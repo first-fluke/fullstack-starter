@@ -8,7 +8,7 @@ Production-ready fullstack monorepo template with Next.js 16, FastAPI, Flutter, 
 
 - **Modern Stack**: Next.js 16 + React 19, FastAPI, Flutter 3.32, TailwindCSS v4
 - **Type Safety**: Full type support with TypeScript, Pydantic, and Dart
-- **Authentication**: OAuth with better-auth (Google, GitHub, Kakao)
+- **Authentication**: OAuth with better-auth (Google, GitHub, Facebook)
 - **Internationalization**: next-intl (web), Flutter ARB (mobile), shared i18n package
 - **Auto-generated API Clients**: Orval (web), swagger_parser (mobile)
 - **Infrastructure as Code**: Terraform + GCP (Cloud Run, Cloud SQL, Cloud Storage)
@@ -22,7 +22,7 @@ Production-ready fullstack monorepo template with Next.js 16, FastAPI, Flutter, 
 |-------|------------|
 | **Frontend** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
 | **Backend** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
-| **Mobile** | Flutter 3.32, Riverpod 3, go_router 17 |
+| **Mobile** | Flutter 3.32, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
 | **Worker** | FastAPI + CloudTasks/PubSub |
 | **Infrastructure** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
@@ -127,6 +127,7 @@ mise tasks --all
 | `mise test` | Test all apps |
 | `mise typecheck` | Type check |
 | `mise i18n:build` | Build i18n files |
+| `mise gen:api` | Generate OpenAPI schema and API clients |
 
 ### App-specific Tasks
 
@@ -141,6 +142,7 @@ mise tasks --all
 | `mise //apps/api:format` | Format code |
 | `mise //apps/api:migrate` | Run migrations |
 | `mise //apps/api:migrate:create` | Create new migration |
+| `mise //apps/api:gen:openapi` | Generate OpenAPI schema |
 | `mise //apps/api:infra:up` | Start local infrastructure |
 | `mise //apps/api:infra:down` | Stop local infrastructure |
 
@@ -169,6 +171,7 @@ mise tasks --all
 | `mise //apps/mobile:test` | Run tests |
 | `mise //apps/mobile:lint` | Run analyzer |
 | `mise //apps/mobile:gen:l10n` | Generate localizations |
+| `mise //apps/mobile:gen:api` | Generate API client |
 
 </details>
 
@@ -251,6 +254,8 @@ Set these secrets in your repository:
 | `GCP_REGION` | GCP region (e.g., `asia-northeast3`) |
 | `WORKLOAD_IDENTITY_PROVIDER` | From Terraform output |
 | `GCP_SERVICE_ACCOUNT` | From Terraform output |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase service account JSON (for mobile deployment) |
+| `FIREBASE_ANDROID_APP_ID` | Firebase Android app ID |
 
 ## Deployment
 
@@ -260,6 +265,7 @@ Push to `main` branch triggers automatic deployment:
 - `apps/api/` changes → Deploy API
 - `apps/web/` changes → Deploy Web
 - `apps/worker/` changes → Deploy Worker
+- `apps/mobile/` changes → Build & Deploy to Firebase App Distribution
 
 ### Manual Deployment
 
@@ -271,6 +277,43 @@ docker push gcr.io/PROJECT_ID/api
 
 # Deploy to Cloud Run
 gcloud run deploy api --image gcr.io/PROJECT_ID/api --region REGION
+```
+
+## Mobile Setup
+
+### Firebase Configuration
+
+1. Install FlutterFire CLI:
+
+```bash
+dart pub global activate flutterfire_cli
+```
+
+2. Configure Firebase for your project:
+
+```bash
+cd apps/mobile
+flutterfire configure
+```
+
+This generates `lib/firebase_options.dart` with your Firebase configuration.
+
+### Fastlane
+
+The mobile app uses Fastlane for build automation and deployment.
+
+```bash
+cd apps/mobile
+
+# Install Ruby dependencies
+bundle install
+
+# Available lanes
+bundle exec fastlane android build       # Build APK
+bundle exec fastlane android firebase    # Deploy to Firebase App Distribution
+bundle exec fastlane android internal    # Deploy to Play Store (internal)
+bundle exec fastlane ios build           # Build iOS (no codesign)
+bundle exec fastlane ios testflight_deploy  # Deploy to TestFlight
 ```
 
 ## AI Agent Support

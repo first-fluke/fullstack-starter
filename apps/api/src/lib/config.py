@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
+    # Auth (better-auth)
+    BETTER_AUTH_URL: str = "http://localhost:3000"
+
+    # Redis (optional)
+    REDIS_URL: str | None = None
+
+    # OpenTelemetry (optional)
+    OTEL_EXPORTER_OTLP_ENDPOINT: str | None = None
+    OTEL_SERVICE_NAME: str | None = None
+
     # AI (optional)
     AI_PROVIDER: Literal["gemini", "openai"] = "gemini"
     GOOGLE_CLOUD_PROJECT: str | None = None

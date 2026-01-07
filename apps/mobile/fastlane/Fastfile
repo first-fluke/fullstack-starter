@@ -1,0 +1,122 @@
+default_platform(:ios)
+
+before_all do
+  ensure_bundle_exec
+end
+
+platform :android do
+  desc "Build Android APK"
+  lane :build do
+    Dir.chdir("..") do
+      sh("flutter", "build", "apk", "--release", "--split-per-abi")
+    end
+  end
+
+  desc "Build Android App Bundle"
+  lane :build_aab do
+    Dir.chdir("..") do
+      sh("flutter", "build", "appbundle", "--release")
+    end
+  end
+
+  desc "Deploy to Firebase App Distribution"
+  lane :firebase do
+    build
+    firebase_app_distribution(
+      app: ENV["FIREBASE_ANDROID_APP_ID"],
+      groups: ENV["FIREBASE_TESTERS_GROUP"] || "testers",
+      release_notes: changelog_from_git_commits(commits_count: 10),
+      apk_path: "../build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+    )
+  end
+
+  desc "Deploy to Google Play (internal)"
+  lane :internal do
+    build_aab
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote internal to production"
+  lane :production do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end
+
+platform :ios do
+  desc "Build iOS app"
+  lane :build do
+    Dir.chdir("..") do
+      sh("flutter", "build", "ios", "--release", "--no-codesign")
+    end
+  end
+
+  desc "Build and sign iOS app"
+  lane :build_signed do
+    setup_ci if ENV["CI"]
+    
+    match(type: "appstore", readonly: is_ci)
+    
+    Dir.chdir("..") do
+      sh("flutter", "build", "ipa", "--release", "--export-options-plist=ios/ExportOptions.plist")
+    end
+  end
+
+  desc "Deploy to Firebase App Distribution"
+  lane :firebase do
+    build_signed
+    firebase_app_distribution(
+      app: ENV["FIREBASE_IOS_APP_ID"],
+      groups: ENV["FIREBASE_TESTERS_GROUP"] || "testers",
+      release_notes: changelog_from_git_commits(commits_count: 10),
+      ipa_path: "../build/ios/ipa/*.ipa"
+    )
+  end
+
+  desc "Deploy to TestFlight"
+  lane :testflight_deploy do
+    build_signed
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/*.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Deploy to App Store"
+  lane :appstore do
+    build_signed
+    upload_to_app_store(
+      ipa: "../build/ios/ipa/*.ipa",
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false
+    )
+  end
+end
+
+desc "Run tests"
+lane :test do
+  Dir.chdir("..") do
+    sh("flutter", "test", "--coverage")
+  end
+end
+
+desc "Run static analysis"
+lane :lint do
+  Dir.chdir("..") do
+    sh("dart", "format", "--output=none", "--set-exit-if-changed", ".")
+    sh("flutter", "analyze", "--fatal-infos")
+  end
+end

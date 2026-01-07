@@ -19,6 +19,7 @@ format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:f
 test = { depends = ["//apps/api:test", "//apps/web:test", "//apps/worker:test"], description = "Test all apps" }
 typecheck = { depends = ["//apps/api:typecheck", "//apps/web:typecheck"], description = "Type check all apps" }
 "i18n:build" = { depends = ["//packages/i18n:build"], description = "Build i18n files" }
+"gen:api" = { run = "mise //apps/api:gen:openapi && mise //apps/web:gen:api", description = "Generate OpenAPI schema and API clients" }
 
 [tasks."git:commit-msg"]
 description = "Validate commit message using commitlint"

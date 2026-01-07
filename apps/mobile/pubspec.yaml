@@ -36,6 +36,10 @@ dependencies:
   # Utils
   jiffy: ^6.3.2
   
+  # Firebase
+  firebase_core: ^3.14.0
+  firebase_crashlytics: ^4.3.7
+  
   # UI
   cupertino_icons: ^1.0.8
 

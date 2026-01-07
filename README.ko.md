@@ -8,7 +8,7 @@
 
 - **모던 스택**: Next.js 16 + React 19, FastAPI, Flutter 3.32, TailwindCSS v4
 - **타입 안전성**: TypeScript, Pydantic, Dart 전체 타입 지원
-- **인증**: better-auth 기반 OAuth (Google, GitHub, Kakao)
+- **인증**: better-auth 기반 OAuth (Google, GitHub, Facebook)
 - **국제화**: next-intl (웹), Flutter ARB (모바일), 공용 i18n 패키지
 - **API 클라이언트 자동 생성**: Orval (웹), swagger_parser (모바일)
 - **인프라 as 코드**: Terraform + GCP (Cloud Run, Cloud SQL, Cloud Storage)
@@ -22,7 +22,7 @@
 |--------|------|
 | **프론트엔드** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
 | **백엔드** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
-| **모바일** | Flutter 3.32, Riverpod 3, go_router 17 |
+| **모바일** | Flutter 3.32, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
 | **워커** | FastAPI + CloudTasks/PubSub |
 | **인프라** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
@@ -127,6 +127,7 @@ mise tasks --all
 | `mise test` | 모든 앱 테스트 |
 | `mise typecheck` | 타입 체크 |
 | `mise i18n:build` | 다국어 파일 빌드 |
+| `mise gen:api` | OpenAPI 스키마 및 API 클라이언트 생성 |
 
 ### 앱별 태스크
 
@@ -141,6 +142,7 @@ mise tasks --all
 | `mise //apps/api:format` | 코드 포맷 |
 | `mise //apps/api:migrate` | 마이그레이션 실행 |
 | `mise //apps/api:migrate:create` | 새 마이그레이션 생성 |
+| `mise //apps/api:gen:openapi` | OpenAPI 스키마 생성 |
 | `mise //apps/api:infra:up` | 로컬 인프라 시작 |
 | `mise //apps/api:infra:down` | 로컬 인프라 중지 |
 
@@ -169,6 +171,7 @@ mise tasks --all
 | `mise //apps/mobile:test` | 테스트 실행 |
 | `mise //apps/mobile:lint` | 분석기 실행 |
 | `mise //apps/mobile:gen:l10n` | 다국어 파일 생성 |
+| `mise //apps/mobile:gen:api` | API 클라이언트 생성 |
 
 </details>
 
@@ -251,6 +254,8 @@ cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
 | `GCP_REGION` | GCP 리전 (예: `asia-northeast3`) |
 | `WORKLOAD_IDENTITY_PROVIDER` | Terraform output에서 확인 |
 | `GCP_SERVICE_ACCOUNT` | Terraform output에서 확인 |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase 서비스 계정 JSON (모바일 배포용) |
+| `FIREBASE_ANDROID_APP_ID` | Firebase Android 앱 ID |
 
 ## 배포
 
@@ -260,6 +265,7 @@ cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
 - `apps/api/` 변경 → API 배포
 - `apps/web/` 변경 → Web 배포
 - `apps/worker/` 변경 → Worker 배포
+- `apps/mobile/` 변경 → Firebase App Distribution 빌드 및 배포
 
 ### 수동 배포
 
@@ -271,6 +277,43 @@ docker push gcr.io/PROJECT_ID/api
 
 # Cloud Run 배포
 gcloud run deploy api --image gcr.io/PROJECT_ID/api --region REGION
+```
+
+## 모바일 설정
+
+### Firebase 설정
+
+1. FlutterFire CLI 설치:
+
+```bash
+dart pub global activate flutterfire_cli
+```
+
+2. Firebase 설정:
+
+```bash
+cd apps/mobile
+flutterfire configure
+```
+
+이 명령어로 `lib/firebase_options.dart`가 생성됩니다.
+
+### Fastlane
+
+모바일 앱은 Fastlane을 사용하여 빌드 자동화 및 배포를 수행합니다.
+
+```bash
+cd apps/mobile
+
+# Ruby 의존성 설치
+bundle install
+
+# 사용 가능한 레인
+bundle exec fastlane android build       # APK 빌드
+bundle exec fastlane android firebase    # Firebase App Distribution 배포
+bundle exec fastlane android internal    # Play Store 배포 (internal)
+bundle exec fastlane ios build           # iOS 빌드 (서명 없음)
+bundle exec fastlane ios testflight_deploy  # TestFlight 배포
 ```
 
 ## AI 에이전트 지원
