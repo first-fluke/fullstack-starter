@@ -6,7 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SOURCE_DIR = join(ROOT, "source");
 const WEB_OUTPUT_DIR = resolve(ROOT, "../../apps/web/src/config/messages");
-const MOBILE_OUTPUT_DIR = resolve(ROOT, "../../apps/mobile/lib/l10n");
+const MOBILE_OUTPUT_DIR = resolve(ROOT, "../../apps/mobile/lib/i18n/messages");
 
 interface ArbFile {
   [key: string]: string | object;
