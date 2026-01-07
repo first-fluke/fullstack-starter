@@ -1,0 +1,95 @@
+name: Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  biome:
+    name: Biome (JS/TS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: reviewdog/action-setup@v1
+
+      - name: Run Biome with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm biome check --reporter=json 2>&1 | \
+          reviewdog -f=biome -reporter=github-pr-review -fail-level=error
+
+  ruff:
+    name: Ruff (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - uses: reviewdog/action-setup@v1
+
+      - name: Run Ruff with reviewdog (API)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: apps/api
+        run: |
+          uv sync --frozen
+          uv run ruff check --output-format=json . 2>&1 | \
+          reviewdog -f=ruff -reporter=github-pr-review -fail-level=error
+
+      - name: Run Ruff with reviewdog (Worker)
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: apps/worker
+        run: |
+          uv sync --frozen
+          uv run ruff check --output-format=json . 2>&1 | \
+          reviewdog -f=ruff -reporter=github-pr-review -fail-level=error
+
+  flutter:
+    name: Flutter Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.0"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - uses: reviewdog/action-setup@v1
+
+      - name: Run Flutter analyze with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: apps/mobile
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | \
+          reviewdog -efm="%f:%l:%c: %m" -name="flutter-analyze" -reporter=github-pr-review -fail-level=error
