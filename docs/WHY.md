@@ -36,10 +36,16 @@ This document explains the reasoning behind each technology choice in this fulls
 
 ### Jotai
 
-- **Atomic state**: No boilerplate, just atoms and derived atoms
+- **Bottom-up atomic model**: Build state by combining atoms, optimize renders based on atom dependency
+- **No extra re-renders**: Only components subscribed to changed atoms re-render
 - **TypeScript-first**: Excellent type inference
 - **Lightweight**: ~3KB, no providers required for basic usage
-- **Suspense-ready**: Works seamlessly with React concurrent features
+
+### TanStack Form
+
+- **Headless & composable**: `withForm` HOC pattern for modular form composition with type safety
+- **Type-safe**: Full TypeScript inference for form values and validation
+- **Simple interface**: Cleaner API compared to React Hook Form or Formik
 
 ## Backend
 
@@ -155,7 +161,7 @@ We prioritize **speed** across the entire development workflow by choosing Rust-
 ### mise
 
 - **Polyglot monorepo support**: Node, Python, Flutter, Terraform — different ecosystems, one tool
-- **Project-local versions**: `.mise.toml` ensures team consistency across all runtimes
+- **Project-local versions**: `.mise.toml` ensures consistent environments across OS during developer onboarding
 - **Task runner**: Replace Makefile, npm scripts, shell scripts with unified `mise` commands
 - **Written in Rust**: Instant tool switching, no startup overhead
 
