@@ -391,5 +391,6 @@ If this project helped you, please consider buying me a coffee!
 Or leave a star:
 
 ```bash
-gh api --method PUT /user/starred/first-fluke/fullstack-starter --input /dev/null
+# Install extension first: gh extension install maggie-j-liu/gh-star
+gh star first-fluke/fullstack-starter
 ```
