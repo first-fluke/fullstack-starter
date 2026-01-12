@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1](https://github.com/first-fluke/fullstack-starter/compare/v1.0.0...v1.0.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* **api:** resolve ruff lint errors ([f28a4c8](https://github.com/first-fluke/fullstack-starter/commit/f28a4c81a18423c84ad65b98122fdf6f3c15c284))
+* **ci:** replace pyright with mypy in pipelines ([6ee1db3](https://github.com/first-fluke/fullstack-starter/commit/6ee1db338bc40ad125273ef8af8cfec2d94f13c6))
+* **mobile:** resolve lint errors and comply with very_good_analysis ([0b3c8c4](https://github.com/first-fluke/fullstack-starter/commit/0b3c8c48cf13c28fa93d279409da68d47ff116d4))
+* standardize Python version to 3.12 across all configurations ([3893d15](https://github.com/first-fluke/fullstack-starter/commit/3893d151d23afe7a7b6b2b9f2cf9b8ba3ba6eb58))
+* **worker:** allow empty test suite to pass in pre-push hook ([11ef628](https://github.com/first-fluke/fullstack-starter/commit/11ef628c9d94e9938cbfb654c273feeb3d016faa))
+
 ## 1.0.0 (2026-01-12)
 
 
