@@ -59,3 +59,33 @@ if echo "$changed" | grep -qE "Dockerfile$"; then
     echo "$changed" | grep -E "Dockerfile$" | xargs hadolint || exit 1
 fi
 '''
+
+[tasks."git:pre-push"]
+description = "Validate branch name and run tests before push"
+run = '''
+#!/usr/bin/env bash
+pnpm dlx @gracefullight/validate-branch || exit 1
+
+# Get changed files compared to origin
+changed=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
+
+if echo "$changed" | grep -q "^apps/api/"; then
+    echo "[pre-push] apps/api detected, running test..."
+    mise //apps/api:test || exit 1
+fi
+
+if echo "$changed" | grep -q "^apps/web/"; then
+    echo "[pre-push] apps/web detected, running test..."
+    mise //apps/web:test || exit 1
+fi
+
+if echo "$changed" | grep -q "^apps/worker/"; then
+    echo "[pre-push] apps/worker detected, running test..."
+    mise //apps/worker:test || exit 1
+fi
+
+if echo "$changed" | grep -q "^apps/mobile/"; then
+    echo "[pre-push] apps/mobile detected, running test..."
+    mise //apps/mobile:test || exit 1
+fi
+'''
