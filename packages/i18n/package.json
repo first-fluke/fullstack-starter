@@ -9,6 +9,8 @@
     "build:mobile": "node --import=tsx tooling/build.ts --target=mobile"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "@types/node": "^24.10.7",
     "tsx": "^4.21.0"
   }
 }

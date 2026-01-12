@@ -1,6 +1,7 @@
 [tasks]
 dev = { run = "pnpm dev", description = "Start Web server" }
 build = { run = "pnpm build", description = "Build Web app" }
+install = { run = "pnpm install", description = "Install dependencies" }
 lint = { run = "pnpm lint", description = "Lint Web" }
 format = { run = "pnpm format", description = "Format Web" }
 test = { run = "pnpm test", description = "Test Web" }

@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   reactCompiler: true,
-  devIndicators: isDev,
+  devIndicators: isDev ? undefined : false,
   images: {
     formats: ["image/avif", "image/webp"],
   },

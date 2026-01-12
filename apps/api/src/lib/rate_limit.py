@@ -2,13 +2,18 @@
 
 import time
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, cast
 
 from fastapi import HTTPException, Request, status
+from fastapi.responses import Response
 
 from src.lib.config import settings
 from src.lib.logging import get_logger
+
+if TYPE_CHECKING:
+    import redis.asyncio as redis_module
 
 logger = get_logger(__name__)
 
@@ -74,14 +79,17 @@ class RedisRateLimiter:
     def __init__(self, requests: int, window: int):
         self.requests = requests
         self.window = window
-        self._redis = None
+        self._redis: "redis_module.Redis | None" = None
 
-    async def _get_redis(self):
+    async def _get_redis(self) -> "redis_module.Redis":
         """Lazy Redis connection."""
         if self._redis is None:
             import redis.asyncio as redis
 
-            self._redis = redis.from_url(settings.REDIS_URL)
+            self._redis = cast(
+                redis_module.Redis,
+                redis.from_url(settings.REDIS_URL),  # type: ignore[no-untyped-call]
+            )
         return self._redis
 
     async def is_allowed(self, key: str) -> tuple[bool, int, int]:
@@ -114,7 +122,7 @@ class RedisRateLimiter:
 
         return True, remaining, reset_after
 
-    async def close(self):
+    async def close(self) -> None:
         """Close Redis connection."""
         if self._redis:
             await self._redis.aclose()
@@ -144,7 +152,7 @@ def rate_limit(
     requests: int = 100,
     window: int = 60,
     key_func: Callable[[Request], str] | None = None,
-):
+) -> Callable[[Callable[..., Awaitable[Response]]], Callable[..., Awaitable[Response]]]:
     """
     Rate limit decorator for FastAPI endpoints.
 
@@ -162,8 +170,10 @@ def rate_limit(
     config = RateLimitConfig(requests=requests, window=window, key_func=key_func)
     actual_key_func = key_func or default_key_func
 
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
+    def decorator(
+        func: Callable[..., Awaitable[Response]],
+    ) -> Callable[..., Awaitable[Response]]:
+        async def wrapper(*args: object, **kwargs: object) -> Response:
             # Find request in args/kwargs
             request: Request | None = None
             for arg in args:
@@ -171,7 +181,7 @@ def rate_limit(
                     request = arg
                     break
             if request is None:
-                request = kwargs.get("request")
+                request = cast(Request | None, kwargs.get("request"))
 
             if request is None:
                 return await func(*args, **kwargs)
@@ -208,8 +218,10 @@ def rate_limit(
 
 
 async def rate_limit_middleware(
-    request: Request, call_next, config: RateLimitConfig | None = None
-):
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+    config: RateLimitConfig | None = None,
+) -> Response:
     """
     Rate limit middleware for global application.
 

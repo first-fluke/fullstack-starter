@@ -1,16 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { OklchColor } from "./src/tokens.js";
 import {
-  oklchToOklab,
-  oklabToLinearSrgb,
-  linearSrgbToXyz,
-  xyzToLinearP3,
   gammaEncode,
-  oklchToP3,
+  linearSrgbToXyz,
+  oklabToLinearSrgb,
   oklchToCss,
+  oklchToOklab,
+  oklchToP3,
   p3ToFlutterColor,
   p3ToHex,
+  xyzToLinearP3,
 } from "./tooling/oklch-to-p3.js";
-import type { OklchColor } from "./src/tokens.js";
 
 describe("OKLCH to P3 conversion", () => {
   describe("oklchToOklab", () => {

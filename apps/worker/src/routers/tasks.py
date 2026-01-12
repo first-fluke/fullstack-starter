@@ -6,7 +6,7 @@ router = APIRouter(tags=["Tasks"])
 
 class TaskPayload(BaseModel):
     task_type: str
-    data: dict
+    data: dict[str, object]
 
 
 @router.post("/process")

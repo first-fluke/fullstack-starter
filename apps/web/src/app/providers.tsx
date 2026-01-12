@@ -3,8 +3,8 @@
 import { SerwistProvider } from "@serwist/turbopack/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider as JotaiProvider } from "jotai";
-import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import dynamic from "next/dynamic";
+import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { getQueryClient } from "@/lib/get-query-client";
 

@@ -15,6 +15,7 @@ hadolint = "latest"
 
 [tasks]
 dev = { depends = ["//apps/api:dev", "//apps/web:dev", "//apps/worker:dev"], description = "Start all services" }
+install = { depends = ["//apps/web:install", "//apps/api:install", "//apps/worker:install", "//apps/mobile:install", "//packages/design-tokens:install", "//packages/i18n:install"], description = "Install all dependencies" }
 lint = { depends = ["//apps/api:lint", "//apps/web:lint", "//apps/worker:lint"], description = "Lint all apps" }
 format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:format"], description = "Format all apps" }
 test = { depends = ["//apps/api:test", "//apps/web:test", "//apps/worker:test"], description = "Test all apps" }

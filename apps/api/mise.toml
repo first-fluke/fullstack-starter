@@ -1,9 +1,10 @@
 [tasks]
 dev = { run = "uv run poe dev", description = "Start API server" }
+install = { run = "uv sync", description = "Install dependencies" }
 lint = { run = "uv run poe lint", description = "Lint API" }
 format = { run = "uv run poe format", description = "Format API" }
 test = { run = "uv run poe test", description = "Test API" }
-typecheck = { run = "uv run poe type-check", description = "Type check API" }
+typecheck = { run = "uv run poe typecheck", description = "Type check API" }
 migrate = { run = "uv run poe migrate", description = "Run DB migrations" }
 "migrate:create" = { run = "uv run poe migrate-create", description = "Create migration" }
 "gen:openapi" = { run = "uv run python scripts/gen_openapi.py", description = "Generate OpenAPI schema" }

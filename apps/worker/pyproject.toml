@@ -32,7 +32,7 @@ start = "fastapi run src/main.py --port 8080"
 lint = "ruff check ."
 format = "ruff format ."
 check = ["lint", "format"]
-"type-check" = "mypy src"
+typecheck = "mypy src"
 test = "pytest tests/ --suppress-no-test-exit-code"
 
 [tool.pytest.ini_options]

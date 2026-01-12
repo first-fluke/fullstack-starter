@@ -1,6 +1,7 @@
 [tasks]
 dev = { run = "flutter run", description = "Run mobile app" }
 build = { run = "flutter build", description = "Build mobile app" }
+install = { run = "flutter pub get", description = "Install dependencies" }
 lint = { run = "flutter analyze", description = "Analyze mobile app" }
 format = { run = "dart format .", description = "Format mobile app" }
 test = { run = "flutter test", description = "Test mobile app" }

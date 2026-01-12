@@ -1,10 +1,6 @@
 """Pagination models and utilities."""
 
-from typing import Generic, TypeVar
-
 from pydantic import BaseModel, Field
-
-T = TypeVar("T")
 
 
 class PaginationParams(BaseModel):
@@ -30,7 +26,7 @@ class PaginationMeta(BaseModel):
     has_prev: bool = Field(description="Whether there is a previous page")
 
 
-class PaginatedResponse(BaseModel, Generic[T]):  # noqa: UP046
+class PaginatedResponse[T](BaseModel):
     """Generic paginated response wrapper."""
 
     data: list[T]

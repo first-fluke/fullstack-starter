@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from typing import Any, Generic, TypeVar
-
-T = TypeVar("T")
+from typing import Any
 
 
-class AIProvider(ABC, Generic[T]):  # noqa: UP046
+class AIProvider[T](ABC):
     @abstractmethod
     async def analyze_image(self, image_data: bytes | list[bytes]) -> T:
         pass

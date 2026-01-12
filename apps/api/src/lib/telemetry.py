@@ -2,6 +2,7 @@
 
 import contextlib
 
+from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -42,7 +43,7 @@ def configure_telemetry() -> None:
     trace.set_tracer_provider(provider)
 
 
-def instrument_app(app: "FastAPI") -> None:  # noqa: F821
+def instrument_app(app: FastAPI) -> None:
     """Instrument FastAPI and other libraries for tracing."""
     from src.lib.database import engine
 

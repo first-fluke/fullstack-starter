@@ -1,7 +1,7 @@
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { tokens, type OklchColor } from "../src/tokens.js";
+import { type OklchColor, tokens } from "../src/tokens.js";
 import { oklchToP3, p3ToFlutterColor } from "./oklch-to-p3.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

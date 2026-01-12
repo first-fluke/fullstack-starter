@@ -3,4 +3,8 @@ build = { run = "node --import=tsx tooling/build.ts", description = "Build desig
 "build:css" = { run = "node --import=tsx tooling/build-css.ts", description = "Build CSS tokens for web only" }
 "build:flutter" = { run = "node --import=tsx tooling/build-forui-theme.ts", description = "Build Flutter theme for mobile only" }
 dev = { run = "node --import=tsx tooling/watch.ts", description = "Watch tokens.ts for changes and rebuild" }
+install = { run = "pnpm install", description = "Install dependencies" }
 test = { run = "pnpm test", description = "Run design-tokens tests" }
+lint = { run = "pnpm biome check --write --unsafe", description = "Run biome linter" }
+format = { run = "pnpm biome check --write", description = "Run biome formatter" }
+typecheck = { run = "tsc --noEmit", description = "Run TypeScript type check" }

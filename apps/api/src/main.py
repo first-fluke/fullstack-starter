@@ -1,10 +1,10 @@
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Literal
+from typing import TYPE_CHECKING, Literal, cast
 from uuid import uuid4
 
 import structlog
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from opentelemetry import trace
@@ -15,6 +15,9 @@ from src.lib.config import settings
 from src.lib.database import async_session_factory
 from src.lib.logging import configure_logging, get_logger
 from src.lib.telemetry import configure_telemetry, instrument_app
+
+if TYPE_CHECKING:
+    import redis.asyncio as redis_module
 
 # Configure logging first
 configure_logging()
@@ -44,7 +47,9 @@ app = FastAPI(
 
 # Request ID middleware
 @app.middleware("http")
-async def request_id_middleware(request: Request, call_next):
+async def request_id_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Add request ID to each request for tracing."""
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
 
@@ -164,8 +169,8 @@ async def check_redis() -> ServiceStatus | None:
     try:
         import redis.asyncio as redis
 
-        client = redis.from_url(settings.REDIS_URL)
-        await client.ping()
+        client = cast(redis_module.Redis, redis.from_url(settings.REDIS_URL))  # type: ignore[no-untyped-call]
+        await client.ping()  # type: ignore[misc]
         await client.aclose()
         latency = (time.perf_counter() - start) * 1000
         return ServiceStatus(status="healthy", latency_ms=round(latency, 2))
