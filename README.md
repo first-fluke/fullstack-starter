@@ -93,9 +93,16 @@ Or use GitHub:
 
 ### Prerequisites
 
+**Required for all platforms:**
 - [mise](https://mise.jdx.dev/) - Runtime version manager
 - [Docker](https://www.docker.com/) or [Podman Desktop](https://podman-desktop.io/downloads) - Local infrastructure
-- [Terraform](https://www.terraform.io/) - Cloud infrastructure (optional)
+
+**For mobile development (iOS/Android):**
+- [Xcode](https://apps.apple.com/app/xcode/id497799835) - Includes iOS Simulator (macOS only)
+- [Android Studio](https://developer.android.com/studio) - Includes Android SDK and emulator
+
+**Optional:**
+- [Terraform](https://www.terraform.io/) - Cloud infrastructure
 
 ### 1. Install Runtimes
 

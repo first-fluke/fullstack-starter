@@ -93,9 +93,16 @@ npm create fullstack-starter my-app
 
 ### 사전 요구사항
 
+**모든 플랫폼 필수:**
 - [mise](https://mise.jdx.dev/) - 런타임 버전 관리자
 - [Docker](https://www.docker.com/) 또는 [Podman Desktop](https://podman-desktop.io/downloads) - 로컬 인프라 구동
-- [Terraform](https://www.terraform.io/) - 클라우드 인프라 (선택 사항)
+
+**모바일 개발용 (iOS/Android):**
+- [Xcode](https://apps.apple.com/app/xcode/id497799835) - iOS Simulator 포함 (macOS만 해당)
+- [Android Studio](https://developer.android.com/studio) - Android SDK 및 에뮬레이터 포함
+
+**선택 사항:**
+- [Terraform](https://www.terraform.io/) - 클라우드 인프라
 
 ### 1. 런타임 설치
 
