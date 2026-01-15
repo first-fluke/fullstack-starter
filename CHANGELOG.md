@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/first-fluke/fullstack-starter/compare/v1.2.0...v1.3.0) (2026-01-15)
+
+
+### Features
+
+* implement stateless JWE authentication and add documentation ([edf6c40](https://github.com/first-fluke/fullstack-starter/commit/edf6c40439b5f7b7baf808aec32a2b2c138eb7ca))
+
 ## [1.2.0](https://github.com/first-fluke/fullstack-starter/compare/v1.1.0...v1.2.0) (2026-01-14)
 
 
