@@ -303,9 +303,9 @@ mise tasks --all
 
 ```bash
 # Edit i18n files
-packages/i18n/source/en.arb  # English (default)
-packages/i18n/source/ko.arb  # Korean
-packages/i18n/source/ja.arb  # Japanese
+packages/i18n/src/en.arb  # English (default)
+packages/i18n/src/ko.arb  # Korean
+packages/i18n/src/ja.arb  # Japanese
 
 # Build and deploy to each app
 mise i18n:build
