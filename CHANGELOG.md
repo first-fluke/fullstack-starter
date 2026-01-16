@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/first-fluke/fullstack-starter/compare/v2.0.0...v2.1.0) (2026-01-16)
+
+
+### Features
+
+* add db:migrate task and sort tasks alphabetically ([e66a494](https://github.com/first-fluke/fullstack-starter/commit/e66a494fbcca1a5e09cd1f523ea86e1c7cee679d))
+
 ## [2.0.0](https://github.com/first-fluke/fullstack-starter/compare/v1.3.0...v2.0.0) (2026-01-16)
 
 
