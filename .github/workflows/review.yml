@@ -85,7 +85,18 @@ jobs:
         working-directory: apps/web
         run: |
           pnpm biome check src --reporter=json 2>&1 | \
-          reviewdog -f=biome -reporter=github-pr-review -fail-level=error
+          jq -r '.diagnostics[] | {
+            message: .message,
+            location: {
+              path: .location.path.file,
+              range: {
+                start: { line: .location.span[0].line, column: .location.span[0].column },
+                end: { line: .location.span[1].line, column: .location.span[1].column }
+              }
+            },
+            severity: (if .severity == "error" then "ERROR" elif .severity == "warning" then "WARNING" else "INFO" end)
+          }' | \
+          reviewdog -f=rdjsonl -reporter=github-pr-review -fail-level=error
 
   ruff:
     name: Ruff (Python)
@@ -109,7 +120,19 @@ jobs:
         run: |
           uv sync --frozen
           uv run ruff check --output-format=json . 2>&1 | \
-          reviewdog -f=ruff -reporter=github-pr-review -fail-level=error
+          jq -r '.[] | {
+            message: .message,
+            location: {
+              path: .filename,
+              range: {
+                start: { line: .location.row, column: .location.column },
+                end: { line: .end_location.row, column: .end_location.column }
+              }
+            },
+            code: { value: .code },
+            severity: "WARNING"
+          }' | \
+          reviewdog -f=rdjsonl -name="ruff-api" -reporter=github-pr-review -fail-level=error
 
       - name: Run Ruff with reviewdog (Worker)
         env:
@@ -118,7 +141,19 @@ jobs:
         run: |
           uv sync --frozen
           uv run ruff check --output-format=json . 2>&1 | \
-          reviewdog -f=ruff -reporter=github-pr-review -fail-level=error
+          jq -r '.[] | {
+            message: .message,
+            location: {
+              path: .filename,
+              range: {
+                start: { line: .location.row, column: .location.column },
+                end: { line: .end_location.row, column: .end_location.column }
+              }
+            },
+            code: { value: .code },
+            severity: "WARNING"
+          }' | \
+          reviewdog -f=rdjsonl -name="ruff-worker" -reporter=github-pr-review -fail-level=error
 
   flutter:
     name: Flutter Analyze
