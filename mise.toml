@@ -43,7 +43,7 @@ hadolint = "latest"
 "db:migrate" = { depends = ["//apps/api:migrate"], description = "Run database migrations" }
 dev = { depends = ["//apps/api:dev", "//apps/web:dev", "//apps/worker:dev"], description = "Start all services" }
 format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:format"], description = "Format all apps" }
-"gen:api" = { run = "mise //apps/api:gen:openapi && mise //apps/web:gen:api", description = "Generate OpenAPI schema and API clients" }
+"gen:api" = { depends = ["//apps/api:gen:openapi"], run = [{ tasks = ["//apps/web:gen:api", "//apps/mobile:gen:api"] }], description = "Generate OpenAPI schema and API clients" }
 "i18n:build" = { depends = ["//packages/i18n:build"], description = "Build i18n files" }
 "infra:down" = { depends = ["//apps/api:infra:down"], description = "Stop local infrastructure" }
 "infra:up" = { depends = ["//apps/api:infra:up"], description = "Start local infrastructure" }

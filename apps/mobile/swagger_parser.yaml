@@ -1,11 +1,10 @@
-projectName: mobile
-squashClients: false
-clientPostfix: Client
-
-apis:
-  api:
-    rootClient: true
-    schemaPath: ../api/openapi.json
-    classPostfix: Service
-    putClientsIn: lib/core/network/api/
-    putModelsIn: lib/core/models/
+swagger_parser:
+  output_directory: lib/core/network/api
+  schema_path: ../api/openapi.json
+  root_client: true
+  root_client_name: ApiClient
+  client_postfix: Service
+  json_serializer: freezed
+  put_clients_in_folder: true
+  export_file: true
+  use_freezed3: true

@@ -33,10 +33,12 @@ interface ProvidersProps {
 function BackendJwtBridge() {
   const { data: session, isPending } = useSession();
 
+  const user = session?.user;
+
   useEffect(() => {
     if (isPending) return;
 
-    if (!session?.user) {
+    if (!user) {
       if (hasBackendAccessToken()) {
         clearBackendTokens();
       }
@@ -46,7 +48,7 @@ function BackendJwtBridge() {
     if (hasBackendAccessToken()) return;
 
     exchangeOAuthForBackendJwt().catch(() => {});
-  }, [isPending, session?.user?.id]);
+  }, [isPending, user]);
 
   return null;
 }

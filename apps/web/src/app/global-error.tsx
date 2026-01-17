@@ -12,7 +12,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         <main className="flex min-h-screen flex-col items-center justify-center p-24">
           <h1 className="text-4xl font-bold text-red-600">Something went wrong!</h1>
           <p className="mt-4 text-gray-600">
-            {error.digest && <span>Error ID: {error.digest}</span>}
+            {error.digest ? <span>Error ID: {error.digest}</span> : null}
           </p>
           <button
             type="button"

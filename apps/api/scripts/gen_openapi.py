@@ -1,7 +1,11 @@
 """Generate OpenAPI schema from FastAPI application."""
 
 import json
+import sys
 from pathlib import Path
+
+# Add the app directory to sys.path to allow importing from src
+sys.path.append(str(Path(__file__).parent.parent))
 
 from src.main import app
 
