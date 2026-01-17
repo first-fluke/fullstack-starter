@@ -1,20 +1,20 @@
 #!/bin/bash
 # =============================================================================
-# GCP Project Migration Script for Pic2Cook
+# GCP Project Migration Script
 # =============================================================================
-# 이 스크립트는 기존 GCP 프로젝트에서 새 프로젝트로 마이그레이션을 수행합니다.
+# This script performs migration from an existing GCP project to a new project.
 #
-# 사용법:
+# Usage:
 #   ./migrate-gcp-project.sh --old-project OLD_PROJECT_ID --new-project NEW_PROJECT_ID
 #
-# 예시:
-#   ./migrate-gcp-project.sh --old-project pic2cook-479811 --new-project pic2cook-v2
+# Example:
+#   ./migrate-gcp-project.sh --old-project your-old-project --new-project your-new-project
 #
-# 필수 조건:
-#   - gcloud CLI 설치 및 인증됨
-#   - 두 프로젝트 모두에 대한 owner/editor 권한
-#   - psql 설치됨 (DB 마이그레이션용)
-#   - docker 설치됨 (이미지 마이그레이션용)
+# Prerequisites:
+#   - gcloud CLI installed and authenticated
+#   - Owner/Editor permissions for both projects
+#   - psql installed (for DB migration)
+#   - docker installed (for container image migration)
 # =============================================================================
 
 set -e
@@ -29,10 +29,10 @@ NC='\033[0m' # No Color
 # Default values
 OLD_PROJECT=""
 NEW_PROJECT=""
-OLD_REGION="us-central1"
-NEW_REGION="asia-northeast1"
-OLD_BUCKET_PREFIX="pic2cook"
-NEW_BUCKET_PREFIX="pic2cook-v2"
+OLD_REGION="your-old-region"
+NEW_REGION="your-new-region"
+OLD_BUCKET_PREFIX="your-old-bucket-prefix"
+NEW_BUCKET_PREFIX="your-new-bucket-prefix"
 SKIP_DB=false
 SKIP_STORAGE=false
 SKIP_IMAGES=false
@@ -77,12 +77,14 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 --old-project OLD_PROJECT_ID --new-project NEW_PROJECT_ID [options]"
             echo ""
             echo "Options:"
-            echo "  --old-region REGION     Old project region (default: us-central1)"
-            echo "  --new-region REGION     New project region (default: asia-northeast1)"
-            echo "  --skip-db               Skip database migration"
-            echo "  --skip-storage          Skip storage bucket migration"
-            echo "  --skip-images           Skip container image migration"
-            echo "  --skip-apis             Skip API enablement"
+            echo "  --old-project PROJECT_ID     Old project ID"
+            echo "  --new-project PROJECT_ID     New project ID"
+            echo "  --old-region REGION          Old project region (default: your-old-region)"
+            echo "  --new-region REGION          New project region (default: your-new-region)"
+            echo "  --skip-db                    Skip database migration"
+            echo "  --skip-storage               Skip storage bucket migration"
+            echo "  --skip-images                Skip container image migration"
+            echo "  --skip-apis                  Skip API enablement"
             exit 0
             ;;
         *)
@@ -185,7 +187,7 @@ migrate_database() {
     DUMP_FILE="$MIGRATION_BUCKET/db_dump_$TIMESTAMP.sql"
     log_info "Exporting database to $DUMP_FILE..."
     gcloud sql export sql "$OLD_INSTANCE" "$DUMP_FILE" \
-        --database=pic2cook \
+        --database=your-old-database \
         --project="$OLD_PROJECT"
     
     # Get new Cloud SQL SA
@@ -200,12 +202,12 @@ migrate_database() {
     
     # Create database if not exists
     log_info "Creating database in new instance..."
-    gcloud sql databases create pic2cook --instance="$NEW_INSTANCE" --project="$NEW_PROJECT" 2>/dev/null || true
+    gcloud sql databases create your-new-database --instance="$NEW_INSTANCE" --project="$NEW_PROJECT" 2>/dev/null || true
     
     # Import database to new instance
     log_info "Importing database from $DUMP_FILE..."
     gcloud sql import sql "$NEW_INSTANCE" "$DUMP_FILE" \
-        --database=pic2cook \
+        --database=your-new-database \
         --user=postgres \
         --project="$NEW_PROJECT" \
         --quiet
@@ -255,7 +257,7 @@ migrate_images() {
     gcloud auth configure-docker "${OLD_REGION}-docker.pkg.dev,${NEW_REGION}-docker.pkg.dev" --quiet
     
     # Get running images from old project Cloud Run services
-    SERVICES=("pic2cook-api" "pic2cook-web" "pic2cook-worker")
+    SERVICES=("your-old-image-1" "your-old-image-2" "your-old-image-3")
     
     for SERVICE in "${SERVICES[@]}"; do
         log_info "Processing service: $SERVICE"
@@ -278,11 +280,8 @@ migrate_images() {
         
         # Determine new image path
         case "$SERVICE" in
-            pic2cook-api|pic2cook-worker)
-                NEW_IMAGE="${NEW_REGION}-docker.pkg.dev/${NEW_PROJECT}/pic2cook/api:${IMAGE_TAG}"
-                ;;
-            pic2cook-web)
-                NEW_IMAGE="${NEW_REGION}-docker.pkg.dev/${NEW_PROJECT}/pic2cook/web:${IMAGE_TAG}"
+            your-old-image-1|your-old-image-2|your-old-image-3)
+                NEW_IMAGE="${NEW_REGION}-docker.pkg.dev/${NEW_PROJECT}/your-new-image-1:${IMAGE_TAG}"
                 ;;
         esac
         
@@ -310,7 +309,7 @@ migrate_images() {
 main() {
     echo -e "${GREEN}"
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║          GCP Project Migration for Pic2Cook                  ║"
+    echo "║   GCP Project Migration for $OLD_PROJECT to $NEW_PROJECT     ║"
     echo "╠══════════════════════════════════════════════════════════════╣"
     echo "║  Old Project: $OLD_PROJECT"
     echo "║  New Project: $NEW_PROJECT"
@@ -360,7 +359,7 @@ main() {
     echo ""
     echo "2. Update app configuration files:"
     echo "   - apps/api/src/lib/config.py (gcs_bucket_name)"
-    echo "   - apps/infra/compute-*.tf (GCS_BUCKET_NAME env vars)"
+    echo "   - apps/infra/variables.tf (project_id, region variables)"
     echo ""
     echo "3. Run Terraform apply in new project"
     echo ""

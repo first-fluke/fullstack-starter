@@ -1,24 +1,24 @@
 ---
 name: GCP Project Migration
-description: GCP 프로젝트 간 마이그레이션 (DB, Storage, Container Images, Terraform)
+description: Migration between GCP Projects (DB, Storage, Container Images, Terraform)
 ---
 
 # GCP Project Migration Skill
 
-이 스킬은 GCP 프로젝트를 한 프로젝트에서 다른 프로젝트로 완전 이전하는 작업을 안내합니다.
+This skill guides you through the process of fully migrating from one GCP project to another.
 
-## 사전 조건
+## Prerequisites
 
-1. **두 GCP 프로젝트** 모두에 대한 Owner/Editor 권한
-2. **gcloud CLI** 설치 및 인증됨
-3. **Docker** 설치됨 (컨테이너 이미지 이전용)
-4. 새 프로젝트에 **Terraform 인프라가 먼저 배포**되어 있어야 함
+1. Owner/Editor permissions for **both GCP projects**
+2. **gcloud CLI** installed and authenticated
+3. **Docker** installed (for container image migration)
+4. **Terraform infrastructure must be deployed** to the new project first
 
-## 마이그레이션 순서
+## Migration Steps
 
-### Phase 1: API 활성화
+### Phase 1: Enable APIs
 
-새 프로젝트에서 필요한 API들을 활성화합니다:
+Enable required APIs in the new project:
 
 ```bash
 gcloud services enable \
@@ -35,131 +35,311 @@ gcloud services enable \
   --project=NEW_PROJECT_ID
 ```
 
-### Phase 2: 데이터베이스 마이그레이션
+### Phase 2: Database Migration
 
 1. **Export from old project**
    ```bash
-   # 구 프로젝트 계정으로 전환
+   # Switch to old project account
    gcloud config set account OLD_ACCOUNT@gmail.com
    
-   # Cloud SQL 서비스 계정에 버킷 권한 부여
+   # Grant bucket permissions to Cloud SQL service account
    OLD_SA=$(gcloud sql instances describe OLD_INSTANCE --project=OLD_PROJECT --format="value(serviceAccountEmailAddress)")
    gcloud storage buckets add-iam-policy-binding gs://MIGRATION_BUCKET \
      --member="serviceAccount:$OLD_SA" \
      --role="roles/storage.objectAdmin"
    
-   # DB 덤프
+   # Dump DB
    gcloud sql export sql OLD_INSTANCE gs://MIGRATION_BUCKET/dump.sql \
-     --database=pic2cook --project=OLD_PROJECT
+     --database=database_name --project=OLD_PROJECT
    ```
 
 2. **Import to new project**
    ```bash
-   # 신 프로젝트 계정으로 전환
+   # Switch to new project account
    gcloud config set account NEW_ACCOUNT@gmail.com
    
-   # 권한 부여 및 Import
+   # Grant permissions and Import
    NEW_SA=$(gcloud sql instances describe NEW_INSTANCE --project=NEW_PROJECT --format="value(serviceAccountEmailAddress)")
    gcloud storage buckets add-iam-policy-binding gs://MIGRATION_BUCKET \
      --member="serviceAccount:$NEW_SA" \
      --role="roles/storage.objectViewer"
    
    gcloud sql import sql NEW_INSTANCE gs://MIGRATION_BUCKET/dump.sql \
-     --database=pic2cook --user=postgres --project=NEW_PROJECT
+     --database=database_name --user=db_username --project=NEW_PROJECT
    ```
 
-### Phase 3: GCS 버킷 마이그레이션
+### Phase 3: GCS Bucket Migration
 
 ```bash
-# 구 계정에서 신 계정에 읽기 권한 부여
+# Grant read permission to new account from old account
 gcloud storage buckets add-iam-policy-binding gs://OLD_BUCKET \
   --member="user:NEW_ACCOUNT@gmail.com" \
   --role="roles/storage.objectViewer"
 
-# 신 계정에서 버킷 생성 및 동기화
+# Create and sync bucket in new account
 gcloud storage buckets create gs://NEW_BUCKET --location=REGION --project=NEW_PROJECT
 gcloud storage rsync -r gs://OLD_BUCKET gs://NEW_BUCKET
 ```
 
-### Phase 4: 컨테이너 이미지 마이그레이션
+### Phase 4: Container Image Migration
 
 ```bash
-# Docker 인증
+# Docker Authentication
 gcloud auth configure-docker OLD_REGION-docker.pkg.dev,NEW_REGION-docker.pkg.dev
 
-# 이미지 Pull -> Tag -> Push
+# Image Pull -> Tag -> Push
 docker pull OLD_REGION-docker.pkg.dev/OLD_PROJECT/REPO/IMAGE:TAG
 docker tag OLD_REGION-docker.pkg.dev/OLD_PROJECT/REPO/IMAGE:TAG \
   NEW_REGION-docker.pkg.dev/NEW_PROJECT/REPO/IMAGE:TAG
 docker push NEW_REGION-docker.pkg.dev/NEW_PROJECT/REPO/IMAGE:TAG
 ```
 
-### Phase 5: Terraform 변수 수정
+### Phase 5: Modify Terraform Variables
 
-`apps/infra/variables.tf` 파일 상단의 변수만 수정:
+Modify only the variables at the top of the `apps/infra/variables.tf` file:
 
 ```hcl
 variable "project_id" {
-  default = "NEW_PROJECT_ID"  # ← 변경
+  default = "NEW_PROJECT_ID"  # ← Change
 }
 
 variable "region" {
-  default = "asia-northeast1"  # ← 필요 시 변경
+  default = "your_region"  # ← Change if necessary
 }
 ```
 
-**수동 변경 필요**:
-- `provider.tf`의 `backend.bucket` (Terraform 제약)
+**Manual Changes Required**:
+- `backend.bucket` in `provider.tf` (Terraform limitation)
 
-### Phase 6: GitHub Secrets 업데이트
+### Phase 6: Update GitHub Secrets
 
-Repository Settings > Secrets and variables > Actions에서:
+In Repository Settings > Secrets and variables > Actions:
 
-| Secret                           | 값                                                                                                       |
+| Secret                           | Value                                                                                                    |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/pic2cook-pool/providers/github-provider` |
-| `GCP_SERVICE_ACCOUNT`            | `pic2cook-deployer@NEW_PROJECT.iam.gserviceaccount.com`                                                  |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/your-pool/providers/github-provider` |
+| `GCP_SERVICE_ACCOUNT`            | `your-deployer@NEW_PROJECT.iam.gserviceaccount.com`                                                  |
 
-값 조회:
+Retrieve Values:
 ```bash
 # Project Number
 gcloud projects describe NEW_PROJECT --format="value(projectNumber)"
 
 # WIF Provider
 gcloud iam workload-identity-pools providers describe github-provider \
-  --workload-identity-pool=pic2cook-pool --location=global --project=NEW_PROJECT --format="value(name)"
+  --workload-identity-pool=your-pool --location=global --project=NEW_PROJECT --format="value(name)"
 ```
 
-### Phase 7: 코드 변경 및 배포
+### Phase 7: Code Changes and Deployment
 
-1. `apps/api/src/lib/config.py`의 `gcs_bucket_name` 기본값 변경
-2. 커밋 및 푸시
-3. GitHub Actions가 자동 배포
+1. Change `gcs_bucket_name` default value in `apps/api/src/lib/config.py`
+2. Commit and Push
+3. GitHub Actions will auto-deploy
 
-## 자동화 스크립트
+## Automation Script
 
-전체 데이터 마이그레이션을 한 번에 실행:
+Run full data migration at once:
 
 ```bash
 ./.agent/skills/gcp-migration/scripts/migrate-gcp-project.sh \
   --old-project OLD_PROJECT_ID \
   --new-project NEW_PROJECT_ID \
-  --old-region us-central1 \
-  --new-region asia-northeast1
+  --old-region your_old_region \
+  --new-region your_new_region
 ```
 
-## 참조 문서
+## References
 
-- [마이그레이션 가이드](docs/gcp-migration-guide.md)
-- [마이그레이션 스크립트](.agent/skills/gcp-migration/scripts/migrate-gcp-project.sh)
+- [Migration Guide](references/gcp-migration-guide.md)
+- [Migration Script](scripts/migrate-gcp-project.sh)
 
-## 체크리스트
+## Troubleshooting
 
-- [ ] API 활성화 완료
-- [ ] DB 마이그레이션 완료
-- [ ] GCS 버킷 마이그레이션 완료
-- [ ] 컨테이너 이미지 마이그레이션 완료
-- [ ] Terraform variables.tf 수정
-- [ ] GitHub Secrets 업데이트
-- [ ] config.py 수정 및 푸시
-- [ ] 배포 확인 및 테스트
+### Cloud Run Job fails with TCP Connection Error
+
+**Symptoms**:
+```
+Is the server running on that host and accepting TCP/IP connections?
+```
+
+**Cause**: A VPC Connector is required for Cloud Run Jobs to access Cloud SQL Private IP.
+
+**Resolution**:
+```bash
+# 1. Enable VPC Access API
+gcloud services enable vpcaccess.googleapis.com --project=NEW_PROJECT_ID
+
+# 2. Check VPC Connector
+gcloud compute networks vpc-access connectors list \
+  --region=REGION \
+  --project=NEW_PROJECT_ID
+
+# 3. Create VPC Connector (if missing, use same network as Cloud SQL)
+gcloud compute networks vpc-access connectors create CONNECTOR_NAME \
+  --region=REGION \
+  --network=NETWORK_NAME \
+  --range=10.9.0.0/28 \
+  --project=NEW_PROJECT_ID
+
+# 4. Attach VPC Connector to Cloud Run Job
+gcloud run jobs update JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --vpc-connector=CONNECTOR_NAME \
+  --vpc-egress=private-ranges-only
+```
+
+### Direct VPC and VPC Connector Conflict
+
+**Symptoms**:
+```
+VPC connector and direct VPC can not be used together
+```
+
+**Resolution**: Remove Direct VPC first, then add VPC Connector:
+```bash
+# Remove Direct VPC
+gcloud run jobs update JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --clear-network
+
+# Add VPC Connector
+gcloud run jobs update JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --vpc-connector=CONNECTOR_NAME \
+  --vpc-egress=private-ranges-only
+```
+
+### Password Authentication Failed
+
+**Symptoms**:
+```
+FATAL: password authentication failed for user "username"
+```
+
+**Resolution**:
+```bash
+# Check Cloud SQL user list
+gcloud sql users list \
+  --instance=INSTANCE_NAME \
+  --project=NEW_PROJECT_ID
+
+# Reset password (if needed)
+gcloud sql users set-password USERNAME \
+  --instance=INSTANCE_NAME \
+  --project=NEW_PROJECT_ID \
+  --password="NEW_PASSWORD"
+```
+
+### Missing Required Environment Variables
+
+**Symptoms**:
+```
+pydantic_core._pydantic_core.ValidationError: Field required
+jwt_secret_key
+```
+
+**Resolution**: Environment variables required for Migration Job:
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET_KEY` - JWT signing secret
+
+**IMPORTANT**: Use `--update-env-vars` to preserve existing environment variables:
+```bash
+# WRONG: Overwrites all existing environment variables
+gcloud run jobs update JOB_NAME --set-env-vars="KEY=value"
+
+# CORRECT: Adds/Updates while keeping existing environment variables
+gcloud run jobs update JOB_NAME --update-env-vars="KEY=value"
+```
+
+### Manual Migration Job Fix (Full Steps)
+
+Full process for manually fixing the Migration Job:
+
+```bash
+# 1. Enable VPC Access API
+gcloud services enable vpcaccess.googleapis.com --project=NEW_PROJECT_ID
+
+# 2. Check Cloud SQL Private IP
+DB_IP=$(gcloud sql instances describe INSTANCE_NAME \
+  --project=NEW_PROJECT_ID \
+  --format="value(ipAddresses[0].ipAddress)")
+echo "Cloud SQL Private IP: $DB_IP"
+
+# 3. Create VPC Connector (same network as Cloud SQL)
+gcloud compute networks vpc-access connectors create default-connector \
+  --region=REGION \
+  --network=default \
+  --range=10.9.0.0/28 \
+  --project=NEW_PROJECT_ID
+
+# 4. Remove Direct VPC (if exists)
+gcloud run jobs update JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --clear-network
+
+# 5. Connect VPC Connector + Set Env Vars
+gcloud run jobs update JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --vpc-connector=default-connector \
+  --vpc-egress=private-ranges-only \
+  --update-env-vars="DATABASE_URL=postgresql+asyncpg://USER:PASS@${DB_IP}:5432/DBNAME,JWT_SECRET_KEY=YOUR_JWT_SECRET"
+
+# 6. Execute Migration
+gcloud run jobs execute JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID
+
+# 7. Check Status
+EXECUTION_ID=$(gcloud run jobs executions list \
+  --job=JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --limit=1 \
+  --format="value(name)")
+
+gcloud run jobs executions describe $EXECUTION_ID \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --format="value(status.conditions[0].status,status.conditions[0].message)"
+```
+
+### Verify Cloud Run Job Configuration
+
+```bash
+# Check current Job configuration
+gcloud run jobs describe JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --format="yaml(spec.template.spec.template.spec)"
+
+# Check only VPC configuration
+gcloud run jobs describe JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --format="yaml(spec.template.metadata.annotations)"
+
+# Check environment variables
+gcloud run jobs describe JOB_NAME \
+  --region=REGION \
+  --project=NEW_PROJECT_ID \
+  --format="yaml(spec.template.spec.template.spec.containers[0].env)"
+```
+
+## Checklist
+
+- [ ] APIs Enabled
+- [ ] Database Migration Completed
+- [ ] GCS Bucket Migration Completed
+- [ ] Container Image Migration Completed
+- [ ] Terraform variables.tf Modified
+- [ ] GitHub Secrets Updated
+- [ ] config.py Modified and Pushed
+- [ ] VPC Connector Created and Attached
+- [ ] Migration Job Env Vars Set (DATABASE_URL, JWT_SECRET_KEY)
+- [ ] Migration Job Executed Successfully
+- [ ] Deployment Verified and Tested
