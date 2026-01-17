@@ -729,7 +729,7 @@ function Dashboard() {
 
 **Impact: MEDIUM (prevents memory leaks and redundant handlers)**
 
-Use `@reactuses/core` hooks for global events to prevent multiple subscriptions and ensure proper cleanup.
+Use `ahooks` hooks for global events to prevent multiple subscriptions and ensure proper cleanup.
 
 **Incorrect: each component creates its own listener**
 
@@ -751,19 +751,22 @@ function Component2() {
 }
 ```
 
-**Correct: use @reactuses/core hooks**
+**Correct: use ahooks hooks**
 
 ```tsx
-import { useEventListener, useWindowSize } from '@reactuses/core'
+import { useEventListener } from 'ahooks'
 
 // Option 1: Listen to resize event directly
 function Component1() {
   useEventListener('resize', () => console.log('resize'))
 }
 
-// Option 2: Get window dimensions reactively
+// Option 2: Get window dimensions reactively with useEventListener
 function Component2() {
-  const { width, height } = useWindowSize()
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  useEventListener('resize', () => {
+    setSize({ width: window.innerWidth, height: window.innerHeight })
+  })
   // Automatically updates on resize
 }
 ```
@@ -889,7 +892,7 @@ function Profile({ user }: { user: User }) {
 
 **Impact: MEDIUM (reduces re-render frequency)**
 
-Subscribe to derived boolean state instead of continuous values to reduce re-render frequency. Use `useMediaQuery` from `@reactuses/core`.
+Subscribe to derived boolean state instead of continuous values to reduce re-render frequency. Use `useResponsive` from `ahooks`.
 
 **Incorrect: re-renders on every pixel change**
 
@@ -901,18 +904,19 @@ function Sidebar() {
 }
 ```
 
-**Correct: re-renders only when boolean changes**
+**Correct: re-renders only when breakpoint changes**
 
 ```tsx
-import { useMediaQuery } from '@reactuses/core'
+import { useResponsive } from 'ahooks'
 
 function Sidebar() {
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const responsive = useResponsive()
+  const isMobile = !responsive.md  // md breakpoint is 768px by default
   return <nav className={isMobile ? 'mobile' : 'desktop'}>
 }
 ```
 
-`useMediaQuery` uses `useSyncExternalStore` internally for optimized re-rendering and only triggers updates when the query match state changes.
+`useResponsive` uses breakpoint-based updates and only triggers re-renders when the breakpoint state changes, not on every pixel.
 
 ### 5.5 Use Functional setState Updates
 
@@ -1050,7 +1054,7 @@ For simple primitives (`useState(0)`), direct references (`useState(props.value)
 
 **Impact: MEDIUM (maintains UI responsiveness)**
 
-Mark frequent, non-urgent state updates as transitions to maintain UI responsiveness. Alternatively, use throttling from `@reactuses/core`.
+Mark frequent, non-urgent state updates as transitions to maintain UI responsiveness. Alternatively, use throttling from `ahooks`.
 
 **Incorrect: blocks UI on every scroll**
 
@@ -1082,18 +1086,16 @@ function ScrollTracker() {
 }
 ```
 
-**Alternative: throttling with @reactuses/core**
+**Alternative: throttling with ahooks**
 
 ```tsx
-import { useEventListener, useThrottle } from '@reactuses/core'
+import { useEventListener, useThrottle } from 'ahooks'
 
 function ScrollTracker() {
   const [scrollY, setScrollY] = useState(0)
-  const throttledScrollY = useThrottle(scrollY, 100) // Update max 10x/sec
+  const throttledScrollY = useThrottle(scrollY, { wait: 100 }) // Update max 10x/sec
 
-  useEventListener('scroll', () => setScrollY(window.scrollY), {
-    passive: true
-  })
+  useEventListener('scroll', () => setScrollY(window.scrollY))
 
   // Use throttledScrollY for rendering
   return <div>Scroll: {throttledScrollY}px</div>
@@ -1929,7 +1931,7 @@ Advanced patterns for specific cases that require careful implementation.
 
 **Impact: LOW (stable subscriptions)**
 
-Store callbacks in refs when used in effects that shouldn't re-subscribe on callback changes. Prefer `@reactuses/core` hooks which handle this internally.
+Store callbacks in refs when used in effects that shouldn't re-subscribe on callback changes. Prefer `ahooks` hooks which handle this internally.
 
 **Incorrect: re-subscribes on every render**
 
@@ -1942,10 +1944,10 @@ function useWindowEvent(event: string, handler: () => void) {
 }
 ```
 
-**Correct: use @reactuses/core useEventListener**
+**Correct: use ahooks useEventListener**
 
 ```tsx
-import { useEventListener } from '@reactuses/core'
+import { useEventListener } from 'ahooks'
 
 function Component() {
   // Handler is stored in a ref internally - no re-subscription on handler change
@@ -1976,7 +1978,7 @@ function useWindowEvent(event: string, handler: () => void) {
 
 **Impact: LOW (prevents effect re-runs)**
 
-Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures. Use `useLatest` from `@reactuses/core`.
+Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures. Use `useLatest` from `ahooks`.
 
 **Incorrect: effect re-runs on every callback change**
 
@@ -1991,10 +1993,10 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
 }
 ```
 
-**Correct: stable effect, fresh callback with @reactuses/core**
+**Correct: stable effect, fresh callback with ahooks**
 
 ```tsx
-import { useLatest } from '@reactuses/core'
+import { useLatest } from 'ahooks'
 
 function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
   const [query, setQuery] = useState('')
@@ -2007,24 +2009,24 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
 }
 ```
 
-**Alternative: use useDebounce for this specific pattern**
+**Alternative: use useDebounceFn for this specific pattern**
 
 ```tsx
-import { useDebounce } from '@reactuses/core'
+import { useDebounceFn } from 'ahooks'
 
 function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
   const [query, setQuery] = useState('')
-  const debouncedQuery = useDebounce(query, 300)
+  const { run: debouncedSearch } = useDebounceFn(onSearch, { wait: 300 })
 
   useEffect(() => {
-    if (debouncedQuery) {
-      onSearch(debouncedQuery)
+    if (query) {
+      debouncedSearch(query)
     }
-  }, [debouncedQuery, onSearch])
+  }, [query, debouncedSearch])
 }
 ```
 
-For debounced search specifically, `useDebounce` provides a cleaner solution.
+For debounced search specifically, `useDebounceFn` provides a cleaner solution.
 
 ---
 
@@ -2034,5 +2036,5 @@ For debounced search specifically, `useDebounce` provides a cleaner solution.
 2. [https://nextjs.org](https://nextjs.org)
 3. [https://tanstack.com/query](https://tanstack.com/query)
 4. [https://github.com/shuding/better-all](https://github.com/shuding/better-all)
-5. [https://reactuse.com](https://reactuse.com) - @reactuses/core hooks library
+5. [https://ahooks.js.org](https://ahooks.js.org) - ahooks React hooks library
 

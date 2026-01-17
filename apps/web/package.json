@@ -24,7 +24,7 @@
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/sdk-trace-base": "^2.2.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
-    "@reactuses/core": "^6.1.8",
+    "ahooks": "^3.8.5",
     "@serwist/turbopack": "^9.5.0",
     "@t3-oss/env-nextjs": "^0.13.10",
     "@tanstack/react-devtools": "^0.9.1",
