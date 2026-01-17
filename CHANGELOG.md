@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.2.0](https://github.com/first-fluke/fullstack-starter/compare/v2.1.0...v2.2.0) (2026-01-17)
+
+
+### Features
+
+* add gcp-migration skill and fix reviewdog ci errors ([a27edfa](https://github.com/first-fluke/fullstack-starter/commit/a27edfacb1383c9b112edf82d985e9ddb33d93c2))
+* add gcp-migration skill and fix reviewdog ci errors ([8918f17](https://github.com/first-fluke/fullstack-starter/commit/8918f17896be9c3255afa16869e6bbae0432e42b))
+* GCP 마이그레이션 스킬 및 가이드 문서 추가 ([f0731c9](https://github.com/first-fluke/fullstack-starter/commit/f0731c9774d1264295cd443b3f5f2a7d90c4ac00))
+
+
+### Bug Fixes
+
+* **ci:** reviewdog biome/ruff 포맷 지원 문제 수정 ([0a1ff7b](https://github.com/first-fluke/fullstack-starter/commit/0a1ff7b0e74aca4950b00aa55419789ed86ef9fa))
+
 ## [2.1.0](https://github.com/first-fluke/fullstack-starter/compare/v2.0.0...v2.1.0) (2026-01-16)
 
 
