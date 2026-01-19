@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0](https://github.com/first-fluke/fullstack-starter/compare/v2.2.2...v2.3.0) (2026-01-19)
+
+
+### Features
+
+* **infra:** add Firestore and Vertex AI resources ([95fe4aa](https://github.com/first-fluke/fullstack-starter/commit/95fe4aa620ad2e27dc4ce255e96c4047f759a74b))
+* **infra:** add Firestore and Vertex AI resources ([d9e3b70](https://github.com/first-fluke/fullstack-starter/commit/d9e3b705f2c4e207cde89b54da633e735bb7d3ea))
+
 ## [2.2.2](https://github.com/first-fluke/fullstack-starter/compare/v2.2.1...v2.2.2) (2026-01-18)
 
 
