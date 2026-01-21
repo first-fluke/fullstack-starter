@@ -2,7 +2,7 @@
 build = { run = "node --import=tsx scripts/build.ts", description = "Build i18n files for web and mobile" }
 "build:web" = { run = "node --import=tsx scripts/build.ts --target=web", description = "Build i18n for web only" }
 "build:mobile" = { run = "node --import=tsx scripts/build.ts --target=mobile", description = "Build i18n for mobile only" }
-install = { run = "pnpm install", description = "Install dependencies" }
+install = { run = "pnpm install", description = "Install dependencies", sources = ["package.json", "pnpm-lock.yaml"] }
 lint = { run = "pnpm biome check --write --unsafe", description = "Run biome linter" }
 format = { run = "pnpm biome check --write", description = "Run biome formatter" }
 typecheck = { run = "tsc --noEmit", description = "Run TypeScript type check" }

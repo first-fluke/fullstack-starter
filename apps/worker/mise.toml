@@ -1,6 +1,6 @@
 [tasks]
 dev = { run = "uv run poe dev", description = "Start Worker" }
-install = { run = "uv sync", description = "Install dependencies" }
+install = { run = "uv sync", description = "Install dependencies", sources = ["pyproject.toml", "uv.lock"] }
 lint = { run = "uv run poe lint", description = "Lint Worker" }
 format = { run = "uv run poe format", description = "Format Worker" }
 test = { run = "uv run poe test", description = "Test Worker" }
