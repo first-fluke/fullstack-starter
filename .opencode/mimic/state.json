@@ -38,9 +38,9 @@
       "id": "204ae352-bdcf-49d6-8e28-06972fc74395",
       "type": "tool",
       "description": "bash",
-      "count": 65,
+      "count": 71,
       "firstSeen": 1769121137004,
-      "lastSeen": 1769123698676,
+      "lastSeen": 1769123721309,
       "surfaced": true,
       "examples": [
         {
@@ -152,7 +152,7 @@
   },
   "statistics": {
     "totalSessions": 6,
-    "totalToolCalls": 74,
+    "totalToolCalls": 80,
     "filesModified": {},
     "lastSessionId": "8f646926-1d0a-47ef-ac17-aa1cbca3b9a2"
   }
