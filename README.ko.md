@@ -82,7 +82,7 @@ graph TB
 
 ```bash
 # CLI로 생성하기
-pnpm create fullstack-starter my-app
+bun create fullstack-starter my-app
 # 또는
 npm create fullstack-starter my-app
 ```
@@ -111,7 +111,7 @@ npm create fullstack-starter my-app
 # mise 설치 (미설치 시)
 curl https://mise.run | sh
 
-# 모든 런타임 일괄 설치 (Node 24, Python 3.12, Flutter 3, pnpm 10, uv, Terraform)
+# 모든 런타임 일괄 설치 (Node 24, Python 3.12, Flutter 3, bun, uv, Terraform)
 mise install
 ```
 

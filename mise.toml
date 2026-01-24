@@ -38,7 +38,7 @@ EOF
 [tools]
 node = "24"
 python = "3.12"
-pnpm = "10"
+bun = "latest"
 uv = "latest"
 flutter = "3"
 terraform = "1"
@@ -63,7 +63,7 @@ typecheck = { depends = ["//apps/api:typecheck", "//apps/web:typecheck"], descri
 
 [tasks."git:commit-msg"]
 description = "Validate commit message using commitlint"
-run = "pnpm dlx @commitlint/cli@20 --edit $1"
+run = "bunx @commitlint/cli@20 --edit $1"
 
 [tasks."git:pre-commit"]
 description = "Run conditional checks for staging files"
@@ -101,7 +101,7 @@ fi
 description = "Validate branch name and run tests before push"
 run = '''
 #!/usr/bin/env bash
-pnpm dlx @gracefullight/validate-branch || exit 1
+bunx @gracefullight/validate-branch || exit 1
 
 # Get changed files compared to origin
 changed=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)

@@ -82,7 +82,7 @@ Choose one of the following methods to start with this template:
 
 ```bash
 # Create from CLI
-pnpm create fullstack-starter my-app
+bun create fullstack-starter my-app
 # or
 npm create fullstack-starter my-app
 ```
@@ -111,7 +111,7 @@ Or use GitHub:
 # Install mise (if not installed)
 curl https://mise.run | sh
 
-# Install all runtimes (Node 24, Python 3.12, Flutter 3, pnpm 10, uv, Terraform)
+# Install all runtimes (Node 24, Python 3.12, Flutter 3, bun, uv, Terraform)
 mise install
 ```
 

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "bun@1.2.14",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

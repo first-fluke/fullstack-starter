@@ -32,8 +32,8 @@ jobs:
             Note this PR might be rejected due to its size.
           github_api_url: "https://api.github.com"
           files_to_ignore: |
-            pnpm-lock.yaml
-            **/pnpm-lock.yaml
+            bun.lock
+            **/bun.lock
             package-lock.json
             **/package-lock.json
             yarn.lock
@@ -63,19 +63,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          bun-version: latest
 
       - name: Install dependencies
         working-directory: apps/web
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - uses: reviewdog/action-setup@v1
 
@@ -84,7 +78,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: apps/web
         run: |
-          pnpm biome check src --reporter=json 2>&1 | \
+          bun run biome check src --reporter=json 2>&1 | \
           jq -r '.diagnostics[] | {
             message: .message,
             location: {

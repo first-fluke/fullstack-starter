@@ -1,9 +1,9 @@
 [tasks]
-dev = { run = "pnpm dev", description = "Start Web server" }
-build = { run = "pnpm build", description = "Build Web app" }
-install = { run = "pnpm install", description = "Install dependencies", sources = ["package.json", "pnpm-lock.yaml"] }
-lint = { run = "pnpm lint", description = "Lint Web" }
-format = { run = "pnpm format", description = "Format Web" }
-test = { run = "pnpm test", description = "Test Web" }
-typecheck = { run = "pnpm typecheck", description = "Type check Web" }
-"gen:api" = { run = "pnpm gen:api", description = "Generate API client" }
+dev = { run = "bun run dev", description = "Start Web server" }
+build = { run = "bun run build", description = "Build Web app" }
+install = { run = "bun install", description = "Install dependencies", sources = ["package.json", "bun.lock"] }
+lint = { run = "bun run lint", description = "Lint Web" }
+format = { run = "bun run format", description = "Format Web" }
+test = { run = "bun run test", description = "Test Web" }
+typecheck = { run = "bun run typecheck", description = "Type check Web" }
+"gen:api" = { run = "bun run gen:api", description = "Generate API client" }

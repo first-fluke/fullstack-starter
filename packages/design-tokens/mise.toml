@@ -1,10 +1,10 @@
 [tasks]
-build = { run = "node --import=tsx scripts/build.ts", description = "Build design tokens for web and mobile" }
-"build:css" = { run = "node --import=tsx scripts/build-css.ts", description = "Build CSS tokens for web only" }
-"build:flutter" = { run = "node --import=tsx scripts/build-forui-theme.ts", description = "Build Flutter theme for mobile only" }
-dev = { run = "node --import=tsx scripts/watch.ts", description = "Watch tokens.ts for changes and rebuild" }
-install = { run = "pnpm install", description = "Install dependencies", sources = ["package.json", "pnpm-lock.yaml"] }
-test = { run = "pnpm test", description = "Run design-tokens tests" }
-lint = { run = "pnpm biome check --write --unsafe", description = "Run biome linter" }
-format = { run = "pnpm biome check --write", description = "Run biome formatter" }
-typecheck = { run = "tsc --noEmit", description = "Run TypeScript type check" }
+build = { run = "bun scripts/build.ts", description = "Build design tokens for web and mobile" }
+"build:css" = { run = "bun scripts/build-css.ts", description = "Build CSS tokens for web only" }
+"build:flutter" = { run = "bun scripts/build-forui-theme.ts", description = "Build Flutter theme for mobile only" }
+dev = { run = "bun scripts/watch.ts", description = "Watch tokens.ts for changes and rebuild" }
+install = { run = "bun install", description = "Install dependencies", sources = ["package.json", "bun.lock"] }
+test = { run = "bun run test", description = "Run design-tokens tests" }
+lint = { run = "bun run biome check --write --unsafe", description = "Run biome linter" }
+format = { run = "bun run biome check --write", description = "Run biome formatter" }
+typecheck = { run = "bun run tsc --noEmit", description = "Run TypeScript type check" }
