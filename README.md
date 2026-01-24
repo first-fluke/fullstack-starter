@@ -136,19 +136,20 @@ This starts:
 ### 4. Run Database Migrations
 
 ```bash
-mise //apps/api:migrate
+mise db:migrate
 ```
 
 ### 5. Start Development Servers
 
 ```bash
-# Start all services (recommended)
-mise dev
+# Start API and Web services (recommended for web development)
+mise dev:web
 
-# Or start individually
-mise //apps/api:dev    # API server
-mise //apps/web:dev    # Web server
-mise //apps/worker:dev # Worker
+# Start API and Mobile services (recommended for mobile development)
+mise dev:mobile
+
+# Or start all services
+mise dev
 ```
 
 ## Project Structure
@@ -184,6 +185,8 @@ mise tasks --all
 |---------|-------------|
 | `mise db:migrate` | Run database migrations |
 | `mise dev` | Start all services |
+| `mise dev:web` | Start API and Web services |
+| `mise dev:mobile` | Start API and Mobile services |
 | `mise format` | Format all apps |
 | `mise gen:api` | Generate OpenAPI schema and API clients |
 | `mise i18n:build` | Build i18n files |

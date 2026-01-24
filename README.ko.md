@@ -136,19 +136,20 @@ mise infra:up
 ### 4. 데이터베이스 마이그레이션
 
 ```bash
-mise //apps/api:migrate
+mise db:migrate
 ```
 
 ### 5. 개발 서버 실행
 
 ```bash
-# 모든 서비스 일괄 실행 (권장)
-mise dev
+# API와 웹 서버 실행 (웹 개발 시 권장)
+mise dev:web
 
-# 개별 실행
-mise //apps/api:dev    # API 서버
-mise //apps/web:dev    # 웹 서버
-mise //apps/worker:dev # 워커
+# API와 모바일 서버 실행 (모바일 개발 시 권장)
+mise dev:mobile
+
+# 또는 모든 서비스 실행
+mise dev
 ```
 
 ## 프로젝트 구조
@@ -184,6 +185,8 @@ mise tasks --all
 |--------|------|
 | `mise db:migrate` | 데이터베이스 마이그레이션 실행 |
 | `mise dev` | 모든 서비스 시작 |
+| `mise dev:web` | API와 웹 서비스 시작 |
+| `mise dev:mobile` | API와 모바일 서비스 시작 |
 | `mise format` | 전체 앱 코드 포맷팅 |
 | `mise gen:api` | OpenAPI 스키마 및 클라이언트 생성 |
 | `mise i18n:build` | 다국어 파일 빌드 |

@@ -47,6 +47,8 @@ hadolint = "latest"
 
 [tasks]
 "db:migrate" = { depends = ["//apps/api:migrate"], description = "Run database migrations" }
+"dev:web" = { depends = ["//apps/api:dev", "//apps/web:dev"], description = "Start API and Web services" }
+"dev:mobile" = { depends = ["//apps/api:dev", "//apps/mobile:dev"], description = "Start API and Mobile services" }
 dev = { depends = ["//apps/api:dev", "//apps/web:dev", "//apps/worker:dev"], description = "Start all services" }
 format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:format"], description = "Format all apps" }
 "gen:api" = { depends = ["//apps/api:gen:openapi"], run = [{ tasks = ["//apps/web:gen:api", "//apps/mobile:gen:api"] }], description = "Generate OpenAPI schema and API clients" }
