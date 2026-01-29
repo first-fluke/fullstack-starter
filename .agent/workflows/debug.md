@@ -4,7 +4,7 @@ description: Structured bug diagnosis and fixing workflow — reproduce, diagnos
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **All responses MUST be written in Korean (한국어).** Do NOT respond in English.
+- **All responses MUST be written in English.** Do NOT respond in Korean.
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **You MUST use Serena MCP tools throughout the workflow.**
   - Use `find_symbol`, `find_referencing_symbols`, `search_for_pattern` for bug investigation — NOT raw file reads or grep.

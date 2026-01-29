@@ -4,7 +4,7 @@ description: Automated CLI-based parallel agent execution — spawn subagents vi
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **All responses MUST be written in Korean (한국어).** Do NOT respond in English.
+- **All responses MUST be written in English.** Do NOT respond in Korean.
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
 - **You MUST use Serena MCP tools throughout the entire workflow.** This is NOT optional.
   - Use `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern` for code exploration.

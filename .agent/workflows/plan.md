@@ -4,7 +4,7 @@ description: PM planning workflow — analyze requirements, select tech stack, d
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **All responses MUST be written in Korean (한국어).** Do NOT respond in English.
+- **All responses MUST be written in English.** Do NOT respond in Korean.
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **You MUST use Serena MCP tools throughout the workflow.**
   - Use `get_symbols_overview`, `find_symbol`, `search_for_pattern` to analyze the existing codebase.
