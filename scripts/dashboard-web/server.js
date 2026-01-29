@@ -26,7 +26,7 @@ try {
   chokidar = require("chokidar");
 } catch {
   console.error(
-    "Missing dependency: chokidar\nRun: npm install chokidar ws"
+    "Missing dependency: chokidar\nRun: bun install chokidar ws"
   );
   process.exit(1);
 }
@@ -34,7 +34,7 @@ try {
 try {
   ({ WebSocketServer } = require("ws"));
 } catch {
-  console.error("Missing dependency: ws\nRun: npm install chokidar ws");
+  console.error("Missing dependency: ws\nRun: bun install chokidar ws");
   process.exit(1);
 }
 

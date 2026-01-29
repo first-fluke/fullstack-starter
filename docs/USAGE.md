@@ -77,10 +77,10 @@ wait
 **Monitor in real-time:**
 ```bash
 # Terminal (separate terminal window)
-npm run dashboard
+bun run dashboard
 
 # Or browser
-npm run dashboard:web
+bun run dashboard:web
 # → http://localhost:9847
 ```
 
@@ -91,7 +91,7 @@ npm run dashboard:web
 ### Terminal Dashboard
 
 ```bash
-npm run dashboard
+bun run dashboard
 ```
 
 Watches `.serena/memories/` using `fswatch` (macOS) or `inotifywait` (Linux). Displays a live table with session status, agent states, turns, and latest activity. Updates automatically when memory files change.
@@ -103,8 +103,8 @@ Watches `.serena/memories/` using `fswatch` (macOS) or `inotifywait` (Linux). Di
 ### Web Dashboard
 
 ```bash
-npm install          # first time only
-npm run dashboard:web
+bun install          # first time only
+bun run dashboard:web
 ```
 
 Open `http://localhost:9847` in your browser. Features:
@@ -232,7 +232,7 @@ You: "Login button throws TypeError"
 ### Workflow D: CLI Orchestration with Dashboard
 
 ```
-Terminal 1: npm run dashboard:web
+Terminal 1: bun run dashboard:web
 Terminal 2: ./scripts/spawn-subagent.sh backend "task" ./backend &
             ./scripts/spawn-subagent.sh frontend "task" ./frontend &
 Browser:    http://localhost:9847 → real-time status
@@ -246,7 +246,7 @@ Browser:    http://localhost:9847 → real-time status
 2. **Use Agent Manager** for multi-domain projects — don't try to do everything in one chat
 3. **Review Knowledge Base** — check `.gemini/antigravity/brain/` for API consistency
 4. **Iterate with re-spawns** — refine instructions, don't start over
-5. **Use dashboards** — `npm run dashboard` or `npm run dashboard:web` to monitor orchestrator sessions
+5. **Use dashboards** — `bun run dashboard` or `bun run dashboard:web` to monitor orchestrator sessions
 6. **Separate workspaces** — assign each agent its own directory
 
 ---
@@ -259,19 +259,19 @@ Browser:    http://localhost:9847 → real-time status
 | Agent Manager not found | View → Agent Manager menu, requires Antigravity 2026+ |
 | Incompatible agent outputs | Review both in Knowledge Base, re-spawn with corrections |
 | Dashboard: "No agents" | Memory files not created yet, run orchestrator first |
-| Web dashboard won't start | Run `npm install` to install chokidar and ws |
+| Web dashboard won't start | Run `bun install` to install chokidar and ws |
 | fswatch not found | macOS: `brew install fswatch`, Linux: `apt install inotify-tools` |
 | QA report has 50+ issues | Focus on CRITICAL/HIGH first, document rest for later |
 
 ---
 
-## npm Scripts
+## Bun Scripts
 
 ```bash
-npm run dashboard       # Terminal real-time dashboard
-npm run dashboard:web   # Web dashboard → http://localhost:9847
-npm run validate        # Validate skill files
-npm run info            # Show this usage guide
+bun run dashboard       # Terminal real-time dashboard
+bun run dashboard:web   # Web dashboard → http://localhost:9847
+bun run validate        # Validate skill files
+bun run info            # Show this usage guide
 ```
 
 ---

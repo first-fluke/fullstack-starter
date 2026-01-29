@@ -77,10 +77,10 @@ wait
 **실시간 모니터링:**
 ```bash
 # 터미널 (별도 창)
-npm run dashboard
+bun run dashboard
 
 # 또는 브라우저
-npm run dashboard:web
+bun run dashboard:web
 # → http://localhost:9847
 ```
 
@@ -91,7 +91,7 @@ npm run dashboard:web
 ### 터미널 대시보드
 
 ```bash
-npm run dashboard
+bun run dashboard
 ```
 
 `fswatch` (macOS) 또는 `inotifywait` (Linux)로 `.serena/memories/`를 감시합니다. 세션 상태, 에이전트 상태, 턴 수, 최신 활동을 실시간 테이블로 표시합니다. 메모리 파일 변경 시 자동으로 업데이트됩니다.
@@ -103,8 +103,8 @@ npm run dashboard
 ### 웹 대시보드
 
 ```bash
-npm install          # 최초 1회
-npm run dashboard:web
+bun install          # 최초 1회
+bun run dashboard:web
 ```
 
 브라우저에서 `http://localhost:9847` 열기. 기능:
@@ -231,7 +231,7 @@ Antigravity IDE 채팅에서 입력하여 단계별 워크플로우를 실행합
 ### 워크플로우 D: CLI Orchestration + 대시보드
 
 ```
-터미널 1: npm run dashboard:web
+터미널 1: bun run dashboard:web
 터미널 2: ./scripts/spawn-subagent.sh backend "task" ./backend &
          ./scripts/spawn-subagent.sh frontend "task" ./frontend &
 브라우저:  http://localhost:9847 → 실시간 상태
@@ -245,7 +245,7 @@ Antigravity IDE 채팅에서 입력하여 단계별 워크플로우를 실행합
 2. **멀티 도메인은 Agent Manager 사용** — 한 채팅에서 모든 것을 하려고 하지 마세요.
 3. **Knowledge Base 검토** — `.gemini/antigravity/brain/`에서 API 일관성 확인
 4. **재생성으로 반복** — 처음부터 다시 하지 말고, 명령을 다듬어 재생성하세요.
-5. **대시보드 사용** — `npm run dashboard` 또는 `npm run dashboard:web`로 orchestrator 세션 모니터링
+5. **대시보드 사용** — `bun run dashboard` 또는 `bun run dashboard:web`로 orchestrator 세션 모니터링
 6. **별도 워크스페이스** — 각 에이전트에 고유 디렉토리 할당
 
 ---
@@ -258,19 +258,19 @@ Antigravity IDE 채팅에서 입력하여 단계별 워크플로우를 실행합
 | Agent Manager를 찾을 수 없음 | View → Agent Manager 메뉴, Antigravity 2026+ 필요 |
 | 에이전트 산출물이 호환되지 않음 | Knowledge Base에서 둘 다 검토, 수정하여 재생성 |
 | 대시보드: "No agents" 표시 | 메모리 파일이 아직 생성되지 않음, orchestrator 실행 필요 |
-| 웹 대시보드가 시작 안 됨 | `npm install`로 chokidar, ws 설치 |
+| 웹 대시보드가 시작 안 됨 | `bun install`로 chokidar, ws 설치 |
 | fswatch not found | macOS: `brew install fswatch`, Linux: `apt install inotify-tools` |
 | QA 리포트에 50개 이상 이슈 | CRITICAL/HIGH부터 처리, 나머지는 문서화 후 나중에 |
 
 ---
 
-## npm 스크립트
+## Bun 스크립트
 
 ```bash
-npm run dashboard       # 터미널 실시간 대시보드
-npm run dashboard:web   # 웹 대시보드 → http://localhost:9847
-npm run validate        # 스킬 파일 검증
-npm run info            # 이 사용 가이드 출력
+bun run dashboard       # 터미널 실시간 대시보드
+bun run dashboard:web   # 웹 대시보드 → http://localhost:9847
+bun run validate        # 스킬 파일 검증
+bun run info            # 이 사용 가이드 출력
 ```
 
 ---

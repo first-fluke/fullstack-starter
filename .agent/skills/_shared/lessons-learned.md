@@ -67,7 +67,7 @@ Add in the following format after session completion:
 ### Initial Lessons
 - **Rate limiting verification method**: Send continuous requests with `curl` and verify 429 response. Code review alone is insufficient.
 - **CORS wildcard**: Using `*` in development environment is OK, but production build must restrict to specific domains.
-- **npm audit vs safety**: Use `npm audit` for frontend, `pip-audit` or `safety check` for backend (Python).
+- **bun audit vs safety**: Use `bun audit` for frontend, `pip-audit` or `safety check` for backend (Python).
 
 ---
 
