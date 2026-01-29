@@ -74,6 +74,48 @@ graph TB
 
 > **[왜 이 기술 스택인가?](./docs/WHY.ko.md)** — 기술 선정 배경 상세 설명
 
+### AI 에이전트 오케스트레이션
+
+복잡한 크로스 도메인 작업을 위한 멀티 에이전트 협업 워크플로우가 포함되어 있습니다.
+
+```mermaid
+graph TB
+    subgraph Coordination["조정 레이어"]
+        User([사용자 요청])
+        PM[PM 에이전트<br/>태스크 분해]
+    end
+
+    subgraph Execution["병렬 실행"]
+        FE[프론트엔드 에이전트<br/>Next.js/Flutter]
+        BE[백엔드 에이전트<br/>FastAPI]
+        Infra[인프라 에이전트<br/>Terraform]
+    end
+
+    subgraph Review["품질 보증"]
+        QA[QA 에이전트<br/>보안/접근성/성능]
+    end
+
+    User --> PM
+    PM --> FE & BE & Infra
+    FE & BE & Infra --> QA
+    QA -->|이슈 발견| FE & BE & Infra
+    QA -->|승인| Done([완료])
+
+    style PM fill:#8B5CF6,color:#fff
+    style FE fill:#0070f3,color:#fff
+    style BE fill:#009688,color:#fff
+    style Infra fill:#F59E0B,color:#fff
+    style QA fill:#EF4444,color:#fff
+```
+
+| 에이전트 | 역할 |
+|----------|------|
+| **PM 에이전트** | 요구사항 분석, API 계약 정의, 우선순위별 태스크 분해 |
+| **도메인 에이전트** | 프론트엔드, 백엔드, 모바일, 인프라 에이전트가 우선순위별 병렬 실행 |
+| **QA 에이전트** | 보안(OWASP), 성능, 접근성(WCAG 2.1 AA) 검토 |
+
+> 전체 오케스트레이션 워크플로우는 [`.agent/workflows/coordinate.md`](.agent/workflows/coordinate.md)를 참조하세요.
+
 ![Fullstack](./docs/fullstack.jpg)
 
 ## 빠른 시작

@@ -74,6 +74,48 @@ graph TB
 
 > **[Why this tech stack?](./docs/WHY.md)** — Detailed reasoning behind each technology choice.
 
+### AI Agent Orchestration
+
+This template includes a multi-agent coordination workflow for complex cross-domain tasks.
+
+```mermaid
+graph TB
+    subgraph Coordination["Coordination Layer"]
+        User([User Request])
+        PM[PM Agent<br/>Task Decomposition]
+    end
+
+    subgraph Execution["Parallel Execution"]
+        FE[Frontend Agent<br/>Next.js/Flutter]
+        BE[Backend Agent<br/>FastAPI]
+        Infra[Infra Agent<br/>Terraform]
+    end
+
+    subgraph Review["Quality Assurance"]
+        QA[QA Agent<br/>Security/A11y/Perf]
+    end
+
+    User --> PM
+    PM --> FE & BE & Infra
+    FE & BE & Infra --> QA
+    QA -->|Issues Found| FE & BE & Infra
+    QA -->|Approved| Done([Complete])
+
+    style PM fill:#8B5CF6,color:#fff
+    style FE fill:#0070f3,color:#fff
+    style BE fill:#009688,color:#fff
+    style Infra fill:#F59E0B,color:#fff
+    style QA fill:#EF4444,color:#fff
+```
+
+| Agent | Role |
+|-------|------|
+| **PM Agent** | Analyzes requirements, defines API contracts, creates prioritized task breakdown |
+| **Domain Agents** | Frontend, Backend, Mobile, Infra agents execute tasks in parallel by priority |
+| **QA Agent** | Reviews security (OWASP), performance, accessibility (WCAG 2.1 AA) |
+
+> See [`.agent/workflows/coordinate.md`](.agent/workflows/coordinate.md) for the full orchestration workflow.
+
 ![Fullstack](./docs/fullstack.jpg)
 
 ## Quick Start
