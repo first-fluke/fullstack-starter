@@ -74,6 +74,8 @@ graph TB
 
 > **[왜 이 기술 스택인가?](./docs/WHY.ko.md)** — 기술 선정 배경 상세 설명
 
+![Fullstack](./docs/fullstack.jpg)
+
 ### AI 에이전트 오케스트레이션
 
 복잡한 크로스 도메인 작업을 위한 멀티 에이전트 협업 워크플로우가 포함되어 있습니다.
@@ -115,8 +117,6 @@ graph TB
 | **QA 에이전트** | 보안(OWASP), 성능, 접근성(WCAG 2.1 AA) 검토 |
 
 > 전체 오케스트레이션 워크플로우는 [`.agent/workflows/coordinate.md`](.agent/workflows/coordinate.md)를 참조하세요.
-
-![Fullstack](./docs/fullstack.jpg)
 
 ## 빠른 시작
 

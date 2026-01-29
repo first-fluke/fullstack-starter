@@ -74,6 +74,8 @@ graph TB
 
 > **[Why this tech stack?](./docs/WHY.md)** — Detailed reasoning behind each technology choice.
 
+![Fullstack](./docs/fullstack.jpg)
+
 ### AI Agent Orchestration
 
 This template includes a multi-agent coordination workflow for complex cross-domain tasks.
@@ -115,8 +117,6 @@ graph TB
 | **QA Agent** | Reviews security (OWASP), performance, accessibility (WCAG 2.1 AA) |
 
 > See [`.agent/workflows/coordinate.md`](.agent/workflows/coordinate.md) for the full orchestration workflow.
-
-![Fullstack](./docs/fullstack.jpg)
 
 ## Quick Start
 
