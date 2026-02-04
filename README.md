@@ -490,3 +490,7 @@ Or leave a star:
 ```bash
 gh api --method PUT /user/starred/first-fluke/fullstack-starter
 ```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=first-fluke/fullstack-starter&type=date&legend=bottom-right)](https://www.star-history.com/#first-fluke/fullstack-starter&type=date&legend=bottom-right)

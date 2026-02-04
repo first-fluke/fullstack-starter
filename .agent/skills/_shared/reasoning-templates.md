@@ -1,161 +1,161 @@
 # Reasoning Templates
 
-Use these templates by filling in the blanks when multi-step reasoning is required.
-To avoid losing direction, proceed to the next step **after completing each step**.
+멀티스텝 추론이 필요한 상황에서 이 템플릿의 빈칸을 채우며 진행한다.
+중간에 방향을 잃지 않도록 **각 단계를 완료한 후** 다음 단계로 넘어간다.
 
 ---
 
-## 1. Debugging Reasoning (Debug Agent, Backend/Frontend/Mobile Agent)
+## 1. 디버깅 추론 (Debug Agent, Backend/Frontend/Mobile Agent)
 
-Repeat the loop below when finding bug causes. If unresolved after max 3 iterations, record `Status: blocked`.
+버그의 원인을 찾을 때 아래 루프를 반복한다. 최대 3회 반복 후에도 해결 안 되면 `Status: blocked` 기록.
 
 ```
-=== Hypothesis #{N} ===
+=== 가설 #{N} ===
 
-Observation: {error message, symptoms, reproduction conditions}
-Hypothesis: "{phenomenon} is caused by {suspected cause}"
-Verification Method: {how to confirm — code reading, logs, tests, etc.}
-Verification Result: {what was actually confirmed}
-Verdict: Correct / Incorrect
+관찰: {에러 메시지, 증상, 재현 조건}
+가설: "{현상}은 {추정 원인}으로 인한 것이다"
+검증 방법: {어떻게 확인할 것인가 — 코드 읽기, 로그, 테스트 등}
+검증 결과: {실제로 확인한 내용}
+판정: 맞음 / 틀림
 
-If correct → Move to fix stage
-If incorrect → Write new hypothesis #{N+1}
+맞으면 → 수정 단계로 이동
+틀리면 → 새 가설 #{N+1} 작성
 ```
 
-**Example:**
+**예시:**
 ```
-=== Hypothesis #1 ===
-Observation: "Cannot read property 'map' of undefined" in TodoList
-Hypothesis: "todos is undefined when .map() is called before API response"
-Verification Method: Check initial value of todos in TodoList component
-Verification Result: No initial value in useState() → undefined
-Verdict: Correct → Set default value of todos to []
+=== 가설 #1 ===
+관찰: TodoList에서 "Cannot read property 'map' of undefined"
+가설: "API 응답 전에 todos가 undefined 상태로 .map()이 호출된다"
+검증 방법: TodoList 컴포넌트에서 todos의 초기값 확인
+검증 결과: useState()에 초기값 없음 → undefined
+판정: 맞음 → todos의 기본값을 [] 로 설정
 ```
 
 ---
 
-## 2. Architecture Decision (PM Agent, Backend Agent)
+## 2. 아키텍처 결정 (PM Agent, Backend Agent)
 
-Fill in this matrix when technical choices or design decisions are needed.
+기술 선택이나 설계 결정이 필요할 때 이 매트릭스를 채운다.
 
 ```
-=== Decision: {what needs to be chosen} ===
+=== 결정: {무엇을 선택해야 하는가} ===
 
-Options:
-  A: {Option A}
-  B: {Option B}
-  C: {Option C} (if any)
+선택지:
+  A: {선택지 A}
+  B: {선택지 B}
+  C: {선택지 C} (있으면)
 
-Evaluation Criteria and Scores (1-5):
-| Criterion           | A | B | C | Weight |
-|---------------------|---|---|---|--------|
-| Performance         |   |   |   | {H/M/L} |
-| Implementation Complexity |   |   |   | {H/M/L} |
-| Team Familiarity    |   |   |   | {H/M/L} |
-| Scalability         |   |   |   | {H/M/L} |
-| Existing Code Consistency |   |   |   | {H/M/L} |
+평가 기준과 점수 (1-5):
+| 기준         | A | B | C | 가중치 |
+|-------------|---|---|---|--------|
+| 성능         |   |   |   | {H/M/L} |
+| 구현 복잡도   |   |   |   | {H/M/L} |
+| 팀 익숙도     |   |   |   | {H/M/L} |
+| 확장성       |   |   |   | {H/M/L} |
+| 기존 코드 일관성 |   |   |   | {H/M/L} |
 
-Conclusion: {option}
-Reason: {1-2 line rationale}
-Tradeoff: {why giving up advantages of unchosen options}
+결론: {선택지}
+이유: {1-2줄 근거}
+트레이드오프: {선택하지 않은 것의 장점을 포기하는 이유}
 ```
 
-**Example:**
+**예시:**
 ```
-=== Decision: State Management Library ===
+=== 결정: 상태 관리 라이브러리 ===
 
-Options:
+선택지:
   A: Zustand
   B: Redux Toolkit
   C: React Context
 
-| Criterion           | A | B | C | Weight |
-|---------------------|---|---|---|--------|
-| Performance         | 4 | 4 | 3 | M     |
-| Implementation Complexity | 5 | 3 | 4 | H     |
-| Team Familiarity    | 3 | 5 | 5 | M     |
-| Scalability         | 4 | 5 | 2 | M     |
-| Existing Code Consistency | 2 | 5 | 3 | H |
+| 기준         | A | B | C | 가중치 |
+|-------------|---|---|---|--------|
+| 성능         | 4 | 4 | 3 | M     |
+| 구현 복잡도   | 5 | 3 | 4 | H     |
+| 팀 익숙도     | 3 | 5 | 5 | M     |
+| 확장성       | 4 | 5 | 2 | M     |
+| 기존 코드 일관성 | 2 | 5 | 3 | H |
 
-Conclusion: Redux Toolkit
-Reason: Existing code uses RTK, team familiarity is highest
-Tradeoff: Giving up Zustand's simplicity but ensuring consistency
+결론: Redux Toolkit
+이유: 기존 코드가 RTK 사용 중이며, 팀 익숙도 최고
+트레이드오프: Zustand의 간결함을 포기하지만 일관성 확보
 ```
 
 ---
 
-## 3. Cause-Effect Chain (Debug Agent)
+## 3. 원인-결과 체인 (Debug Agent)
 
-Use when tracing execution flow step-by-step in complex bugs.
-
-```
-=== Execution Flow Trace ===
-
-1. [Entry Point]   {file:function} - {input value}
-2. [Call]          {file:function} - {passed value}
-3. [Processing]    {file:function} - {transformation/logic}
-4. [Failure Point] {file:function} - {something different from expected happens here}
-   - Expected: {expected behavior}
-   - Actual: {actual behavior}
-   - Cause: {why different}
-5. [Result]        {error message or incorrect output}
-```
-
-**Example:**
-```
-1. [Entry Point]   pages/todos.tsx:TodoPage - user accesses /todos
-2. [Call]          hooks/useTodos.ts:useTodos - fetchTodos() called
-3. [Processing]    api/todos.ts:fetchTodos - GET /api/todos request
-4. [Failure Point] hooks/useTodos.ts:23 - data returned as undefined
-   - Expected: data = [] (empty array)
-   - Actual: data = undefined (before fetch complete)
-   - Cause: initialData not set in useQuery
-5. [Result]        undefined.map() in TodoList → TypeError
-```
-
----
-
-## 4. Refactoring Judgment (All Implementation Agents)
-
-Use when deciding "should I fix it or leave it as is" when modifying code.
+복잡한 버그에서 실행 흐름을 단계별로 추적할 때 사용한다.
 
 ```
-=== Refactoring Judgment ===
+=== 실행 흐름 추적 ===
 
-Current Code Problem: {what is the problem}
-Relation to Task: Directly related / Indirectly related / Unrelated
+1. [진입점]   {파일:함수} - {입력값}
+2. [호출]     {파일:함수} - {전달된 값}
+3. [처리]     {파일:함수} - {변환/로직}
+4. [실패 지점] {파일:함수} - {여기서 예상과 다른 일이 발생}
+   - 예상: {예상 동작}
+   - 실제: {실제 동작}
+   - 원인: {왜 다른가}
+5. [결과]     {에러 메시지 또는 잘못된 출력}
+```
 
-Directly related → Fix it
-Indirectly related → Record in result, fix only within current task scope
-Unrelated → Record only in result (never fix)
+**예시:**
+```
+1. [진입점]   pages/todos.tsx:TodoPage - 유저가 /todos 접근
+2. [호출]     hooks/useTodos.ts:useTodos - fetchTodos() 호출
+3. [처리]     api/todos.ts:fetchTodos - GET /api/todos 요청
+4. [실패 지점] hooks/useTodos.ts:23 - data가 undefined인 채로 반환
+   - 예상: data = [] (빈 배열)
+   - 실제: data = undefined (fetch 완료 전)
+   - 원인: useQuery의 initialData 미설정
+5. [결과]     TodoList에서 undefined.map() → TypeError
 ```
 
 ---
 
-## 5. Performance Bottleneck Analysis (Debug Agent, QA Agent)
+## 4. 리팩토링 판단 (모든 구현 에이전트)
 
-Systematically find bottlenecks for "it's slow" reports.
+코드를 수정할 때 "고칠 것인가, 그대로 둘 것인가" 판단에 사용한다.
 
 ```
-=== Performance Bottleneck Analysis ===
+=== 리팩토링 판단 ===
 
-Measurements:
-  - Total response time: {ms}
-  - DB query time: {ms} ({N} queries)
-  - Business logic: {ms}
-  - Serialization/Rendering: {ms}
+현재 코드 문제: {무엇이 문제인가}
+태스크와 관련성: 직접 관련 / 간접 관련 / 무관
 
-Bottleneck Location: {stage taking longest time}
-Cause: {N+1 query / heavy computation / large response / missing index / ...}
-Solution: {specific fix method}
-Expected Improvement: {X}ms → {Y}ms
+직접 관련 → 수정한다
+간접 관련 → result에 기록하되, 현재 태스크 범위 내에서만 수정
+무관     → result에 기록만 한다 (절대 수정하지 않는다)
 ```
 
 ---
 
-## Usage Rules
+## 5. 성능 병목 분석 (Debug Agent, QA Agent)
 
-1. **When to use**: Required for Complex difficulty tasks, recommended for Medium
-2. **Where to record**: Record reasoning process in `progress-{agent-id}.md`
-3. **If can't fill blanks**: First collect that information (Serena, code reading, log checking)
-4. **If unresolved after 3 iterations**: `Status: blocked` + include reasoning so far in result
+"느리다"는 보고에 대해 체계적으로 병목을 찾는다.
+
+```
+=== 성능 병목 분석 ===
+
+측정:
+  - 전체 응답 시간: {ms}
+  - DB 쿼리 시간: {ms} (쿼리 {N}개)
+  - 비즈니스 로직: {ms}
+  - 직렬화/렌더링: {ms}
+
+병목 위치: {가장 시간이 오래 걸리는 단계}
+원인: {N+1 쿼리 / 무거운 연산 / 큰 응답 / 인덱스 부재 / ...}
+해결: {구체적 수정 방법}
+예상 개선: {X}ms → {Y}ms
+```
+
+---
+
+## 사용 규칙
+
+1. **언제 사용하나**: Complex 난이도 태스크에서 필수, Medium에서 권장
+2. **어디에 기록하나**: `progress-{agent-id}.md`에 추론 과정 기록
+3. **빈칸을 채울 수 없으면**: 해당 정보를 먼저 수집 (Serena, 코드 읽기, 로그 확인)
+4. **3회 반복 후에도 미해결**: `Status: blocked` + 현재까지의 추론 기록을 result에 포함
