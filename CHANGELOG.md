@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/first-fluke/fullstack-starter/compare/v2.7.1...v2.8.0) (2026-02-07)
+
+
+### Features
+
+* remove dashboard web server and related scripts ([cb7d818](https://github.com/first-fluke/fullstack-starter/commit/cb7d8181e4923bd010d79dad4ff4ad2ba2801391))
+
 ## [2.7.1](https://github.com/first-fluke/fullstack-starter/compare/v2.7.0...v2.7.1) (2026-01-29)
 
 
