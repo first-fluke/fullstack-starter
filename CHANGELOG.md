@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/first-fluke/fullstack-starter/compare/v2.8.0...v2.9.0) (2026-02-12)
+
+
+### Features
+
+* **web:** add kebab-case naming convention to orval config ([0ad5e9c](https://github.com/first-fluke/fullstack-starter/commit/0ad5e9c3b65e9e55f41ae8ec69f9b3f7c070832a))
+
 ## [2.8.0](https://github.com/first-fluke/fullstack-starter/compare/v2.7.1...v2.8.0) (2026-02-07)
 
 
