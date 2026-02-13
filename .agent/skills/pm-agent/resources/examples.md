@@ -2,7 +2,7 @@
 
 ## Example 1: Simple TODO App
 
-**Input**: "JWT 인증이 있는 TODO 앱을 만들어줘"
+**Input**: "Build a TODO app with JWT authentication"
 
 **Output**:
 ```json

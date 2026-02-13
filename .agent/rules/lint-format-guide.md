@@ -8,6 +8,7 @@ description: when working for linting and formatting.
 ## Overview
 
 This project uses:
+
 - **Biome** for JavaScript/TypeScript (lint + format)
 - **Ruff** for Python (lint + format)
 - **dart analyze** for Dart/Flutter
@@ -16,10 +17,11 @@ This project uses:
 ## Quick Commands
 
 ### Check All
+
 ```bash
 # From root
-pnpm lint          # Biome check
-pnpm format:check  # Biome format check
+bun lint          # Biome check
+bun format:check  # Biome format check
 
 # Python (in apps/api or apps/worker)
 poe lint           # Ruff check
@@ -33,10 +35,11 @@ terraform fmt -check -recursive
 ```
 
 ### Fix All
+
 ```bash
 # From root
-pnpm lint:fix      # Biome fix
-pnpm format        # Biome format
+bun lint:fix      # Biome fix
+bun format        # Biome format
 
 # Python
 poe lint:fix       # Ruff fix
@@ -49,9 +52,11 @@ terraform fmt -recursive
 ## Biome (JavaScript/TypeScript)
 
 ### Configuration
+
 See `biome.json` at project root.
 
 ### Key Rules
+
 - Indent: 2 spaces
 - Quotes: double
 - Semicolons: required
@@ -59,6 +64,7 @@ See `biome.json` at project root.
 - Line width: 100
 
 ### Lint Categories
+
 - **Correctness**: Errors that will cause bugs
 - **Suspicious**: Likely bugs or confusing code
 - **Style**: Code style issues
@@ -66,6 +72,7 @@ See `biome.json` at project root.
 - **Security**: Potential security issues
 
 ### Ignored Patterns
+
 - `node_modules/`
 - `.next/`
 - `dist/`
@@ -73,6 +80,7 @@ See `biome.json` at project root.
 - Generated files (`*.gen.ts`)
 
 ### Editor Integration
+
 ```json
 // .vscode/settings.json
 {
@@ -90,15 +98,18 @@ See `biome.json` at project root.
 ## Ruff (Python)
 
 ### Configuration
+
 See `ruff.toml` in `apps/api/` and `apps/worker/`.
 
 ### Key Rules
+
 - Line length: 88
 - Target: Python 3.12
 - Indent: 4 spaces
 - Quotes: double
 
 ### Rule Sets
+
 - **E/W**: pycodestyle (errors/warnings)
 - **F**: Pyflakes
 - **I**: isort (import sorting)
@@ -110,6 +121,7 @@ See `ruff.toml` in `apps/api/` and `apps/worker/`.
 - **RUF**: Ruff-specific
 
 ### Editor Integration
+
 ```json
 // .vscode/settings.json
 {
@@ -126,19 +138,23 @@ See `ruff.toml` in `apps/api/` and `apps/worker/`.
 ## Dart/Flutter
 
 ### Configuration
+
 See `analysis_options.yaml` in `apps/mobile/`.
 
 ### Key Rules
+
 - Strict mode enabled
 - All recommended lints
 - Flutter-specific lints
 
 ### Editor Integration
+
 Dart extension automatically uses `analysis_options.yaml`.
 
 ## Terraform
 
 ### Formatting
+
 ```bash
 # Check format
 terraform fmt -check -recursive
@@ -148,6 +164,7 @@ terraform fmt -recursive
 ```
 
 ### Validation
+
 ```bash
 terraform validate
 ```
@@ -172,6 +189,7 @@ chmod +x .git/hooks/commit-msg
 ```
 
 The pre-commit task runs lint for changed apps:
+
 - `apps/api/` changes → `mise //apps/api:lint`
 - `apps/web/` changes → `mise //apps/web:lint`
 - `apps/worker/` changes → `mise //apps/worker:lint`
@@ -185,7 +203,7 @@ GitHub Actions runs linting on every PR:
 
 ```yaml
 - name: Lint JS/TS
-  run: pnpm lint
+  run: bun lint
 
 - name: Lint Python
   run: |
@@ -206,10 +224,13 @@ GitHub Actions runs linting on every PR:
 ## Troubleshooting
 
 ### Biome Conflicts with Other Formatters
+
 Disable other formatters in VS Code settings and set Biome as default.
 
 ### Ruff Import Sorting Issues
+
 Ensure `I` rule set is enabled and run `ruff check --fix --select I`.
 
 ### Dart Analysis Takes Too Long
+
 Run `flutter clean` then `flutter pub get` to regenerate analysis.

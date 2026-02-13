@@ -2,27 +2,29 @@
 
 ## Example 1: Full-Stack TODO App
 
-**Input**: "JWT 인증이 있는 TODO 앱을 만들어줘"
+**Input**: "Build a TODO app with JWT authentication"
 
 **Workflow**:
+
 ```
 Step 1: PM Agent plans the project
   -> 5 tasks: auth API, CRUD API, login UI, todo UI, QA review
 
-Step 2: Spawn Priority 1 agents in Agent Manager
-  - Backend Agent: "JWT authentication API + TODO CRUD"
-  - Frontend Agent: "Login/Register UI"
-  (Both run in parallel - no dependencies)
+Step 2: Spawn Priority 1 agents via CLI
+  # Run in parallel using background processes
+  oh-my-ag agent:spawn backend "JWT authentication API + TODO CRUD" session-id -w ./backend &
+  oh-my-ag agent:spawn frontend "Login/Register UI" session-id -w ./frontend &
+  wait
 
 Step 3: Monitor progress
-  - Check Agent Manager inbox for questions
+  - Use memory read tool to poll progress-{agent}.md files
   - Verify API contracts align between backend/frontend
 
 Step 4: Spawn Priority 2 after P1 completes
-  - Frontend Agent: "TODO List UI" (uses backend API contracts from P1)
+  .agent/skills/orchestrator/scripts/spawn-agent.sh frontend "TODO List UI" ./frontend
 
 Step 5: Spawn Priority 3
-  - QA Agent: "Security + Performance review of all deliverables"
+  .agent/skills/orchestrator/scripts/spawn-agent.sh qa "Security + Performance review" .
 
 Step 6: Address QA findings
   - Re-spawn agents for CRITICAL/HIGH issues
@@ -31,30 +33,31 @@ Step 6: Address QA findings
 
 ## Example 2: Adding Feature to Existing App
 
-**Input**: "블로그에 댓글 기능을 추가해줘"
+**Input**: "Add a comment feature to the blog"
 
 **Workflow**:
+
 ```
 Step 1: PM Agent analyzes existing codebase and plans
   -> 2 tasks: Comments API, Comment Section UI
 
 Step 2: Spawn Backend Agent first (API-first)
-  - "Comments API with nested replies, pagination"
+  oh-my-ag agent:spawn backend "Comments API with nested replies, pagination" session-id -w ./backend
 
 Step 3: After backend completes, spawn Frontend Agent
-  - "Comment section UI using the new API endpoints"
+  oh-my-ag agent:spawn frontend "Comment section UI using the new API endpoints" session-id -w ./frontend
   (Sequential because frontend depends on API contracts)
 
 Step 4: QA review
-  - Security: XSS in comments, rate limiting
-  - Performance: Pagination, N+1 queries
+  oh-my-ag agent:spawn qa "Security: XSS in comments, rate limiting; Performance: Pagination, N+1 queries" session-id -w .
 ```
 
 ## Example 3: When to Use Orchestrator Instead
 
-**User**: "자동으로 실행해줘" / "Run everything automatically"
+**User**: "Run everything automatically"
 
 **Response**:
+
 ```
 "You want fully automated execution. Let me switch to the
 orchestrator skill instead, which will:
@@ -63,6 +66,6 @@ orchestrator skill instead, which will:
 3. Monitor progress and handle retries
 4. Return unified results
 
-Use workflow-guide when you want manual control.
+Use workflow-guide when you want step-by-step control.
 Use orchestrator when you want hands-off automation."
 ```

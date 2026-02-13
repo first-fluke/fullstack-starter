@@ -5,15 +5,16 @@
  * Follow this structure for consistency.
  */
 
-import { cn } from '@/lib/utils';
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 // 1. Type Definitions
 interface ComponentNameProps {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   // Add specific props here
-  variant?: 'default' | 'primary' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "default" | "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
   onClick?: () => void;
   disabled?: boolean;
 }
@@ -22,8 +23,8 @@ interface ComponentNameProps {
 export function ComponentName({
   className,
   children,
-  variant = 'default',
-  size = 'md',
+  variant = "default",
+  size = "md",
   onClick,
   disabled = false,
 }: ComponentNameProps) {
@@ -42,24 +43,26 @@ export function ComponentName({
   // 6. Computed Values
   const classes = cn(
     // Base styles
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors',
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors",
     // Variants
     {
-      'bg-primary text-primary-foreground hover:bg-primary/90': variant === 'primary',
-      'bg-secondary text-secondary-foreground hover:bg-secondary/80': variant === 'secondary',
-      'bg-background text-foreground hover:bg-accent': variant === 'default',
+      "bg-primary text-primary-foreground hover:bg-primary/90":
+        variant === "primary",
+      "bg-secondary text-secondary-foreground hover:bg-secondary/80":
+        variant === "secondary",
+      "bg-background text-foreground hover:bg-accent": variant === "default",
     },
     // Sizes
     {
-      'h-8 px-3 text-sm': size === 'sm',
-      'h-10 px-4 text-base': size === 'md',
-      'h-12 px-6 text-lg': size === 'lg',
+      "h-8 px-3 text-sm": size === "sm",
+      "h-10 px-4 text-base": size === "md",
+      "h-12 px-6 text-lg": size === "lg",
     },
     // States
     {
-      'opacity-50 cursor-not-allowed': disabled,
+      "opacity-50 cursor-not-allowed": disabled,
     },
-    className
+    className,
   );
 
   // 7. Render
@@ -82,11 +85,9 @@ ComponentName.Slot = function ComponentNameSlot({
   children,
 }: ComponentNameProps) {
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      {children}
-    </div>
+    <div className={cn("flex items-center gap-2", className)}>{children}</div>
   );
 };
 
 // 9. Display Name (for debugging)
-ComponentName.displayName = 'ComponentName';
+ComponentName.displayName = "ComponentName";

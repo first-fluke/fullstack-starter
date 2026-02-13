@@ -8,6 +8,7 @@ description: when working for building, running, or deploying the project
 ## Quick Start
 
 ### Prerequisites
+
 Ensure you have `mise` installed for runtime management.
 
 ```bash
@@ -23,6 +24,7 @@ mise current
 This project uses mise monorepo mode with `//path:task` syntax.
 
 ### Root (All Apps)
+
 ```bash
 # List all available tasks
 mise tasks --all
@@ -50,6 +52,7 @@ mise gen:api
 ```
 
 ### API (apps/api)
+
 ```bash
 # Start development server
 mise //apps/api:dev
@@ -86,6 +89,7 @@ docker build -t api apps/api
 ```
 
 ### Web (apps/web)
+
 ```bash
 # Start development server
 mise //apps/web:dev
@@ -113,6 +117,7 @@ docker build -t web apps/web
 ```
 
 ### Worker (apps/worker)
+
 ```bash
 # Start worker
 mise //apps/worker:dev
@@ -131,6 +136,7 @@ docker build -t worker apps/worker
 ```
 
 ### Mobile (apps/mobile)
+
 ```bash
 # Run on device/simulator
 mise //apps/mobile:dev
@@ -155,6 +161,7 @@ mise //apps/mobile:gen:api
 ```
 
 ### Fastlane (Mobile CI/CD)
+
 ```bash
 cd apps/mobile
 
@@ -171,6 +178,7 @@ bundle exec fastlane ios testflight_deploy  # Deploy to TestFlight
 ```
 
 ### Infrastructure (apps/infra)
+
 ```bash
 # Initialize Terraform
 mise //apps/infra:init
@@ -189,6 +197,7 @@ mise //apps/infra:apply:prod
 ```
 
 ### i18n (packages/i18n)
+
 ```bash
 # Build i18n files for web and mobile
 mise //packages/i18n:build
@@ -203,21 +212,25 @@ mise //packages/i18n:build:mobile
 ## Docker Compose (Local Development)
 
 ### Start Infrastructure
+
 ```bash
 mise //apps/api:infra:up
 ```
 
 This starts:
+
 - PostgreSQL (port 5432)
 - Redis (port 6379)
 - MinIO (ports 9000, 9001)
 
 ### Stop Infrastructure
+
 ```bash
 mise //apps/api:infra:down
 ```
 
 ### Reset Infrastructure (with data)
+
 ```bash
 docker compose -f apps/api/docker-compose.infra.yml down -v
 ```
@@ -225,16 +238,19 @@ docker compose -f apps/api/docker-compose.infra.yml down -v
 ## Database Migrations
 
 ### Create Migration
+
 ```bash
 mise //apps/api:migrate:create "description of changes"
 ```
 
 ### Apply Migrations
+
 ```bash
 mise //apps/api:migrate
 ```
 
 ### Rollback Migration
+
 ```bash
 cd apps/api
 uv run alembic downgrade -1
@@ -243,6 +259,7 @@ uv run alembic downgrade -1
 ## Common Build Issues
 
 ### Python Import Errors
+
 ```bash
 # Ensure virtual environment is activated
 cd apps/api
@@ -250,13 +267,15 @@ uv sync --frozen
 ```
 
 ### Node Module Issues
+
 ```bash
 # Clear node_modules and reinstall
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
+rm -rf node_modules bun-lock.yaml
+bun install
 ```
 
 ### Flutter Build Issues
+
 ```bash
 # Clean and rebuild
 flutter clean
@@ -265,6 +284,7 @@ dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### Terraform State Issues
+
 ```bash
 cd apps/infra
 

@@ -65,7 +65,7 @@ Check if `.agent/plan.json` exists.
 // turbo
 For each priority tier (P0 first, then P1, etc.):
 
-- Spawn agents using `oh-my-ag agent:spawn {agent_id} {prompt_file} {session_id} {workspace}`.
+- Spawn agents using `oh-my-ag agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
 - Each agent gets: task description, API contracts, relevant context from `_shared/context-loading.md`.
 - Use memory edit tool to update `task-board.md` with agent status.
 

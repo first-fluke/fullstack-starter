@@ -43,8 +43,8 @@ Spawn agents via CLI:
 
 ```bash
 # Example: spawn backend and frontend in parallel
-oh-my-ag agent:spawn backend "task description" session-id ./backend &
-oh-my-ag agent:spawn frontend "task description" session-id ./frontend &
+oh-my-ag agent:spawn backend "task description" session-id -w ./backend &
+oh-my-ag agent:spawn frontend "task description" session-id -w ./frontend &
 wait
 ```
 

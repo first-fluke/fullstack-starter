@@ -10,16 +10,19 @@ Refactor high-complexity React components with proven patterns and workflows.
 **Complexity Threshold**: Components with **cyclomatic complexity > 50** or **line count > 300** should be candidates for refactoring.
 
 **Use When**:
-- `pnpm analyze-component` shows high complexity.
+
+- `bun analyze-component` shows high complexity.
 - Users ask for "code splitting", "hook extraction", or "cleanup".
 - A component file exceeds 300 lines of code.
 
 ## Core Refactoring Patterns
 
 ### 1. Extract Custom Hooks
+
 **Goal**: Separate UI from State/Logic.
 
 **Before**:
+
 ```tsx
 function UserList() {
   const [users, setUsers] = useState([]);
@@ -39,6 +42,7 @@ function UserList() {
 ```
 
 **After**:
+
 ```tsx
 // hooks/useUsers.ts
 function useUsers() {
@@ -54,9 +58,11 @@ function UserList() {
 ```
 
 ### 2. Extract Sub-Components
+
 **Goal**: Break down monolithic JSX.
 
 **Before**:
+
 ```tsx
 function Dashboard() {
   return (
@@ -73,6 +79,7 @@ function Dashboard() {
 ```
 
 **After**:
+
 ```tsx
 function Dashboard() {
   return (
@@ -89,12 +96,14 @@ function Dashboard() {
 ```
 
 ### 3. Simplify Conditional Logic
+
 **Goal**: Reduce nesting and `if/else` checks implementation details.
 
 - Use **Lookup Tables** (Maps/Objects) instead of Switch/If-Else chains.
 - Use **Guard Clauses** (Early Returns) to avoid deep nesting.
 
 ### 4. Extract Modal Management
+
 **Goal**: Centralize modal state and logic.
 
 - Move modal definitions to a generic `<ModalManager />` or context if reused globally.

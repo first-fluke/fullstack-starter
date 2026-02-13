@@ -1,15 +1,15 @@
 # Context Budget Management
 
-Context windows are finite. Especially with Flash-tier models, unnecessary loading directly degrades performance.
+The context window is finite. Especially with Flash-tier models, unnecessary loading directly degrades performance.
 Follow this guide to use context efficiently.
 
 ---
 
 ## Core Principles
 
-1. **No full file reading** — Read only needed functions/classes
-2. **No duplicate reading** — Don't re-read files already read
-3. **Lazy resource loading** — Load only needed resources at the time of need
+1. **No full file reads** — Read only necessary functions/classes
+2. **No duplicate reads** — Do not re-read files already read
+3. **Lazy resource loading** — Load resources only when needed
 4. **Maintain records** — Note read files and symbols in progress
 
 ---
@@ -20,16 +20,16 @@ Follow this guide to use context efficiently.
 
 ```
 ❌ Bad: read_file("app/api/todos.py")          ← entire file 500 lines
-✅ Good: find_symbol("create_todo")              ← that function 30 lines
-✅ Good: get_symbols_overview("app/api")          ← function list only
-✅ Good: find_referencing_symbols("TodoService")  ← usage only
+✅ Good: find_symbol("create_todo")             ← just that function 30 lines
+✅ Good: get_symbols_overview("app/api")        ← function list only
+✅ Good: find_referencing_symbols("TodoService") ← usage only
 ```
 
 ### When Reading Files Without Serena
 
 ```
 ❌ Bad: Read entire file at once
-✅ Good: Check first 50 lines (import + class definition) → read only needed functions additionally
+✅ Good: Check first 50 lines (imports + class definitions) → read additional functions as needed
 ```
 
 ---
@@ -44,9 +44,9 @@ Follow this guide to use context efficiently.
 | execution-protocol.md | ~500 tokens | Always loaded |
 | Task resource 1 | ~500 tokens | Selected by difficulty |
 | Task resource 2 | ~500 tokens | Complex only |
-| error-playbook.md | ~800 tokens | Only on error |
+| error-playbook.md | ~800 tokens | On error only |
 | **Total resource budget** | **~3,100 tokens** | ~2.4% of total |
-| **Working budget** | **~125K tokens** | All remaining |
+| **Working budget** | **~125K tokens** | Everything else |
 
 ### Pro-tier Models (1M+ context)
 
@@ -55,34 +55,34 @@ Follow this guide to use context efficiently.
 | Resource budget | ~5,000 tokens | Can load generously |
 | Working budget | ~1M tokens | Large files possible |
 
-Pro has less budget pressure, but unnecessary loading still distracts attention.
+Pro has less budget pressure, but unnecessary loading still diverts attention.
 
 ---
 
-## Tracking Read Files (Record in progress)
+## Tracking Read Files (Record in Progress)
 
 Agents record read files/symbols when updating progress:
 
 ```markdown
 ## Turn 3 Progress
 
-### Files Read
+### Read Files
 - app/api/todos.py: create_todo(), update_todo() (find_symbol)
 - app/models/todo.py: Todo class (find_symbol)
 - app/schemas/todo.py: entire file (short file, 40 lines)
 
-### Files Not Yet Read
+### Not Yet Read
 - app/services/todo_service.py (will read next turn)
 - tests/test_todos.py (reference after implementation)
 
-### Work Performed
+### Work Completed
 - Added priority field to TodoCreate schema
 ```
 
-This way:
-- No duplicate reading of same files
-- Clear what to do next turn
-- Orchestrator can understand agent state
+This approach:
+- Prevents reading the same file twice
+- Clarifies what to do next turn
+- Allows Orchestrator to understand agent state
 
 ---
 
@@ -90,29 +90,29 @@ This way:
 
 ### Files Over 500 Lines
 
-1. Understand structure with `get_symbols_overview`
-2. Read only needed symbols with `find_symbol`
-3. Never read entire file
+1. Use `get_symbols_overview` to understand structure
+2. Read only necessary symbols with `find_symbol`
+3. Never read the entire file
 
 ### Complex Components (React/Flutter)
 
-1. First read only component's props/state definitions
-2. Read render/build method only when modification needed
-3. Skip style portions unless they're modification targets
+1. Read only props/state definitions first
+2. Read render/build methods only when modification needed
+3. Skip style sections unless they are modification targets
 
 ### Test Files
 
-1. Read only after implementation complete (unnecessary before)
-2. Check existing test patterns only (first 1-2 test functions)
+1. Read only after implementation is complete (unnecessary before)
+2. Check only existing test patterns (first 1-2 test functions)
 3. Write remaining tests following the pattern
 
 ---
 
-## Context Overflow Signs & Responses
+## Context Overflow Symptoms & Responses
 
-| Sign | Meaning | Response |
-|------|---------|----------|
+| Symptom | Meaning | Response |
+|---------|---------|----------|
 | Forgetting previously read code | Context window exhausted | Note key info in progress, make re-referenceable |
-| Reading same file repeatedly | Poor tracking | Check "Files Read" list in progress |
-| Output suddenly becomes short | Output tokens insufficient | Write only essentials, omit extra explanation |
-| Ignoring instructions | SKILL.md content forgotten | Re-reference execution-protocol essentials only |
+| Re-reading the same file | Tracking gap | Check "Read Files" list in progress |
+| Output suddenly becomes shorter | Output tokens insufficient | Write only essentials, omit extra explanations |
+| Ignoring instructions | Forgot SKILL.md content | Re-reference only execution-protocol essentials |

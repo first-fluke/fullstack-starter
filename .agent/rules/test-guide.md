@@ -8,6 +8,7 @@ description: when working for testing or coverage.
 ## Overview
 
 Testing stack:
+
 - **Web**: Vitest (unit/integration)
 - **API**: pytest + pytest-asyncio
 - **Worker**: pytest + pytest-asyncio
@@ -16,6 +17,7 @@ Testing stack:
 ## Quick Commands
 
 ### Run All Tests
+
 ```bash
 # All tests
 mise test
@@ -28,18 +30,20 @@ mise //apps/mobile:test
 ```
 
 ### Watch Mode
+
 ```bash
 # Web
-cd apps/web && pnpm test:watch
+cd apps/web && bun test:watch
 
 # API (use pytest-watch)
 cd apps/api && uv run ptw
 ```
 
 ### Coverage
+
 ```bash
 # Web
-cd apps/web && pnpm test:coverage
+cd apps/web && bun test:coverage
 
 # API
 cd apps/api && uv run poe test-cov
@@ -51,13 +55,16 @@ cd apps/mobile && flutter test --coverage
 ## Web Testing (Vitest)
 
 ### Configuration
+
 See `apps/web/vitest.config.mts`.
 
 ### File Patterns
+
 - Unit tests: `**/*.test.{ts,tsx}`
 - Integration tests: `**/*.spec.{ts,tsx}`
 
 ### Example Unit Test
+
 ```typescript
 // src/lib/utils.test.ts
 import { describe, it, expect } from 'vitest';
@@ -75,6 +82,7 @@ describe('cn', () => {
 ```
 
 ### Example Component Test
+
 ```typescript
 // src/components/button.test.tsx
 import { describe, it, expect } from 'vitest';
@@ -90,6 +98,7 @@ describe('Button', () => {
 ```
 
 ### Mocking
+
 ```typescript
 import { vi } from 'vitest';
 
@@ -108,13 +117,16 @@ const mockFn = vi.fn().mockResolvedValue({ data: 'test' });
 ## API Testing (pytest)
 
 ### Configuration
+
 See `apps/api/pyproject.toml` [tool.pytest.ini_options].
 
 ### File Patterns
+
 - Tests: `tests/**/*test*.py`
 - Fixtures: `tests/conftest.py`
 
 ### Example Test
+
 ```python
 # tests/test_health.py
 import pytest
@@ -138,6 +150,7 @@ async def test_health_check(client: AsyncClient):
 ```
 
 ### Database Testing
+
 ```python
 # tests/conftest.py
 import pytest
@@ -184,15 +197,18 @@ async def client(db_session):
 ## Flutter Testing
 
 ### Configuration
+
 See `apps/mobile/pubspec.yaml` dev_dependencies and `analysis_options.yaml`.
 
 Uses `very_good_analysis` for strict linting.
 
 ### File Patterns
+
 - Unit tests: `test/**/*_test.dart`
 - Widget tests: `test/**/*_widget_test.dart`
 
 ### Example Unit Test
+
 ```dart
 // test/core/utils_test.dart
 import 'package:flutter_test/flutter_test.dart';
@@ -208,6 +224,7 @@ void main() {
 ```
 
 ### Example Widget Test
+
 ```dart
 // test/features/home/home_screen_test.dart
 import 'package:flutter/material.dart';
@@ -243,21 +260,25 @@ GitHub Actions runs tests on every PR:
 ## Best Practices
 
 ### Test Organization
+
 - One test file per source file
 - Group related tests with `describe`/`group`
 - Use descriptive test names
 
 ### Mocking
+
 - Mock external dependencies (APIs, databases)
 - Don't mock what you're testing
 - Reset mocks between tests
 
 ### Assertions
+
 - One logical assertion per test
 - Use specific matchers (`toHaveTextContent` vs `toContain`)
 - Test behavior, not implementation
 
 ### Coverage
+
 - Aim for 80%+ coverage on critical paths
 - Don't chase 100% - focus on meaningful tests
 - Coverage != quality

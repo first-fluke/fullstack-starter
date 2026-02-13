@@ -53,7 +53,7 @@ Memory provider and tool names are configurable via `mcp.json`:
 **PHASE 2 - Setup**: Use memory write tool to create `orchestrator-session.md` + `task-board.md`
 **PHASE 3 - Execute**: Spawn agents by priority tier (never exceed MAX_PARALLEL)
 **PHASE 4 - Monitor**: Poll every POLL_INTERVAL; handle completed/failed/crashed agents
-**PHASE 4.5 - Verify**: Run `../_shared/verify.sh {agent-type} {workspace}` per completed agent
+**PHASE 4.5 - Verify**: Run `oh-my-ag verify {agent-type}` per completed agent
 **PHASE 5 - Collect**: Read all `result-{agent}.md`, compile summary, cleanup progress files
 
 See `resources/subagent-prompt-template.md` for prompt construction.
@@ -71,16 +71,48 @@ See `resources/memory-schema.md` for memory file formats.
 ## Verification Gate (PHASE 4.5)
 After each agent completes, run automated verification before accepting the result:
 ```bash
-bash .agent/skills/_shared/verify.sh {agent-type} {workspace}
+oh-my-ag verify {agent-type} --workspace {workspace}
+# or with JSON output for programmatic use:
+oh-my-ag verify {agent-type} --workspace {workspace} --json
 ```
 - **PASS (exit 0)**: Accept result, advance to next task
 - **FAIL (exit 1)**: Treat as failure → enter Retry Logic with verify output as error context
 - This is mandatory. Never skip verification even if the agent reports success.
 
 ## Retry Logic
-- 1st retry: Wait 30s, re-spawn with error context (include verify.sh output)
+- 1st retry: Wait 30s, re-spawn with error context (include verify output)
 - 2nd retry: Wait 60s, add "Try a different approach"
 - Final failure: Report to user, ask whether to continue or abort
+
+## Clarification Debt (CD) Monitoring
+
+Track user corrections during session execution. See `../_shared/session-metrics.md` for full protocol.
+
+### Event Classification
+When user sends feedback during session:
+- **clarify** (+10): User answering agent's question
+- **correct** (+25): User correcting agent's misunderstanding
+- **redo** (+40): User rejecting work, requesting restart
+
+### Threshold Actions
+| CD Score | Action |
+|----------|--------|
+| CD >= 50 | **RCA Required**: QA agent must add entry to `lessons-learned.md` |
+| CD >= 80 | **Session Pause**: Request user to re-specify requirements |
+| `redo` >= 2 | **Scope Lock**: Request explicit allowlist confirmation before continuing |
+
+### Recording
+After each user correction event:
+```
+[EDIT]("session-metrics.md", append event to Events table)
+```
+
+At session end, if CD >= 50:
+1. Include CD summary in final report
+2. Trigger QA agent RCA generation
+3. Update `lessons-learned.md` with prevention measures
+
+
 
 ## Serena Memory (CLI Mode)
 
@@ -93,7 +125,8 @@ See `../_shared/memory-protocol.md`.
 - Scripts: `scripts/spawn-agent.sh`, `scripts/parallel-run.sh`
 - Task templates: `templates/`
 - Skill routing: `../_shared/skill-routing.md`
-- Verification: `../_shared/verify.sh`
+- Verification: `oh-my-ag verify <agent-type>`
+- Session metrics: `../_shared/session-metrics.md`
 - API contracts: `../_shared/api-contracts/`
 - Context loading: `../_shared/context-loading.md`
 - Difficulty guide: `../_shared/difficulty-guide.md`

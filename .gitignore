@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-.pnpm-store/
 __pycache__/
 *.pyc
 .venv/
@@ -37,7 +36,7 @@ Thumbs.db
 logs/
 *.log
 npm-debug.log*
-pnpm-debug.log*
+bun-debug.log*
 
 # Testing
 coverage/

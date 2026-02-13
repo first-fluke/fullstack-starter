@@ -126,7 +126,7 @@ parse_inline_tasks() {
 
         # Spawn in background
         (
-            "$SPAWN_SCRIPT" "$agent" "$task" "$workspace" $VENDOR_FLAG \
+            oh-my-ag agent:spawn "$agent" "$task" "parallel-${TIMESTAMP}" -w "$workspace" \
                 > "${RUN_DIR}/${agent}-${idx}.log" 2>&1
         ) &
 
