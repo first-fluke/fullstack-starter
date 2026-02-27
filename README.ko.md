@@ -17,7 +17,7 @@
 graph TB
     subgraph Client["클라이언트"]
         Web[Next.js 16<br/>React 19]
-        Mobile[Flutter 3.38<br/>Riverpod]
+        Mobile[Flutter 3.41.2<br/>Riverpod]
     end
 
     subgraph GCP["GCP Cloud Run"]
@@ -50,7 +50,7 @@ graph TB
 
 ## 주요 기능
 
-- **모던 스택**: Next.js 16 + React 19, FastAPI, Flutter 3.38, TailwindCSS v4
+- **모던 스택**: Next.js 16 + React 19, FastAPI, Flutter 3.41.2, TailwindCSS v4
 - **타입 안전성**: TypeScript, Pydantic, Dart 등 전 영역 타입 지원
 - **통합 인증**: better-auth 기반 OAuth (Google, GitHub, Facebook)
 - **국제화 (i18n)**: next-intl (웹), Flutter ARB (모바일), 공용 패키지 통합
@@ -66,7 +66,7 @@ graph TB
 |--------|------|
 | **프론트엔드** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
 | **백엔드** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
-| **모바일** | Flutter 3.38, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
+| **모바일** | Flutter 3.41.2, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
 | **워커** | FastAPI + CloudTasks/PubSub |
 | **인프라** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |

@@ -51,6 +51,31 @@ project:
 # When using multiple languages, the first language server that supports a given file will be used for that file.
 # The first language is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
+
+
+# list of languages for which language servers are started; choose from:
+#   al                  bash                clojure             cpp                 csharp
+#   csharp_omnisharp    dart                elixir              elm                 erlang
+#   fortran             fsharp              go                  groovy              haskell
+#   java                julia               kotlin              lua                 markdown
+#   matlab              nix                 pascal              perl                php
+#   php_phpactor        powershell          python              python_jedi         r
+#   rego                ruby                ruby_solargraph     rust                scala
+#   swift               terraform           toml                typescript          typescript_vts
+#   vue                 yaml                zig
+#   (This list may be outdated. For the current list, see values of Language enum here:
+#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
+#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
+# Note:
+#   - For C, use cpp
+#   - For JavaScript, use typescript
+#   - For Free Pascal/Lazarus, use pascal
+# Special requirements:
+#   Some languages require additional setup/installations.
+#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
+# When using multiple languages, the first language server that supports a given file will be used for that file.
+# The first language is the default language and the respective language server will be used as a fallback.
+# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
 - python
 - typescript
@@ -211,6 +236,13 @@ documentation:
 # Otherwise, this setting overrides the global configuration.
 # Set this to [] to disable base modes for this project.
 # Set this to a list of mode names to always include the respective modes for this project.
+
+# list of mode names to that are always to be included in the set of active modes
+# The full set of modes to be activated is base_modes + default_modes.
+# If the setting is undefined, the base_modes from the global configuration (serena_config.yml) apply.
+# Otherwise, this setting overrides the global configuration.
+# Set this to [] to disable base modes for this project.
+# Set this to a list of mode names to always include the respective modes for this project.
 base_modes:
 
 # list of mode names that are to be activated by default.
@@ -293,3 +325,10 @@ project_name: fullstack-starter
 # override of the corresponding setting in serena_config.yml, see the documentation there.
 # If null or missing, the value from the global config is used.
 symbol_info_budget:
+
+# The language backend to use for this project.
+# If not set, the global setting from serena_config.yml is used.
+# Valid values: LSP, JetBrains
+# Note: the backend is fixed at startup. If a project with a different backend
+# is activated post-init, an error will be returned.
+language_backend:

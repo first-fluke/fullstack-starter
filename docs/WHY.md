@@ -88,7 +88,7 @@ This document explains the reasoning behind each technology choice in this fulls
 
 ## Mobile
 
-### Flutter 3.38
+### Flutter 3.41.2
 
 - **Korea eGovFrame v5**: Selected as the official mobile framework by Korea e-Government Standard Framework
 - **Flexible versioning**: Easy to pin and upgrade Flutter/Dart versions per project

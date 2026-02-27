@@ -13,8 +13,7 @@ part 'authentication_service.g.dart';
 
 @RestApi()
 abstract class AuthenticationService {
-  factory AuthenticationService(Dio dio, {String? baseUrl}) =
-      _AuthenticationService;
+  factory AuthenticationService(Dio dio, {String? baseUrl}) = _AuthenticationService;
 
   /// Login.
   ///
