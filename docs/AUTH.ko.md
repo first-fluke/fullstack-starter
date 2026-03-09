@@ -1,5 +1,7 @@
 # Stateless Token Authentication Architecture
 
+[English](./AUTH.md) | [한국어](./AUTH.ko.md) | [简体中文](./AUTH.cn.md) | [日本語](./AUTH.jp.md)
+
 ## 개요
 
 이 템플릿은 **stateful(상태 저장) 세션 기반 인증** 대신 **stateless(무상태) JWT/JWE 인증 시스템**을 구현합니다. 인증 처리는 전적으로 백엔드에서 수행하며, 프론트엔드는 토큰을 저장하고 전송하는 역할만 담당합니다.

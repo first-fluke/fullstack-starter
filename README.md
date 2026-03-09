@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/github/v/release/first-fluke/fullstack-starter?label=version)](https://github.com/first-fluke/fullstack-starter/releases)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/first-fluke/fullstack-starter)
 
-English | [한국어](./README.ko.md)
+English | [한국어](./docs/README.ko.md) | [简体中文](./docs/README.cn.md) | [日本語](./docs/README.jp.md)
 
 > Template versioning via [Release Please](https://github.com/googleapis/release-please) — see [CHANGELOG.md](./CHANGELOG.md) for release history.
 

@@ -1,6 +1,6 @@
 # Why This Tech Stack?
 
-[English](./WHY.md) | [한국어](./WHY.ko.md)
+[English](./WHY.md) | [한국어](./WHY.ko.md) | [简体中文](./WHY.cn.md) | [日本語](./WHY.jp.md)
 
 This document explains the reasoning behind each technology choice in this fullstack starter template.
 

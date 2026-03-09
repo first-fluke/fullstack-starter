@@ -1,5 +1,7 @@
 # Stateless Token Authentication Architecture
 
+[English](./AUTH.md) | [한국어](./AUTH.ko.md) | [简体中文](./AUTH.cn.md) | [日本語](./AUTH.jp.md)
+
 ## Overview
 
 This template implements a **stateless JWT/JWE authentication system** instead of **stateful session-based authentication**. Authentication processing is performed entirely on the backend, and the frontend is responsible only for storing and transmitting tokens.

@@ -1,6 +1,6 @@
 # 왜 이 기술 스택인가?
 
-[English](./WHY.md) | [한국어](./WHY.ko.md)
+[English](./WHY.md) | [한국어](./WHY.ko.md) | [简体中文](./WHY.cn.md) | [日本語](./WHY.jp.md)
 
 이 문서는 풀스택 스타터 템플릿의 기술 선정 배경과 이유를 다룹니다.
 
