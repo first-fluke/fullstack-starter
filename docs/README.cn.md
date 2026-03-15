@@ -116,7 +116,7 @@ graph TB
 | **领域智能体** | 前端、后端、移动端、基础设施智能体按优先级并行执行 |
 | **QA 智能体** | 审查安全性（OWASP）、性能、无障碍（WCAG 2.1 AA） |
 
-> 查看 [`.agent/workflows/coordinate.md`](../.agent/workflows/coordinate.md) 了解完整的编排工作流。
+> 查看 [`.agents/workflows/coordinate.md`](../.agents/workflows/coordinate.md) 了解完整的编排工作流。
 
 ## 快速开始
 

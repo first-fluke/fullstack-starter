@@ -116,7 +116,7 @@ graph TB
 | **도메인 에이전트** | 프론트엔드, 백엔드, 모바일, 인프라 에이전트가 우선순위별 병렬 실행 |
 | **QA 에이전트** | 보안(OWASP), 성능, 접근성(WCAG 2.1 AA) 검토 |
 
-> 전체 오케스트레이션 워크플로우는 [`../.agent/workflows/coordinate.md`](../.agent/workflows/coordinate.md)를 참조하세요.
+> 전체 오케스트레이션 워크플로우는 [`../.agents/workflows/coordinate.md`](../.agents/workflows/coordinate.md)를 참조하세요.
 
 ## 빠른 시작
 
