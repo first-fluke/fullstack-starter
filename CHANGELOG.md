@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.12.0](https://github.com/first-fluke/fullstack-starter/compare/v2.11.0...v2.12.0) (2026-03-15)
+
+
+### Features
+
+* add skill directories ([eac7aa1](https://github.com/first-fluke/fullstack-starter/commit/eac7aa1ff76b3a366ab87b2d8f22ac5e651bf379))
+
+
+### Bug Fixes
+
+* correct commit message for skill directories ([1d1b794](https://github.com/first-fluke/fullstack-starter/commit/1d1b794dd514ec387e592a672994af621bfc9fcc))
+
 ## [2.11.0](https://github.com/first-fluke/fullstack-starter/compare/v2.10.0...v2.11.0) (2026-02-21)
 
 
