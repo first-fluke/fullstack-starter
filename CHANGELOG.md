@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.12.1](https://github.com/first-fluke/fullstack-starter/compare/v2.12.0...v2.12.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* **docs:** correct coordinate.md path from .agent to .agents ([1aa463d](https://github.com/first-fluke/fullstack-starter/commit/1aa463d3529b2ed2c882a9b6e26644b8b616eb64))
+* **mobile:** update flutter sdk version to 3.41.2 ([d164309](https://github.com/first-fluke/fullstack-starter/commit/d164309c0effb51b240a1ab2532c317619134839))
+
 ## [2.12.0](https://github.com/first-fluke/fullstack-starter/compare/v2.11.0...v2.12.0) (2026-03-15)
 
 
