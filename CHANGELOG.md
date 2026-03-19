@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/first-fluke/fullstack-starter/compare/v2.12.1...v2.13.0) (2026-03-19)
+
+
+### Features
+
+* **root:** add translator skill and refresh agent guides ([53a3f46](https://github.com/first-fluke/fullstack-starter/commit/53a3f46c1ff8b41e6b51b6dc7b7326ccc40e1c01))
+
 ## [2.12.1](https://github.com/first-fluke/fullstack-starter/compare/v2.12.0...v2.12.1) (2026-03-15)
 
 
