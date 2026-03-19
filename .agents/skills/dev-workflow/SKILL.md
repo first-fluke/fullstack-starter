@@ -3,15 +3,9 @@ name: dev-workflow
 description: Use when setting up or optimizing developer workflows in a monorepo, managing mise tasks, git hooks, CI/CD pipelines, database migrations, or release automation. Invoke for development environment setup, build automation, testing workflows, and release coordination.
 ---
 
-# Dev Workflow
+# Dev Workflow - Monorepo Task Automation Specialist
 
-Dev workflow specialist for monorepo task automation and developer productivity.
-
-## Role Definition
-
-You are a senior DevOps engineer with 7+ years of experience in monorepo tooling and task automation. You specialize in mise (formerly rtx) task runner, parallel execution strategies, and multi-language development workflows. You excel at orchestrating complex build pipelines, managing cross-app dependencies, and optimizing development workflows for teams working with diverse technology stacks in a unified codebase.
-
-## When to Use This Skill
+## When to use
 
 - Running development servers for monorepo with multiple applications
 - Executing lint, format, typecheck across multiple apps in parallel
@@ -24,15 +18,39 @@ You are a senior DevOps engineer with 7+ years of experience in monorepo tooling
 - Troubleshooting mise task failures or configuration issues
 - Optimizing CI/CD pipelines with mise
 
-## Core Workflow
+## When NOT to use
 
-1. **Analyze Task Requirements** - Identify which apps are affected and task dependencies
-2. **Check mise Configuration** - Verify mise.toml structure and available tasks
-3. **Determine Execution Strategy** - Decide between parallel vs sequential task execution
-4. **Run Prerequisites** - Install runtimes, dependencies if needed
-5. **Execute Tasks** - Run mise tasks with proper error handling
-6. **Verify Results** - Check output, logs, and generated artifacts
-7. **Report Status** - Summarize success/failure with actionable next steps
+- Database schema design or query tuning -> use DB Agent
+- Backend API implementation -> use Backend Agent
+- Frontend UI implementation -> use Frontend Agent
+- Mobile development -> use Mobile Agent
+
+## Core Rules
+
+1. Always use `mise run` tasks instead of direct package manager commands
+2. Run `mise install` after pulling changes that might update runtime versions
+3. Use parallel tasks (`mise run lint`, `mise run test`) for independent operations
+4. Run lint/test only on apps with changed files (`lint:changed`, `test:changed`)
+5. Validate commit messages with commitlint before committing
+6. Run pre-commit validation pipeline for staged files only
+7. Configure CI to skip unchanged apps for faster builds
+8. Check `mise tasks --all` to discover available tasks before running
+9. Verify task output and exit codes for CI/CD integration
+10. Document task dependencies in mise.toml comments
+11. Use consistent task naming conventions across apps
+12. Enable mise in CI/CD pipelines for reproducible builds
+13. Pin runtime versions in mise.toml for consistency
+14. Test tasks locally before committing CI/CD changes
+15. Never use direct package manager commands when mise tasks exist
+16. Never modify mise.toml without understanding task dependencies
+17. Never skip `mise install` after toolchain version updates
+18. Never run dev servers without checking port availability first
+19. Never commit without running validation on affected apps
+20. Never ignore task failures - always investigate root cause
+21. Never hardcode secrets in mise.toml files
+22. Never assume task availability - always verify with `mise tasks`
+23. Never run destructive tasks (clean, reset) without confirmation
+24. Never skip reading task definitions before running unfamiliar tasks
 
 ## Technical Guidelines
 
@@ -164,36 +182,6 @@ API_URL=http://localhost:8000
 PUBLIC_API_URL=http://localhost:8000
 ```
 
-## Constraints
-
-### MUST DO
-- Always use `mise run` tasks instead of direct package manager commands
-- Run `mise install` after pulling changes that might update runtime versions
-- Use parallel tasks (`mise run lint`, `mise run test`) for independent operations
-- Run lint/test only on apps with changed files (`lint:changed`, `test:changed`)
-- Validate commit messages with commitlint before committing
-- Run pre-commit validation pipeline for staged files only
-- Configure CI to skip unchanged apps for faster builds
-- Check `mise tasks --all` to discover available tasks before running
-- Verify task output and exit codes for CI/CD integration
-- Document task dependencies in mise.toml comments
-- Use consistent task naming conventions across apps
-- Enable mise in CI/CD pipelines for reproducible builds
-- Pin runtime versions in mise.toml for consistency
-- Test tasks locally before committing CI/CD changes
-
-### MUST NOT DO
-- Never use direct package manager commands when mise tasks exist
-- Never modify mise.toml without understanding task dependencies
-- Never skip `mise install` after toolchain version updates
-- Never run dev servers without checking port availability first
-- Never commit without running validation on affected apps
-- Never ignore task failures - always investigate root cause
-- Never hardcode secrets in mise.toml files
-- Never assume task availability - always verify with `mise tasks`
-- Never run destructive tasks (clean, reset) without confirmation
-- Never skip reading task definitions before running unfamiliar tasks
-
 ## Output Templates
 
 When setting up development environment:
@@ -225,6 +213,17 @@ When troubleshooting:
 | Port already in use | Find process: `lsof -ti:PORT` then kill |
 | Permission denied | Check file permissions, try with proper user |
 | Missing dependencies | Run `mise run install` or app-specific install |
+
+## How to Execute
+
+Follow the core workflow step by step:
+1. **Analyze Task Requirements** - Identify which apps are affected and task dependencies
+2. **Check mise Configuration** - Verify mise.toml structure and available tasks
+3. **Determine Execution Strategy** - Decide between parallel vs sequential task execution
+4. **Run Prerequisites** - Install runtimes, dependencies if needed
+5. **Execute Tasks** - Run mise tasks with proper error handling
+6. **Verify Results** - Check output, logs, and generated artifacts
+7. **Report Status** - Summarize success/failure with actionable next steps
 
 ## Execution Protocol (CLI Mode)
 

@@ -23,7 +23,7 @@ Follow these steps in order (adjust depth by difficulty).
 ## Step 2: Plan
 - Decide on component structure (which are new, which extend existing)
 - Define props interfaces with TypeScript
-- Plan state management approach (local state, Context, Zustand)
+- Plan state management approach (Jotai for client, nuqs for URL, TanStack Query for server)
 - Identify API integration points (TanStack Query hooks)
 - Plan responsive breakpoints and accessibility requirements
 

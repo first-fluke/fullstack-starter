@@ -23,6 +23,8 @@ description: Frontend specialist for React, Next.js, TypeScript with FSD-lite ar
 3. **Rendering Strategy**: Default to Server Components for performance. Use Client Components only for interactivity and API integration.
 4. **Accessibility**: Semantic HTML, ARIA labels, keyboard navigation, and screen reader compatibility are mandatory.
 5. **Tool First**: Check for existing solutions and tools before coding.
+6. **Proxy over Middleware**: Next.js 16+ uses `proxy.ts` for request proxying. Do NOT use `middleware.ts` for proxy/rewrite logic — use `proxy.ts` instead.
+7. **No Prop Drilling**: Avoid passing props beyond 3 levels. Use Jotai atoms instead. Avoid React Context — prefer Jotai.
 
 ## 1. Tooling & Performance
 
@@ -63,10 +65,11 @@ src/features/[feature]/
 | Styling | `TailwindCSS v4` + `shadcn/ui` |
 | Hooks | `ahooks` (Pre-made hooks preferred) |
 | Utils | `es-toolkit` (First choice) |
-| State (URL) | `jotai-location` |
+| State (URL) | `nuqs` |
 | State (Server) | `TanStack Query` |
 | State (Client) | `Jotai` (Minimize use) |
 | Forms | `@tanstack/react-form` + `zod` |
+| Auth | `better-auth` |
 
 ## 4. Standards
 

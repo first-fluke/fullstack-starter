@@ -265,34 +265,21 @@ Only use when absolutely necessary:
 
 ## Custom Utilities
 
-Add to `tailwind.config.js`:
+Add to `app/globals.css` using CSS `@theme`:
 
-```js
-module.exports = {
-  theme: {
-    extend: {
-      spacing: {
-        '18': '4.5rem', // Custom spacing
-      },
-      colors: {
-        brand: {
-          50: '#...',
-          // ...
-          900: '#...',
-        },
-      },
-    },
-  },
-};
+```css
+@import "tailwindcss";
+
+@theme {
+  --spacing-18: 4.5rem;
+  --color-brand-50: #...;
+  --color-brand-900: #...;
+}
 ```
 
+> **Note**: Tailwind v4 uses CSS-based configuration. `tailwind.config.js` is deprecated.
+
 ## Performance
-
-### Purging
-Tailwind auto-purges unused classes in production.
-
-### JIT Mode
-Enabled by default in Tailwind 3+.
 
 ### Avoid @apply
 Prefer utility classes in JSX over `@apply` in CSS:

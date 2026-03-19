@@ -1,13 +1,8 @@
 # Frontend Agent - Tech Stack Reference
 
-## Core Stack
-- **Framework**: Next.js 14+ (App Router), React 18+
+## Core Framework
+- **Framework**: Next.js 16+ (App Router), React 19+
 - **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS 3+ (NO inline styles)
-- **Components**: shadcn/ui, Radix UI
-- **State**: React Context, Zustand, or Redux Toolkit
-- **Forms**: React Hook Form + Zod
-- **API Client**: TanStack Query
 - **Testing**: Vitest, React Testing Library, Playwright
 
 ## Code Standards

@@ -76,13 +76,13 @@ export function useCreateTodo() {
 
 ---
 
-## Form with React Hook Form + Zod
+## Form with TanStack Form + Zod
 
 ```tsx
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 
 const schema = z.object({
@@ -90,54 +90,76 @@ const schema = z.object({
   password: z.string().min(8, "At least 8 characters"),
 });
 
-type FormData = z.infer<typeof schema>;
-
-export function LoginForm({ onSubmit }: { onSubmit: (data: FormData) => void }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+export function LoginForm({ onSubmit }: { onSubmit: (data: z.infer<typeof schema>) => void }) {
+  const form = useForm({
+    defaultValues: { email: "", password: "" },
+    validatorAdapter: zodValidator(),
+    validators: { onChange: schema },
+    onSubmit: async ({ value }) => onSubmit(value),
+  });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          {...register("email")}
-          className="mt-1 w-full rounded-md border px-3 py-2"
-          aria-invalid={!!errors.email}
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field name="email">
+        {(field) => (
+          <div>
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              aria-invalid={field.state.meta.errors.length > 0}
+            />
+            {field.state.meta.errors.length > 0 && (
+              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]}</p>
+            )}
+          </div>
         )}
-      </div>
-      <div>
-        <label htmlFor="password" className="text-sm font-medium">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          {...register("password")}
-          className="mt-1 w-full rounded-md border px-3 py-2"
-          aria-invalid={!!errors.password}
-        />
-        {errors.password && (
-          <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
+      </form.Field>
+      <form.Field name="password">
+        {(field) => (
+          <div>
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              aria-invalid={field.state.meta.errors.length > 0}
+            />
+            {field.state.meta.errors.length > 0 && (
+              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]}</p>
+            )}
+          </div>
         )}
-      </div>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
-      >
-        {isSubmitting ? "Signing in..." : "Sign in"}
-      </button>
+      </form.Field>
+      <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+        {([canSubmit, isSubmitting]) => (
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="w-full rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+          >
+            {isSubmitting ? "Signing in..." : "Sign in"}
+          </button>
+        )}
+      </form.Subscribe>
     </form>
   );
 }
