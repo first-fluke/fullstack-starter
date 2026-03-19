@@ -207,7 +207,7 @@ fullstack-starter/
 ├── packages/
 │   ├── design-tokens/ # Shared design tokens (Source of Truth)
 │   └── i18n/          # Shared i18n package (Source of Truth)
-├── .agent/rules/      # AI agent guidelines
+├── .agents/rules/      # AI agent guidelines
 ├── .serena/           # Serena MCP config
 └── .github/workflows/ # CI/CD
 ```
@@ -466,16 +466,16 @@ bundle exec fastlane ios testflight_deploy  # Deploy to TestFlight
 
 This template is designed to work with AI coding agents (Gemini, Claude, etc.).
 
-- `.agent/rules/` - Guidelines for AI agents
+- `.agents/rules/` - Guidelines for AI agents
 - `.serena/` - Serena MCP configuration
 
-> Try [oh-my-ag](https://github.com/first-fluke/oh-my-ag) to maximize productivity with AI coding agents.
+> Try [oh-my-agent](https://github.com/first-fluke/oh-my-agent) to maximize productivity with AI coding agents.
 
 ## Documentation
 
-- [Build Guide](.agent/rules/build-guide.md)
-- [Lint & Format Guide](.agent/rules/lint-format-guide.md)
-- [Test Guide](.agent/rules/test-guide.md)
+- [Build Guide](.agents/rules/build-guide.md)
+- [Lint & Format Guide](.agents/rules/lint-format-guide.md)
+- [Test Guide](.agents/rules/test-guide.md)
 
 ## License
 

@@ -207,7 +207,7 @@ fullstack-starter/
 ├── packages/
 │   ├── design-tokens/ # 共享设计令牌（单一数据源）
 │   └── i18n/          # 共享 i18n 包（单一数据源）
-├── .agent/rules/      # AI 智能体指南
+├── .agents/rules/      # AI 智能体指南
 ├── .serena/           # Serena MCP 配置
 └── .github/workflows/ # CI/CD
 ```
@@ -466,16 +466,16 @@ bundle exec fastlane ios testflight_deploy  # 部署到 TestFlight
 
 本模板专为与 AI 编程助手（Gemini、Claude 等）协作而设计。
 
-- `.agent/rules/` - AI 智能体指南
+- `.agents/rules/` - AI 智能体指南
 - `.serena/` - Serena MCP 配置
 
-> 试试 [oh-my-ag](https://github.com/first-fluke/oh-my-ag) 来最大化 AI 编程助手的生产力。
+> 试试 [oh-my-agent](https://github.com/first-fluke/oh-my-agent) 来最大化 AI 编程助手的生产力。
 
 ## 文档
 
-- [构建指南](../.agent/rules/build-guide.md)
-- [代码检查与格式化指南](../.agent/rules/lint-format-guide.md)
-- [测试指南](../.agent/rules/test-guide.md)
+- [构建指南](../.agents/rules/build-guide.md)
+- [代码检查与格式化指南](../.agents/rules/lint-format-guide.md)
+- [测试指南](../.agents/rules/test-guide.md)
 
 ## 许可证
 

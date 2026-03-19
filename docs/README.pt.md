@@ -207,7 +207,7 @@ fullstack-starter/
 ├── packages/
 │   ├── design-tokens/ # Design tokens compartilhados (Fonte da Verdade)
 │   └── i18n/          # Pacote i18n compartilhado (Fonte da Verdade)
-├── .agent/rules/      # Diretrizes para agentes de IA
+├── .agents/rules/      # Diretrizes para agentes de IA
 ├── .serena/           # Configuração Serena MCP
 └── .github/workflows/ # CI/CD
 ```
@@ -467,16 +467,16 @@ bundle exec fastlane ios testflight_deploy  # Deploy para TestFlight
 
 Este template é projetado para trabalhar com agentes de codificação de IA (Gemini, Claude, etc.).
 
-- `.agent/rules/` - Diretrizes para agentes de IA
+- `.agents/rules/` - Diretrizes para agentes de IA
 - `.serena/` - Configuração Serena MCP
 
-> Experimente [oh-my-ag](https://github.com/first-fluke/oh-my-ag) para maximizar a produtividade com agentes de codificação de IA.
+> Experimente [oh-my-agent](https://github.com/first-fluke/oh-my-agent) para maximizar a produtividade com agentes de codificação de IA.
 
 ## Documentação
 
-- [Guia de Build](../.agent/rules/build-guide.md)
-- [Guia de Lint & Formatação](../.agent/rules/lint-format-guide.md)
-- [Guia de Testes](../.agent/rules/test-guide.md)
+- [Guia de Build](../.agents/rules/build-guide.md)
+- [Guia de Lint & Formatação](../.agents/rules/lint-format-guide.md)
+- [Guia de Testes](../.agents/rules/test-guide.md)
 
 ## Licença
 

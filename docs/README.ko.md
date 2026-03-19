@@ -207,7 +207,7 @@ fullstack-starter/
 ├── packages/
 │   ├── design-tokens/ # 공용 디자인 토큰 (Source of Truth)
 │   └── i18n/          # 공용 다국어 패키지 (Source of Truth)
-├── .agent/rules/      # AI 에이전트 가이드라인
+├── .agents/rules/      # AI 에이전트 가이드라인
 ├── .serena/           # Serena MCP 설정
 └── .github/workflows/ # CI/CD
 ```
@@ -466,16 +466,16 @@ bundle exec fastlane ios testflight_deploy  # TestFlight 배포
 
 이 템플릿은 Gemini, Claude 등 AI 코딩 에이전트와의 협업을 고려해 설계되었습니다.
 
-- `.agent/rules/`: AI 에이전트용 가이드라인
+- `.agents/rules/`: AI 에이전트용 가이드라인
 - `.serena/`: Serena MCP 설정
 
-> [oh-my-ag](https://github.com/first-fluke/oh-my-ag)를 사용하면 AI 코딩 에이전트의 생산성을 극대화할 수 있습니다.
+> [oh-my-agent](https://github.com/first-fluke/oh-my-agent)를 사용하면 AI 코딩 에이전트의 생산성을 극대화할 수 있습니다.
 
 ## 문서
 
-- [빌드 가이드](../.agent/rules/build-guide.md)
-- [린트 & 포맷 가이드](../.agent/rules/lint-format-guide.md)
-- [테스트 가이드](../.agent/rules/test-guide.md)
+- [빌드 가이드](../.agents/rules/build-guide.md)
+- [린트 & 포맷 가이드](../.agents/rules/lint-format-guide.md)
+- [테스트 가이드](../.agents/rules/test-guide.md)
 
 ## 라이선스
 

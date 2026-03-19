@@ -207,7 +207,7 @@ fullstack-starter/
 ├── packages/
 │   ├── design-tokens/ # 共有デザイントークン（信頼できる唯一の情報源）
 │   └── i18n/          # 共有 i18n パッケージ（信頼できる唯一の情報源）
-├── .agent/rules/      # AI エージェントガイドライン
+├── .agents/rules/      # AI エージェントガイドライン
 ├── .serena/           # Serena MCP 設定
 └── .github/workflows/ # CI/CD
 ```
@@ -466,16 +466,16 @@ bundle exec fastlane ios testflight_deploy  # TestFlight にデプロイ
 
 このテンプレートは AI コーディングエージェント（Gemini、Claude など）との協働を考慮して設計されています。
 
-- `.agent/rules/` - AI エージェント用ガイドライン
+- `.agents/rules/` - AI エージェント用ガイドライン
 - `.serena/` - Serena MCP 設定
 
-> [oh-my-ag](https://github.com/first-fluke/oh-my-ag) を試して、AI コーディングエージェントの生産性を最大化しましょう。
+> [oh-my-agent](https://github.com/first-fluke/oh-my-agent) を試して、AI コーディングエージェントの生産性を最大化しましょう。
 
 ## ドキュメント
 
-- [ビルドガイド](../.agent/rules/build-guide.md)
-- [リント＆フォーマットガイド](../.agent/rules/lint-format-guide.md)
-- [テストガイド](../.agent/rules/test-guide.md)
+- [ビルドガイド](../.agents/rules/build-guide.md)
+- [リント＆フォーマットガイド](../.agents/rules/lint-format-guide.md)
+- [テストガイド](../.agents/rules/test-guide.md)
 
 ## ライセンス
 
