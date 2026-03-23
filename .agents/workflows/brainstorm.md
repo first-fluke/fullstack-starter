@@ -16,6 +16,10 @@ description: Design-first ideation workflow — explore user intent, clarify con
 
 ---
 
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis and file tools.
+
+---
+
 ## Step 1: Explore Project Context
 
 // turbo

@@ -15,6 +15,45 @@ description: Structured bug diagnosis and fixing workflow — reproduce, diagnos
 
 ---
 
+## Vendor Detection
+
+Before starting, determine your runtime environment by following `.agents/skills/_shared/core/vendor-detection.md`.
+
+Steps 1-5 execute inline for all vendors. Step 6 (similar pattern scanning) may delegate to a `debug-investigator` subagent when the scan scope is broad.
+
+### Subagent Spawn Criteria
+
+Spawn `debug-investigator` when:
+- Error spans multiple domains
+- Similar pattern scan scope is 10+ files
+- Deep dependency tracing is needed for diagnosis
+
+### Vendor-Specific Spawn (Step 6)
+
+#### If Claude Code
+
+Spawn `debug-investigator` via **Agent tool** using `.claude/agents/debug-investigator.md`.
+Include diagnosis results so far + scan scope in prompt.
+
+#### If Codex CLI
+
+Request subagent execution via model-mediated subagent request.
+Include diagnosis results and scan scope. Results returned as JSON output.
+
+#### If Gemini CLI
+
+```bash
+oh-my-ag agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+```
+
+#### If Antigravity or CLI Fallback
+
+```bash
+oh-my-ag agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+```
+
+---
+
 ## Step 1: Collect Error Information
 
 Ask the user for:

@@ -10,6 +10,10 @@ description: Create, manage, and track execution plans as first-class repository
 
 ---
 
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native file and code analysis tools. Execution handoff in Step 5 delegates to `/orchestrate` or `/coordinate`, which handle their own vendor detection.
+
+---
+
 ## Core Philosophy
 
 **Execution plans are first-class artifacts, checked into the repository.**
@@ -20,7 +24,7 @@ Complex work is captured in plans with progress and decision logs. Plans live in
 
 ## Step 0: Preparation
 
-1. Read `.agents/skills/workflow-guide/SKILL.md` and confirm Core Rules.
+1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
 2. Verify `docs/exec-plans/` directory exists. If not, create it with `active/` and `completed/` subdirectories.
 3. Check `docs/exec-plans/active/` for existing plans that may relate to the current request.
 
@@ -29,8 +33,8 @@ Complex work is captured in plans with progress and decision logs. Plans live in
 ## Step 1: Analyze Scope
 
 1. **Decompose the request** using the prompt structure (Goal, Context, Constraints, Done When).
-   - See `_shared/prompt-structure.md` for the four-element framework.
-2. **Assess complexity** using `_shared/difficulty-guide.md`:
+   - See `_shared/core/prompt-structure.md` for the four-element framework.
+2. **Assess complexity** using `_shared/core/difficulty-guide.md`:
    - Simple → no exec-plan needed, execute directly
    - Medium → lightweight plan (skip Step 3)
    - Complex → full exec-plan with all sections
@@ -98,8 +102,8 @@ Generate `docs/exec-plans/active/{plan-name}.md` using this template:
 
 If the plan involves cross-boundary work (frontend ↔ backend, service ↔ service):
 
-1. Define API contracts using `_shared/api-contracts/template.md`.
-2. Save to `_shared/api-contracts/{contract-name}.md`.
+1. Define API contracts using `_shared/core/api-contracts/template.md`.
+2. Save to `_shared/core/api-contracts/{contract-name}.md`.
 3. Reference from the exec-plan.
 
 ---
@@ -121,7 +125,7 @@ Present the plan:
 Hand off to orchestrator or coordinate workflow:
 
 - **Automated**: Pass plan to `/orchestrate` — orchestrator reads the exec-plan and executes tasks
-- **Manual**: Pass to `/coordinate` — workflow-guide follows the plan step by step
+- **Manual**: Pass to `/coordinate` — oma-coordination follows the plan step by step
 
 During execution, update the plan:
 - Mark task status: ⬜ → 🔄 → ✅ or ❌

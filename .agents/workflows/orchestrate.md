@@ -16,11 +16,18 @@ description: Automated CLI-based parallel agent execution — spawn subagents vi
 
 ---
 
+## Vendor Detection
+
+Before starting, determine your runtime environment by following `.agents/skills/_shared/core/vendor-detection.md`.
+The detected vendor determines how agents are spawned (Step 3) and monitored (Step 4).
+
+---
+
 ## Step 0: Preparation (DO NOT SKIP)
 
-1. Read `.agents/skills/workflow-guide/SKILL.md` and confirm Core Rules.
-2. Read `.agents/skills/_shared/context-loading.md` for resource loading strategy.
-3. Read `.agents/skills/_shared/memory-protocol.md` for memory protocol.
+1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
+2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
+3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
 
 ---
 
@@ -65,9 +72,42 @@ Check if `.agents/plan.json` exists.
 // turbo
 For each priority tier (P0 first, then P1, etc.):
 
-- Spawn agents using `oh-my-ag agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
-- Each agent gets: task description, API contracts, relevant context from `_shared/context-loading.md`.
+- Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`.
 - Use memory edit tool to update `task-board.md` with agent status.
+
+### If Claude Code
+
+Spawn agents via **Agent tool** using `.claude/agents/{agent}.md` definitions.
+
+- **Multiple Agent tool calls in same message** = true parallel execution
+- Agent mapping:
+
+| Domain | Subagent File |
+|:------|:---------------|
+| backend | `.claude/agents/backend-engineer.md` |
+| frontend | `.claude/agents/frontend-engineer.md` |
+| mobile | `.claude/agents/mobile-engineer.md` |
+| db | `.claude/agents/db-engineer.md` |
+| qa | `.claude/agents/qa-reviewer.md` |
+| debug | `.claude/agents/debug-investigator.md` |
+| pm | `.claude/agents/pm-planner.md` |
+
+- Include API contracts from `.agents/skills/_shared/api-contracts/` if they exist
+- Load only task-relevant context (check codebase structure around affected domains)
+
+### If Codex CLI
+
+Request parallel subagent execution via model-mediated parallel subagent request.
+Each subagent receives task description, API contracts, and relevant context.
+Results are returned as JSON output.
+
+### If Gemini CLI
+
+Spawn agents using `oh-my-ag agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+
+### If Antigravity or CLI Fallback
+
+Spawn agents using `oh-my-ag agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}` only (custom subagents not available).
 
 ---
 
@@ -79,6 +119,8 @@ Also use memory read tool to poll `progress-{agent}.md` for logic updates.
 - Use memory edit tool to update `task-board.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
 
+> **Claude Code note**: Agent tool returns results synchronously — no polling needed. Check status, files changed, and issues directly in each agent's return value.
+
 ---
 
 ## Step 5: Verify Completed Agents
@@ -87,11 +129,17 @@ Also use memory read tool to poll `progress-{agent}.md` for logic updates.
 For each completed agent, run automated verification:
 
 ```
-bash .agents/skills/_shared/verify.sh {agent-type} {workspace}
+bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
 ```
 
-- PASS (exit 0): accept result.
+- PASS (exit 0): accept result. If Quality Score is active, measure and record in Experiment Ledger.
 - FAIL (exit 1): re-spawn with error context (max 2 retries).
+- FAIL (after 2 retries): Activate **Exploration Loop** (load `exploration-loop.md` per `context-loading.md`):
+  1. Generate 2-3 alternative hypotheses for the failing task
+  2. Spawn the **same agent type** with different hypothesis prompts (parallel, separate workspaces)
+  3. Score each result with Quality Score (if available)
+  4. Keep the highest-scoring approach, discard others
+  5. Record all experiments in Experiment Ledger
 
 ---
 
@@ -110,3 +158,7 @@ Present session summary to the user.
 - If any tasks failed after retries, list them with error details.
 - Suggest next steps: manual fix, re-run specific agents, or run `/review` for QA.
 - Use memory write tool to record final results.
+- If Quality Score was measured during this session:
+  - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
+  - Auto-generate lessons from discarded experiments (delta <= -5) into `lessons-learned.md`
+  - Include agent effectiveness ranking in the report

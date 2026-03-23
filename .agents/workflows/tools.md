@@ -10,6 +10,10 @@ description: Manage MCP tools with natural language commands — list, enable, d
 
 ---
 
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native file reading tools to inspect MCP and skill configurations.
+
+---
+
 ## Step 1: Show Current Status
 
 1. Read `.agents/mcp.json` (project configuration)

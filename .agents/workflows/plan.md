@@ -15,6 +15,10 @@ description: PM planning workflow — analyze requirements, select tech stack, d
 
 ---
 
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis tools. The saved plan (`.agents/plan.json`) is consumed by `/orchestrate` or `/coordinate`, which handle their own vendor detection.
+
+---
+
 ## Step 1: Gather Requirements
 
 Ask the user to describe what they want to build. Clarify:
@@ -40,7 +44,7 @@ If an existing codebase exists, use MCP code analysis tools to scan:
 Design API contracts between frontend/mobile and backend. Per endpoint:
 - Method, path, request/response schemas
 - Auth requirements, error responses
-- Save to `.agents/skills/_shared/api-contracts/`.
+- Save to `.agents/skills/_shared/core/api-contracts/`.
 
 ---
 
@@ -67,6 +71,6 @@ Present the full plan: task list, priority tiers, dependency graph, agent assign
 Save the approved plan:
 1. `.agents/plan.json`
 2. Use memory write tool to record plan summary.
-3. For complex plans (Medium/Complex per `_shared/difficulty-guide.md`), also create an execution plan artifact in `docs/exec-plans/active/` — see `/exec-plan` workflow for the template and lifecycle.
+3. For complex plans (Medium/Complex per `_shared/core/difficulty-guide.md`), also create an execution plan artifact in `docs/exec-plans/active/` — see `/exec-plan` workflow for the template and lifecycle.
 
 The plan is now ready for `/coordinate` or `/orchestrate` to execute.

@@ -15,6 +15,13 @@ description: Full QA review pipeline — security audit (OWASP Top 10), performa
 
 ---
 
+## Vendor Detection
+
+Before starting, determine your runtime environment by following `.agents/skills/_shared/core/vendor-detection.md`.
+The detected vendor determines how the QA agent is spawned (Step 7).
+
+---
+
 ## Step 1: Identify Review Scope
 
 Ask the user what to review: specific files, a feature branch, or the entire project.
@@ -84,3 +91,48 @@ Compile all findings into a prioritized report:
 
 Each finding must include: `file:line`, description, and remediation code.
 Use memory write tool to record the final report.
+
+---
+
+## Agent Delegation: Spawn QA Agent
+
+For large review scopes, delegate Steps 2-7 to a QA agent instead of running inline.
+
+### If Claude Code
+Use the Agent tool to spawn subagent:
+- `Agent(subagent_type="qa-reviewer", prompt="Review the following files for security, performance, accessibility, and code quality issues: [file list]. Follow .agents/skills/oma-qa/SKILL.md for review standards. Report findings as: CRITICAL / HIGH / MEDIUM / LOW with file:line, description, and remediation code.", run_in_background=true)`
+
+### If Codex CLI
+Request parallel subagent execution with the review scope and standards.
+
+### If Gemini CLI or Antigravity or CLI Fallback
+```bash
+oh-my-ag agent:spawn qa-agent "Review files for security, performance, accessibility, and code quality. Follow .agents/skills/oma-qa/SKILL.md standards. Report as CRITICAL/HIGH/MEDIUM/LOW with file:line and remediation." session-id
+```
+
+---
+
+## Fix-Verify Loop (with --fix option)
+
+When user wants fixes too, execute review then fix then re-review loop:
+
+1. Spawn QA agent (per vendor method above) to get issue list.
+2. If CRITICAL/HIGH issues exist:
+   - Spawn domain agent to fix issues:
+
+### If Claude Code
+     - `Agent(subagent_type="backend-engineer", prompt="Fix these issues: [issues + fix instructions]", run_in_background=true)`
+     - `Agent(subagent_type="frontend-engineer", prompt="Fix these issues: [issues + fix instructions]", run_in_background=true)`
+
+### If Codex CLI
+     Request parallel subagent execution with the issues and fix instructions.
+
+### If Gemini CLI or Antigravity or CLI Fallback
+     ```bash
+     oh-my-ag agent:spawn backend "Fix issues: [issues]" session-id -w ./backend &
+     oh-my-ag agent:spawn frontend "Fix issues: [issues]" session-id -w ./frontend &
+     wait
+     ```
+
+3. Re-spawn QA agent (per vendor method above) to re-review fixed code.
+4. Repeat up to 3 times until no CRITICAL/HIGH issues remain.

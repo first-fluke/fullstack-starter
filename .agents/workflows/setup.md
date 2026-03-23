@@ -10,6 +10,10 @@ description: Initial setup workflow — verify CLI installations, check MCP conn
 
 ---
 
+> **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native shell and file tools for CLI detection and configuration.
+
+---
+
 ## Step 1: Language Settings
 
 1. Check if `.agents/config/user-preferences.yaml` exists
