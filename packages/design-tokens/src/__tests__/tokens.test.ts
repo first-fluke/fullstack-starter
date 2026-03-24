@@ -10,7 +10,7 @@ import {
   p3ToHex,
   xyzToLinearP3,
 } from "../../scripts/oklch-to-p3.js";
-import type { OklchColor } from "./src/tokens.js";
+import type { OklchColor } from "../tokens.js";
 
 describe("OKLCH to P3 conversion", () => {
   describe("oklchToOklab", () => {

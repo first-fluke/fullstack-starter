@@ -12,9 +12,8 @@
     "declarationMap": true,
     "outDir": "./dist",
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["*.ts", "src/**/*.ts", "scripts/**/*.ts"],
