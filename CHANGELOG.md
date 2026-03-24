@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/first-fluke/fullstack-starter/compare/v2.13.0...v2.13.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **root:** use oma-update-action marketplace action ([a0998f4](https://github.com/first-fluke/fullstack-starter/commit/a0998f4ffa93fcf5c64f31b89e592c5db41f04d5))
+
 ## [2.13.0](https://github.com/first-fluke/fullstack-starter/compare/v2.12.1...v2.13.0) (2026-03-19)
 
 
