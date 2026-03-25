@@ -126,6 +126,31 @@ project:
 # When using multiple languages, the first language server that supports a given file will be used for that file.
 # The first language is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
+
+
+# list of languages for which language servers are started; choose from:
+#   al                  bash                clojure             cpp                 csharp
+#   csharp_omnisharp    dart                elixir              elm                 erlang
+#   fortran             fsharp              go                  groovy              haskell
+#   java                julia               kotlin              lua                 markdown
+#   matlab              nix                 pascal              perl                php
+#   php_phpactor        powershell          python              python_jedi         r
+#   rego                ruby                ruby_solargraph     rust                scala
+#   swift               terraform           toml                typescript          typescript_vts
+#   vue                 yaml                zig
+#   (This list may be outdated. For the current list, see values of Language enum here:
+#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
+#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
+# Note:
+#   - For C, use cpp
+#   - For JavaScript, use typescript
+#   - For Free Pascal/Lazarus, use pascal
+# Special requirements:
+#   Some languages require additional setup/installations.
+#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
+# When using multiple languages, the first language server that supports a given file will be used for that file.
+# The first language is the default language and the respective language server will be used as a fallback.
+# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
 - python
 - typescript
@@ -307,6 +332,13 @@ documentation:
 # Otherwise, this setting overrides the global configuration.
 # Set this to [] to disable base modes for this project.
 # Set this to a list of mode names to always include the respective modes for this project.
+
+# list of mode names to that are always to be included in the set of active modes
+# The full set of modes to be activated is base_modes + default_modes.
+# If the setting is undefined, the base_modes from the global configuration (serena_config.yml) apply.
+# Otherwise, this setting overrides the global configuration.
+# Set this to [] to disable base modes for this project.
+# Set this to a list of mode names to always include the respective modes for this project.
 base_modes:
 
 # list of mode names that are to be activated by default.
@@ -405,3 +437,17 @@ read_only_memory_patterns: []
 # Possible values: unset (use global setting), "lf", "crlf", or "native" (platform default)
 # This does not affect Serena's own files (e.g. memories and configuration files), which always use native line endings.
 line_ending:
+
+# list of regex patterns for memories to completely ignore.
+# Matching memories will not appear in list_memories or activate_project output
+# and cannot be accessed via read_memory or write_memory.
+# To access ignored memory files, use the read_file tool on the raw file path.
+# Extends the list from the global configuration, merging the two lists.
+# Example: ["_archive/.*", "_episodes/.*"]
+ignored_memory_patterns: []
+
+# advanced configuration option allowing to configure language server-specific options.
+# Maps the language key to the options.
+# Have a look at the docstring of the constructors of the LS implementations within solidlsp (e.g., for C# or PHP) to see which options are available.
+# No documentation on options means no options are available.
+ls_specific_settings: {}
