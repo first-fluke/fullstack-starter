@@ -26,6 +26,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | bug, error, crash, broken, slow | **oma-debug** | |
 | review, security, performance | **oma-qa** | |
 | accessibility, WCAG, a11y | **oma-qa** | |
+| UI design, design system, landing page, DESIGN.md, color palette, typography, glassmorphism, responsive design | **oma-design** | |
 | brainstorm, ideate, design, explore, idea, concept | **oma-brainstorm** | Run before oma-pm |
 | plan, breakdown, task, sprint | **oma-pm** | |
 | automatic, parallel, orchestrate | **oma-orchestrator** | |
@@ -46,6 +47,9 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | "Let's design something new" | oma-brainstorm → oma-pm → relevant agents → oma-qa |
 | "Do everything automatically" | oma-orchestrator (internally oma-pm → agents → oma-qa) |
 | "I'll manage manually" | oma-coordination |
+| "Design and build a landing page" | oma-design → oma-frontend |
+| "Design, build, and review" | oma-design → oma-frontend → oma-qa |
+| "Redesign based on this URL" | oma-design (Phase 2 EXTRACT) → oma-frontend |
 
 ---
 

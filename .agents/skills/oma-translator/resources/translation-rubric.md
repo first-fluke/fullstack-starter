@@ -20,6 +20,7 @@ Red flags:
 - Unnatural particles or prepositions
 - Overly long sentences that should be split
 - Forced subjects where omission is natural
+- Europeanized patterns: unnecessary connectives (따라서/그러나/또한), passive voice abuse, noun pile-up, over-nominalization, cleft sentence calques
 
 ### 2. Accuracy (10 pts)
 Is the meaning fully preserved?
@@ -37,6 +38,8 @@ Red flags:
 - Omitted important qualifiers
 - Reversed logic (negation errors)
 - Hallucinated content
+- Emotional connotations flattened (e.g., "alarming" → neutral "놀라운" instead of urgent "우려되는")
+- Figurative language translated literally when the image doesn't work in target language
 
 ### 3. Register Consistency (10 pts)
 Does the tone match the configured register throughout?
@@ -105,3 +108,7 @@ Before submitting, verify:
 - [ ] Register matches config from start to finish
 - [ ] All placeholders survived intact
 - [ ] No source language word order leaking through
+- [ ] Emotional connotations preserved (not flattened into neutral words)
+- [ ] Figurative language handled naturally (interpret/substitute/retain, not literal calques)
+- [ ] No Europeanized patterns (passive voice, noun pile-up, forced pronouns, unnecessary connectives)
+- [ ] Translator's notes are concise, accurate, and calibrated to target audience

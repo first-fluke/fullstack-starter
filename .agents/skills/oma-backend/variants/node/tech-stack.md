@@ -2,7 +2,7 @@
 
 ## Primary Stack
 - **Runtime**: Node.js 22+ / Bun 1.2+
-- **Language**: TypeScript 6.x (strict mode)
+- **Language**: TypeScript 5.x (strict mode)
 - **Framework**: NestJS 11+ or Hono 4+
 - **ORM**: Prisma 6+ or Drizzle ORM
 - **Validation**: Zod

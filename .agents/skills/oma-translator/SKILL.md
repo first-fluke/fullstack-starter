@@ -25,17 +25,18 @@ description: Context-aware translation that preserves tone, style, and natural w
 1. Scan existing locale files before translating to align with project conventions
 2. Preserve placeholders and interpolation syntax
 3. Translate meaning, not words
-4. Match register consistently throughout a single piece
-5. Split/restructure sentences for target language naturalness
-6. Flag ambiguous source text rather than guessing
-7. Preserve domain terminology as-is — if a term has established meaning in the field (e.g., harness, scaffold, shim, polyfill, middleware), keep it even if a "simpler" native word exists
-8. Never produce literal word-for-word translations
-9. Never mix registers within a single piece (formal + casual)
-10. Never replace domain-specific terms with generic equivalents (e.g., "harness" → "framework", "shim" → "wrapper")
-11. Never translate proper nouns unless existing translations do so
-12. Never change the meaning to "sound better"
-13. Never skip verification stage for batches > 10 strings
-14. Never modify source file structure (keys, nesting, comments)
+4. Preserve emotional connotations — translate the feeling, not just the dictionary meaning (e.g., "alarming" carries urgency/concern, not merely "surprising")
+5. Match register consistently throughout a single piece
+6. Split/restructure sentences for target language naturalness
+7. Flag ambiguous source text rather than guessing
+8. Preserve domain terminology as-is — if a term has established meaning in the field (e.g., harness, scaffold, shim, polyfill, middleware), keep it even if a "simpler" native word exists
+9. Never produce literal word-for-word translations
+10. Never mix registers within a single piece (formal + casual)
+11. Never replace domain-specific terms with generic equivalents (e.g., "harness" → "framework", "shim" → "wrapper")
+12. Never translate proper nouns unless existing translations do so
+13. Never change the meaning to "sound better"
+14. Never skip verification stage for batches > 10 strings
+15. Never modify source file structure (keys, nesting, comments)
 
 ## Context Inference
 
@@ -58,6 +59,12 @@ Read the source text and identify:
 - **Domain terms**: Words that need consistent translation (check existing translations first)
 - **Cultural references**: Idioms, metaphors, humor that won't transfer directly
 - **Sentence rhythm**: Short/punchy vs. long/flowing
+- **Comprehension challenges**: Terms or references target readers may struggle with — domain jargon lacking standard translations, cultural references (pop culture, history, social norms), implicit knowledge the author assumes, wordplay or puns, named concepts (e.g., "Dunning-Kruger effect"). For each, note: the original term, why it may confuse, and a concise plain-language explanation for a potential translator's note
+- **Figurative language mapping**: For each metaphor, simile, idiom, or figurative expression, classify the handling approach:
+  - **Interpret**: Discard source image entirely, express the intended meaning directly in natural target language
+  - **Substitute**: Replace with a target-language idiom or image that conveys the same idea and emotional effect
+  - **Retain**: Keep the original image if it works equally well in the target language
+- **Emotional connotations**: Words carrying subjective feeling beyond dictionary meaning (e.g., "alarming" = urgency, "haunting" = lingering unease) — note the emotional effect to preserve in translation
 
 ### Stage 2: Extract Meaning
 
@@ -97,13 +104,80 @@ Check against rubric (see `resources/translation-rubric.md`):
 3. Is the register consistent throughout?
 4. Is the meaning preserved (not just words)?
 5. Are cultural references adapted appropriately?
+6. Are emotional connotations preserved (not flattened into neutral descriptions)?
 
 Check against anti-AI patterns (see `resources/anti-ai-patterns.md`):
-6. No AI vocabulary clustering or inflated significance
-7. No promotional tone upgrade beyond the source
-8. No synonym cycling — consistent terminology
-9. No source-language word order leaking through
-10. No unnecessary bold, em dashes, or formatting artifacts
+7. No AI vocabulary clustering or inflated significance
+8. No promotional tone upgrade beyond the source
+9. No synonym cycling — consistent terminology
+10. No source-language word order leaking through
+11. No unnecessary bold, em dashes, or formatting artifacts
+12. No Europeanized patterns (unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns, cleft calques)
+
+Check figurative language handling:
+13. Were all metaphors/idioms handled per the classify decision (interpret/substitute/retain)?
+14. Do figurative expressions read naturally in the target language, not as literal calques?
+
+## Translator's Notes Guidelines
+
+When adding explanatory notes for terms, cultural references, or concepts that target readers may struggle with:
+
+**Format**: `번역어（원어, 쉬운 설명）` or `번역어(원어)` for well-known terms that just need the original
+
+**Calibration by audience**:
+- **Technical readers**: Skip annotation on common tech terms (API, deploy, refactor). Only annotate domain-specific or coined terms
+- **General readers**: More generous annotation. Explain jargon, cultural references, and domain concepts in plain language
+- **Short texts** (< 5 sentences): Minimize — only annotate terms the target audience is unlikely to know
+
+**Rules**:
+- Annotate on first occurrence only — don't repeat the note
+- Keep notes concise (aim for under 10 words)
+- Explain *what it means*, not just provide the English original
+- Don't annotate self-explanatory terms or widely recognized loanwords
+- If a comprehension challenge was identified in Stage 1, use the pre-planned explanation
+
+## Refined Mode (Long-form Content)
+
+For publication-quality translation of long-form content (articles, documentation, essays), extend the standard 4-stage workflow with three additional passes. Use when explicitly requested or when the content demands high polish.
+
+### When to use
+- User explicitly requests "refined", "publication quality", or "정밀 번역"
+- Important documents, official publications, marketing materials
+- Content where naturalness and readability are critical
+
+### Extended workflow
+
+After completing Stage 1–4, continue with:
+
+**Stage 5: Critical Review**
+
+Re-read the translation against the source with fresh eyes. Produce a diagnostic review (no rewriting yet):
+
+- **Accuracy**: Compare paragraph by paragraph — any facts, numbers, or qualifiers altered?
+- **Europeanized language**: Scan for unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns (see `resources/anti-ai-patterns.md`)
+- **Figurative language fidelity**: Cross-check metaphor mapping from Stage 1 — were all handled per the classify decision? Any literal calques that sound unnatural?
+- **Emotional fidelity**: Were subjective/emotional word choices flattened into neutral descriptions?
+- **Expression & flow**: Flag sentences that still read like "translation-ese" — stiff phrasing, unnatural word order, awkward transitions
+- **Translator's notes quality**: Too many? Too few? Accurate and concise?
+
+**Stage 6: Revision**
+
+Apply all findings from Stage 5 to produce a revised translation:
+- Fix accuracy issues
+- Rewrite Europeanized expressions into native patterns
+- Re-interpret literally translated metaphors per the mapping
+- Restore flattened emotional connotations
+- Restructure stiff sentences for fluency
+- Adjust translator's notes per review recommendations
+
+**Stage 7: Polish**
+
+Final pass for publication quality:
+- Read as a standalone piece — does it flow as native content?
+- Smooth remaining rough transitions between paragraphs
+- Ensure narrative voice is consistent throughout
+- Final scan for surviving literal metaphors or translation-ese
+- Verify formatting preservation (headings, bold, links, code blocks)
 
 ## Batch Translation Rules
 
@@ -167,7 +241,7 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 
 ## References
 
-- Translation rubric: `resources/translation-rubric.md`
-- Anti-AI patterns: `resources/anti-ai-patterns.md`
+- Translation rubric: `resources/translation-rubric.md` — 5-criterion scoring (naturalness, accuracy, register, terminology, technical integrity)
+- Anti-AI patterns: `resources/anti-ai-patterns.md` — AI output patterns + Europeanized/translation-ese patterns to avoid
 - Context loading: `../_shared/core/context-loading.md`
 - Quality principles: `../_shared/core/quality-principles.md`
