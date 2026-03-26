@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.13.2](https://github.com/first-fluke/fullstack-starter/compare/v2.13.1...v2.13.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **deps:** fix tsconfig and import path for typescript 6 compat ([99dcd84](https://github.com/first-fluke/fullstack-starter/commit/99dcd84f454d151fc0abf723538a515068c25dab))
+* **root:** use first-fluke/oma-update-action for workflow ([df3e006](https://github.com/first-fluke/fullstack-starter/commit/df3e006987b51788d1d139d97708d0612b335772))
+
 ## [2.13.1](https://github.com/first-fluke/fullstack-starter/compare/v2.13.0...v2.13.1) (2026-03-23)
 
 
