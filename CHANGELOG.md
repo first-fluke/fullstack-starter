@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/first-fluke/fullstack-starter/compare/v2.13.2...v2.14.0) (2026-04-01)
+
+
+### Features
+
+* **web:** add email/password auth with resend and session exchange ([fc929d6](https://github.com/first-fluke/fullstack-starter/commit/fc929d684a2f7191f2fcf8f7c3f746eeba9f14cc))
+
 ## [2.13.2](https://github.com/first-fluke/fullstack-starter/compare/v2.13.1...v2.13.2) (2026-03-26)
 
 
