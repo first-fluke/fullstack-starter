@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/first-fluke/fullstack-starter/compare/v2.14.0...v2.15.0) (2026-04-01)
+
+
+### Features
+
+* **root:** add create-fullstack-starter cli package ([f1664d5](https://github.com/first-fluke/fullstack-starter/commit/f1664d52b7c87d9051a3a8b3cd7690f6925d509a))
+
 ## [2.14.0](https://github.com/first-fluke/fullstack-starter/compare/v2.13.2...v2.14.0) (2026-04-01)
 
 
