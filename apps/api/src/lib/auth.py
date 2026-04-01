@@ -39,6 +39,12 @@ class OAuthLoginRequest(BaseModel):
     name: str | None = None
 
 
+class SessionExchangeRequest(BaseModel):
+    """Exchange better-auth session token for backend JWE tokens."""
+
+    session_token: str
+
+
 class RefreshTokenRequest(BaseModel):
     """Refresh token request."""
 
@@ -201,6 +207,36 @@ async def verify_facebook_token(access_token: str) -> OAuthUserInfo:
             email=data.get("email"),
             name=data.get("name"),
             image=picture_url,
+        )
+
+
+async def verify_session_token(session_token: str) -> OAuthUserInfo:
+    """Verify better-auth session token and extract user info."""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{settings.BETTER_AUTH_URL}/api/auth/get-session",
+            headers={"Cookie": f"better-auth.session_token={session_token}"},
+            timeout=5.0,
+        )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid session token",
+            )
+        data = response.json()
+        user = data.get("user", {})
+        email = user.get("email")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid session: no email",
+            )
+        return OAuthUserInfo(
+            id=user.get("id", ""),
+            email=email,
+            name=user.get("name"),
+            image=user.get("image"),
+            email_verified=user.get("emailVerified", False),
         )
 
 

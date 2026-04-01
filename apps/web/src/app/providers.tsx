@@ -12,6 +12,7 @@ import { env } from "@/config/env";
 import {
   clearBackendTokens,
   exchangeOAuthForBackendJwt,
+  exchangeSessionForBackendJwt,
   hasBackendAccessToken,
   useSession,
 } from "@/lib/auth/auth-client";
@@ -48,7 +49,9 @@ function BackendJwtBridge() {
 
     if (hasBackendAccessToken()) return;
 
-    exchangeOAuthForBackendJwt().catch(() => {});
+    exchangeOAuthForBackendJwt()
+      .catch(() => exchangeSessionForBackendJwt())
+      .catch(() => {});
   }, [isPending, user]);
 
   return null;

@@ -24,8 +24,37 @@ export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_BETTER_AUTH_URL,
 });
 
-export const { useSession, signIn } = authClient;
+export const { useSession, signIn, signUp } = authClient;
 export const signOut = authClient.signOut;
+
+export async function signUpWithEmail(email: string, password: string, name: string) {
+  return authClient.signUp.email({ email, password, name, callbackURL: "/" });
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  return authClient.signIn.email(
+    { email, password },
+    {
+      onError: (ctx) => {
+        if (ctx.error.status === 403) {
+          // Email not verified
+        }
+      },
+    }
+  );
+}
+
+export async function resendVerificationEmail(email: string) {
+  return authClient.sendVerificationEmail({ email, callbackURL: "/" });
+}
+
+export async function requestPasswordReset(email: string) {
+  return authClient.requestPasswordReset({ email, redirectTo: "/reset-password" });
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  return authClient.resetPassword({ newPassword, token });
+}
 
 function normalizeProviderId(providerId: string): OAuthProviderId | null {
   if (providerId === "google" || providerId === "github" || providerId === "facebook") {
@@ -67,6 +96,25 @@ export async function exchangeOAuthForBackendJwt(providerId?: OAuthProviderId) {
   };
 
   const { data } = await apiClient.post<BackendTokenResponse>("/api/auth/login", body);
+
+  if (data?.access_token) setAccessToken(data.access_token);
+  if (data?.refresh_token) setRefreshToken(data.refresh_token);
+}
+
+export async function exchangeSessionForBackendJwt() {
+  const { data: session } = await authClient.getSession();
+  if (!session?.user?.email) return;
+
+  const sessionToken = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("better-auth.session_token="))
+    ?.split("=")[1];
+
+  if (!sessionToken) return;
+
+  const { data } = await apiClient.post<BackendTokenResponse>("/api/auth/session-exchange", {
+    session_token: sessionToken,
+  });
 
   if (data?.access_token) setAccessToken(data.access_token);
   if (data?.refresh_token) setRefreshToken(data.refresh_token);

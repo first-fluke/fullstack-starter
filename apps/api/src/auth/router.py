@@ -5,9 +5,11 @@ from fastapi import APIRouter, HTTPException, status
 from src.lib.auth import (
     OAuthLoginRequest,
     RefreshTokenRequest,
+    SessionExchangeRequest,
     TokenResponse,
     decode_token,
     verify_oauth_token,
+    verify_session_token,
 )
 from src.lib.dependencies import DBSession
 from src.users.model import User
@@ -25,6 +27,45 @@ async def login(
     Verify OAuth token, create/update user, and issue JWE tokens.
     """
     user_info = await verify_oauth_token(request.provider, request.access_token)
+
+    from sqlalchemy import select
+
+    result = await db.execute(select(User).where(User.email == user_info.email))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = User(
+            email=user_info.email,
+            name=user_info.name,
+            image=user_info.image,
+            email_verified=user_info.email_verified,
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    from src.lib.auth import create_access_token, create_refresh_token
+
+    access_token = create_access_token(str(user.id))
+    refresh_token = create_refresh_token(str(user.id))
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
+
+
+@router.post("/session-exchange", response_model=TokenResponse)
+async def session_exchange(
+    request: SessionExchangeRequest,
+    db: DBSession,
+) -> TokenResponse:
+    """Exchange better-auth session token for backend JWE tokens.
+
+    Used by email/password auth users who have no OAuth provider token.
+    Verifies session with better-auth server, then issues backend tokens.
+    """
+    user_info = await verify_session_token(request.session_token)
 
     from sqlalchemy import select
 

@@ -202,6 +202,187 @@ export function StatsGrid({ children }: { children: React.ReactNode }) {
 
 ---
 
+## Email Auth - better-auth + Resend (Server Config)
+
+```typescript
+// src/lib/auth/auth-server.ts
+import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
+import { Resend } from "resend";
+import { env } from "@/config/env";
+
+const resend = new Resend(env.RESEND_API_KEY);
+
+export const auth = betterAuth({
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      void resend.emails.send({
+        from: env.EMAIL_FROM,
+        to: user.email,
+        subject: "비밀번호 재설정",
+        html: `<a href="${url}">비밀번호 재설정하기</a>`,
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      void resend.emails.send({
+        from: env.EMAIL_FROM,
+        to: user.email,
+        subject: "이메일 인증",
+        html: `<a href="${url}">이메일 인증하기</a>`,
+      });
+    },
+  },
+  socialProviders: {
+    // ... existing OAuth providers
+  },
+  plugins: [nextCookies()],
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    cookieCache: { enabled: true, strategy: "jwe" },
+  },
+  trustedOrigins: [env.BETTER_AUTH_URL],
+});
+```
+
+---
+
+## Email Auth - Client (Sign Up / Sign In / Verify)
+
+```typescript
+// src/lib/auth/auth-client.ts
+import { createAuthClient } from "better-auth/react";
+import { env } from "@/config/env";
+
+export const authClient = createAuthClient({
+  baseURL: env.NEXT_PUBLIC_BETTER_AUTH_URL,
+});
+
+// Sign up with email
+export async function signUpWithEmail(email: string, password: string, name: string) {
+  return authClient.signUp.email({
+    email,
+    password,
+    name,
+    callbackURL: "/",
+  });
+}
+
+// Sign in with email
+export async function signInWithEmail(email: string, password: string) {
+  return authClient.signIn.email(
+    { email, password },
+    {
+      onError: (ctx) => {
+        if (ctx.error.status === 403) {
+          // Email not verified - show verification prompt
+        }
+      },
+    },
+  );
+}
+
+// Resend verification email
+export async function resendVerificationEmail(email: string) {
+  return authClient.sendVerificationEmail({
+    email,
+    callbackURL: "/",
+  });
+}
+
+// Request password reset
+export async function requestPasswordReset(email: string) {
+  return authClient.requestPasswordReset({
+    email,
+    redirectTo: "/reset-password",
+  });
+}
+
+// Reset password with token
+export async function resetPassword(token: string, newPassword: string) {
+  return authClient.resetPassword({
+    newPassword,
+    token,
+  });
+}
+```
+
+---
+
+## Email Auth - Backend Token Exchange (Bridge)
+
+Email auth에는 OAuth provider token이 없으므로, better-auth 세션 기반으로 백엔드 JWE 토큰을 교환합니다.
+
+```typescript
+// src/lib/auth/auth-client.ts - exchangeSessionForBackendJwt 추가
+export async function exchangeSessionForBackendJwt() {
+  const { data: session } = await authClient.getSession();
+  if (!session?.user?.email) return;
+
+  // email auth 유저는 OAuth provider가 없음
+  // better-auth 세션 토큰으로 백엔드에 직접 인증 요청
+  const sessionToken = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("better-auth.session_token="))
+    ?.split("=")[1];
+
+  if (!sessionToken) return;
+
+  const { data } = await apiClient.post<BackendTokenResponse>(
+    "/api/auth/session-exchange",
+    { session_token: sessionToken },
+  );
+
+  if (data?.access_token) setAccessToken(data.access_token);
+  if (data?.refresh_token) setRefreshToken(data.refresh_token);
+}
+```
+
+```typescript
+// src/app/providers.tsx - BackendJwtBridge 수정
+function BackendJwtBridge() {
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
+  useEffect(() => {
+    if (isPending) return;
+    if (!user) {
+      if (hasBackendAccessToken()) clearBackendTokens();
+      return;
+    }
+    if (hasBackendAccessToken()) return;
+
+    // OAuth 유저는 기존 flow, email 유저는 session exchange
+    exchangeOAuthForBackendJwt()
+      .catch(() => exchangeSessionForBackendJwt())
+      .catch(() => {});
+  }, [isPending, user]);
+
+  return null;
+}
+```
+
+---
+
+## Email Auth - Environment Variables
+
+```typescript
+// src/config/env.ts - 추가할 환경변수
+server: {
+  // ... existing
+  RESEND_API_KEY: z.string().min(1),
+  EMAIL_FROM: z.string().email().optional().default("noreply@yourdomain.com"),
+},
+```
+
+---
+
 ## Vitest Component Test
 
 ```tsx
