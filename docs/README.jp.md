@@ -153,6 +153,9 @@ npm create fullstack-starter my-app
 # mise のインストール（未インストールの場合）
 curl https://mise.run | sh
 
+# プロジェクト設定を信頼する（初回クローン時に必要）
+mise trust
+
 # すべてのランタイムをインストール（Node 24、Python 3.12、Flutter 3、bun、uv、Terraform）
 mise install
 ```

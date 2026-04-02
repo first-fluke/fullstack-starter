@@ -153,6 +153,9 @@ Ou use o GitHub:
 # Instalar mise (se não estiver instalado)
 curl https://mise.run | sh
 
+# Confiar na configuração do projeto (necessário no primeiro clone)
+mise trust
+
 # Instalar todos os runtimes (Node 24, Python 3.12, Flutter 3, bun, uv, Terraform)
 mise install
 ```

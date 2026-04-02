@@ -153,6 +153,9 @@ npm create fullstack-starter my-app
 # mise 설치 (미설치 시)
 curl https://mise.run | sh
 
+# 프로젝트 설정 신뢰 (최초 클론 시 필요)
+mise trust
+
 # 모든 런타임 일괄 설치 (Node 24, Python 3.12, Flutter 3, bun, uv, Terraform)
 mise install
 ```

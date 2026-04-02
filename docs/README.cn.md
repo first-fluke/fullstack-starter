@@ -153,6 +153,9 @@ npm create fullstack-starter my-app
 # 安装 mise（如未安装）
 curl https://mise.run | sh
 
+# 信任项目配置（首次克隆时需要）
+mise trust
+
 # 安装所有运行时（Node 24、Python 3.12、Flutter 3、bun、uv、Terraform）
 mise install
 ```
