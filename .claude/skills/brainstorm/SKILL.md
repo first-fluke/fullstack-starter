@@ -1,9 +1,8 @@
 ---
 name: brainstorm
-description: Design-first idea exploration — Understanding user intent and design workflow before implementation
+description: "Design-first ideation workflow — explore user intent, clarify constraints, propose approaches, and produce an approved design document before planning"
 disable-model-invocation: true
 ---
-
 # /brainstorm
 
 Read and follow `.agents/workflows/brainstorm.md` step by step.

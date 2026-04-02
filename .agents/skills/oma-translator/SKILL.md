@@ -27,9 +27,9 @@ description: Context-aware translation that preserves tone, style, and natural w
 3. Translate meaning, not words
 4. Preserve emotional connotations — translate the feeling, not just the dictionary meaning (e.g., "alarming" carries urgency/concern, not merely "surprising")
 5. Match register consistently throughout a single piece
-6. Split/restructure sentences for target language naturalness
+6. Split, merge, or restructure sentences for target language naturalness
 7. Flag ambiguous source text rather than guessing
-8. Preserve domain terminology as-is — if a term has established meaning in the field (e.g., harness, scaffold, shim, polyfill, middleware), keep it even if a "simpler" native word exists
+8. Preserve domain terminology — if a term has established meaning in the field (e.g., harness, scaffold, shim, polyfill, middleware), keep it even if a "simpler" native word exists
 9. Never produce literal word-for-word translations
 10. Never mix registers within a single piece (formal + casual)
 11. Never replace domain-specific terms with generic equivalents (e.g., "harness" → "framework", "shim" → "wrapper")
@@ -58,7 +58,7 @@ Read the source text and identify:
 - **Intent**: Inform, persuade, instruct, entertain
 - **Domain terms**: Words that need consistent translation (check existing translations first)
 - **Cultural references**: Idioms, metaphors, humor that won't transfer directly
-- **Sentence rhythm**: Short/punchy vs. long/flowing
+- **Sentence rhythm**: Short/punchy vs. long/flowing — note parallel structures, intentional repetition, and emphasis patterns
 - **Comprehension challenges**: Terms or references target readers may struggle with — domain jargon lacking standard translations, cultural references (pop culture, history, social norms), implicit knowledge the author assumes, wordplay or puns, named concepts (e.g., "Dunning-Kruger effect"). For each, note: the original term, why it may confuse, and a concise plain-language explanation for a potential translator's note
 - **Figurative language mapping**: For each metaphor, simile, idiom, or figurative expression, classify the handling approach:
   - **Interpret**: Discard source image entirely, express the intended meaning directly in natural target language
@@ -93,8 +93,8 @@ Rebuild from meaning, following target language norms:
 - English bullet points may merge into flowing paragraphs in some languages
 
 **Omission of the obvious**:
-- Korean/Japanese allow subject omission when contextually clear
-- Don't force subjects that feel unnatural
+- Many languages (Korean, Japanese, Chinese, etc.) allow subject or pronoun omission when contextually clear
+- Don't force subjects or pronouns that feel unnatural in the target language
 
 ### Stage 4: Verify
 
@@ -157,6 +157,7 @@ Re-read the translation against the source with fresh eyes. Produce a diagnostic
 - **Europeanized language**: Scan for unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns (see `resources/anti-ai-patterns.md`)
 - **Figurative language fidelity**: Cross-check metaphor mapping from Stage 1 — were all handled per the classify decision? Any literal calques that sound unnatural?
 - **Emotional fidelity**: Were subjective/emotional word choices flattened into neutral descriptions?
+- **Tone drift**: Does the register stay consistent from start to finish, or does it shift mid-document (e.g., formal intro drifting into casual explanation)?
 - **Expression & flow**: Flag sentences that still read like "translation-ese" — stiff phrasing, unnatural word order, awkward transitions
 - **Translator's notes quality**: Too many? Too few? Accurate and concise?
 
@@ -228,6 +229,9 @@ Why:
 | Register conflict in source | Follow project's existing register, note the inconsistency |
 | Placeholder in middle of sentence | Restructure around it; never break placeholder syntax |
 | Translation too long for UI | Provide a shorter alternative with note |
+| Multiple valid translations for a term | Pick the one most consistent with project's existing translations; note alternatives |
+| Target language requires gendered forms | Follow source text intent; prefer gender-neutral forms when available in target language |
+| Tone shifts across a long document | Re-read end-to-end after translating; normalize register to the dominant tone |
 
 ## How to Execute
 

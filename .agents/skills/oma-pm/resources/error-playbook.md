@@ -54,10 +54,10 @@ When you encounter a failure during planning, follow these recovery steps.
 
 1. Check existing codebase — consistency wins over "better" tech
 2. If greenfield: use the project's default stack (see SKILL.md tech-stack references)
-3. Default choices:
-   - Frontend: Next.js 14 + TypeScript + Tailwind
-   - Backend: FastAPI + PostgreSQL + Redis
-   - Mobile: Flutter + Riverpod
+3. Default choices: refer to each domain skill's `resources/tech-stack.md` for current versions
+   - Frontend: `oma-frontend/resources/tech-stack.md`
+   - Backend: `oma-backend/resources/tech-stack.md`
+   - Mobile: `oma-mobile/resources/tech-stack.md`
 4. Note decision rationale in plan: `tech_decision: { choice: "X", reason: "Y" }`
 
 ---

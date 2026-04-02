@@ -53,7 +53,7 @@ vendors:
     output_format: "json"
     auto_approve_flag: "--yolo"
     model_flag: "-m"
-    default_model: "qwen3-coder-plus"
+    default_model: "qwen3.5-coder-plus"
     response_jq: ".output"
     isolation_method: "directory"
 

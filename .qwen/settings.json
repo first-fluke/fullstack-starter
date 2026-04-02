@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/keyword-detector.ts\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/persistent-mode.ts\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

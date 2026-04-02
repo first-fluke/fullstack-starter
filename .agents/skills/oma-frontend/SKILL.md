@@ -14,6 +14,8 @@ description: Frontend specialist for React, Next.js, TypeScript with FSD-lite ar
 
 ## When NOT to use
 - Backend API implementation -> use Backend Agent
+- Database access, migrations, or ORM setup -> use Backend Agent
+- Auth server setup (better-auth server library, DB adapters) -> use Backend Agent
 - Native mobile development -> use Mobile Agent
 
 ## Core Rules
@@ -25,6 +27,7 @@ description: Frontend specialist for React, Next.js, TypeScript with FSD-lite ar
 5. **Tool First**: Check for existing solutions and tools before coding.
 6. **Proxy over Middleware**: Next.js 16+ uses `proxy.ts` for request proxying. Do NOT use `middleware.ts` for proxy/rewrite logic — use `proxy.ts` instead.
 7. **No Prop Drilling**: Avoid passing props beyond 3 levels. Use Jotai atoms instead. Avoid React Context — prefer Jotai.
+8. **Auth Boundary**: Frontend handles auth UI and token storage only. Use `better-auth` client SDK to call backend auth endpoints. Never import database adapters, ORMs, or `better-auth` server library. Auth is stateless JWT/JWE via `Authorization: Bearer` header — no cookies, no sessions.
 
 ## 1. Tooling & Performance
 
@@ -69,7 +72,7 @@ src/features/[feature]/
 | State (Server) | `TanStack Query` |
 | State (Client) | `Jotai` (Minimize use) |
 | Forms | `@tanstack/react-form` + `zod` |
-| Auth | `better-auth` |
+| Auth | `better-auth` (client SDK only — never import server library or database adapters) |
 
 ## 4. Standards
 
