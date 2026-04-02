@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.15.1](https://github.com/first-fluke/fullstack-starter/compare/v2.15.0...v2.15.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* **root:** rewrite i18n guide as response language rules and bump version to 4.20.0 ([a5cd68d](https://github.com/first-fluke/fullstack-starter/commit/a5cd68d76b574254c620401432235b973dbabcba))
+* **root:** translate i18n guide to english and bump version to 4.20.1 ([21b0d63](https://github.com/first-fluke/fullstack-starter/commit/21b0d63b64edb71e6259683324ef0342f3beea44))
+
 ## [2.15.0](https://github.com/first-fluke/fullstack-starter/compare/v2.14.0...v2.15.0) (2026-04-01)
 
 
