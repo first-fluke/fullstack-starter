@@ -138,7 +138,7 @@ Or use GitHub:
 
 **Required for all platforms:**
 - [mise](https://mise.jdx.dev/) - Runtime version manager
-- [Docker](https://www.docker.com/) or [Podman Desktop](https://podman-desktop.io/downloads) - Local infrastructure
+- [Docker](https://www.docker.com/), [OrbStack](https://orbstack.dev/) (macOS), or [Podman Desktop](https://podman-desktop.io/downloads) - Local infrastructure
 
 **For mobile development (iOS/Android):**
 - [Xcode](https://apps.apple.com/app/xcode/id497799835) - Includes iOS Simulator (macOS only)
