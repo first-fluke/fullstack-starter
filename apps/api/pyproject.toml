@@ -24,6 +24,7 @@ dependencies = [
     "opentelemetry-exporter-otlp>=1.28.0",
     "jwcrypto>=1.5.6",
     "psycopg2-binary>=2.9.9",
+    "bcrypt>=5.0.0",
 ]
 
 [dependency-groups]
@@ -35,7 +36,7 @@ dev = [
     "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.1.1",
     "factory-boy>=3.3.3",
-
+    "aiosqlite>=0.22.1",
 ]
 
 [tool.uv]

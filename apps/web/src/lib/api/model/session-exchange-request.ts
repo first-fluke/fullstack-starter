@@ -6,10 +6,8 @@
  */
 
 /**
- * Token response.
+ * Exchange better-auth session token for backend JWE tokens.
  */
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type?: string;
+export interface SessionExchangeRequest {
+  session_token: string;
 }

@@ -1,38 +1,10 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { Resend } from "resend";
 import { env } from "@/config/env";
-
-const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: true,
-    sendResetPassword: async ({ user, url }) => {
-      if (!resend) return;
-      void resend.emails.send({
-        from: env.EMAIL_FROM,
-        to: user.email,
-        subject: "비밀번호 재설정",
-        html: `<a href="${url}">비밀번호 재설정하기</a>`,
-      });
-    },
-  },
-  emailVerification: {
-    sendOnSignUp: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      if (!resend) return;
-      void resend.emails.send({
-        from: env.EMAIL_FROM,
-        to: user.email,
-        subject: "이메일 인증",
-        html: `<a href="${url}">이메일 인증하기</a>`,
-      });
-    },
-  },
   socialProviders: {
     google: env.GOOGLE_CLIENT_ID
       ? {

@@ -10,10 +10,10 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { env } from "@/config/env";
 import {
-  clearBackendTokens,
   exchangeOAuthForBackendJwt,
   exchangeSessionForBackendJwt,
   hasBackendAccessToken,
+  useOAuthSession,
   useSession,
 } from "@/lib/auth/auth-client";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -34,25 +34,24 @@ interface ProvidersProps {
 
 function BackendJwtBridge() {
   const { data: session, isPending } = useSession();
+  const { data: oauthSession, isPending: isOAuthPending } = useOAuthSession();
 
   const user = session?.user;
+  const oauthUser = oauthSession?.user;
 
   useEffect(() => {
-    if (isPending) return;
+    if (isPending || isOAuthPending) return;
 
-    if (!user) {
-      if (hasBackendAccessToken()) {
-        clearBackendTokens();
-      }
-      return;
-    }
+    if (user) return;
+
+    if (!oauthUser) return;
 
     if (hasBackendAccessToken()) return;
 
     exchangeOAuthForBackendJwt()
       .catch(() => exchangeSessionForBackendJwt())
       .catch(() => {});
-  }, [isPending, user]);
+  }, [isOAuthPending, isPending, oauthUser, user]);
 
   return null;
 }

@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from functools import wraps
 from typing import Annotated, Any, Literal
 
+import bcrypt
 import httpx
 from fastapi import Depends, HTTPException, Request, status
 from jwcrypto import jwe, jwk
@@ -45,6 +46,21 @@ class SessionExchangeRequest(BaseModel):
     session_token: str
 
 
+class EmailLoginRequest(BaseModel):
+    """Email/password login request."""
+
+    email: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    """Email/password registration request."""
+
+    email: str
+    password: str
+    name: str | None = None
+
+
 class RefreshTokenRequest(BaseModel):
     """Refresh token request."""
 
@@ -69,6 +85,36 @@ class CurrentUserInfo(BaseModel):
     name: str | None = None
     image: str | None = None
     email_verified: bool = False
+
+
+def normalize_email(email: str) -> str:
+    """Normalize email for storage and lookup."""
+    return email.strip().lower()
+
+
+def validate_password_strength(password: str) -> None:
+    """Validate password minimum requirements."""
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long",
+        )
+
+
+def hash_password(password: str) -> str:
+    """Hash a password with bcrypt."""
+    validate_password_strength(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, password_hash: str | None) -> bool:
+    """Verify a password against a stored bcrypt hash."""
+    if not password_hash:
+        return False
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def _get_jwe_key() -> jwk.JWK:

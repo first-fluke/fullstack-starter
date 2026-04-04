@@ -1,4 +1,5 @@
 const STORAGE_PREFIX = "fullstack_";
+export const AUTH_STATE_CHANGE_EVENT = "fullstack-auth-state-change";
 
 const STORAGE_KEYS = {
   ACCESS_TOKEN: `${STORAGE_PREFIX}access_token`,
@@ -8,6 +9,12 @@ const STORAGE_KEYS = {
 export interface AuthTokens {
   access_token: string;
   refresh_token: string;
+}
+
+function notifyAuthStateChange(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(AUTH_STATE_CHANGE_EVENT));
+  }
 }
 
 export function getAccessToken(): string | null {
@@ -23,24 +30,30 @@ export function getRefreshToken(): string | null {
 export function setAccessToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    notifyAuthStateChange();
   }
 }
 
 export function setRefreshToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+    notifyAuthStateChange();
   }
 }
 
 export function setTokens(tokens: AuthTokens): void {
-  setAccessToken(tokens.access_token);
-  setRefreshToken(tokens.refresh_token);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
+    notifyAuthStateChange();
+  }
 }
 
 export function clearTokens(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    notifyAuthStateChange();
   }
 }
 

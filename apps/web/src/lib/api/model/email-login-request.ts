@@ -4,6 +4,11 @@
  * fullstack-starter-api
  * OpenAPI spec version: 0.1.0
  */
-import type { ServiceStatus } from './service-status';
 
-export type HealthResponseServices = {[key: string]: ServiceStatus};
+/**
+ * Email/password login request.
+ */
+export interface EmailLoginRequest {
+  email: string;
+  password: string;
+}

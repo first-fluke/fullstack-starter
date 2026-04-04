@@ -70,19 +70,111 @@
         }
       }
     },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Register",
+        "description": "Register with email/password and issue backend tokens.",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/login": {
       "post": {
         "tags": [
           "authentication"
         ],
         "summary": "Login",
-        "description": "OAuth login endpoint.\n\nVerify OAuth token, create/update user, and issue JWE tokens.",
+        "description": "Login with OAuth or email/password and issue backend tokens.\n\nVerify OAuth token, create/update user, and issue JWE tokens.",
         "operationId": "login_api_auth_login_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OAuthLoginRequest"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/OAuthLoginRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EmailLoginRequest"
+                  }
+                ],
+                "title": "Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/session-exchange": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Session Exchange",
+        "description": "Exchange better-auth session token for backend JWE tokens.\n\nUsed by email/password auth users who have no OAuth provider token.\nVerifies session with better-auth server, then issues backend tokens.",
+        "operationId": "session_exchange_api_auth_session_exchange_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionExchangeRequest"
               }
             }
           },
@@ -168,10 +260,51 @@
           }
         }
       }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Get Me",
+        "description": "Return the current authenticated user.",
+        "operationId": "get_me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "EmailLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "EmailLoginRequest",
+        "description": "Email/password login request."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -271,6 +404,36 @@
         "title": "RefreshTokenRequest",
         "description": "Refresh token request."
       },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest",
+        "description": "Email/password registration request."
+      },
       "ServiceStatus": {
         "properties": {
           "status": {
@@ -311,6 +474,20 @@
         "title": "ServiceStatus",
         "description": "Individual service health status."
       },
+      "SessionExchangeRequest": {
+        "properties": {
+          "session_token": {
+            "type": "string",
+            "title": "Session Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_token"
+        ],
+        "title": "SessionExchangeRequest",
+        "description": "Exchange better-auth session token for backend JWE tokens."
+      },
       "TokenResponse": {
         "properties": {
           "access_token": {
@@ -334,6 +511,64 @@
         ],
         "title": "TokenResponse",
         "description": "Token response."
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "title": "Email Verified",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserResponse",
+        "description": "User response model."
       },
       "ValidationError": {
         "properties": {

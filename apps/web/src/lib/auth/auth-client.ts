@@ -1,9 +1,16 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
+import { useEffect, useState } from "react";
 import { env } from "@/config/env";
 import { apiClient } from "@/lib/api-client";
-import { clearTokens, getAccessToken, setAccessToken, setRefreshToken } from "@/lib/auth/token";
+import {
+  AUTH_STATE_CHANGE_EVENT,
+  clearTokens,
+  getAccessToken,
+  hasTokens,
+  setTokens,
+} from "@/lib/auth/token";
 
 export type OAuthProviderId = "google" | "github" | "facebook";
 
@@ -20,40 +27,50 @@ type BackendTokenResponse = {
   token_type?: string;
 };
 
-export const authClient = createAuthClient({
+type BackendUser = {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+  email_verified: boolean;
+};
+
+type BackendSession = {
+  user: BackendUser;
+};
+
+const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_BETTER_AUTH_URL,
 });
 
-export const { useSession, signIn, signUp } = authClient;
+export const { useSession: useOAuthSession, signIn, signUp } = authClient;
 export const signOut = authClient.signOut;
 
 export async function signUpWithEmail(email: string, password: string, name: string) {
-  return authClient.signUp.email({ email, password, name, callbackURL: "/" });
+  const { data } = await apiClient.post<BackendTokenResponse>("/api/auth/register", {
+    email,
+    password,
+    name,
+  });
+
+  if (data?.access_token && data?.refresh_token) {
+    setTokens(data);
+  }
+
+  return data;
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  return authClient.signIn.email(
-    { email, password },
-    {
-      onError: (ctx) => {
-        if (ctx.error.status === 403) {
-          // Email not verified
-        }
-      },
-    }
-  );
-}
+  const { data } = await apiClient.post<BackendTokenResponse>("/api/auth/login", {
+    email,
+    password,
+  });
 
-export async function resendVerificationEmail(email: string) {
-  return authClient.sendVerificationEmail({ email, callbackURL: "/" });
-}
+  if (data?.access_token && data?.refresh_token) {
+    setTokens(data);
+  }
 
-export async function requestPasswordReset(email: string) {
-  return authClient.requestPasswordReset({ email, redirectTo: "/reset-password" });
-}
-
-export async function resetPassword(token: string, newPassword: string) {
-  return authClient.resetPassword({ newPassword, token });
+  return data;
 }
 
 function normalizeProviderId(providerId: string): OAuthProviderId | null {
@@ -73,6 +90,54 @@ async function resolveProviderFromAccounts(): Promise<OAuthProviderId | null> {
     if (providerId) return providerId;
   }
   return null;
+}
+
+async function loadBackendSession(): Promise<BackendSession | null> {
+  if (!hasTokens()) return null;
+
+  try {
+    const { data } = await apiClient.get<BackendUser>("/api/auth/me");
+    return { user: data };
+  } catch {
+    clearTokens();
+    return null;
+  }
+}
+
+export function useSession() {
+  const [data, setData] = useState<BackendSession | null>(null);
+  const [isPending, setIsPending] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncSession = async () => {
+      setIsPending(true);
+      const session = await loadBackendSession();
+
+      if (!cancelled) {
+        setData(session);
+        setIsPending(false);
+      }
+    };
+
+    void syncSession();
+
+    const handleAuthStateChange = () => {
+      void syncSession();
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthStateChange);
+    window.addEventListener("storage", handleAuthStateChange);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthStateChange);
+      window.removeEventListener("storage", handleAuthStateChange);
+    };
+  }, []);
+
+  return { data, isPending };
 }
 
 export async function exchangeOAuthForBackendJwt(providerId?: OAuthProviderId) {
@@ -97,8 +162,9 @@ export async function exchangeOAuthForBackendJwt(providerId?: OAuthProviderId) {
 
   const { data } = await apiClient.post<BackendTokenResponse>("/api/auth/login", body);
 
-  if (data?.access_token) setAccessToken(data.access_token);
-  if (data?.refresh_token) setRefreshToken(data.refresh_token);
+  if (data?.access_token && data?.refresh_token) {
+    setTokens(data);
+  }
 }
 
 export async function exchangeSessionForBackendJwt() {
@@ -116,12 +182,13 @@ export async function exchangeSessionForBackendJwt() {
     session_token: sessionToken,
   });
 
-  if (data?.access_token) setAccessToken(data.access_token);
-  if (data?.refresh_token) setRefreshToken(data.refresh_token);
+  if (data?.access_token && data?.refresh_token) {
+    setTokens(data);
+  }
 }
 
 export async function signOutAndClearBackendTokens() {
-  await authClient.signOut();
+  await authClient.signOut().catch(() => undefined);
   clearTokens();
 }
 
