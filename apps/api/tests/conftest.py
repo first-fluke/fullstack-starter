@@ -45,5 +45,6 @@ def client() -> Iterator[TestClient]:
 def cleanup_test_database() -> Iterator[None]:
     """Remove the process-local SQLite file after the test session."""
     yield
+    asyncio.run(engine.dispose())
     if TEST_DB_PATH.exists():
         TEST_DB_PATH.unlink()
