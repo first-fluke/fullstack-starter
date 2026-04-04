@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.16.0](https://github.com/first-fluke/fullstack-starter/compare/v2.15.1...v2.16.0) (2026-04-04)
+
+
+### Features
+
+* **root:** move email auth flow into api ([74c8dc4](https://github.com/first-fluke/fullstack-starter/commit/74c8dc42c8f519fb8a11c6891f96f82db3f4428d))
+
+
+### Bug Fixes
+
+* **root:** dispose api test engine after pytest session ([49b0bfc](https://github.com/first-fluke/fullstack-starter/commit/49b0bfca19e59fd6b8aa8df88ed9064c0d467a01))
+* **root:** isolate api test sqlite database per process ([cf28862](https://github.com/first-fluke/fullstack-starter/commit/cf28862ab1c29a396953a3b764f4e39d2a22b9b7))
+
 ## [2.15.1](https://github.com/first-fluke/fullstack-starter/compare/v2.15.0...v2.15.1) (2026-04-02)
 
 
