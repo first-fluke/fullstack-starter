@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.1](https://github.com/first-fluke/fullstack-starter/compare/v2.16.0...v2.16.1) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** configure serwist turbopack with native esbuild ([018a5ad](https://github.com/first-fluke/fullstack-starter/commit/018a5add5315db36f27f56aed34555cdb536fc96))
+
 ## [2.16.0](https://github.com/first-fluke/fullstack-starter/compare/v2.15.1...v2.16.0) (2026-04-04)
 
 
