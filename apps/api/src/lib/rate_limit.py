@@ -86,10 +86,7 @@ class RedisRateLimiter:
         if self._redis is None:
             import redis.asyncio as redis
 
-            self._redis = cast(
-                redis_module.Redis,
-                redis.from_url(settings.REDIS_URL),  # type: ignore[no-untyped-call]
-            )
+            self._redis = redis.from_url(settings.REDIS_URL or "")
         return self._redis
 
     async def is_allowed(self, key: str) -> tuple[bool, int, int]:
