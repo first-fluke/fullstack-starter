@@ -1,17 +1,22 @@
+---
+trigger: always_on
+description: Response language rules for agents and workflows
+---
+
 # i18n Guide — Response Language Rules
 
-Single source of truth for agent/workflow response language handling.
+Rules for determining and applying response language across agents and workflows.
 
 ## Language Resolution
 
 Response language is determined by the following priority:
 
 1. **User prompt language** — if the user writes in a specific language, respond in that language
-2. **`user-preferences.yaml`** — `language` field in `.agents/config/user-preferences.yaml`
+2. **`oma-config.yaml`** — `language` field in `.agents/oma-config.yaml`
 3. **Fallback** — English (en) if neither of the above is set
 
 ```yaml
-# .agents/config/user-preferences.yaml
+# .agents/oma-config.yaml
 language: ko  # ko, en, ja, zh, ...
 ```
 
@@ -46,13 +51,14 @@ language: ko  # ko, en, ja, zh, ...
 3. **Inline code (`backtick`) is never translated**
 4. **Parenthetical supplement allowed** — for unfamiliar terms, use `translated(original)` format once
 5. **Register consistency** — match the target language's appropriate register for the context
+6. **Translation tasks** — for translating UI strings, docs, or marketing copy, use the `/oma-translator` skill
 
 ## Workflow Integration
 
 All workflows follow these rules. The following line in existing workflows references this guide:
 
 ```
-- **Response language follows `language` setting in `.agents/config/user-preferences.yaml` if configured.**
+- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 ```
 
 ## Subagent Behavior

@@ -4,7 +4,7 @@ description: Design workflow — create design systems, DESIGN.md, and design to
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **Response language follows `language` setting in `.agents/config/user-preferences.yaml` if configured.**
+- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip phases.** Execute from Phase 1 in order.
 - **Do NOT write implementation code.** This workflow produces DESIGN.md, design tokens, and design guidance — not application code.
 - **You MUST use MCP tools throughout the workflow.**

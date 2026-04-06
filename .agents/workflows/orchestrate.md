@@ -4,7 +4,7 @@ description: Automated CLI-based parallel agent execution — spawn subagents vi
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **Response language follows `language` setting in `.agents/config/user-preferences.yaml` if configured.**
+- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
@@ -46,7 +46,7 @@ Check if `.agents/plan.json` exists.
 // turbo
 
 1. 설정 파일 로드:
-   - `.agents/config/user-preferences.yaml` (언어, CLI 매핑)
+   - `.agents/oma-config.yaml` (언어, CLI 매핑)
 2. CLI 매핑 현황 표시:
 
    ```
@@ -166,7 +166,7 @@ bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
 ## Step 6: Collect Results
 
 // turbo
-After all agents complete, use memory read tool to read all `result-{agent}.md` files.
+After all agents complete, use memory read tool to read all `result-{agent}-{sessionId}.md` files.
 Compile summary: completed tasks, failed tasks, files changed, remaining issues.
 
 ---

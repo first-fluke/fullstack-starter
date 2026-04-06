@@ -94,7 +94,7 @@ Show the commit message and proceed immediately without asking for confirmation:
 
 feat(orchestrator): add multi-CLI agent mapping support
 
-- Add user-preferences.yaml for CLI configuration
+- Add oma-config.yaml for CLI configuration
 - Update spawn-agent.sh to read agent-CLI mapping
 - Update memory schema with CLI field
 

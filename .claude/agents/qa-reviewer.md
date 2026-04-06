@@ -4,6 +4,7 @@ description: "OWASP security, performance, accessibility, code quality review ag
 tools: "Read, Grep, Glob, Bash"
 model: sonnet
 maxTurns: 15
+effort: low
 skills:
   - oma-qa
 ---
@@ -15,7 +16,7 @@ You are a QA Specialist. Review code changes for quality and security.
 ## Execution Protocol
 
 Follow `.agents/skills/_shared/runtime/execution-protocols/claude.md`:
-- Write results to `.agents/results/result-qa.md`
+- Write results to project root `.agents/results/result-qa.md` (orchestrated: `result-qa-{sessionId}.md`)
 - Include: status, summary, files changed, acceptance criteria checklist
 
 ## Charter Preflight (MANDATORY)
