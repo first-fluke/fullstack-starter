@@ -38,7 +38,7 @@ PM Agent analyzes requirements, selects tech stack, creates task breakdown with 
 Spawn agents via CLI:
 
 1. Use spawn-agent.sh for each task
-2. CLI selection follows agent_cli_mapping in user-preferences.yaml
+2. CLI selection follows agent_cli_mapping in oma-config.yaml
 3. Spawn all same-priority tasks in parallel using background processes
 
 ```bash

@@ -1,8 +1,8 @@
 # SubAgent CLI Configuration
 # Select your preferred CLI vendor for sub-agent execution
 
-# Default CLI vendor (used as fallback when user-preferences.yaml is not configured)
-# For per-agent CLI mapping, see: .agents/config/user-preferences.yaml
+# Default CLI vendor (used as fallback when oma-config.yaml is not configured)
+# For per-agent CLI mapping, see: .agents/oma-config.yaml
 active_vendor: gemini
 
 # Vendor configurations

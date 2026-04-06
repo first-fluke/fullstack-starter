@@ -4,7 +4,7 @@ description: Generate Conventional Commits spec git commits (auto-separate by fe
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **Response language follows `language` setting in `.agents/config/user-preferences.yaml` if configured.**
+- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.
 
 ---

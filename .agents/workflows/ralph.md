@@ -4,7 +4,7 @@ description: Ralph - persistent self-referential execution loop wrapping ultrawo
 
 # MANDATORY RULES — VIOLATION IS FORBIDDEN
 
-- **Response language follows `language` setting in `.agents/config/user-preferences.yaml` if configured.**
+- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip phases.** Execute from Phase 0 in order. Explicitly report completion of each phase to the user before proceeding to the next.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.

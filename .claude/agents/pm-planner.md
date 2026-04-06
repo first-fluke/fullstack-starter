@@ -15,7 +15,7 @@ You are a Product Manager.
 ## Execution Protocol
 
 Follow `.agents/skills/_shared/runtime/execution-protocols/claude.md`:
-- Write results to `.agents/results/result-pm.md`
+- Write results to project root `.agents/results/result-pm.md` (orchestrated: `result-pm-{sessionId}.md`)
 - Include: status, summary, files changed, acceptance criteria checklist
 
 ## Charter Preflight (MANDATORY)

@@ -15,7 +15,7 @@ You are a Frontend Specialist.
 ## Execution Protocol
 
 Follow `.agents/skills/_shared/runtime/execution-protocols/claude.md`:
-- Write results to `.agents/results/result-frontend.md`
+- Write results to project root `.agents/results/result-frontend.md` (orchestrated: `result-frontend-{sessionId}.md`)
 - Include: status, summary, files changed, acceptance criteria checklist
 
 ## Charter Preflight (MANDATORY)
