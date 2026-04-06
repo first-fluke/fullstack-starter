@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.2](https://github.com/first-fluke/fullstack-starter/compare/v2.16.1...v2.16.2) (2026-04-06)
+
+
+### Bug Fixes
+
+* **root:** upgrade outdated dependencies across api and mobile ([81ef50d](https://github.com/first-fluke/fullstack-starter/commit/81ef50deb29ace9ed0c6fe30d09b0f94f2e624ac))
+
 ## [2.16.1](https://github.com/first-fluke/fullstack-starter/compare/v2.16.0...v2.16.1) (2026-04-05)
 
 
