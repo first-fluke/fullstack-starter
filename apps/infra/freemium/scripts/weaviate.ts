@@ -51,7 +51,12 @@ function readState(): WeaviateState | null {
 }
 
 function writeState(state: WeaviateState): void {
-  writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
+  const sanitized: WeaviateState = {
+    cluster_id: String(state.cluster_id),
+    url: String(state.url),
+    api_key: String(state.api_key),
+  };
+  writeFileSync(STATE_FILE, JSON.stringify(sanitized, null, 2), "utf-8");
 }
 
 function deleteState(): void {
