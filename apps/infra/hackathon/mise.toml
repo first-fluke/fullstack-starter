@@ -1,0 +1,27 @@
+[tasks]
+# Lifecycle
+[tasks.setup]
+description = "Provision everything"
+run = ["mise run apply", "mise run weaviate:up", "mise run env:sync"]
+
+[tasks.teardown]
+description = "Destroy everything"
+run = ["mise run weaviate:down", "mise run destroy"]
+
+# Terraform
+init = { run = "terraform init", description = "Initialize Terraform" }
+plan = { run = "terraform plan", description = "Plan infrastructure" }
+apply = { run = "terraform apply", description = "Apply infrastructure" }
+destroy = { run = "terraform destroy", description = "Destroy infrastructure" }
+fmt = { run = "terraform fmt -recursive", description = "Format Terraform" }
+validate = { run = "terraform validate", description = "Validate Terraform" }
+output = { run = "terraform output -json", description = "Show Terraform outputs" }
+
+# Weaviate Cloud
+"weaviate:up" = { run = "bun run scripts/weaviate.ts up", description = "Create WCD cluster" }
+"weaviate:down" = { run = "bun run scripts/weaviate.ts down", description = "Delete WCD cluster" }
+"weaviate:status" = { run = "bun run scripts/weaviate.ts status", description = "Check WCD cluster" }
+
+# Ops
+"env:sync" = { run = "bun run scripts/env-sync.ts", description = "Sync env vars to Vercel + .env.example" }
+status = { run = "bun run scripts/status.ts", description = "Check all provisioned resources" }

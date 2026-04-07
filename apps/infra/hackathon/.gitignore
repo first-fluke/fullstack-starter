@@ -1,0 +1,15 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+!terraform.tfvars.example
+
+# Weaviate state
+.weaviate-state.json
+
+# Scripts
+scripts/node_modules/
+
+# Secrets
+.env

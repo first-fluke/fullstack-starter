@@ -1,0 +1,14 @@
+{
+  "name": "hackathon-infra-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "weaviate": "bun run weaviate.ts",
+    "supabase-keys": "bun run supabase-keys.ts",
+    "env-sync": "bun run env-sync.ts",
+    "status": "bun run status.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

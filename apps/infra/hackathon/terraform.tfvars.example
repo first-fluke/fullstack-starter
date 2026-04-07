@@ -1,0 +1,5 @@
+project_prefix       = "hackathon"
+github_repo          = "first-fluke/fullstack-starter"
+supabase_org_id      = ""
+supabase_db_password = ""
+supabase_region      = "ap-northeast-2"
