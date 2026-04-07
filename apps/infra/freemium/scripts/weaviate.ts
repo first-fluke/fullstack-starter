@@ -7,6 +7,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const STATE_FILE = join(__dirname, "..", ".weaviate-state.json");
 const WCD_BASE_URL = "https://api.wcs.weaviate.io/v1";
 
+function validatePathSegment(value: string, name: string): string {
+  const sanitized = encodeURIComponent(value);
+  if (!sanitized || sanitized.includes("..") || sanitized.includes("/")) {
+    throw new Error(`Invalid ${name}: ${value}`);
+  }
+  return sanitized;
+}
+
 interface WeaviateState {
   cluster_id: string;
   url: string;
@@ -106,7 +114,7 @@ async function commandUp(apiKey: string, clusterName: string): Promise<void> {
   if (state?.cluster_id) {
     const check = await apiRequest<unknown>(
       "GET",
-      `/clusters/${state.cluster_id}`,
+      `/clusters/${validatePathSegment(state.cluster_id, "cluster_id")}`,
       apiKey,
     );
 
@@ -163,7 +171,7 @@ async function commandDown(apiKey: string): Promise<void> {
 
   const del = await apiRequest<unknown>(
     "DELETE",
-    `/clusters/${state.cluster_id}`,
+    `/clusters/${validatePathSegment(state.cluster_id, "cluster_id")}`,
     apiKey,
   );
 
@@ -191,7 +199,7 @@ async function commandStatus(apiKey: string): Promise<void> {
 
   const result = await apiRequest<unknown>(
     "GET",
-    `/clusters/${state.cluster_id}`,
+    `/clusters/${validatePathSegment(state.cluster_id, "cluster_id")}`,
     apiKey,
   );
 

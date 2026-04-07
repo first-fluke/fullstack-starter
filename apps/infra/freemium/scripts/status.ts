@@ -7,6 +7,14 @@ const HACKATHON_DIR = join(__dirname, "..");
 const STATE_FILE = join(HACKATHON_DIR, ".weaviate-state.json");
 const TIMEOUT_MS = 5_000;
 
+function validateUrl(value: string, name: string): string {
+  const parsed = URL.parse(value);
+  if (!parsed || !["http:", "https:"].includes(parsed.protocol ?? "")) {
+    throw new Error(`Invalid ${name} URL: ${value}`);
+  }
+  return parsed.href;
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -119,7 +127,7 @@ async function checkVercelProject(
   projectId: string,
   token: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const url = `https://api.vercel.com/v9/projects/${projectId}`;
+  const url = validateUrl(`https://api.vercel.com/v9/projects/${encodeURIComponent(projectId)}`, "Vercel API");
   try {
     const res = await fetchWithTimeout(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -134,7 +142,7 @@ async function checkVercelProject(
 async function checkSupabase(
   projectId: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const url = `https://${projectId}.supabase.co`;
+  const url = validateUrl(`https://${encodeURIComponent(projectId)}.supabase.co`, "Supabase");
   try {
     const res = await fetchWithTimeout(url);
     if (res.status < 500) return { ok: true };
@@ -147,7 +155,7 @@ async function checkSupabase(
 async function checkWeaviate(
   weaviateUrl: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const base = weaviateUrl.replace(/\/$/, "");
+  const base = validateUrl(weaviateUrl, "Weaviate").replace(/\/$/, "");
   const url = `${base}/.well-known/ready`;
   try {
     const res = await fetchWithTimeout(url);
