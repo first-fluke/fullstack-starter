@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.17.1](https://github.com/first-fluke/fullstack-starter/compare/v2.17.0...v2.17.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* **infra:** resolve file system race condition in env-sync ([d279992](https://github.com/first-fluke/fullstack-starter/commit/d2799923fe411440337723f943361d070714d303))
+* **infra:** sanitize network data before writing weaviate state ([e759f0f](https://github.com/first-fluke/fullstack-starter/commit/e759f0f4b6c51e3b87b0548d29ea16399c20f156))
+* **infra:** validate file-sourced data before outbound network requests ([d4c4f4c](https://github.com/first-fluke/fullstack-starter/commit/d4c4f4caeaa13fb2a72d1ae8e9770578275f13f0))
+* **root:** enable autofix and strict warnings for biome and ruff lint ([90cae36](https://github.com/first-fluke/fullstack-starter/commit/90cae36894859e87381c766e773296bc30d0a666))
+
 ## [2.17.0](https://github.com/first-fluke/fullstack-starter/compare/v2.16.2...v2.17.0) (2026-04-07)
 
 
