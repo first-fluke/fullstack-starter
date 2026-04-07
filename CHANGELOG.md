@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.0](https://github.com/first-fluke/fullstack-starter/compare/v2.16.2...v2.17.0) (2026-04-07)
+
+
+### Features
+
+* **infra:** add hackathon infrastructure provisioning ([de295ed](https://github.com/first-fluke/fullstack-starter/commit/de295edf75161b34c508bde7d8036b415ce95762))
+
 ## [2.16.2](https://github.com/first-fluke/fullstack-starter/compare/v2.16.1...v2.16.2) (2026-04-06)
 
 
