@@ -1,8 +1,8 @@
-# Hackathon Infrastructure Design
+# Freemium Infrastructure Design
 
 ## Overview
 
-`apps/infra/hackathon/`에 Vercel + Supabase + Backblaze B2 + Weaviate Cloud를 프로비저닝하는 독립 인프라 구성.
+`apps/infra/freemium/`에 Vercel + Supabase + Backblaze B2 + Weaviate Cloud를 프로비저닝하는 독립 인프라 구성.
 기존 `apps/infra/` (GCP)와 완전 독립. state/provider 분리.
 
 ## Approach: Terraform + mise hybrid (Approach B)
@@ -14,7 +14,7 @@
 ## Architecture
 
 ```
-apps/infra/hackathon/
+apps/infra/freemium/
 ├── versions.tf                 # provider 선언 (vercel ~>4.0, supabase ~>1.0, b2 ~>0.8)
 ├── provider.tf                 # provider 설정 + 인증
 ├── variables.tf                # 입력 변수
@@ -307,10 +307,10 @@ status = { run = "bun run scripts/status.ts", description = "Check all provision
 ### status.ts
 - 각 서비스 health check 후 상태 출력:
   ```
-  Vercel API    ✓ hackathon-api (production)
-  Vercel Web    ✓ hackathon-web (production)
+  Vercel API    ✓ freemium-api (production)
+  Vercel Web    ✓ freemium-web (production)
   Supabase      ✓ https://xxx.supabase.co
-  B2 Bucket     ✓ hackathon-storage
+  B2 Bucket     ✓ freemium-storage
   Weaviate      ✓ https://xxx.weaviate.network
   ```
 
@@ -373,7 +373,7 @@ scripts/node_modules/
 ## CLI Usage
 
 ```bash
-cd apps/infra/hackathon
+cd apps/infra/freemium
 
 # 초기화
 mise run init
