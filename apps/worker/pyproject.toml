@@ -29,7 +29,7 @@ managed = true
 [tool.poe.tasks]
 dev = "fastapi dev src/main.py --port 8080"
 start = "fastapi run src/main.py --port 8080"
-lint = "ruff check ."
+lint = "ruff check --fix --unsafe-fixes ."
 format = "ruff format ."
 check = ["lint", "format"]
 typecheck = "mypy src"

@@ -52,7 +52,7 @@ migrate = "alembic upgrade head"
 "migrate-down" = "alembic downgrade -1"
 
 # Linting & Formatting
-lint = "ruff check ."
+lint = "ruff check --fix --unsafe-fixes ."
 format = "ruff format ."
 check = ["lint", "format"]
 
