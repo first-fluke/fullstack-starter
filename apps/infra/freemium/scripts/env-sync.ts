@@ -239,23 +239,16 @@ async function injectVercelEnvVars(
 function ensureEnvExampleKeys(filePath: string, keys: string[]): void {
   let content = "";
 
-  if (existsSync(filePath)) {
+  try {
     content = readFileSync(filePath, "utf-8");
-  } else {
-    // Create empty file
-    writeFileSync(filePath, "", "utf-8");
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
     console.log(`  [created] ${filePath}`);
   }
 
-  const lines = content.split("\n");
-  const missing: string[] = [];
-
-  for (const key of keys) {
-    const hasKey = lines.some((line) => line.startsWith(`${key}=`));
-    if (!hasKey) {
-      missing.push(key);
-    }
-  }
+  const missing = keys.filter(
+    (key) => !content.split("\n").some((line) => line.startsWith(`${key}=`)),
+  );
 
   if (missing.length === 0) {
     console.log(`  [ok] ${filePath} — all keys present`);
@@ -267,7 +260,7 @@ function ensureEnvExampleKeys(filePath: string, keys: string[]): void {
     missing.map((k) => `${k}=`).join("\n") +
     "\n";
 
-  appendFileSync(filePath, toAppend, "utf-8");
+  writeFileSync(filePath, content + toAppend, "utf-8");
 
   for (const key of missing) {
     console.log(`  [added] ${key} to ${filePath}`);
