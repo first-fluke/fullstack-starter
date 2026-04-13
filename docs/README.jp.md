@@ -116,7 +116,7 @@ graph TB
 | **ドメインエージェント** | フロントエンド、バックエンド、モバイル、インフラエージェントが優先度順に並列実行 |
 | **QA エージェント** | セキュリティ（OWASP）、パフォーマンス、アクセシビリティ（WCAG 2.1 AA）のレビュー |
 
-> 完全なオーケストレーションワークフローは [`.agents/workflows/coordinate.md`](../.agents/workflows/coordinate.md) をご覧ください。
+> 完全なオーケストレーションワークフローは [`.agents/workflows/work.md`](../.agents/workflows/work.md) をご覧ください。
 
 ## クイックスタート
 

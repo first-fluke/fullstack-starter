@@ -116,7 +116,7 @@ graph TB
 | **Agentes de Domínio** | Agentes Frontend, Backend, Mobile, Infra executam tarefas em paralelo por prioridade |
 | **Agente QA** | Revisa segurança (OWASP), performance, acessibilidade (WCAG 2.1 AA) |
 
-> Consulte [`.agents/workflows/coordinate.md`](../.agents/workflows/coordinate.md) para o fluxo de orquestração completo.
+> Consulte [`.agents/workflows/work.md`](../.agents/workflows/work.md) para o fluxo de orquestração completo.
 
 ## Início Rápido
 
