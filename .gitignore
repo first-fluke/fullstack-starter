@@ -76,3 +76,6 @@ apps/mobile/.packages
 !.serena/memories/.gitkeep
 
 .omc/
+
+# oh-my-agent runtime state
+.agents/state/
