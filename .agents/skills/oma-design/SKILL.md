@@ -70,21 +70,58 @@ DESIGN.md is the central artifact — all design work revolves around it.
 7 phases: Setup → Extract → Enhance → Propose → Generate → Audit → Handoff.
 See `resources/execution-protocol.md` for full detail.
 
+## Vendor Inspiration (getdesign)
+
+Phase 2 can optionally seed from the community
+[getdesign](https://getdesign.md) catalog
+([VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md),
+MIT). Trigger it by listing a supported vendor domain in the
+`## Reference Sites` section of your `.design-context.md`:
+
+```markdown
+## Reference Sites
+- [linear.app](https://linear.app) — clean dark UI, minimal, professional
+- [stripe.com](https://stripe.com) — strong hierarchy, purposeful animation
+```
+
+Any domain that matches a brand in the getdesign manifest triggers an
+automatic fetch + hash-verify + load during Phase 2. No new fields, no
+extra config. Full vendor list: see `bunx getdesign@latest list`
+(telemetry is always disabled by oma-design).
+
+**Seed, not final.** oma-design treats vendor templates as inspiration
+and synthesizes a project-specific DESIGN.md around them. Importantly:
+- **Typography is never adopted from the seed.** Rule #2 (system font
+  stack default) and Rule #3 (Pretendard Variable / Noto Sans CJK for
+  ko/ja/zh) always win over the vendor's latin-only fonts.
+- **Anti-patterns are pre-audited** before synthesis. If a vendor uses
+  heavy glassmorphism or purple gradients, Phase 4 will surface the
+  choice explicitly rather than copy the pattern silently.
+- **Offline is fine.** If the fetch fails, you get a 3-option dialog
+  (retry / continue without seed / abort). Default: continue.
+
+Attribution is appended to the generated `DESIGN.md` in Phase 7 as a
+required MIT compliance footer. Full fetcher rules, matching algorithm,
+injection defenses, and multi-vendor merge policy live in
+`resources/getdesign-fetcher.md`.
+
 ## Resources
 - `resources/execution-protocol.md` — 7-phase workflow
 - `resources/anti-patterns.md` — Full DO/DON'T catalog
 - `resources/checklist.md` — Audit checklist (Responsive + WCAG + Nielsen + Slop)
-- `resources/design-md-spec.md` — DESIGN.md generation guide
+- `resources/design-md-spec.md` — DESIGN.md generation guide (9 sections)
 - `resources/design-tokens.md` — CSS/Tailwind/shadcn export templates
 - `resources/prompt-enhancement.md` — Vague request → detailed spec
 - `resources/stitch-integration.md` — Stitch MCP tool mapping (optional)
+- `resources/getdesign-fetcher.md` — Vendor seed fetch, hash verify, seed rules
 - `resources/error-playbook.md` — Design error recovery
 
 ## References
+- `reference/visual-hierarchy.md` — 7 hierarchy principles (Alignment, Color, Contrast, Proximity, Size, Texture, Time)
 - `reference/typography.md` — Font selection, type scale, CJK
 - `reference/color-and-contrast.md` — Color psychology, WCAG contrast
 - `reference/spatial-design.md` — 8px grid, breakpoints, spacing
-- `reference/motion-design.md` — motion/react, GSAP, Three.js, ogl
+- `reference/motion-design.md` — motion/react, GSAP, Three.js, ogl, Temporal UX
 - `reference/responsive-design.md` — Mobile-first, theme system
 - `reference/component-patterns.md` — shadcn/Aceternity/React Bits catalog
 - `reference/accessibility.md` — WCAG 2.2, ARIA, focus, reduced-motion

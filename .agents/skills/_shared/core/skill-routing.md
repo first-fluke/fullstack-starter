@@ -23,6 +23,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | style, Tailwind, responsive, CSS | **oma-frontend** | |
 | mobile, iOS, Android, Flutter, React Native, app | **oma-mobile** | |
 | offline, push notification, camera, GPS | **oma-mobile** | |
+| architecture, system design, software design, module boundary, service boundary, tradeoff, ADR, ATAM, CBAM, quality attribute | **oma-architecture** | Consult before planning when the structure itself is undecided |
 | bug, error, crash, broken, slow | **oma-debug** | |
 | review, security, performance | **oma-qa** | |
 | accessibility, WCAG, a11y | **oma-qa** | |
@@ -31,6 +32,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | plan, breakdown, task, sprint | **oma-pm** | |
 | automatic, parallel, orchestrate | **oma-orchestrator** | |
 | workflow, guide, manual, step-by-step | **oma-coordination** | |
+| configuration management, SCM, CM, git, commit, gitflow, GitHub Flow, GitLab Flow, trunk-based branching, merge conflict, rebase, worktree, baseline, tag, release branch, signed commits, merge queue, conventional commits | **oma-scm** | SCM + Conventional Commits in one skill |
 
 ---
 
@@ -41,6 +43,8 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | "Create a fullstack app" | oma-pm → (oma-backend + oma-frontend) parallel → oma-qa |
 | "Create a mobile app" | oma-pm → (oma-backend + oma-mobile) parallel → oma-qa |
 | "Fullstack + mobile" | oma-pm → (oma-backend + oma-frontend + oma-mobile) parallel → oma-qa |
+| "Help me choose the system architecture" | oma-architecture → oma-pm |
+| "Review this architecture before we build" | oma-architecture → oma-pm → oma-qa |
 | "Fix bug and review" | oma-debug → oma-qa |
 | "Add feature and test" | oma-pm → relevant agent → oma-qa |
 | "I have an idea for a feature" | oma-brainstorm → oma-pm → relevant agents → oma-qa |
@@ -61,6 +65,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 - oma-frontend + oma-mobile (independent of each other)
 
 ### Sequential Execution Required
+- oma-architecture → oma-pm (architecture decision comes before task decomposition)
 - oma-brainstorm → oma-pm (design comes before planning)
 - oma-pm → all other agents (planning comes first)
 - implementation agent → oma-qa (review after implementation complete)
@@ -79,7 +84,7 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 |-----------|------------------|
 | Agent finds bug in different domain | Create task for oma-debug |
 | QA finds CRITICAL issue | Re-run relevant domain agent |
-| Architecture change needed | Request re-planning from oma-pm |
+| Architecture change needed | oma-architecture → oma-pm |
 | Performance issue found (during implementation) | Current agent fixes, oma-debug if severe |
 | API contract mismatch | oma-orchestrator re-runs oma-backend |
 
@@ -93,5 +98,6 @@ Skills are explicitly loaded via /command invocation or agent skills field. Load
 | oma-backend | 20 | 30 |
 | oma-frontend | 20 | 30 |
 | oma-mobile | 20 | 30 |
+| oma-architecture | 12 | 18 |
 | oma-debug | 15 | 25 |
 | oma-qa | 15 | 20 |

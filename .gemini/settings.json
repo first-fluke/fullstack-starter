@@ -2,27 +2,53 @@
   "hooks": {
     "BeforeAgent": [
       {
-        "matcher": "*",
         "hooks": [
           {
+            "name": "keyword-detector",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/keyword-detector.ts\"",
-            "timeout": 5
+            "command": "\"/home/runner/.bun/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/keyword-detector.ts\"",
+            "timeout": 5000
           }
-        ]
+        ],
+        "matcher": "*"
       }
     ],
     "AfterAgent": [
       {
-        "matcher": "*",
         "hooks": [
           {
+            "name": "persistent-mode",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
-            "timeout": 5
+            "command": "\"/home/runner/.bun/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
+            "timeout": 5000
           }
-        ]
+        ],
+        "matcher": "*"
+      }
+    ],
+    "BeforeTool": [
+      {
+        "hooks": [
+          {
+            "name": "test-filter",
+            "type": "command",
+            "command": "\"/home/runner/.bun/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/test-filter.ts\"",
+            "timeout": 5000
+          }
+        ],
+        "matcher": "run_shell_command"
       }
     ]
+  },
+  "general": {
+    "enableNotifications": true
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "mcpServers": {
+    "serena": {
+      "url": "http://localhost:12341/mcp"
+    }
   }
 }

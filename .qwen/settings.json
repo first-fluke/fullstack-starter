@@ -4,8 +4,9 @@
       {
         "hooks": [
           {
+            "name": "keyword-detector",
             "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/keyword-detector.ts\"",
+            "command": "\"/home/runner/.bun/bin/bun\" \"$QWEN_PROJECT_DIR/.qwen/hooks/keyword-detector.ts\"",
             "timeout": 5
           }
         ]
@@ -15,11 +16,25 @@
       {
         "hooks": [
           {
+            "name": "persistent-mode",
             "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/persistent-mode.ts\"",
+            "command": "\"/home/runner/.bun/bin/bun\" \"$QWEN_PROJECT_DIR/.qwen/hooks/persistent-mode.ts\"",
             "timeout": 5
           }
         ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "name": "test-filter",
+            "type": "command",
+            "command": "\"/home/runner/.bun/bin/bun\" \"$QWEN_PROJECT_DIR/.qwen/hooks/test-filter.ts\"",
+            "timeout": 5
+          }
+        ],
+        "matcher": "Bash"
       }
     ]
   }

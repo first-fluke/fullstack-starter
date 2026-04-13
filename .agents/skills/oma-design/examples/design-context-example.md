@@ -53,6 +53,17 @@ The file lives in the project root and captures project-specific design decision
 - [vercel.com](https://vercel.com) — developer-premium aesthetic, great typography
 - [stripe.com](https://stripe.com) — strong hierarchy, purposeful animation
 
+> **Note**: every domain in this section is automatically matched
+> against the `getdesign` vendor catalog during Phase 1. All three
+> entries above resolve to community templates (`linear.app`, `vercel`,
+> `stripe`) and will be fetched as Phase 2 seeds. To opt a URL out of
+> vendor matching, use a domain that is not in the catalog (e.g., an
+> internal design reference or a custom portfolio URL). See
+> `resources/getdesign-fetcher.md` for the matching algorithm and the
+> Seed Application Rules — notably, Typography is never adopted from
+> the vendor seed, so the Pretendard Variable choice in this file will
+> still win on the Korean-localized project above.
+
 ## Component Preferences
 - **Base**: shadcn/ui for all foundational components
 - **Effects**: Aceternity UI for hero parallax, React Bits for text animations

@@ -1,5 +1,5 @@
 // Claude Code Hook Types for oh-my-agent
-// Shared across Claude Code, Codex CLI, Gemini CLI, and Qwen Code
+// Shared across Claude Code, Codex CLI, Cursor, Gemini CLI, and Qwen Code
 
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -27,7 +27,7 @@ export function resolveGitRoot(startDir: string): string {
 
 // --- Vendor Detection ---
 
-export type Vendor = "claude" | "codex" | "gemini" | "qwen";
+export type Vendor = "claude" | "codex" | "cursor" | "gemini" | "qwen";
 
 // --- Hook Input (unified) ---
 
@@ -37,6 +37,7 @@ export interface HookInput {
   session_id?: string;
   hook_event_name?: string;
   cwd?: string;
+  workspace_roots?: string[];
   // Gemini: AfterAgent fields
   prompt_response?: string;
   stop_hook_active?: boolean;
@@ -55,6 +56,15 @@ export function makePromptOutput(
       return JSON.stringify({ additionalContext });
     case "codex":
       return JSON.stringify({
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext,
+        },
+      });
+    case "cursor":
+      return JSON.stringify({
+        additionalContext,
+        additional_context: additionalContext,
         hookSpecificOutput: {
           hookEventName: "UserPromptSubmit",
           additionalContext,
@@ -82,11 +92,44 @@ export function makeBlockOutput(vendor: Vendor, reason: string): string {
   switch (vendor) {
     case "claude":
     case "codex":
+    case "cursor":
     case "qwen":
       return JSON.stringify({ decision: "block", reason });
     case "gemini":
       // Gemini AfterAgent uses "deny" to reject response and force retry
       return JSON.stringify({ decision: "deny", reason });
+  }
+}
+
+// --- PreToolUse Output Builder ---
+
+export function makePreToolOutput(
+  vendor: Vendor,
+  updatedInput: Record<string, unknown>,
+): string {
+  switch (vendor) {
+    case "gemini":
+      return JSON.stringify({
+        decision: "rewrite",
+        tool_input: updatedInput,
+      });
+    case "cursor":
+      return JSON.stringify({
+        updated_input: updatedInput,
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          updatedInput,
+        },
+      });
+    case "claude":
+    case "codex":
+    case "qwen":
+      return JSON.stringify({
+        hookSpecificOutput: {
+          hookEventName: "PreToolUse",
+          updatedInput,
+        },
+      });
   }
 }
 

@@ -21,6 +21,15 @@ If it does not exist:
 
 **MUST complete before proceeding. Never skip context gathering.**
 
+### Vendor Inspiration Detection
+After `.design-context.md` exists (either newly created or already present):
+1. Parse the `## Reference Sites` section (if any) and extract bare
+   domains (`linear.app`, `stripe.com`, …).
+2. Load `resources/getdesign-fetcher.md` and run its Matching Algorithm
+   against the live `getdesign@latest` manifest.
+3. Hold the resolved brand list in memory for Phase 2. No disk write.
+4. If zero matches, continue silently — vendor inspiration is optional.
+
 ### Stitch MCP Check (Optional)
 If the user wants to use Stitch for design extraction or generation:
 1. Check if Stitch MCP is available: look for stitch-related tools
@@ -34,28 +43,56 @@ If the user wants to use Stitch for design extraction or generation:
 
 ## Phase 2: EXTRACT (Optional)
 
-If a reference URL or Stitch project exists:
+Phase 2 runs through branches in priority order. Use the first branch
+that has data; subsequent branches are fallbacks.
 
-### With Stitch MCP
+### Branch A — Stitch MCP (highest priority when available)
 1. `list_projects` → find the relevant project
 2. `get_project` → extract `designTheme` (colors, fonts, roundness)
 3. `list_screens` → enumerate all screens
 4. `get_screen_code` → download HTML/CSS for analysis
 5. Extract design tokens → synthesize into DESIGN.md draft
 
-### Without Stitch
-1. If URL provided: fetch and analyze HTML/CSS directly
-2. Extract: font families, color values, spacing patterns, component structures
-3. Translate raw values into semantic DESIGN.md format
+### Branch B — getdesign Vendor Seed
+Triggered when Phase 1 resolved at least one vendor brand from the
+`## Reference Sites` section.
 
-### No Reference
+1. For each resolved brand: follow `resources/getdesign-fetcher.md`
+   steps — fetch via `bunx getdesign@latest add <brand> --out <tmp>`
+   with `GETDESIGN_DISABLE_TELEMETRY=1`, verify the SHA256 against the
+   manifest `templateHash`, then load the file into context with the
+   prompt-injection framing described in the fetcher doc.
+2. Run an immediate **pre-audit** of each seed against
+   `resources/anti-patterns.md`. Record any anti-pattern violations
+   (glassmorphism density, purple gradients, nested cards, etc.) to
+   surface in Phase 4 PROPOSE.
+3. Delete all temp files once context is loaded.
+4. Apply the Seed Application Rules from the fetcher doc: adopt
+   color/spacing/components/depth/responsive; reject typography;
+   rewrite theme/do-don't/agent-prompt-guide in Phase 5.
+
+### Branch C — Reference URL (no Stitch, no vendor seed)
+1. If the user supplied a URL that did not match any getdesign brand:
+   fetch and analyze HTML/CSS directly.
+2. Extract: font families, color values, spacing patterns, component
+   structures.
+3. Translate raw values into the 9-section DESIGN.md format
+   (`resources/design-md-spec.md`).
+
+### Branch D — No Reference
 Skip to Phase 3.
 
 ---
 
 ## Phase 3: ENHANCE (Prompt Augmentation)
 
-If the user request is vague (< 3 sentences, no section details):
+**Skip Phase 3 entirely if Phase 2 Branch B (getdesign vendor seed) was
+triggered** — a vendor seed already carries section-by-section detail,
+so further prompt enhancement would duplicate work. Jump straight to
+Phase 4 PROPOSE.
+
+Otherwise, if the user request is vague (< 3 sentences, no section
+details):
 
 1. Load `resources/prompt-enhancement.md`
 2. Transform the request into a section-by-section specification:
@@ -69,6 +106,7 @@ If the request is already detailed: skip to Phase 4.
 
 ## Phase 4: PROPOSE (Multi-Concept)
 
+### Default — No vendor seed
 Present 2-3 distinct design directions. Each direction must include:
 
 1. **Color palette**: 5-7 colors with semantic names and functional roles
@@ -80,6 +118,30 @@ Present 2-3 distinct design directions. Each direction must include:
 
 Present as a comparison table with pros/cons for each direction.
 
+### Vendor seed override (Branch B was triggered in Phase 2)
+Replace the "2-3 distinct directions" rule with a **3-variation
+formula** anchored on the seed:
+
+- **A — Faithful**: stay as close to the vendor template as possible;
+  apply only the mandatory Seed Application Rules (typography override
+  for CJK, anti-pattern removal flagged in Phase 2 pre-audit).
+- **B — Hybrid**: blend the seed's color/spacing/components with the
+  project's brand tone from `.design-context.md`. This is usually the
+  best default for production work.
+- **C — Loose inspiration**: keep only the seed's structural patterns
+  (rhythm, density, component philosophy) and rebuild the visual layer
+  from the project brand.
+
+For each variation, include the pre-audit violations from Phase 2 with
+a note on whether that variation keeps or removes them. Users must
+consciously choose to keep any anti-patterns.
+
+### Multi-vendor merge
+If two or more vendors matched in Phase 1, do not auto-blend. Present
+the dimension-level selection dialog from
+`resources/getdesign-fetcher.md` ("Multi-Vendor Merge Policy") before
+presenting variations A/B/C.
+
 **MUST get user confirmation on the chosen direction before proceeding.**
 
 ---
@@ -88,12 +150,20 @@ Present as a comparison table with pros/cons for each direction.
 
 Based on the chosen direction:
 
-1. Write `DESIGN.md` following `resources/design-md-spec.md` (6 sections)
-2. Output design tokens in applicable formats:
+1. Write `DESIGN.md` following `resources/design-md-spec.md`
+   (9 sections — including the mandatory Section 9 "Agent Prompt
+   Guide" with Quick Color Reference, Example Component Prompts, and
+   Iteration Guide).
+2. If a vendor seed fed Phase 2, apply the Seed Application Rules from
+   `resources/getdesign-fetcher.md`: adopt color/spacing/components/
+   depth/responsive from the seed; rewrite typography, visual theme,
+   do-don't, and agent prompt guide from scratch using project
+   context.
+3. Output design tokens in applicable formats:
    - CSS Custom Properties (`:root { --color-primary: ... }`)
    - Tailwind config extensions (`theme.extend.colors`)
    - shadcn/ui theme variables (if shadcn is in use)
-3. Generate component code if requested by the user
+4. Generate component code if requested by the user
 
 ### Responsive-First Rule
 ALL generated designs MUST be responsive by default. Never produce desktop-only layouts.
@@ -111,6 +181,12 @@ Every section must specify:
 ---
 
 ## Phase 6: AUDIT
+
+The final audit below runs against the synthesized DESIGN.md. Note
+that Phase 2 Branch B already ran a **pre-audit** on any vendor seeds
+before synthesis — those findings should appear as decisions in the
+final DESIGN.md Section 7 (Do's and Don'ts) rather than as violations
+here.
 
 Load `resources/checklist.md` and run all checks in order:
 
@@ -150,9 +226,13 @@ Fix violations automatically where possible, or report to user with recommendati
 
 ## Phase 7: HANDOFF
 
-1. Save `DESIGN.md` to the project root
-2. Update `.design-context.md` if new decisions were made
-3. Write design token files if not already written
-4. Inform the user:
+1. Save `DESIGN.md` to the project root.
+2. If Phase 2 Branch B fired, append the **License Attribution** block
+   from `resources/getdesign-fetcher.md` as the final section of
+   `DESIGN.md`. This is mandatory for MIT compliance.
+3. Update `.design-context.md` if new decisions were made.
+4. Write design token files if not already written.
+5. Ensure temp seed files from Phase 2 Branch B have been deleted.
+6. Inform the user:
    > "Design complete. DESIGN.md has been created.
    >  To implement, delegate to oma-frontend or run /orchestrate."

@@ -1,0 +1,41 @@
+{
+  "$schema": "./agent-variant.schema.json",
+  "vendor": "gemini",
+  "destDir": ".gemini/agents",
+  "modelDefault": "gemini-3-flash-preview",
+  "toolsDefault": [
+    "bash",
+    "glob",
+    "grep",
+    "read",
+    "edit",
+    "write",
+    "ask"
+  ],
+  "protocolPath": ".agents/skills/_shared/runtime/execution-protocols/gemini.md",
+  "agents": {
+    "backend-engineer": {},
+    "frontend-engineer": {},
+    "db-engineer": {},
+    "debug-investigator": {},
+    "mobile-engineer": {},
+    "pm-planner": {
+      "tools": [
+        "bash",
+        "glob",
+        "grep",
+        "read",
+        "ask"
+      ]
+    },
+    "qa-reviewer": {
+      "tools": [
+        "bash",
+        "glob",
+        "grep",
+        "read",
+        "ask"
+      ]
+    }
+  }
+}
