@@ -1,0 +1,21 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "cursor",
+  "hookDir": ".cursor/hooks",
+  "settingsFile": ".cursor/hooks.json",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "events": {
+    "UserPromptSubmit": {
+      "hook": "keyword-detector.ts",
+      "timeout": 5
+    },
+    "beforeSubmitPrompt": {
+      "hook": "keyword-detector.ts",
+      "timeout": 5
+    }
+  },
+  "extra": {
+    "version": 1
+  }
+}

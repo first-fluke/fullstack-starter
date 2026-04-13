@@ -33,10 +33,11 @@ The detected vendor determines how agents are spawned (Step 3) and monitored (St
 
 ## Step 1: Load or Create Plan
 
-Check if `.agents/plan.json` exists.
+Look for a plan file:
 
-- If yes: load it and proceed to Step 2.
-- If no: ask the user to run `/plan` first, or ask them to describe the tasks to execute.
+1. Check `.agents/results/plan-{sessionId}.json` (current session's plan).
+2. If not found: find the most recent `.agents/results/plan-*.json` file.
+3. If none exist: ask the user to run `/plan` first, or ask them to describe the tasks to execute.
 - **Do NOT proceed without a plan.**
 
 ---

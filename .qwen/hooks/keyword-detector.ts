@@ -18,9 +18,22 @@ import { type Vendor, type ModeState, makePromptOutput, resolveGitRoot } from ".
 
 // ── Vendor Detection ──────────────────────────────────────────
 
+function inferVendorFromScriptPath(): Vendor | null {
+  const path = import.meta.path;
+  if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
+  if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
+  if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
+  if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
+  if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
+  return null;
+}
+
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
+  const byScriptPath = inferVendorFromScriptPath();
+  if (byScriptPath) return byScriptPath;
   if (event === "BeforeAgent") return "gemini";
+  if (event === "beforeSubmitPrompt") return "cursor";
   if (event === "UserPromptSubmit") {
     // Codex uses snake_case session_id, Claude uses camelCase sessionId
     if ("session_id" in input && !("sessionId" in input)) return "codex";
@@ -37,6 +50,7 @@ function getProjectDir(
   let dir: string;
   switch (vendor) {
     case "codex":
+    case "cursor":
       dir = (input.cwd as string) || process.cwd();
       break;
     case "gemini":

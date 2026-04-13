@@ -50,7 +50,7 @@ Activate PM Agent to execute Steps 1-4:
 4. Execute Plan Review - Completeness (Step 2).
 5. Execute Meta Review (Step 3).
 6. Execute Over-Engineering Review (Step 4).
-7. Save plan to `.agents/plan.json`.
+7. Save plan to `.agents/results/plan-{sessionId}.json`.
 8. Create `task-board.md` in memory path for dashboard compatibility.
 9. Use memory write tool to record plan completion.
 

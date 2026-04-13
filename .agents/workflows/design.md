@@ -39,24 +39,42 @@ If it does not exist:
    - Accessibility requirements? (WCAG AA / AAA / none specified)
 3. Save answers to `.design-context.md`
 
+Then parse the `## Reference Sites` section (if any) and resolve each
+domain against the live `getdesign@latest` manifest — see
+`resources/getdesign-fetcher.md`. Hold matched brands in memory for
+Phase 2 Branch B. No vendor match = no branch activated.
+
 **Do NOT proceed until design context is established.**
 
 ---
 
 ## Phase 2: EXTRACT (Optional)
 
-If a reference URL or Stitch project exists:
-- Load `resources/stitch-integration.md` if Stitch MCP is available
-- Extract design tokens from source → DESIGN.md draft
-- Follow the 5-stage pipeline: Retrieval → Extraction → Translation → Synthesis → Alignment
+Run branches in priority order, use the first with data:
 
-If no reference: skip to Phase 3.
+- **Branch A — Stitch MCP**: load `resources/stitch-integration.md` if
+  Stitch MCP is available; extract designTheme + screens.
+- **Branch B — getdesign Vendor Seed**: if Phase 1 matched any vendor,
+  follow `resources/getdesign-fetcher.md` — fetch via
+  `bunx getdesign@latest add <brand> --out <tmp> --force` with
+  `GETDESIGN_DISABLE_TELEMETRY=1`, verify SHA256 against manifest,
+  load with prompt-injection framing, run anti-pattern pre-audit,
+  delete temp.
+- **Branch C — Reference URL**: fetch and analyze HTML/CSS directly.
+- **Branch D — No reference**: skip to Phase 3.
+
+Every branch ends by feeding the 5-stage pipeline:
+Retrieval → Extraction → Translation → Synthesis → Alignment.
 
 ---
 
 ## Phase 3: ENHANCE (Prompt Augmentation)
 
-If the user request is vague (< 3 sentences, no section details):
+**Skip if Phase 2 Branch B fired.** Vendor seeds already supply section
+detail.
+
+Otherwise, if the user request is vague (< 3 sentences, no section
+details):
 - Load `resources/prompt-enhancement.md`
 - Transform into section-by-section specification
 - Present enhanced prompt to user for confirmation
@@ -68,12 +86,19 @@ If already detailed: skip to Phase 4.
 ## Phase 4: PROPOSE (Multi-Concept)
 
 // turbo
-Present 2-3 distinct design directions. Each direction includes:
+Default (no vendor seed): present 2-3 distinct design directions. Each
+direction includes:
 - Color palette (5-7 colors with semantic names and functional roles)
 - Typography pairing (system fonts default, custom only with justification)
 - Layout approach (chess / grid / bento / full-bleed / mixed)
 - Motion strategy (scroll-driven / hover-based / entrance-only / minimal)
 - Recommended component libraries (shadcn base + Aceternity / React Bits accents)
+
+Vendor seed present: override with the 3-variation formula —
+A Faithful, B Hybrid, C Loose inspiration — and surface any
+anti-patterns flagged in the Phase 2 pre-audit. Multi-vendor merges
+require the dimension-level selection dialog from
+`resources/getdesign-fetcher.md`.
 
 **You MUST get user confirmation on the chosen direction before proceeding.**
 
@@ -83,12 +108,17 @@ Present 2-3 distinct design directions. Each direction includes:
 
 // turbo
 Based on the chosen direction:
-1. Write `DESIGN.md` following `resources/design-md-spec.md` (6 sections)
-2. Output design tokens:
+1. Write `DESIGN.md` following `resources/design-md-spec.md` (9 sections,
+   including the mandatory Agent Prompt Guide in Section 9)
+2. If a vendor seed is in play: apply Seed Application Rules from
+   `resources/getdesign-fetcher.md` — adopt color/spacing/components/
+   depth/responsive; rewrite typography for CJK projects; never copy
+   the seed's Agent Prompt Guide verbatim.
+3. Output design tokens:
    - CSS Custom Properties
    - Tailwind config extensions
    - shadcn/ui theme variables (if applicable)
-3. Generate component code if requested
+4. Generate component code if requested
 
 ### Responsive-First Rule (MANDATORY)
 ALL output must be responsive by default. Never produce desktop-only layouts.
@@ -115,7 +145,11 @@ Fix violations or report to user with recommendations.
 ## Phase 7: HANDOFF
 
 1. Save `DESIGN.md` to the project root
-2. Update `.design-context.md` if new decisions were made
-3. Write design token files if not already written
-4. Inform the user:
+2. If Phase 2 Branch B fired, append the License Attribution block
+   from `resources/getdesign-fetcher.md` to the bottom of `DESIGN.md`
+   (mandatory for MIT compliance).
+3. Update `.design-context.md` if new decisions were made
+4. Write design token files if not already written
+5. Verify all temp seed files have been deleted
+6. Inform the user:
    > "Design complete. DESIGN.md has been created. To implement, delegate to oma-frontend or run /orchestrate."

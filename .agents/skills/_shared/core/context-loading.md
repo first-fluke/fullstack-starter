@@ -84,6 +84,17 @@ This saves context window and prevents confusion from irrelevant information.
 | Full audit           | checklist.md (full) + self-check.md                 |
 | Quality scoring      | quality-score.md (measurement protocol via Bash)    |
 
+### Architecture Agent
+
+| Task Type                    | Required Resources                                                         |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| Architecture recommendation  | methodology-selection.md + output-templates.md                             |
+| Design review                | methodology-selection.md + checklist.md + stakeholder-synthesis.md         |
+| Design-twice comparison      | methodology-selection.md + stakeholder-synthesis.md + examples.md          |
+| ATAM-style analysis          | methodology-selection.md + stakeholder-synthesis.md + output-templates.md  |
+| CBAM-style prioritization    | methodology-selection.md + output-templates.md                             |
+| ADR generation               | output-templates.md                                                        |
+
 ### Developer Workflow Expert
 
 | Task Type                   | Required Resources                                            |
