@@ -122,13 +122,16 @@ export function makePreToolOutput(
         },
       });
     case "claude":
-    case "codex":
-    case "qwen":
       return JSON.stringify({
         hookSpecificOutput: {
           hookEventName: "PreToolUse",
           updatedInput,
         },
+      });
+    case "codex":
+    case "qwen":
+      return JSON.stringify({
+        updated_input: updatedInput,
       });
   }
 }

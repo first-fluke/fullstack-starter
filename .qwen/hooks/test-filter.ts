@@ -2,16 +2,27 @@
 // Works with: Claude Code, Codex CLI, Gemini CLI, Qwen Code
 
 import { resolveGitRoot, makePreToolOutput, type Vendor } from "./types.ts";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 // --- Vendor detection (same logic as keyword-detector.ts) ---
 
+function inferVendorFromScriptPath(): Vendor | null {
+  const path = import.meta.path;
+  if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
+  if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
+  if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
+  if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
+  if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
+  return null;
+}
+
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
+  const byScriptPath = inferVendorFromScriptPath();
+  if (byScriptPath) return byScriptPath;
   if (event === "BeforeTool") return "gemini";
-  if (event === "PreToolUse") {
-    if ("session_id" in input && !("sessionId" in input)) return "codex";
-  }
+  if (event === "PreToolUse" && "session_id" in input) return "codex";
   if (process.env.QWEN_PROJECT_DIR) return "qwen";
   return "claude";
 }
@@ -129,6 +140,9 @@ if (isExcluded) process.exit(0);
 const vendor = detectVendor(input);
 const projectDir = getProjectDir(vendor, input);
 const filterScript = join(projectDir, getHookDir(vendor), "filter-test-output.sh");
+
+// Skip filtering if the script doesn't exist (hooks not fully installed)
+if (!existsSync(filterScript)) process.exit(0);
 
 // Rewrite command to pipe through filter
 const filteredCmd = `set -o pipefail; (${command}) 2>&1 | bash "${filterScript}"`;

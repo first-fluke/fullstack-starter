@@ -6,7 +6,7 @@
           {
             "name": "keyword-detector",
             "type": "command",
-            "command": "\"/home/runner/.bun/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts\"",
+            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts\"",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
           {
             "name": "persistent-mode",
             "type": "command",
-            "command": "\"/home/runner/.bun/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/persistent-mode.ts\"",
+            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/persistent-mode.ts\"",
             "timeout": 5
           }
         ]
@@ -30,7 +30,7 @@
           {
             "name": "test-filter",
             "type": "command",
-            "command": "\"/home/runner/.bun/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/test-filter.ts\"",
+            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/test-filter.ts\"",
             "timeout": 5
           }
         ],
@@ -40,7 +40,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "\"/home/runner/.bun/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
+    "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
   },
   "permissions": {
     "allow": [

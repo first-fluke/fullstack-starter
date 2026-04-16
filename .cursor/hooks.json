@@ -6,7 +6,7 @@
           {
             "name": "keyword-detector",
             "type": "command",
-            "command": "\"/home/runner/.bun/bin/bun\" .cursor/hooks/keyword-detector.ts",
+            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" .cursor/hooks/keyword-detector.ts",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
           {
             "name": "keyword-detector",
             "type": "command",
-            "command": "\"/home/runner/.bun/bin/bun\" .cursor/hooks/keyword-detector.ts",
+            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" .cursor/hooks/keyword-detector.ts",
             "timeout": 5
           }
         ]

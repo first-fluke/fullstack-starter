@@ -53,12 +53,22 @@ function loadPersistentWorkflows(): string[] {
 
 // ── Vendor Detection ──────────────────────────────────────────
 
+function inferVendorFromScriptPath(): Vendor | null {
+  const path = import.meta.path;
+  if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
+  if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
+  if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
+  if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
+  if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
+  return null;
+}
+
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
+  const byScriptPath = inferVendorFromScriptPath();
+  if (byScriptPath) return byScriptPath;
   if (event === "AfterAgent") return "gemini";
-  if (event === "Stop") {
-    if ("session_id" in input && !("sessionId" in input)) return "codex";
-  }
+  if (event === "Stop" && "session_id" in input) return "codex";
   if (process.env.QWEN_PROJECT_DIR) return "qwen";
   return "claude";
 }
@@ -203,11 +213,16 @@ async function main() {
       `  2. Or ask the user to say "워크플로우 완료" / "workflow done"`,
     ].join("\n");
 
-    process.stdout.write(makeBlockOutput(vendor, reason));
-    process.exit(2);
+    writeBlockAndExit(vendor, reason);
   }
 
   process.exit(0);
+}
+
+export function writeBlockAndExit(vendor: Vendor, reason: string): never {
+  process.stderr.write(reason);
+  process.stdout.write(makeBlockOutput(vendor, reason));
+  process.exit(2);
 }
 
 if (import.meta.main) {
