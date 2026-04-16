@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.0](https://github.com/first-fluke/fullstack-starter/compare/v2.17.1...v2.18.0) (2026-04-16)
+
+
+### Features
+
+* **root:** implement per-agent vendor dispatch and add new agents ([06ac5e1](https://github.com/first-fluke/fullstack-starter/commit/06ac5e12a9bb0b7931813db57369dd6402f1facb))
+
 ## [2.17.1](https://github.com/first-fluke/fullstack-starter/compare/v2.17.0...v2.17.1) (2026-04-07)
 
 
