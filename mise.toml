@@ -43,7 +43,11 @@ uv = "latest"
 flutter = "3.41.6"
 terraform = "1"
 hadolint = "latest"
+monodep = "0.1.1"
 "github:Infisical/cli" = "latest"
+
+[plugins]
+monodep = "https://github.com/gracefullight/mise-monodep-plugin"
 
 [tasks]
 "db:migrate" = { depends = ["//apps/api:migrate"], description = "Run database migrations" }
@@ -55,7 +59,7 @@ format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:f
 "i18n:build" = { depends = ["//packages/i18n:build"], description = "Build i18n files" }
 "infra:down" = { depends = ["//apps/api:infra:down"], description = "Stop local infrastructure" }
 "infra:up" = { depends = ["//apps/api:infra:up"], description = "Start local infrastructure" }
-install = { depends = ["//apps/web:install", "//apps/api:install", "//apps/worker:install", "//apps/mobile:install", "//packages/design-tokens:install", "//packages/i18n:install"], description = "Install all dependencies" }
+install = { run = "monodep install", description = "Install all dependencies and deduplicate" }
 lint = { depends = ["//apps/api:lint", "//apps/web:lint", "//apps/worker:lint"], description = "Lint all apps" }
 test = { depends = ["//apps/api:test", "//apps/web:test", "//apps/worker:test"], description = "Test all apps" }
 "tokens:build" = { depends = ["//packages/design-tokens:build"], description = "Build design tokens" }
