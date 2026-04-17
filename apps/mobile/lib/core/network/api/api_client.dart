@@ -12,8 +12,8 @@ class ApiClient {
   ApiClient(
     Dio dio, {
     String? baseUrl,
-  })  : _dio = dio,
-        _baseUrl = baseUrl;
+  }) : _dio = dio,
+       _baseUrl = baseUrl;
 
   final Dio _dio;
   final String? _baseUrl;
@@ -23,7 +23,9 @@ class ApiClient {
   FallbackService? _fallback;
   AuthenticationService? _authentication;
 
-  FallbackService get fallback => _fallback ??= FallbackService(_dio, baseUrl: _baseUrl);
+  FallbackService get fallback =>
+      _fallback ??= FallbackService(_dio, baseUrl: _baseUrl);
 
-  AuthenticationService get authentication => _authentication ??= AuthenticationService(_dio, baseUrl: _baseUrl);
+  AuthenticationService get authentication =>
+      _authentication ??= AuthenticationService(_dio, baseUrl: _baseUrl);
 }

@@ -14,10 +14,10 @@ part 'service_status.g.dart';
 abstract class ServiceStatus with _$ServiceStatus {
   const factory ServiceStatus({
     required ServiceStatusStatus status,
-    @JsonKey(name: 'latency_ms')
-    num? latencyMs,
+    @JsonKey(name: 'latency_ms') num? latencyMs,
     String? error,
   }) = _ServiceStatus;
-  
-  factory ServiceStatus.fromJson(Map<String, Object?> json) => _$ServiceStatusFromJson(json);
+
+  factory ServiceStatus.fromJson(Map<String, Object?> json) =>
+      _$ServiceStatusFromJson(json);
 }

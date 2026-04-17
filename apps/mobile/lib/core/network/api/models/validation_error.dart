@@ -14,6 +14,7 @@ abstract class ValidationError with _$ValidationError {
     required String msg,
     required String type,
   }) = _ValidationError;
-  
-  factory ValidationError.fromJson(Map<String, Object?> json) => _$ValidationErrorFromJson(json);
+
+  factory ValidationError.fromJson(Map<String, Object?> json) =>
+      _$ValidationErrorFromJson(json);
 }

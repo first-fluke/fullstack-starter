@@ -12,20 +12,24 @@ enum HealthResponseStatus {
   degraded('degraded'),
   @JsonValue('unhealthy')
   unhealthy('unhealthy'),
+
   /// Default value for all unparsed values, allows backward compatibility when adding new values on the backend.
-  $unknown(null);
+  $unknown(null)
+  ;
 
   const HealthResponseStatus(this.json);
 
   factory HealthResponseStatus.fromJson(String json) => values.firstWhere(
-        (e) => e.json == json,
-        orElse: () => $unknown,
-      );
+    (e) => e.json == json,
+    orElse: () => $unknown,
+  );
 
   final String? json;
 
   @override
   String toString() => json?.toString() ?? super.toString();
+
   /// Returns all defined enum values excluding the $unknown value.
-  static List<HealthResponseStatus> get $valuesDefined => values.where((value) => value != $unknown).toList();
+  static List<HealthResponseStatus> get $valuesDefined =>
+      values.where((value) => value != $unknown).toList();
 }

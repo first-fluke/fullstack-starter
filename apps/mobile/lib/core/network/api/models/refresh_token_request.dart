@@ -11,9 +11,9 @@ part 'refresh_token_request.g.dart';
 @Freezed()
 abstract class RefreshTokenRequest with _$RefreshTokenRequest {
   const factory RefreshTokenRequest({
-    @JsonKey(name: 'refresh_token')
-    required String refreshToken,
+    @JsonKey(name: 'refresh_token') required String refreshToken,
   }) = _RefreshTokenRequest;
-  
-  factory RefreshTokenRequest.fromJson(Map<String, Object?> json) => _$RefreshTokenRequestFromJson(json);
+
+  factory RefreshTokenRequest.fromJson(Map<String, Object?> json) =>
+      _$RefreshTokenRequestFromJson(json);
 }
