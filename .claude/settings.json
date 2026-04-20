@@ -6,8 +6,14 @@
           {
             "name": "keyword-detector",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts\"",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts\"",
             "timeout": 5
+          },
+          {
+            "name": "skill-injector",
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-injector.ts\"",
+            "timeout": 3
           }
         ]
       }
@@ -18,7 +24,7 @@
           {
             "name": "persistent-mode",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/persistent-mode.ts\"",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/persistent-mode.ts\"",
             "timeout": 5
           }
         ]
@@ -30,7 +36,7 @@
           {
             "name": "test-filter",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/test-filter.ts\"",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/test-filter.ts\"",
             "timeout": 5
           }
         ],
@@ -40,7 +46,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
+    "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
   },
   "permissions": {
     "allow": [
@@ -57,10 +63,15 @@
     "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
-    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
+    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1",
+    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
+    "ENABLE_PROMPT_CACHING_1H": "1"
   },
   "attribution": {
     "commit": "Generated with oh-my-agent\n\nCo-Authored-By: First Fluke <our.first.fluke@gmail.com>",
     "pr": "Generated with [oh-my-agent](https://github.com/first-fluke/oh-my-agent)"
-  }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high"
 }
