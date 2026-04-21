@@ -6,8 +6,14 @@
           {
             "name": "keyword-detector",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/keyword-detector.ts\"",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/keyword-detector.ts\"",
             "timeout": 5000
+          },
+          {
+            "name": "skill-injector",
+            "type": "command",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/skill-injector.ts\"",
+            "timeout": 3000
           }
         ],
         "matcher": "*"
@@ -19,7 +25,7 @@
           {
             "name": "persistent-mode",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
             "timeout": 5000
           }
         ],
@@ -32,7 +38,7 @@
           {
             "name": "test-filter",
             "type": "command",
-            "command": "\"/Users/gracefullight/.local/share/mise/installs/bun/1.3.11/bin/bun\" \"$GEMINI_PROJECT_DIR/.gemini/hooks/test-filter.ts\"",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/test-filter.ts\"",
             "timeout": 5000
           }
         ],
