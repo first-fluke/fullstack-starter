@@ -1,0 +1,24 @@
+# User Preferences (Optional)
+# Project-specific user configuration
+#
+# This file is optional. Works with defaults if not present.
+# CLI priority: --vendor arg > agent_cli_mapping > default_cli > cli-config.yaml's active_vendor > gemini
+
+# Response language setting (ko, en, ja, zh, ...)
+language: ko
+
+# Date/time format
+date_format: ISO
+timezone: Asia/Seoul
+
+# Default CLI (for single tasks)
+default_cli: gemini
+
+# Per-agent CLI mapping (multi-CLI mode)
+agent_cli_mapping:
+  frontend: gemini
+  backend: gemini
+  mobile: gemini
+  qa: gemini
+  debug: gemini
+  pm: gemini
