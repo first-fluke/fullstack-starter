@@ -43,5 +43,23 @@
         "matcher": "Bash"
       }
     ]
+  },
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "agent",
+        "--project",
+        "."
+      ],
+      "env": {
+        "SERENA_LOG_LEVEL": "info"
+      }
+    }
   }
 }

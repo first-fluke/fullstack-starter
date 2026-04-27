@@ -20,6 +20,8 @@ Follow `.agents/skills/_shared/core/quality-principles.md`:
 - Write results to project root `.agents/results/result-qa.md` (orchestrated: `result-qa-{sessionId}.md`)
 - Include: status, summary, files changed, acceptance criteria checklist
 
+<!-- CHARTER_CHECK_BEGIN -->
+
 ## Charter Preflight (MANDATORY)
 
 Before starting review, output this block:
@@ -32,6 +34,7 @@ CHARTER_CHECK:
 - Must NOT do: modify source code, skip severity levels, report unverified findings
 - Success criteria: {all files reviewed, findings with file:line references}
 ```
+<!-- CHARTER_CHECK_END -->
 
 ## Review Priority Order
 
