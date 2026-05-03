@@ -2345,6 +2345,94 @@
         "ja": ["翻訳して", "英訳", "多言語化", "ローカライズして", "訳して"],
         "zh": ["翻译一下", "帮我翻译", "多语言", "本地化", "翻成英文"]
       }
+    },
+    "oma-image": {
+      "keywords": {
+        "*": [
+          "nano-banana",
+          "nanobanana",
+          "gpt-image",
+          "pollinations",
+          "oma-image"
+        ],
+        "en": [
+          "generate image",
+          "generate an image",
+          "create image",
+          "create an image",
+          "make a picture",
+          "make an image",
+          "render image",
+          "render a picture",
+          "draw me",
+          "draw a",
+          "ai image",
+          "image generation",
+          "generate a photo",
+          "create picture",
+          "picture of",
+          "image of"
+        ],
+        "ko": [
+          "이미지 만들어",
+          "이미지 만들어줘",
+          "이미지 생성",
+          "이미지 생성해",
+          "이미지 생성해줘",
+          "사진 만들어",
+          "사진 만들어줘",
+          "그림 그려",
+          "그림 그려줘",
+          "이미지 뽑아",
+          "이미지 뽑아줘",
+          "이미지 그려줘",
+          "이미지 출력",
+          "나노바나나",
+          "나노 바나나",
+          "바나나로 뽑",
+          "이미지 생성기",
+          "ai 이미지"
+        ],
+        "ja": [
+          "画像を生成",
+          "画像生成",
+          "画像を作",
+          "画像を作成",
+          "絵を描いて",
+          "画像出力",
+          "イラストを生成",
+          "写真を生成"
+        ],
+        "zh": [
+          "生成图像",
+          "生成图片",
+          "生成一张",
+          "画一张",
+          "画一幅",
+          "帮我画",
+          "出图",
+          "图像生成",
+          "图片生成"
+        ],
+        "es": [
+          "generar imagen",
+          "crear imagen",
+          "hazme una imagen",
+          "genera una foto"
+        ],
+        "fr": [
+          "générer une image",
+          "créer une image",
+          "fais-moi une image",
+          "dessine-moi"
+        ],
+        "de": [
+          "bild generieren",
+          "bild erstellen",
+          "erstelle ein bild",
+          "zeichne mir"
+        ]
+      }
     }
   },
   "informationalPatterns": {
@@ -2443,7 +2531,7 @@
       "wykryto"
     ]
   },
-  "excludedWorkflows": ["tools", "stack-set", "exec-plan"],
+  "excludedWorkflows": ["tools", "stack-set"],
   "cjkScripts": ["ko", "ja", "zh"],
   "extensionRouting": {
     "frontend-engineer": [
