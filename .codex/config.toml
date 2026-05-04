@@ -1,5 +1,7 @@
 [features]
 codex_hooks = true
+goals = true
+child_agents_md = true
 
 [mcp_servers.serena]
 command = "uvx"
