@@ -16,12 +16,12 @@ agent_defaults:
   architecture:  { model: "anthropic/claude-opus-4-7" }
   qa:            { model: "anthropic/claude-sonnet-4-6" }
   pm:            { model: "anthropic/claude-sonnet-4-6" }
-  backend:       { model: "openai/gpt-5.3-codex", effort: "high" }
-  frontend:      { model: "openai/gpt-5.4", effort: "high" }
-  mobile:        { model: "openai/gpt-5.4", effort: "high" }
-  db:            { model: "openai/gpt-5.3-codex", effort: "high" }
-  debug:         { model: "openai/gpt-5.3-codex", effort: "high" }
-  tf-infra:      { model: "openai/gpt-5.4", effort: "high" }
+  backend:       { model: "openai/gpt-5.5", effort: "high" }
+  frontend:      { model: "openai/gpt-5.5", effort: "high" }
+  mobile:        { model: "openai/gpt-5.5", effort: "high" }
+  db:            { model: "openai/gpt-5.5", effort: "high" }
+  debug:         { model: "openai/gpt-5.5", effort: "high" }
+  tf-infra:      { model: "openai/gpt-5.5", effort: "high" }
   retrieval:     { model: "google/gemini-3.1-flash-lite" }
 
 runtime_profiles:
@@ -43,16 +43,16 @@ runtime_profiles:
   codex-only:
     description: "Codex-only — ChatGPT Plus/Pro"
     agent_defaults:
-      orchestrator:  { model: "openai/gpt-5.4", effort: "medium" }
-      architecture:  { model: "openai/gpt-5.4-pro", effort: "high" }
-      qa:            { model: "openai/gpt-5.4", effort: "high" }
-      pm:            { model: "openai/gpt-5.4", effort: "medium" }
-      backend:       { model: "openai/gpt-5.3-codex", effort: "high" }
-      frontend:      { model: "openai/gpt-5.4", effort: "high" }
-      mobile:        { model: "openai/gpt-5.4", effort: "high" }
-      db:            { model: "openai/gpt-5.3-codex", effort: "high" }
-      debug:         { model: "openai/gpt-5.3-codex", effort: "high" }
-      tf-infra:      { model: "openai/gpt-5.4", effort: "high" }
+      orchestrator:  { model: "openai/gpt-5.5", effort: "medium" }
+      architecture:  { model: "openai/gpt-5.5", effort: "high" }
+      qa:            { model: "openai/gpt-5.5", effort: "high" }
+      pm:            { model: "openai/gpt-5.5", effort: "medium" }
+      backend:       { model: "openai/gpt-5.5", effort: "high" }
+      frontend:      { model: "openai/gpt-5.5", effort: "high" }
+      mobile:        { model: "openai/gpt-5.5", effort: "high" }
+      db:            { model: "openai/gpt-5.5", effort: "high" }
+      debug:         { model: "openai/gpt-5.5", effort: "high" }
+      tf-infra:      { model: "openai/gpt-5.5", effort: "high" }
       retrieval:     { model: "openai/gpt-5.4-mini", effort: "low" }
 
   gemini-only:
@@ -77,25 +77,25 @@ runtime_profiles:
       architecture:  { model: "anthropic/claude-opus-4-7" }
       qa:            { model: "anthropic/claude-sonnet-4-6" }
       pm:            { model: "anthropic/claude-sonnet-4-6" }
-      backend:       { model: "openai/gpt-5.3-codex", effort: "high" }
-      frontend:      { model: "openai/gpt-5.4", effort: "high" }
-      mobile:        { model: "openai/gpt-5.4", effort: "high" }
-      db:            { model: "openai/gpt-5.3-codex", effort: "high" }
-      debug:         { model: "openai/gpt-5.3-codex", effort: "high" }
-      tf-infra:      { model: "openai/gpt-5.4", effort: "high" }
+      backend:       { model: "openai/gpt-5.5", effort: "high" }
+      frontend:      { model: "openai/gpt-5.5", effort: "high" }
+      mobile:        { model: "openai/gpt-5.5", effort: "high" }
+      db:            { model: "openai/gpt-5.5", effort: "high" }
+      debug:         { model: "openai/gpt-5.5", effort: "high" }
+      tf-infra:      { model: "openai/gpt-5.5", effort: "high" }
       retrieval:     { model: "google/gemini-3.1-flash-lite" }
 
   qwen-only:
     description: "Qwen Code — all agents routed external (no native parallel); Qwen has no --effort, only binary --thinking"
     agent_defaults:
       orchestrator:  { model: "qwen/qwen3-coder-next", thinking: false }
-      architecture:  { model: "qwen/qwen3-coder-plus", thinking: true }
-      qa:            { model: "qwen/qwen3-coder-plus", thinking: true }
+      architecture:  { model: "qwen/qwen3.6-plus", thinking: true }
+      qa:            { model: "qwen/qwen3.6-plus", thinking: true }
       pm:            { model: "qwen/qwen3-coder-next", thinking: false }
-      backend:       { model: "qwen/qwen3-coder-plus", thinking: true }
-      frontend:      { model: "qwen/qwen3-coder-plus", thinking: true }
-      mobile:        { model: "qwen/qwen3-coder-plus", thinking: true }
-      db:            { model: "qwen/qwen3-coder-plus", thinking: true }
-      debug:         { model: "qwen/qwen3-coder-plus", thinking: true }
-      tf-infra:      { model: "qwen/qwen3-coder-plus", thinking: true }
+      backend:       { model: "qwen/qwen3.6-plus", thinking: true }
+      frontend:      { model: "qwen/qwen3.6-plus", thinking: true }
+      mobile:        { model: "qwen/qwen3.6-plus", thinking: true }
+      db:            { model: "qwen/qwen3.6-plus", thinking: true }
+      debug:         { model: "qwen/qwen3.6-plus", thinking: true }
+      tf-infra:      { model: "qwen/qwen3.6-plus", thinking: true }
       retrieval:     { model: "qwen/qwen3-coder-next", thinking: false }

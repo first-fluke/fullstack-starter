@@ -43,6 +43,10 @@ criteria:
     verification: "<how to verify — test result, build output, file existence, command output>"
     status: PENDING
     fail_count: 0
+    previous_status: null           # last non-null status from prior iteration
+    regressed_at_iteration: null    # iteration number when PASS → FAIL transition was detected
+    affected_paths: []              # optional glob list — only set when verification takes >30s
+                                    # used by judge-protocol's cache rules; see judge-protocol.md § "Caching for Heavy Verification"
 ```
 
 **Rules:**
@@ -69,10 +73,10 @@ criteria:
 Compose the ultrawork input based on current iteration:
 
 - **Iteration 1**: Full user request with all PENDING criteria
-- **Iteration 2+**: Only REMAINING criteria from previous JUDGE result, with:
+- **Iteration 2+**: REMAINING (FAIL + REGRESSED) criteria from previous JUDGE result, with:
   - Previous JUDGE results as context (what failed and why)
   - Suggested actions from JUDGE
-  - Already-PASSED criteria explicitly excluded from scope
+  - Already-PASSED criteria excluded from **implementation scope** (do not re-implement), but they remain in **JUDGE scope** (will be re-verified to detect regressions)
 
 ### Step 1.2: Execute Ultrawork
 
@@ -96,12 +100,16 @@ Delegate to the ultrawork workflow:
 
 **You are now the independent verifier, NOT the implementer.**
 
-For each criterion with status PENDING or FAIL, execute the verification method defined in Phase 0:
+For **EVERY criterion regardless of current status** (including PASS from prior iterations), execute the verification method defined in Phase 0:
 
 - Run tests → check pass/fail count
 - Run build → check exit code
 - Check file existence → verify path
 - Run specific commands → check output
+
+**Why re-verify PASS criteria**: ultrawork modifies shared code (utils, configs, migrations, dependencies). A PASS in iteration N may regress in iteration N+1 when fixing other criteria. Without re-verification, "DONE" can ship silent regressions.
+
+**Heavy verification caching**: For verifications that take >30 seconds (e2e tests, integration suites), apply the caching rules in `judge-protocol.md` § "Caching for Heavy Verification" to skip re-runs when no relevant files changed.
 
 **Follow `.agents/workflows/ralph/resources/judge-protocol.md` for the full protocol.**
 
@@ -112,11 +120,12 @@ Output the JUDGE result in this exact format:
 ```markdown
 ## JUDGE Result — Iteration {N}
 
-| Criterion | Status  | Evidence                          |
-|-----------|---------|-----------------------------------|
-| C1        | PASS    | <concrete evidence>               |
-| C2        | FAIL    | <concrete evidence of failure>    |
-| C3        | BLOCKED | <failed 3x: reason>               |
+| Criterion | Status    | Evidence                                                |
+|-----------|-----------|---------------------------------------------------------|
+| C1        | PASS      | <concrete evidence>                                     |
+| C2        | FAIL      | <concrete evidence of failure>                          |
+| C3        | BLOCKED   | <failed 3x: reason>                                     |
+| C4        | REGRESSED | previously PASS at iter N — now FAIL: <evidence + diff> |
 
 verdict: PASS | FAIL
 ```
@@ -129,15 +138,22 @@ remaining:
     reason: "<why it failed>"
     suggested_action: "<what to try next>"
     fail_count: {N}
+    regression: true | false        # true if status is REGRESSED
+    previous_pass_iteration: {N}    # only when regression: true
 ```
 
 ### Step 2.3: Apply JUDGE Result
 
-Update each criterion's status in `session-ralph.md`:
+Before updating any criterion, capture the current `status` into `previous_status`. Then apply the transition rules in order:
 
-- Test passed → `PASS`
-- Test failed, fail_count < 3 → `FAIL` (increment fail_count)
-- Test failed, fail_count >= 3 → `BLOCKED`
+1. **Verification passed** → `PASS`. Reset `regressed_at_iteration` to null.
+2. **Verification failed AND `previous_status == PASS`** → `REGRESSED`. Set `regressed_at_iteration: {current_iteration}`. Do NOT increment `fail_count` on the first regression — regression is treated as a distinct first-class signal, not a normal failure streak. Subsequent consecutive failures of the same criterion follow rules 3-4.
+3. **Verification failed AND not a regression AND `fail_count < 3`** → `FAIL`. Increment `fail_count`.
+4. **Verification failed AND `fail_count >= 3`** → `BLOCKED`.
+
+**Decision Gate impact**:
+- `REGRESSED` is treated as `FAIL` for verdict computation (verdict becomes FAIL, REPLAN triggers).
+- `REGRESSED` is NOT counted toward "DONE" — only `PASS` and `BLOCKED` count.
 
 ---
 
@@ -163,9 +179,9 @@ If all criteria are either PASS or BLOCKED:
    ```
 5. Workflow ends.
 
-### → REPLAN (Any criterion is FAIL)
+### → REPLAN (Any criterion is FAIL or REGRESSED)
 
-If any criterion has status FAIL, proceed to Phase 3.
+If any criterion has status FAIL or REGRESSED, proceed to Phase 3.
 
 ### → SAFEGUARD (max_iterations reached)
 
@@ -193,31 +209,42 @@ If `current_iteration >= max_iterations`:
 
 ### Step 3.1: Extract Remaining Work
 
-From the JUDGE result, collect only criteria with status `FAIL`:
+From the JUDGE result, collect criteria with status `FAIL` or `REGRESSED`. Treat the two classes separately:
 
-1. List each FAIL criterion with its reason and suggested_action
-2. Include previous iteration's JUDGE evidence as context
-3. Explicitly state which criteria are PASS (do not re-implement)
-4. Explicitly state which criteria are BLOCKED (do not retry)
+1. **FAIL** (first-time or persistent failures): list each with its reason and suggested_action
+2. **REGRESSED** (previously PASS, now FAIL): list each with previous-pass iteration, the inter-iteration diff that likely caused the regression, and a regression-specific suggested_action
+3. Include previous iteration's JUDGE evidence as context
+4. Explicitly state which criteria are PASS (do not re-implement, but do not exclude from next JUDGE either)
+5. Explicitly state which criteria are BLOCKED (do not retry)
 
 ### Step 3.2: Narrow Scope
 
-Compose a focused task description containing ONLY the remaining work:
+Compose a focused task description containing the remaining work, separating regressions from first-fail items so ultrawork's reasoning differs:
 
 ```markdown
 ## Ralph Iteration {N+1} — Remaining Work
 
-### Already Complete (DO NOT modify)
+### Already Complete (DO NOT re-implement; will be re-verified by JUDGE)
 - C1: <description> ✅
 
 ### Blocked (DO NOT retry)
 - C3: <description> 🚫 (failed 3x)
 
-### To Fix
+### Regressed (was passing — diagnose what broke it; minimal fix that preserves recent changes)
+- C4: <description>
+  - Last passed at: iteration {N}
+  - Failed at: iteration {current}
+  - Files changed since last pass: <list of modified paths>
+  - Failure evidence: <evidence>
+  - Suggested action: diff-aware diagnosis — identify which change in the listed files broke C4, fix that specifically without reverting the criterion that change was made for
+
+### To Fix (first-time or persistent failures)
 - C2: <description>
   - Previous failure: <evidence>
   - Suggested action: <action>
 ```
+
+**Why separate Regressed from To Fix**: ultrawork prompts that frame work as "fix from scratch" vs "diagnose a regression" produce different reasoning paths. Regressed items should trigger diff-based investigation, not greenfield re-implementation.
 
 ### Step 3.3: Loop Back
 
@@ -249,4 +276,4 @@ Phase 3: REPLAN → Extract remaining, narrow scope
 | INIT    | Define success criteria     | Verifiable criteria + session init |
 | EXEC    | Implementation             | Delegate to ultrawork             |
 | JUDGE   | Independent verification   | Evidence-based pass/fail per criterion |
-| REPLAN  | Scope narrowing            | Extract FAIL items only           |
+| REPLAN  | Scope narrowing            | Extract FAIL + REGRESSED items, separated by class |

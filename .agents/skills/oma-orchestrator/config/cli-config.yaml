@@ -40,7 +40,7 @@ vendors:
     output_format_flag: "--json"
     auto_approve_flag: "--full-auto"
     model_flag: "-m"
-    default_model: "gpt-5.3-codex"
+    default_model: "gpt-5.5"
     response_jq: ".response"
     isolation_method: "directory"
 
@@ -51,7 +51,7 @@ vendors:
     output_format: "json"
     auto_approve_flag: "--yolo"
     model_flag: "-m"
-    default_model: "qwen3.5-coder-plus"
+    default_model: "qwen3.6-plus"
     response_jq: ".output"
     isolation_method: "directory"
 
