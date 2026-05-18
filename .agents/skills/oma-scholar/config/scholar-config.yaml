@@ -12,7 +12,7 @@ api:
   # No auth required for proxy endpoints
   timeout_seconds: 30
 
-# Partial-fetch defaults — fields you can request individually
+# Partial-fetch defaults: fields you can request individually
 partial_fields:
   available:
     - statements
@@ -40,7 +40,7 @@ openalex:
 generation:
   # Minimum number of statements before warning user about under-extraction
   min_statements_complex_paper: 15
-  # Average relations per statement — relation wiring quality threshold
+  # Average relations per statement (relation wiring quality threshold)
   min_relations_per_statement: 1.5
   # ID format
   id_prefixes:

@@ -1,6 +1,6 @@
 # Design Audit Checklist
 
-## 1. Responsive (MANDATORY — run first)
+## 1. Responsive (MANDATORY, run first)
 - [ ] All sections render correctly at 375px width
 - [ ] No horizontal scroll at any breakpoint
 - [ ] Touch targets >= 44x44pt on mobile
@@ -38,7 +38,7 @@
 - [ ] Help and documentation (if needed, searchable and task-oriented)
 
 ## 4. AI Slop Check
-- [ ] Passes the "AI made this" test — would a human designer be proud?
+- [ ] Passes the "AI made this" test (would a human designer be proud?)
 - [ ] No purple gradient backgrounds
 - [ ] No Inter-only or Geist-only typography without justification
 - [ ] No triple-nested cards

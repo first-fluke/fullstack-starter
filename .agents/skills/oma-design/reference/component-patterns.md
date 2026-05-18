@@ -6,7 +6,7 @@
 - Install: `npx shadcn@latest init`
 - Use for: buttons, inputs, dialogs, dropdowns, tabs, cards, forms
 - Customizable via CSS variables in `globals.css`
-- Code ownership model — components live in your project
+- Code ownership model: components live in your project
 
 ### Aceternity UI (Premium Effects)
 - Install: `npx shadcn@latest add @aceternity/<component>`
@@ -133,12 +133,12 @@ useEffect(() => {
 
 With top/bottom fade gradients (200px height):
 ```
-linear-gradient(to bottom, black, transparent) — top fade
-linear-gradient(to top, black, transparent) — bottom fade
+linear-gradient(to bottom, black, transparent) for top fade
+linear-gradient(to top, black, transparent) for bottom fade
 ```
 
 ## Anti-Patterns
-- DON'T: Use glassmorphism on every element — reserve for badges, nav pills, accent cards
+- DON'T: Use glassmorphism on every element; reserve for badges, nav pills, accent cards
 - DON'T: Use the same card layout for every section (all 3-col grids)
 - DON'T: Force identical card heights with arbitrary min-height
 - DON'T: Rely on hover-only interactions without touch/keyboard alternatives

@@ -11,8 +11,8 @@ otel_spec: "1.x (stable API/SDK)"
 
 | Type | Where Decision Is Made | Trace Completeness | Typical Use |
 |------|----------------------|-------------------|-------------|
-| **Head-based** | At trace start (first span) | May be incomplete — downstream services inherit decision but cannot guarantee it | Simple, low-overhead; works well for single-service or homogeneous traffic |
-| **Tail-based** | After all spans arrive (end of trace) | Complete — sampler buffers spans until decision | Production multi-service; required for error/latency policies |
+| **Head-based** | At trace start (first span) | May be incomplete; downstream services inherit decision but cannot guarantee it | Simple, low-overhead; works well for single-service or homogeneous traffic |
+| **Tail-based** | After all spans arrive (end of trace) | Complete; sampler buffers spans until decision | Production multi-service; required for error/latency policies |
 | **Adaptive** | Dynamic rate based on traffic volume | Depends on implementation | Auto-scaling sampling rate under variable load |
 
 **Head-based limitation**: If a service at hop 2 is sampled out but hop 1 was sampled in (or vice versa), the reconstructed trace is missing spans. This is the core motivation for tail-based sampling in multi-service systems.
@@ -27,9 +27,9 @@ The production-standard recipe retains high-signal traces at 100% while keeping 
 
 **Policy hierarchy** (evaluated in order; first match wins unless using `and` policy):
 
-1. **100% error retention** — any trace with an error span is always kept
-2. **100% cost/latency threshold retention** — traces exceeding a cost or latency threshold are always kept
-3. **5-10% baseline** — probabilistic retention of remaining traffic
+1. **100% error retention**: any trace with an error span is always kept
+2. **100% cost/latency threshold retention**: traces exceeding a cost or latency threshold are always kept
+3. **5-10% baseline**: probabilistic retention of remaining traffic
 
 This requires the `tail_sampling` processor running in the **gateway tier only**, combined with a `loadbalancing` exporter upstream to ensure trace completeness via consistent hash by `trace_id`. See `collector-topology.md` Section 6.
 
@@ -66,7 +66,7 @@ processors:
           sampling_percentage: 8  # 5-10% baseline
 ```
 
-> The `tail_sampling` processor evaluates policies top-to-bottom. A trace matching any policy is kept. Policies do not chain — `probabilistic` at the bottom catches everything not already retained.
+> The `tail_sampling` processor evaluates policies top-to-bottom. A trace matching any policy is kept. Policies do not chain; `probabilistic` at the bottom catches everything not already retained.
 
 ---
 
@@ -75,10 +75,10 @@ processors:
 LLM workloads (OpenAI, Anthropic, Bedrock, Vertex AI) attach cost attributes to spans. These should be treated as first-class sampling dimensions.
 
 **Relevant span attributes** (following GenAI semantic conventions):
-- `gen_ai.usage.input_tokens` — prompt token count
-- `gen_ai.usage.output_tokens` — completion token count
-- `llm.request.cost_usd` — estimated cost if pre-computed by SDK
-- `gen_ai.cost.total_usd` — total cost attribute (custom, team-defined)
+- `gen_ai.usage.input_tokens`: prompt token count
+- `gen_ai.usage.output_tokens`: completion token count
+- `llm.request.cost_usd`: estimated cost if pre-computed by SDK
+- `gen_ai.cost.total_usd`: total cost attribute (custom, team-defined)
 
 **Strategy**: Set a cost threshold (e.g., $0.50 per trace). Any trace with cumulative LLM cost above the threshold is always retained for cost attribution and FinOps analysis.
 

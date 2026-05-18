@@ -2,4 +2,4 @@
 language: ko
 date_format: ISO
 timezone: Asia/Seoul
-model_preset: gemini-only
+model_preset: gemini

@@ -15,7 +15,7 @@ Three properties make mesh observability distinct enough to warrant a dedicated 
 
 1. **Zero-code auto-instrumentation.** Sidecar injection (or ambient mode) intercepts all inbound and outbound traffic without requiring any change to application code. Metrics, access logs, and distributed trace spans are produced automatically from day one of mesh deployment. This contrasts with `layers/L4-transport.md`, where eBPF probes attach to kernel socket events and produce transport-centric (TCP RTT, retransmit) artifacts.
 
-2. **Proxy-centric, not transport-centric.** Mesh observability is Envoy-proxy-centric or Linkerd-proxy-centric. The primary artifacts are Envoy listeners/clusters, access log records, and HTTP/gRPC span metadata — not TCP segments or IP packets. `layers/L4-transport.md` covers kernel-level transport; this file covers proxy-level L7 framing.
+2. **Proxy-centric, not transport-centric.** Mesh observability is Envoy-proxy-centric or Linkerd-proxy-centric. The primary artifacts are Envoy listeners/clusters, access log records, and HTTP/gRPC span metadata; not TCP segments or IP packets. `layers/L4-transport.md` covers kernel-level transport; this file covers proxy-level L7 framing.
 
 3. **mTLS identity as a first-class signal.** The mesh terminates mTLS at the sidecar, producing certificate identity (SPIFFE SVID), cipher suite, and expiry as observable attributes alongside each request. No other layer produces this security context natively.
 
@@ -31,7 +31,7 @@ Three properties make mesh observability distinct enough to warrant a dedicated 
 | **Consul Connect** | Not CNCF | Envoy (via xDS) | Sidecar | HashiCorp ecosystem; strong multi-datacenter support |
 | **Kuma** | CNCF Sandbox | Envoy (via xDS) | Sidecar, Universal (VM) | Multi-cloud and multi-zone; Kong-backed |
 
-CNCF status source: <https://landscape.cncf.io> — verify quarterly.
+CNCF status source: <https://landscape.cncf.io>; verify quarterly.
 
 ---
 
@@ -64,7 +64,7 @@ Spans are created without SDK changes. The caveat is that without application-le
 
 ### 3.3 Access Logs
 
-Envoy access logs provide per-request metadata: source workload identity, destination service, HTTP method and status code, request duration, bytes sent and received, and upstream cluster name. Access logs complement traces — they are always available (100% sampling) even when traces are sampled at 1%.
+Envoy access logs provide per-request metadata: source workload identity, destination service, HTTP method and status code, request duration, bytes sent and received, and upstream cluster name. Access logs complement traces; they are always available (100% sampling) even when traces are sampled at 1%.
 
 Structured access log format (JSON) is required for trace correlation:
 
@@ -85,8 +85,8 @@ Structured access log format (JSON) is required for trace correlation:
 
 Istio exposes certificate expiry and rotation events as Prometheus metrics:
 
-- `citadel_server_csr_count` — certificate signing request volume
-- `pilot_xds_pushes{type="sds"}` — SDS secret delivery (certificate rotation)
+- `citadel_server_csr_count`: certificate signing request volume
+- `pilot_xds_pushes{type="sds"}`: SDS secret delivery (certificate rotation)
 - Cert expiry: scraped from `istio-proxy` via `/pki` endpoint, alertable as a PrometheusRule
 
 Cross-reference: `signals/privacy.md §Security Context (TLS attrs Development)` for attribute stability notes.
@@ -132,7 +132,7 @@ The `resourceDetectors.environment` block activates the **Environment Resource D
 
 ### 4.3 Custom Samplers (Envoy 1.29+)
 
-Envoy 1.29 introduced the OTel Sampler interface, allowing parent-based or trace-ID-ratio samplers to be configured without patching application code. Tail-based sampling decisions are still made at the Collector tier — see `resources/transport/sampling-recipes.md` for tail-sampler configuration.
+Envoy 1.29 introduced the OTel Sampler interface, allowing parent-based or trace-ID-ratio samplers to be configured without patching application code. Tail-based sampling decisions are still made at the Collector tier; see `resources/transport/sampling-recipes.md` for tail-sampler configuration.
 
 ---
 
@@ -167,7 +167,7 @@ The **OpenTelemetry Operator** (`github.com/open-telemetry/opentelemetry-operato
 
 Supported language runtimes: Java, NodeJS, Python, .NET, Go, Apache HTTPD, Nginx.
 
-**Step 1 — Deploy the Instrumentation CR:**
+**Step 1; Deploy the Instrumentation CR:**
 
 ```yaml
 apiVersion: opentelemetry.io/v1alpha1
@@ -197,7 +197,7 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:latest
 ```
 
-**Step 2 — Activate per Pod via annotation:**
+**Step 2; Activate per Pod via annotation:**
 
 ```yaml
 metadata:
@@ -236,13 +236,13 @@ Cross-reference: `resources/boundaries/cross-application.md` for full propagator
 
 ## 7. Combining Mesh and Application Telemetry
 
-The mesh alone covers **network boundary spans**: the ingress proxy creates a server-side span, the egress proxy creates a client-side span. What it cannot see is what the application does between receiving a request and making the next outbound call — database queries, cache reads, external API calls, or business-logic operations.
+The mesh alone covers **network boundary spans**: the ingress proxy creates a server-side span, the egress proxy creates a client-side span. What it cannot see is what the application does between receiving a request and making the next outbound call; database queries, cache reads, external API calls, or business-logic operations.
 
 | Source | Spans covered | Business context |
 |--------|--------------|-----------------|
-| Mesh (Envoy/Linkerd) | Ingress and egress HTTP/gRPC per service hop | None — proxy has no access to app state |
-| Application SDK | Internal operations: DB, cache, queue, business logic | Full — SDK operates inside the application process |
-| Combined via OTel Collector | All of the above, correlated by `trace_id` | Complete — best result |
+| Mesh (Envoy/Linkerd) | Ingress and egress HTTP/gRPC per service hop | None; proxy has no access to app state |
+| Application SDK | Internal operations: DB, cache, queue, business logic | Full; SDK operates inside the application process |
+| Combined via OTel Collector | All of the above, correlated by `trace_id` | Complete; best result |
 
 Recommended pipeline architecture:
 
@@ -266,10 +266,10 @@ For Collector topology options see `resources/transport/collector-topology.md`.
 
 When Istio PeerAuthentication is set to `STRICT` mode, all pod-to-pod traffic is encrypted with mTLS. The mesh then exposes security context as observable attributes:
 
-- **TLS version**: `tls.protocol_version` (Development tier per semconv 1.27.0 — see `resources/standards.md §Semconv Stability Tiers`)
+- **TLS version**: `tls.protocol_version` (Development tier per semconv 1.27.0; see `resources/standards.md §Semconv Stability Tiers`)
 - **Cipher suite**: `tls.cipher` (Development tier)
 - **Certificate expiry**: alertable via PrometheusRule on `citadel_server_root_cert_expiry_timestamp`
-- **SPIFFE peer identity**: available in Envoy access log via `%DOWNSTREAM_PEER_SUBJECT%` — identifies source workload for zero-trust audit
+- **SPIFFE peer identity**: available in Envoy access log via `%DOWNSTREAM_PEER_SUBJECT%`; identifies source workload for zero-trust audit
 
 ```yaml
 # PrometheusRule: alert when any Istio cert expires within 7 days
@@ -298,7 +298,7 @@ Cross-reference: `resources/signals/privacy.md §Security Context` for TLS attri
 
 ## 9. Sampling Considerations
 
-Istio's default sampling rate is **1%** (`randomSamplingPercentage: 1.0`). At 1%, you need 100 requests before the first trace is visible in the backend — this is insufficient for debugging low-traffic endpoints or canary deployments.
+Istio's default sampling rate is **1%** (`randomSamplingPercentage: 1.0`). At 1%, you need 100 requests before the first trace is visible in the backend; this is insufficient for debugging low-traffic endpoints or canary deployments.
 
 | Scenario | Recommended sampling rate | Configuration location |
 |----------|--------------------------|----------------------|
@@ -317,11 +317,11 @@ These cells from `resources/matrix.md` are the primary coverage drivers for this
 
 | matrix cell | symbol | artifact |
 |------------|--------|---------|
-| mesh × cross-application × traces | ✅ | Zero-code L7 trace continuity — primary use case of the mesh layer |
-| mesh × multi-tenant × traces | ✅ | `tenant.id` via W3C Baggage; proxy can enforce baggage scrubbing at gateway |
-| mesh × release × traces | ⚠️ | Canary routing rules are observable; `service.version` on spans; trace continuity requires OTel Operator CR |
-| mesh × privacy × * | ✅ | mTLS config observability; baggage scrubbing; SPIFFE identity in access log |
-| mesh × slo × metrics | ✅ | Envoy request rate + error rate are primary SLI sources |
+| mesh × cross-application × traces | PASS | Zero-code L7 trace continuity; primary use case of the mesh layer |
+| mesh × multi-tenant × traces | PASS | `tenant.id` via W3C Baggage; proxy can enforce baggage scrubbing at gateway |
+| mesh × release × traces | PARTIAL | Canary routing rules are observable; `service.version` on spans; trace continuity requires OTel Operator CR |
+| mesh × privacy × * | PASS | mTLS config observability; baggage scrubbing; SPIFFE identity in access log |
+| mesh × slo × metrics | PASS | Envoy request rate + error rate are primary SLI sources |
 
 ---
 
@@ -343,17 +343,17 @@ The following are anti-patterns for this layer. They are candidates for inclusio
 
 
 Internal cross-references:
-- `resources/standards.md` — normative semconv stability tiers and W3C Trace Context requirements
-- `resources/matrix.md` — full 112-cell coverage map (mesh row)
-- `resources/transport/sampling-recipes.md` — tail-based sampling at Collector tier
-- `resources/transport/collector-topology.md` — DaemonSet vs sidecar Collector topology
-- `resources/meta-observability.md` — cardinality guardrails and pipeline self-health
-- `resources/layers/L4-transport.md` — eBPF socket-level profiles for mesh sidecar overhead
-- `resources/boundaries/cross-application.md` — full propagator compatibility matrix
-- `resources/boundaries/multi-tenant.md` — baggage-based tenant attribution
-- `resources/boundaries/release.md` — canary trace routing with `service.version`
-- `resources/signals/privacy.md` — TLS attribute stability and mTLS security context
-- `resources/signals/traces.md` — OTel SDK trace patterns for application layer
+- `resources/standards.md`: normative semconv stability tiers and W3C Trace Context requirements
+- `resources/matrix.md`: full 112-cell coverage map (mesh row)
+- `resources/transport/sampling-recipes.md`: tail-based sampling at Collector tier
+- `resources/transport/collector-topology.md`: DaemonSet vs sidecar Collector topology
+- `resources/meta-observability.md`: cardinality guardrails and pipeline self-health
+- `resources/layers/L4-transport.md`: eBPF socket-level profiles for mesh sidecar overhead
+- `resources/boundaries/cross-application.md`: full propagator compatibility matrix
+- `resources/boundaries/multi-tenant.md`: baggage-based tenant attribution
+- `resources/boundaries/release.md`: canary trace routing with `service.version`
+- `resources/signals/privacy.md`: TLS attribute stability and mTLS security context
+- `resources/signals/traces.md`: OTel SDK trace patterns for application layer
 
 ## References
 

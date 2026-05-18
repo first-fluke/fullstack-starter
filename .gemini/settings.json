@@ -54,7 +54,20 @@
   },
   "mcpServers": {
     "serena": {
-      "url": "http://localhost:12341/mcp"
+      "command": "serena",
+      "args": [
+        "start-mcp-server",
+        "--context",
+        "ide",
+        "--project",
+        "."
+      ],
+      "env": {
+        "SERENA_LOG_LEVEL": "info"
+      }
     }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
   }
 }

@@ -58,7 +58,7 @@ Run this after Mode 1 (Generate) or Mode 3 (Review) before reporting done.
 - [ ] Every claim has a `supported_by` relation pointing to evidence
 - [ ] Average relations-per-statement ratio ≥ 1.5
 - [ ] Methods have at least one of: `implements`, `uses`, `evaluates_on`, `documents`
-- [ ] No dangling references — every `subject_ref` and `object_ref` points to an existing id
+- [ ] No dangling references; every `subject_ref` and `object_ref` points to an existing id
 
 ## Density
 
@@ -85,4 +85,4 @@ Include:
 - Counts: `statements`, `evidence`, `relations`, `artifacts`
 - Ratio: relations/statements (target ≥ 1.5)
 - Lint status: clean / N warnings / N errors
-- Fields explicitly omitted due to anti-fabrication (e.g., "DOI not visible — please paste if you have it")
+- Fields explicitly omitted due to anti-fabrication (e.g., "DOI not visible; please paste if you have it")

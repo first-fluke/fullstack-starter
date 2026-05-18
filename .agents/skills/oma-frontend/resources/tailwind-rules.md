@@ -4,11 +4,11 @@
 
 ## Core Rules
 
-1. **No inline styles** — Tailwind classes only
-2. **Mobile-first** — base classes target mobile, scale up with `sm:` `md:` `lg:`
-3. **No hardcoded colors** — always use semantic tokens (see below)
-4. **Dark mode aware** — every color token must work under `dark:` variant
-5. **Arbitrary values only with justification** — `w-[789px]` needs a design reason; otherwise use the scale
+1. **No inline styles**: Tailwind classes only
+2. **Mobile-first**: base classes target mobile, scale up with `sm:` `md:` `lg:`
+3. **No hardcoded colors**: always use semantic tokens (see below)
+4. **Dark mode aware**: every color token must work under `dark:` variant
+5. **Arbitrary values only with justification**: `w-[789px]` needs a design reason; otherwise use the scale
 
 ## Semantic Color Tokens
 
@@ -73,10 +73,10 @@ Tailwind v4 uses CSS-based configuration. `tailwind.config.js` is deprecated. Ad
 
 ## Anti-Patterns
 
-- **`@apply` in CSS files** — defeats utility-first intent. Use classes in JSX, or extract a component.
-- **Hardcoded hex/rgb** — always go through the token system.
-- **Desktop-first breakpoints** — `grid-cols-3 sm:grid-cols-1` reverses the mobile-first flow.
-- **Nested overrides** — if you find yourself writing `lg:!bg-primary`, the component API is wrong; add a variant instead.
+- **`@apply` in CSS files**: defeats utility-first intent. Use classes in JSX, or extract a component.
+- **Hardcoded hex/rgb**: always go through the token system.
+- **Desktop-first breakpoints**: `grid-cols-3 sm:grid-cols-1` reverses the mobile-first flow.
+- **Nested overrides**: if you find yourself writing `lg:!bg-primary`, the component API is wrong; add a variant instead.
 
 ## Formatting
 

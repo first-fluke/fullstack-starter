@@ -9,9 +9,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Module/package not found errors
 
-1. Check the import path — typo? wrong package name?
+1. Check the import path: typo? wrong package name?
 2. Verify the dependency exists in your package manifest
-3. If missing: note it in your result as "requires install the missing dependency" — do NOT install yourself
+3. If missing: note it in your result as "requires install the missing dependency"; do NOT install yourself
 4. If it's a local module: check the directory structure with `get_symbols_overview`
 5. If the path changed: use `search_for_pattern("class ClassName")` to find the new location
 
@@ -21,7 +21,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: test runner returns FAILED, assertion errors
 
-1. Read the full error output — which test, which assertion, expected vs actual
+1. Read the full error output: which test, which assertion, expected vs actual
 2. `find_symbol("test_function_name")` to read the test code
 3. Determine: is the test wrong or is the implementation wrong?
    - Test expects old behavior → update test
@@ -36,7 +36,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Migration command fails, `IntegrityError`, duplicate column
 
-1. Read the error — is it a conflict with existing migration?
+1. Read the error; is it a conflict with existing migration?
 2. Check current DB state: Check current migration state
 3. If migration conflicts: Rollback one migration step then fix migration script
 4. If schema mismatch: compare model with actual DB schema
@@ -72,7 +72,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**; do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks so orchestrator can retry later
@@ -95,4 +95,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method
 - **Blocked**: If no progress after 5 turns, save current state and record `Status: blocked` in result
-- **Out of scope**: If you find issues in another agent's domain, only record in result — do not modify directly
+- **Out of scope**: If you find issues in another agent's domain, only record in result; do not modify directly

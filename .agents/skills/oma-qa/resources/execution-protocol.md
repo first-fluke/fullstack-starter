@@ -1,17 +1,17 @@
 # QA Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty** — see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
    - **Simple**: Quick security + quality check | **Medium**: Full 4 steps | **Complex**: Full + prioritized scope
-2. **Check lessons** — read QA section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements** — follow `../../_shared/core/clarification-protocol.md`
+2. **Check lessons**: read QA section in `../../_shared/core/lessons-learned.md`
+3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: security/auth concerns, existing code conflict potential?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context** — follow `../../_shared/core/context-budget.md` (prioritize high-risk files)
+4. **Budget context**: follow `../../_shared/core/context-budget.md` (prioritize high-risk files)
 5. **After review**: add recurring issues to `../../_shared/core/lessons-learned.md`
 6. **If standards matter**: read `resources/iso-quality.md`
 
-**⚠️ Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
+**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
 Follow these steps in order (adjust depth by difficulty).
 
@@ -51,7 +51,7 @@ at runtime. This step requires interacting with the running application.
 
 ### Execution by App Type
 
-#### Web Applications (Chrome DevTools MCP — Isolated Mode)
+#### Web Applications (Chrome DevTools MCP: Isolated Mode)
 
 1. Start the application (`bun run dev`, `uv run manage.py runserver`, etc.)
 2. Open the app in an **isolated browser context** to avoid contaminating the user's session:
@@ -145,7 +145,7 @@ Specifically check for these patterns that static review cannot catch:
 
 ---
 
-## Evaluator Posture — SKEPTICAL by default
+## Evaluator Posture: SKEPTICAL by default
 
 Apply this posture when making verdict decisions in Step 3 and Step 4:
 - Assume code has bugs until you prove otherwise with concrete evidence.
@@ -158,9 +158,9 @@ Apply this posture when making verdict decisions in Step 3 and Step 4:
 ## Step 3: Report
 Generate structured report with:
 - Overall status:
-  - PASS — no CRITICAL, no HIGH, and no MEDIUM issues
-  - WARNING — no CRITICAL and no HIGH, but MEDIUM issues exist
-  - FAIL — any CRITICAL or HIGH issue found
+  - PASS: no CRITICAL, no HIGH, and no MEDIUM issues
+  - WARNING: no CRITICAL and no HIGH, but MEDIUM issues exist
+  - FAIL: any CRITICAL or HIGH issue found
 - Findings grouped by severity (CRITICAL > HIGH > MEDIUM > LOW)
 - Each finding: file:line, description, remediation code
 - Performance metrics vs. targets

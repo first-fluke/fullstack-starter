@@ -25,7 +25,7 @@ Most likely causes:
 - If tables are completely absent, confirm the source file actually contains tables (sometimes they are images).
 
 ### 5. Hyperlinks look wrong
-kordoc sanitizes links (XSS defense). If a legitimate link is stripped, verify the original URL scheme — only `http://`, `https://`, `mailto:`, and relative paths are preserved by default.
+kordoc sanitizes links (XSS defense). If a legitimate link is stripped, verify the original URL scheme: only `http://`, `https://`, `mailto:`, and relative paths are preserved by default.
 
 ### 6. Image extraction issues
 - kordoc extracts images from ZIP entries (HWPX) and HWP5 `BinData` streams.
@@ -44,7 +44,7 @@ kordoc sanitizes links (XSS defense). If a legitimate link is stripped, verify t
 4. Meanwhile, if only a subset of the document triggers the crash, use `-p` to skip it
 
 ### 9. Reproducibility vs freshness tradeoff
-- `bunx kordoc@latest` always pulls latest. Fixes land fast, but outputs may drift. A bare `bunx kordoc` reuses the bunx cache and can be arbitrarily old — always include `@latest` or a pinned version.
+- `bunx kordoc@latest` always pulls latest. Fixes land fast, but outputs may drift. A bare `bunx kordoc` reuses the bunx cache and can be arbitrarily old; always include `@latest` or a pinned version.
 - For long-running projects, pin a version: edit `config/hwp-config.yaml`:
   ```yaml
   version:
@@ -55,7 +55,7 @@ kordoc sanitizes links (XSS defense). If a legitimate link is stripped, verify t
 
 ## kordoc limitations (upstream-owned)
 - Inline password entry for encrypted HWP: not yet supported.
-- OCR of scanned HWPs: out of kordoc's scope — it does not perform OCR.
+- OCR of scanned HWPs: out of kordoc's scope; it does not perform OCR.
 - Perfect fidelity of complex shapes / drawings: Markdown cannot represent drawing primitives; expect them to be dropped or replaced by placeholder markers.
 
 ## When to route elsewhere

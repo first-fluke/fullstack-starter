@@ -2,7 +2,7 @@
 description: Ultrawork - high-quality 5-phase development workflow with 11 review steps out of 17
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
@@ -130,7 +130,7 @@ If automated measurement is available (tests, lint exist):
 3. Create Experiment Ledger via memory tools: `[WRITE]("experiment-ledger.md", initial ledger with baseline row)`
 4. Record composite score as the IMPL baseline
 
-If no measurement tools: skip — gates fall back to binary checklist.
+If no measurement tools: skip; gates fall back to binary checklist.
 
 ### IMPL_GATE
 - [ ] Build succeeds
@@ -202,11 +202,13 @@ If baseline was measured at Step 5.2:
 
 **Gate failure (1st time)** → Before re-spawning for the next VERIFY cycle, check the session cost cap:
 
-> **Review Loop termination conditions (OR — whichever fires first wins)**
+> **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Gate failure count has reached the configured maximum iterations (default: 5 total VERIFY + REFINE cycles). Do not start another cycle.
-> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately — save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
+> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
 >
 > If neither condition is met, return to Step 5 and continue.
+
+**Root-cause-first fix mandate:** when re-spawning implementation agents to address QA findings, the fix prompt MUST require root-cause remediation. Forbid tactical patches (try/catch swallowing the error, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent explicitly justifies why a structural fix is out of scope (upstream library bug, deprecated path, hotfix window).
 
 **Gate failure (2nd time on same issue, and termination conditions not yet met)** → Activate **Exploration Loop**:
 1. Load `exploration-loop.md` (conditional, per `context-loading.md`)
@@ -270,7 +272,7 @@ oma agent:spawn debug-agent "Execute Phase 4 Refine. Step 9: Split large files. 
 If baseline was measured at Step 5.2:
 1. Measure Quality Score after refinement
 2. Calculate delta from Post-VERIFY score
-3. **If delta < -5**: Apply Discard rule — revert refinement changes, record in Experiment Ledger
+3. **If delta < -5**: Apply Discard rule. Revert refinement changes, record in Experiment Ledger.
 4. Record kept experiments in Experiment Ledger
 
 ### REFINE_GATE
@@ -284,9 +286,9 @@ If baseline was measured at Step 5.2:
 
 **Gate failure → Before re-spawning the Debug Agent, apply the same termination check:**
 
-> **Review Loop termination conditions (OR — whichever fires first wins)**
+> **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Total REFINE failure count has reached the configured maximum iterations (default: 5 cycles across all phases). Do not start another cycle.
-> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop — save current step results before stopping, then report early termination due to quota.
+> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop. Save current step results before stopping, then report early termination due to quota.
 >
 > If neither condition is met, re-spawn the Debug Agent with specific issues and repeat until GATE passes.
 
@@ -369,6 +371,20 @@ If Quality Score was measured during this session:
 
 ---
 
+## Step 18: Optional Doc Verify Hook
+
+If `oma-config.yaml` has `docs.auto_verify: true`:
+
+1. Run `oma docs verify --json` from the repo root.
+2. Capture the JSON output.
+3. If `broken.length === 0`: print `docs verified clean (N docs)` summary to stdout and continue with workflow completion.
+4. If `broken.length > 0`: print a 1-3 line summary identifying which docs have drift, and a hint `Run /oma-docs verify for the full report.` Continue with workflow completion (warn-only, never block).
+5. If `oma-docs` is not available (CLI command missing): skip silently.
+
+This hook is opt-in; the default `auto_verify: false` skips this step entirely.
+
+---
+
 ## Review Steps Summary
 
 | Phase  | Steps | Agent       | Execution | Perspective                       |
@@ -395,4 +411,4 @@ This workflow conditionally incorporates patterns from autoresearch:
 | **Hypothesis exploration** | On repeated gate failures | `exploration-loop.md` (loaded on trigger) |
 | **Auto-learning** | At session end, if experiments exist | `lessons-learned.md` auto-generation |
 
-All protocols are loaded **conditionally** per `context-loading.md` — not at Phase 0.
+All protocols are loaded **conditionally** per `context-loading.md`, not at Phase 0.

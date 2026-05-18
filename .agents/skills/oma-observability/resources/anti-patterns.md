@@ -13,7 +13,7 @@
 
 ---
 
-## A — Privacy & Sensitive Data
+## A: Privacy & Sensitive Data
 
 ### A.1 Claiming "anonymization" for pseudonymized data
 
@@ -39,7 +39,7 @@
 ### A.4 PII in crash stack traces without redaction filter
 
 **Severity**: CRITICAL
-**Why it fails**: Exception messages frequently capture SQL queries, HTTP headers, and URL query strings verbatim, exposing `user.email`, `Authorization` tokens, card numbers, and passwords in vendor SaaS storage — a GDPR and PIPA breach.
+**Why it fails**: Exception messages frequently capture SQL queries, HTTP headers, and URL query strings verbatim, exposing `user.email`, `Authorization` tokens, card numbers, and passwords in vendor SaaS storage; a GDPR and PIPA breach.
 **Remediation**: Implement a `beforeSend` / `before_send` allowlist hook in your crash SDK. Strip `Authorization`, `Cookie`, and any regex-matching email/card patterns before the crash report is serialized. Do not rely on server-side redaction alone.
 **See also**: `layers/L7-application/crash-analytics.md §8 Privacy and PII`, `signals/privacy.md §7 SDK-Layer Redaction`
 
@@ -74,14 +74,14 @@
 ### A.9 Session replay without client-side PII masking
 
 **Severity**: HIGH
-**Why it fails**: Session replay captures DOM mutations including `<input>` fields. Without SDK-level masking, email addresses, credit card numbers, and passwords are captured in replay payloads before reaching the vendor — a GDPR Article 6 consent violation.
+**Why it fails**: Session replay captures DOM mutations including `<input>` fields. Without SDK-level masking, email addresses, credit card numbers, and passwords are captured in replay payloads before reaching the vendor; a GDPR Article 6 consent violation.
 **Remediation**: Enable input masking in the SDK config (Sentry, Datadog both support this). Wire replay consent to the cookie consent flow. Test via automated replay review that sensitive fields are masked.
 **See also**: `layers/L7-application/web-rum.md §8 Session Replay`, `signals/privacy.md §5`
 
 ### A.10 Unencrypted telemetry queue on mobile device
 
 **Severity**: HIGH
-**Why it fails**: Mobile telemetry queued to disk is PII at rest on user devices. If the device is lost, compromised, or forensically examined, unencrypted queue files expose personal data — violating GDPR Art. 32 and PIPA § 29 safety measures.
+**Why it fails**: Mobile telemetry queued to disk is PII at rest on user devices. If the device is lost, compromised, or forensically examined, unencrypted queue files expose personal data; violating GDPR Art. 32 and PIPA § 29 safety measures.
 **Remediation**: Encrypt the queue using platform-native key storage: iOS Keychain, Android Keystore. Apply field-level redaction before write, not before send.
 **See also**: `layers/L7-application/mobile-rum.md §3 Offline-First Queuing`
 
@@ -94,12 +94,12 @@
 
 ---
 
-## B — Cardinality & Cost
+## B: Cardinality & Cost
 
 ### B.1 `user.id` as metric label
 
 **Severity**: CRITICAL
-**Why it fails**: Creates one TSDB time series per user. For a service with 1M users, this is 1M series — instant storage explosion, query latency degradation, and SaaS vendor bill spike. Additionally, user IDs are PII under GDPR Art. 4(1).
+**Why it fails**: Creates one TSDB time series per user. For a service with 1M users, this is 1M series; instant storage explosion, query latency degradation, and SaaS vendor bill spike. Additionally, user IDs are PII under GDPR Art. 4(1).
 **Remediation**: Replace with `user.tier`, `user.cohort`, or aggregated bucket labels. Never use any unbounded identifier as a metric label. Enforce via OTel SDK View attribute allow-list.
 **See also**: `signals/metrics.md §9 Cardinality Budget`, `meta-observability.md §Section C`
 
@@ -120,14 +120,14 @@
 ### B.4 Cost label at per-request metric granularity
 
 **Severity**: HIGH
-**Why it fails**: Writing `gen_ai.cost.total_usd` as a metric label at request granularity creates one series per request — causing OOM on the TSDB ingestor and making cost attribution unusable.
+**Why it fails**: Writing `gen_ai.cost.total_usd` as a metric label at request granularity creates one series per request; causing OOM on the TSDB ingestor and making cost attribution unusable.
 **Remediation**: Use `gen_ai.cost.total_usd` as a span attribute only. Aggregate cost metrics by `tenant_id`, `namespace`, and `workload` at the metric surface. Configure tail-sampler to always retain spans where cost exceeds $0.50.
 **See also**: `signals/cost.md §10`, `transport/sampling-recipes.md §3`
 
 ### B.5 Summary instrument for cross-service aggregation
 
 **Severity**: MEDIUM
-**Why it fails**: Prometheus Summary computes quantiles client-side per process. p99 from three replicas cannot be merged into a fleet-level p99 — the values are mathematically incompatible.
+**Why it fails**: Prometheus Summary computes quantiles client-side per process. p99 from three replicas cannot be merged into a fleet-level p99; the values are mathematically incompatible.
 **Remediation**: Replace Summary with Histogram + `histogram_quantile()` at query time. Set explicit bucket boundaries matching the expected value range (e.g., seconds-scale for request duration, not the default millisecond buckets).
 **See also**: `signals/metrics.md §2.5 Summary`
 
@@ -147,7 +147,7 @@
 
 ---
 
-## C — Pipeline & Collector
+## C: Pipeline & Collector
 
 ### C.1 Missing `memory_limiter` processor
 
@@ -166,7 +166,7 @@
 ### C.3 Tail sampling in sidecar
 
 **Severity**: HIGH
-**Why it fails**: A sidecar Collector only sees spans from its own pod. A trace spanning multiple services has spans on different pods, each with a different sidecar. No single sidecar has the complete trace — sampling decisions are based on incomplete data, producing systematically wrong retention.
+**Why it fails**: A sidecar Collector only sees spans from its own pod. A trace spanning multiple services has spans on different pods, each with a different sidecar. No single sidecar has the complete trace; sampling decisions are based on incomplete data, producing systematically wrong retention.
 **Remediation**: Run `tail_sampling` processor in the gateway tier (Deployment mode) only, combined with a `loadbalancing` exporter using consistent hash by `trace_id` to ensure trace completeness.
 **See also**: `transport/collector-topology.md §3`, `transport/sampling-recipes.md §2`
 
@@ -200,19 +200,19 @@
 
 ---
 
-## D — Sampling & Retention
+## D: Sampling & Retention
 
 ### D.1 Head-based sampling on multi-service call paths
 
 **Severity**: HIGH
-**Why it fails**: Head-based sampling makes a sampling decision at the trace root. If a downstream service independently samples out, its spans are dropped — the reconstructed trace has gaps. Tracing backends show incomplete traces that mislead incident investigation.
+**Why it fails**: Head-based sampling makes a sampling decision at the trace root. If a downstream service independently samples out, its spans are dropped; the reconstructed trace has gaps. Tracing backends show incomplete traces that mislead incident investigation.
 **Remediation**: Use tail-based sampling in the gateway tier for multi-service systems. Propagate `traceparent` on every hop regardless of local sampling decision. The gateway buffers all spans and decides after the trace is complete.
 **See also**: `transport/sampling-recipes.md §1`, `transport/sampling-recipes.md §6 Pitfalls`
 
 ### D.2 Missing `loadbalancing` exporter before tail sampler
 
 **Severity**: HIGH
-**Why it fails**: Without consistent-hash routing, spans for the same trace arrive at different gateway replicas. Each replica's `tail_sampling` processor sees an incomplete trace and makes wrong retention decisions — high-value traces are dropped, low-value traces are retained.
+**Why it fails**: Without consistent-hash routing, spans for the same trace arrive at different gateway replicas. Each replica's `tail_sampling` processor sees an incomplete trace and makes wrong retention decisions; high-value traces are dropped, low-value traces are retained.
 **Remediation**: Deploy `loadbalancing` exporter (with `routing_key: traceID`) in the tier upstream of `tail_sampling`. Use a headless Kubernetes Service so the exporter resolves per-pod DNS.
 **See also**: `transport/sampling-recipes.md §2`, `transport/collector-topology.md §6`
 
@@ -220,14 +220,14 @@
 
 **Severity**: CRITICAL
 **Why it fails**: SOC 2 CC7.2, PCI DSS Requirement 10, and HIPAA §164.312(b) require tamper-evident, immutable audit storage. Mutable audit logs can be deleted or altered, nullifying compliance evidence and enabling concealment of unauthorized actions.
-**Remediation**: Apply S3 Object Lock in **Compliance** mode (not Governance), GCS retention policy with locked bucket, or Azure Immutable Blob Storage at bucket creation time. Set 7-year retention as a baseline. Do not use Governance mode — it allows privileged override.
+**Remediation**: Apply S3 Object Lock in **Compliance** mode (not Governance), GCS retention policy with locked bucket, or Azure Immutable Blob Storage at bucket creation time. Set 7-year retention as a baseline. Do not use Governance mode; it allows privileged override.
 **See also**: `signals/audit.md §5 Immutable WORM Storage`
 
 ### D.4 Audit log retention below regulatory minimum
 
 **Severity**: HIGH
 **Why it fails**: HIPAA requires 6-year retention; PCI DSS requires 1 year online + offline; SOC 2 audit periods are typically 12 months. Flushing audit logs before the minimum period is a direct compliance violation discoverable during any audit.
-**Remediation**: Use a 7-year baseline with automated lifecycle policy (S3 → Glacier Deep Archive after 90 days). Set WORM Object Lock at write time — it cannot be applied retroactively. Monitor compliance via an `audit_log_retention_days` metric alert.
+**Remediation**: Use a 7-year baseline with automated lifecycle policy (S3 → Glacier Deep Archive after 90 days). Set WORM Object Lock at write time; it cannot be applied retroactively. Monitor compliance via an `audit_log_retention_days` metric alert.
 **See also**: `signals/audit.md §7 7-Year Retention Policy`, `meta-observability.md §Section F Alert 5`
 
 ### D.5 No tamper evidence on audit trail
@@ -240,7 +240,7 @@
 ### D.6 Kubernetes audit logs routed to operational log store
 
 **Severity**: HIGH
-**Why it fails**: Operational log stores (Loki, Elasticsearch) are mutable and have short retention policies. Kubernetes API audit logs — which record secret access, RBAC mutations, and cluster-admin actions — require WORM storage with multi-year retention to satisfy PCI DSS Requirement 10.
+**Why it fails**: Operational log stores (Loki, Elasticsearch) are mutable and have short retention policies. Kubernetes API audit logs; which record secret access, RBAC mutations, and cluster-admin actions; require WORM storage with multi-year retention to satisfy PCI DSS Requirement 10.
 **Remediation**: Route K8s audit logs via a separate pipeline to the WORM cold tier (S3 Glacier Deep Archive with Object Lock). Tag with `source: k8s_apiserver`. Do not co-mingle with operational logs.
 **See also**: `signals/audit.md §9 Kubernetes Audit Logs`
 
@@ -253,12 +253,12 @@
 
 ---
 
-## E — Release & Deployment
+## E: Release & Deployment
 
 ### E.1 No release markers in telemetry
 
 **Severity**: HIGH
-**Why it fails**: Without `service.version` on spans, metrics, and logs — and without a deployment event at release time — there is no way to correlate a metric anomaly or error spike to a specific deploy. Incident investigation degrades to git bisect guesswork.
+**Why it fails**: Without `service.version` on spans, metrics, and logs; and without a deployment event at release time; there is no way to correlate a metric anomaly or error spike to a specific deploy. Incident investigation degrades to git bisect guesswork.
 **Remediation**: Set `service.version` on the OTel Resource at SDK init (injected via CI as `OTEL_RESOURCE_ATTRIBUTES`). Emit a structured deployment event at release time and pipeline it to Grafana as a vertical annotation line.
 **See also**: `boundaries/release.md §9 Release Markers`
 
@@ -279,7 +279,7 @@
 ### E.4 GitOps drift unalerted
 
 **Severity**: MEDIUM
-**Why it fails**: When the cluster state diverges from the git manifest (OutOfSync in Argo CD, stalled Flux reconcile), the cluster is running unintended configuration. This silently breaks observability contracts — dashboards may reference metrics from a previous config version.
+**Why it fails**: When the cluster state diverges from the git manifest (OutOfSync in Argo CD, stalled Flux reconcile), the cluster is running unintended configuration. This silently breaks observability contracts; dashboards may reference metrics from a previous config version.
 **Remediation**: Alert on `argocd_app_info{sync_status="OutOfSync"} == 1` and `gotk_reconcile_condition{type="Ready",status="False"} == 1`. Treat drift as an incident, not a warning.
 **See also**: `boundaries/release.md §7 GitOps Engines`
 
@@ -299,7 +299,7 @@
 
 ---
 
-## F — Security & Compliance
+## F: Security & Compliance
 
 ### F.0 Audit pipeline supply-chain integrity unverified
 
@@ -325,7 +325,7 @@
 ### F.3 `request_id` not exposed to frontend users
 
 **Severity**: MEDIUM
-**Why it fails**: Without a user-visible `request_id` in error banners, customer support cannot correlate a user-reported error to backend traces. Support agents must rely on user-provided timestamps and symptoms — escalations that should take 2 minutes take 20.
+**Why it fails**: Without a user-visible `request_id` in error banners, customer support cannot correlate a user-reported error to backend traces. Support agents must rely on user-provided timestamps and symptoms; escalations that should take 2 minutes take 20.
 **Remediation**: Return `x-request-id` in every HTTP response header. Display it in frontend error banners. Customer support uses this ID; engineers use it to pivot to `trace_id` in the log system.
 **See also**: `boundaries/cross-application.md §7 request_id to trace_id Integration`
 
@@ -340,12 +340,12 @@
 
 **Severity**: MEDIUM
 **Why it fails**: Generating a new `trace_id` at dead letter queue replay severs the forensic chain from the original failure span to the replay event. Root cause analysis of repeated failures requires tracing back to the originating request.
-**Remediation**: Re-inject the original `traceparent` and `causation_id` from the failed message headers when replaying. Use a span link — not parent-child — to connect replay span to the original trace.
+**Remediation**: Re-inject the original `traceparent` and `causation_id` from the failed message headers when replaying. Use a span link; not parent-child; to connect replay span to the original trace.
 **See also**: `boundaries/cross-application.md §8 Idempotency and Event-Driven Trace Lineage`
 
 ---
 
-## G — Frontend / Mobile
+## G: Frontend / Mobile
 
 ### G.1 3rd-party script loaded without CSP monitoring
 
@@ -358,20 +358,20 @@
 
 **Severity**: HIGH
 **Why it fails**: Minified production bundles produce unreadable stack traces: `at t.<anonymous> (bundle.min.js:1:74821)`. Without source maps, engineers cannot identify the failing line of code. Incident investigation for frontend crashes is impossible.
-**Remediation**: Upload source maps to the error tracking vendor on every CI release pipeline step, before the release is considered complete. Use Sentry CLI or equivalent. Never store source maps in git LFS — use vendor symbol storage.
+**Remediation**: Upload source maps to the error tracking vendor on every CI release pipeline step, before the release is considered complete. Use Sentry CLI or equivalent. Never store source maps in git LFS; use vendor symbol storage.
 **See also**: `layers/L7-application/web-rum.md §9 Error Tracking`, `layers/L7-application/crash-analytics.md §3`
 
 ### G.3 FID still reported in dashboards after March 2024
 
 **Severity**: MEDIUM
-**Why it fails**: First Input Delay (FID) was removed from Core Web Vitals in March 2024 and replaced by Interaction to Next Paint (INP). Dashboards still reporting FID mislead SLO reviews — FID scores passing does not mean the INP SLO is met.
+**Why it fails**: First Input Delay (FID) was removed from Core Web Vitals in March 2024 and replaced by Interaction to Next Paint (INP). Dashboards still reporting FID mislead SLO reviews; FID scores passing does not mean the INP SLO is met.
 **Remediation**: Replace FID with INP in all dashboards and OpenSLO definitions. SLI target: INP p75 ≤ 200 ms. Use `web-vitals` JS library v4.x which provides `onINP`.
 **See also**: `layers/L7-application/web-rum.md §2 Core Web Vitals`
 
 ### G.4 `propagateTraceHeaderCorsUrls` / `allowedTracingUrls` not configured
 
 **Severity**: MEDIUM
-**Why it fails**: Browser CORS preflight rejects injection of the `traceparent` header to origins not listed in the SDK allowlist. Client-to-server trace correlation silently breaks — frontend traces appear disconnected from backend traces.
+**Why it fails**: Browser CORS preflight rejects injection of the `traceparent` header to origins not listed in the SDK allowlist. Client-to-server trace correlation silently breaks; frontend traces appear disconnected from backend traces.
 **Remediation**: Add all API origin patterns to `FetchInstrumentation`'s `propagateTraceHeaderCorsUrls` (OTel JS) or Datadog RUM's `allowedTracingUrls`. Test in a browser network inspector to confirm the header is present.
 **See also**: `layers/L7-application/web-rum.md §5 Client-to-Server Error Correlation`
 
@@ -385,7 +385,7 @@
 ### G.6 No event TTL on mobile offline queue
 
 **Severity**: MEDIUM
-**Why it fails**: Stale events queued on-device for hours or days eventually upload when the network reconnects. Events with device timestamps that are 24+ hours old mislead dashboards and SLO calculations — a crash from two days ago appears as a current incident.
+**Why it fails**: Stale events queued on-device for hours or days eventually upload when the network reconnects. Events with device timestamps that are 24+ hours old mislead dashboards and SLO calculations; a crash from two days ago appears as a current incident.
 **Remediation**: Set an event TTL of 24–72 hours on the mobile offline queue. Drop events that exceed the TTL before upload, not after. Log dropped event counts as a metric for monitoring queue health.
 **See also**: `layers/L7-application/mobile-rum.md §3 Offline-First Queuing`
 
@@ -398,12 +398,12 @@
 
 ---
 
-## H — Network / BGP / Clock
+## H: Network / BGP / Clock
 
 ### H.1 NTP drift left unmonitored
 
 **Severity**: HIGH
-**Why it fails**: Distributed traces depend on synchronized clocks. When two nodes diverge by more than 100 ms, waterfall charts show child spans starting before their parent — engineers chase phantom race conditions instead of real bugs. MTTR increases by hours.
+**Why it fails**: Distributed traces depend on synchronized clocks. When two nodes diverge by more than 100 ms, waterfall charts show child spans starting before their parent; engineers chase phantom race conditions instead of real bugs. MTTR increases by hours.
 **Remediation**: Emit `node_clock_drift_ms` from every host (chrony textfile collector or node exporter). Alert when drift exceeds 100 ms for 5 minutes. Run `chronyc makestep` to force resync. For financial / telco workloads requiring sub-ms precision, use PTP (IEEE 1588).
 **See also**: `standards.md §6 Clock Discipline`, `meta-observability.md §Section B`
 
@@ -417,21 +417,21 @@
 ### H.3 PMTUD black hole left uncorrected
 
 **Severity**: HIGH
-**Why it fails**: When firewalls block ICMP Type 3 Code 4 ("Fragmentation Needed"), PMTUD fails silently. Large TCP transfers stall while health checks (small packets) pass — masking the problem. Services appear healthy in monitors while bulk data transfers time out.
+**Why it fails**: When firewalls block ICMP Type 3 Code 4 ("Fragmentation Needed"), PMTUD fails silently. Large TCP transfers stall while health checks (small packets) pass; masking the problem. Services appear healthy in monitors while bulk data transfers time out.
 **Remediation**: Enable MSS clamping at VPN/tunnel endpoints. Allow ICMP Type 3 Code 4 through security groups. Verify the fix with `ping -M do -s 1472 <destination>`. Cross-reference UDP MTU constraints for StatsD pipelines.
 **See also**: `layers/L3-network.md §4 PMTUD`, `transport/udp-statsd-mtu.md §2`
 
 ### H.4 RPKI-ROV not configured on advertised prefixes
 
 **Severity**: HIGH
-**Why it fails**: An IP prefix announced without a valid RPKI ROA record is marked "Not Found" by downstream validators — not "Invalid", but also not cryptographically anchored. Rogue AS announcements for your prefix are undetectable by validators, increasing hijack risk.
+**Why it fails**: An IP prefix announced without a valid RPKI ROA record is marked "Not Found" by downstream validators; not "Invalid", but also not cryptographically anchored. Rogue AS announcements for your prefix are undetectable by validators, increasing hijack risk.
 **Remediation**: Create ROA records at your RIR (ARIN, RIPE NCC, APNIC) for all advertised prefixes. Enable ROV enforcement on border routers to drop or de-prefer RPKI Invalid routes.
 **See also**: `layers/L3-network.md §6.4 RPKI-ROV`
 
 ### H.5 Connection pool observability absent
 
 **Severity**: HIGH
-**Why it fails**: Pool queue saturation causes application latency spikes that are invisible in TCP metrics alone. Neither retransmit rate nor error rate spikes until connection timeouts fire — engineers investigate network issues while the actual problem is a saturated database pool.
+**Why it fails**: Pool queue saturation causes application latency spikes that are invisible in TCP metrics alone. Neither retransmit rate nor error rate spikes until connection timeouts fire; engineers investigate network issues while the actual problem is a saturated database pool.
 **Remediation**: Instrument connection pool size, wait time, and timeout counters at the application layer (not only at the TCP layer). Alert on pool utilization > 80% before timeouts occur.
 **See also**: `layers/L4-transport.md §3.3 Common Pitfalls`
 
@@ -451,7 +451,7 @@
 
 ---
 
-## I — As-Code & GitOps
+## I: As-Code & GitOps
 
 ### I.1 Production dashboards edited directly in UI
 
@@ -476,7 +476,7 @@
 
 ---
 
-## Z — Cross-cutting
+## Z: Cross-cutting
 
 ### Z.1 `trace_id` missing from log records
 
@@ -489,27 +489,27 @@
 
 **Severity**: HIGH
 **Why it fails**: Without `service.version` on every signal, before/after comparison across a release is impossible. Canary analysis, SLO delta calculation, and post-incident release attribution all fail.
-**Remediation**: Set `service.version` on the OTel Resource at SDK initialization. Inject via CI as `OTEL_RESOURCE_ATTRIBUTES=service.version=${GIT_SHA}`. Never set it per-signal — the Resource is the single source.
+**Remediation**: Set `service.version` on the OTel Resource at SDK initialization. Inject via CI as `OTEL_RESOURCE_ATTRIBUTES=service.version=${GIT_SHA}`. Never set it per-signal; the Resource is the single source.
 **See also**: `incident-forensics.md §2.1 Resource Attributes`, `boundaries/release.md §9`
 
 ### Z.3 Pipeline delivery ratio unmonitored
 
 **Severity**: HIGH
-**Why it fails**: If the OTel Collector is silently dropping 10% of traces, every SLO dashboard and alert is built on incomplete data. The pipeline degradation is invisible until SLO violations appear — at which point on-call cannot distinguish real incidents from telemetry gaps.
+**Why it fails**: If the OTel Collector is silently dropping 10% of traces, every SLO dashboard and alert is built on incomplete data. The pipeline degradation is invisible until SLO violations appear; at which point on-call cannot distinguish real incidents from telemetry gaps.
 **Remediation**: Alert when `sum(rate(otelcol_exporter_sent_spans[5m])) / sum(rate(otelcol_receiver_accepted_spans[5m])) < 0.99` for 5 minutes. This is the single most important meta-observability alert.
 **See also**: `meta-observability.md §Section A6`, `meta-observability.md §Section F Alert 1`
 
 ### Z.4 Tenant ID absent from multi-tenant telemetry
 
 **Severity**: HIGH
-**Why it fails**: In a multi-tenant system, telemetry without `tenant.id` makes per-tenant SLO computation, chargeback, and incident isolation impossible. All tenants are indistinguishable in dashboards — a single noisy tenant can mask SLO violations for the entire fleet.
+**Why it fails**: In a multi-tenant system, telemetry without `tenant.id` makes per-tenant SLO computation, chargeback, and incident isolation impossible. All tenants are indistinguishable in dashboards; a single noisy tenant can mask SLO violations for the entire fleet.
 **Remediation**: Propagate `tenant.id` via W3C Baggage from the API gateway through all downstream services. Emit it on every span, log record, and metric data point. Apply top-N cap (≤ 1000) when used as a metric label.
 **See also**: `incident-forensics.md §2.3`, `boundaries/multi-tenant.md`
 
 ### Z.5 Incident forensics without 6-dimension MRA attributes
 
 **Severity**: HIGH
-**Why it fails**: Missing Minimum Required Attributes (`service.name`, `service.namespace`, `service.version`, `deployment.environment`, `cloud.region`, `k8s.pod.name`) break the 6-dimension narrowing flow — Code / Service / Layer / Host / Region / Infra pivots fail silently.
+**Why it fails**: Missing Minimum Required Attributes (`service.name`, `service.namespace`, `service.version`, `deployment.environment`, `cloud.region`, `k8s.pod.name`) break the 6-dimension narrowing flow; Code / Service / Layer / Host / Region / Infra pivots fail silently.
 **Remediation**: Enforce MRA completeness at CI via an OTel attribute coverage gate. Set all resource attributes via `OTEL_RESOURCE_ATTRIBUTES` or the OTel Collector `resource` processor. Validate with `otelcol` debug exporter in staging before production rollout.
 **See also**: `incident-forensics.md §2 Minimum Required Attributes`
 
@@ -527,7 +527,7 @@
 When adding an entry from another doc:
 
 1. Place it in the correct section (A–Z) by primary concern.
-2. If the same anti-pattern appears in multiple source files, one canonical entry only — list all sources in "See also".
+2. If the same anti-pattern appears in multiple source files, one canonical entry only; list all sources in "See also".
 3. Use the format: `### {Section}.{n} {Pattern name}` / `**Severity**` / `**Why it fails**` / `**Remediation**` / `**See also**`.
 4. Order within each section: CRITICAL → HIGH → MEDIUM → LOW.
 5. All cross-references use relative paths from the `resources/` root.

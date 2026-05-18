@@ -8,11 +8,11 @@ This saves context window and prevents confusion from irrelevant information.
 ## Loading Order (Common to All Agents)
 
 ### Always Load (Required)
-1. `SKILL.md` — Auto-loaded (provided by Antigravity)
-2. `resources/execution-protocol.md` — Execution protocol
+1. `SKILL.md`: Auto-loaded (provided by Antigravity)
+2. `resources/execution-protocol.md`: Execution protocol
 
 ### Load at Task Start
-3. `difficulty-guide.md` — Difficulty assessment (Step 0)
+3. `difficulty-guide.md`: Difficulty assessment (Step 0)
 
 ### Load Based on Difficulty
 4. **Simple**: Proceed to implementation without additional loading
@@ -20,15 +20,15 @@ This saves context window and prevents confusion from irrelevant information.
 6. **Complex**: `resources/examples.md` + `stack/tech-stack.md` + `stack/snippets.md`
 
 ### Load During Execution as Needed
-7. `resources/checklist.md` — Load at Step 4 (Verify)
-8. `resources/error-playbook.md` — Load only when errors occur
-9. `common-checklist.md` — For final verification of Complex tasks
-10. `../runtime/memory-protocol.md` — CLI mode only
+7. `resources/checklist.md`: Load at Step 4 (Verify)
+8. `resources/error-playbook.md`: Load only when errors occur
+9. `common-checklist.md`: For final verification of Complex tasks
+10. `../runtime/memory-protocol.md`: CLI mode only
 
 ### Load on Measurement / Exploration (Conditional)
-11. `../conditional/quality-score.md` — Load when Quality Score measurement is needed (VERIFY/SHIP gates)
-12. `../conditional/experiment-ledger.md` — Load when recording experiment results (after implementation changes)
-13. `../conditional/exploration-loop.md` — Load only when a gate fails twice on the same issue
+11. `../conditional/quality-score.md`: Load when Quality Score measurement is needed (VERIFY/SHIP gates)
+12. `../conditional/experiment-ledger.md`: Load when recording experiment results (after implementation changes)
+13. `../conditional/exploration-loop.md`: Load only when a gate fails twice on the same issue
 
 ---
 
@@ -143,7 +143,7 @@ Prompt composition:
 1. Agent SKILL.md's Core Rules section
 2. execution-protocol.md
 3. Resources matching task type (see tables above)
-4. error-playbook.md (always include — recovery is essential)
+4. error-playbook.md (always include; recovery is essential)
 5. Serena Memory Protocol (CLI mode)
 ```
 

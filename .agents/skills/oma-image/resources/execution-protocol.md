@@ -29,7 +29,7 @@ When `--reference <path...>` is supplied:
 
 ### Auto-forward attached images (MANDATORY)
 
-If the user asks to generate/edit an image AND a host-attached image is visible to the agent (e.g. `[Image: source: <path>]` in a Claude Code system message, Antigravity workspace upload, or explicit user-provided path), the agent MUST pass it via `--reference <path>`. Do not fall back to describing the image in prose. Do not ask the user to re-type the path. If `oma image generate --help` shows no `--reference` flag, instruct the user to run `oma update` and retry — do not silently degrade.
+If the user asks to generate/edit an image AND a host-attached image is visible to the agent (e.g. `[Image: source: <path>]` in a Claude Code system message, Antigravity workspace upload, or explicit user-provided path), the agent MUST pass it via `--reference <path>`. Do not fall back to describing the image in prose. Do not ask the user to re-type the path. If `oma image generate --help` shows no `--reference` flag, instruct the user to run `oma update` and retry; do not silently degrade.
 
 ### Host-Specific Reference Paths
 
@@ -48,8 +48,8 @@ Agents should prefer user-supplied explicit paths (e.g., `~/Downloads/otter.jpeg
 
 1. Call `health()` on every registered provider in parallel.
 2. Classify:
-   - `healthy` — `ok: true`
-   - `unhealthy` — `ok: false` with a hint
+   - `healthy`: `ok: true`
+   - `unhealthy`: `ok: false` with a hint
 3. Decide based on `--vendor`:
    - `auto`: continue with every `healthy` provider. If zero → exit 5.
    - `all`: every provider must be healthy. Any missing → exit 5 naming the specific vendor.
@@ -71,8 +71,8 @@ Agents should prefer user-supplied explicit paths (e.g., `~/Downloads/otter.jpeg
 
 ## Step 4: Dispatch
 
-- **Single vendor** — run `provider.generate(input)` sequentially.
-- **Multi-vendor (`all` or `auto` with 2+ healthy)** — `Promise.allSettled` across providers.
+- **Single vendor**: run `provider.generate(input)` sequentially.
+- **Multi-vendor (`all` or `auto` with 2+ healthy)**: `Promise.allSettled` across providers.
 - Providers with sub-strategies escalate internally (e.g. Gemini: `mcp → stream → api`). Record every strategy attempt (ok/skipped/failed with reason).
 - Non-retryable errors (safety-refused, invalid-input) short-circuit the escalation chain.
 

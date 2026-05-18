@@ -31,7 +31,7 @@ AI appends shallow analysis as participle phrases. In Korean/Japanese translatio
 
 **Avoid:** *boasts a, vibrant, rich (figurative), profound, enhancing, showcasing, exemplifies, commitment to, groundbreaking, renowned*
 
-AI defaults to positive, promotional language. Translation should match the source's actual tone — if the source is neutral, the translation must be neutral.
+AI defaults to positive, promotional language. Translation should match the source's actual tone. If the source is neutral, the translation must be neutral.
 
 - Don't upgrade "good" to "excellent" during translation
 - Don't add marketing flair that wasn't there
@@ -76,7 +76,7 @@ AI overuses triple constructions: "adjective, adjective, and adjective."
 - Bad KO: "빠르고, 안정적이며, 직관적인 경험" (mechanical triple)
 - Good KO: "빠르고 쓰기 편한 경험" (natural compression)
 
-If the source uses rule of three, you may compress or keep it — follow what sounds natural in the target language.
+If the source uses rule of three, you may compress or keep it. Follow what sounds natural in the target language.
 
 ### 8. Elegant Variation (Synonym Cycling)
 
@@ -106,7 +106,7 @@ These stack up quickly and create jargon-heavy text:
 Rules:
 - One per sentence is acceptable; two or more stacked is a red flag
 - In Korean/Japanese, unpack the compound into a natural clause rather than calque-translating
-- Not every hyphenated adjective needs to survive translation — drop if redundant
+- Not every hyphenated adjective needs to survive translation; drop if redundant
 
 ### 11. Adjective-Noun Compound Stacking
 
@@ -154,9 +154,26 @@ In Korean, em dashes are rare. Use:
 - Commas or restructured sentences instead
 - Parentheses for asides
 
+### 14a. Mechanical Punctuation Swap (Anti-Pattern)
+
+When source uses an `X — Y and Z` em-dash pattern and the target language doesn't use em dash naturally in that position, **AI tends to swap the em dash for `:` / `(` / parens and call it done**. This is not translation; it's punctuation substitution that preserves source-language structure.
+
+Example failure (Korean):
+- Source: `Documentation drift checks — broken refs and diff-affected docs`
+- Lazy swap: `문서 drift 체크: 깨진 참조와 diff 영향받는 docs` (em dash → colon, structure unchanged, "체크"/"diff 영향받는" Konglish)
+- Restructured: `참조 무결성 검사, 변경 영향 문서 식별` (matches sibling style: comma-coordinated noun phrases, native vocabulary)
+
+The em dash separator implies a definitional `definiendum — definiens` structure that may map to:
+- Coordinated noun phrases joined by commas / `및` / `와/과`
+- Relative clauses (target-language pre-nominal modifiers)
+- Separate sentences
+- A different grammatical pivot entirely
+
+Run the **Sibling-pattern match** check (Stage 4 mechanical) before emitting: if siblings use commas and your draft uses `:`, BLOCK and revise.
+
 ### 15. Title Case in Headings
 
-AI capitalizes all main words in headings. This is an English convention. Korean/Japanese headings should not mimic this pattern — just write naturally.
+AI capitalizes all main words in headings. This is an English convention. Korean/Japanese headings should not mimic this pattern; just write naturally.
 
 ### 16. Unnecessary Tables
 
@@ -260,6 +277,51 @@ English "It is X that..." structures should not be directly calqued.
 - Bad ZH: "重要的**是**用户体验" (是...的 calque)
 - Good ZH: "用户体验最重要"
 
+### 25. CJK Typography & Fragment Sentences
+
+English technical writing tolerates noun-only fragments ("Lint failed.", "Run conditions: X, Y, Z."). Korean and Japanese readers expect complete sentences with verbs in body text. AI translations calque the source's terse rhythm directly, producing reports that feel choppy and unfinished.
+
+**Body fragments (noun-ending sentences in body text) → rewrite as full sentences:**
+
+- Bad KO: "`ANTHROPIC_API_KEY` 미설정."
+- Good KO: "`ANTHROPIC_API_KEY`는 설정하지 않았고, OAuth로 대신 인증합니다."
+- Bad KO: "lint 실패."
+- Good KO: "lint가 실패했습니다." (standalone) / "결과: lint 실패" (inside a label)
+- Bad KO: "anti-pattern 1개."
+- Good KO: "anti-pattern이 하나 발견되었습니다."
+
+**Tailing negation calque (do not directly translate English trailing negation fragments):**
+
+English commonly tacks short negation fragments onto the end of a sentence ("..., no guessing", "..., no wasted motion"). Calquing this into CJK produces awkward noun-ending fragments ("..., 추측 없이", "..., 낭비 없이"). In body text, expand the fragment into a full clause.
+
+- Bad EN→KO: "선택된 항목에서 옵션이 나옵니다, 추측 없이."
+- Good KO: "선택된 항목에서 바로 옵션을 가져오므로 사용자가 추측할 필요가 없습니다."
+- Bad EN→KO: "한 번에 처리합니다, 낭비 없이."
+- Good KO: "낭비되는 동작 없이 한 번에 처리합니다."
+
+Inside label/table-cell positions, short negation fragments are acceptable (e.g., `결과: 추측 불필요`).
+
+**Fragments are allowed inside label/table positions:**
+- Fragments are natural inside table cells, bullet headers, and `key: value` labels (e.g., `실행 조건:`, `Pass:`).
+- Only rewrite fragments that appear abruptly inside narrative body text.
+
+**Spacing between code spans and Korean particles:**
+
+Korean publishing and technical-writing convention attaches the trailing particle directly to an inline code span (`backtick`) with no space. Calquing the English convention of spacing around inline code looks visually broken in Korean.
+
+- Bad: "`prompt` 로 5 개 하네스를 비교합니다"
+- Good: "`prompt`로 5개 하네스를 비교합니다"
+- Bad: "`oh-my-agent` 소스를 프로젝트에 시드"
+- Good: "`oh-my-agent` 소스를 프로젝트에 심습니다" (also avoid Sino-Korean noun transliteration of English verbs; see the next sub-rule)
+
+**No Sino-Korean noun transliteration of English verbs:**
+
+Pinning English verbs into Korean as Sino-Korean nouns ("시드", "로드", "발동", "진행") strips out the action and reads as jargon. Unpack them into natural Korean verbs.
+
+- Bad KO: "skill을 **로드**" → Good KO: "skill을 **불러옵니다**"
+- Bad KO: "프로젝트에 **시드**" → Good KO: "프로젝트에 **심습니다**"
+- Bad KO: "`<HARD-GATE>` **발동**" → Good KO: "`<HARD-GATE>`가 **트리거됐습니다**" or "`<HARD-GATE>`가 **걸렸습니다**"
+
 ---
 
 ## Self-Check
@@ -275,7 +337,10 @@ Before finalizing any translation, scan for:
 - [ ] No chatbot communication artifacts
 - [ ] No unnecessary connectives where context already implies the relationship
 - [ ] No passive voice where active voice is more natural in target language
-- [ ] No long modifier chains (3+) stacked before a noun — break into clauses
-- [ ] No over-nominalization (동사/형용사로 쓸 수 있는데 명사화)
+- [ ] No long modifier chains (3+) stacked before a noun; break into clauses
+- [ ] No over-nominalization (verbs/adjectives turned into nouns where unnecessary)
 - [ ] No forced pronouns where omission is natural in target language
 - [ ] No cleft sentence calques from English
+- [ ] No body-text fragments (noun-ending sentences appearing abruptly in CJK body text); labels and table cells are exempt
+- [ ] CJK typography: no space between inline code and a trailing Korean particle
+- [ ] No Sino-Korean transliteration of English verbs (e.g., 시드 / 로드 / 발동 / 진행); unpack into natural Korean verbs

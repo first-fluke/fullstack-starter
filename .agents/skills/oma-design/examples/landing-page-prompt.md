@@ -1,4 +1,4 @@
-# Landing Page Design Prompt — Example
+# Landing Page Design Prompt: Example
 
 This is an example of the level of detail Phase 3 (Enhance) should produce.
 Based on motionsites.ai-level specifications.
@@ -14,7 +14,7 @@ Based on motionsites.ai-level specifications.
 ## Design System
 
 ### Fonts
-- Heading: Instrument Serif (italic) — display headings only
+- Heading: Instrument Serif (italic) for display headings only
 - Body: system-ui stack (or Pretendard for CJK)
 
 ### CSS Variables
@@ -48,7 +48,7 @@ Based on motionsites.ai-level specifications.
 ### HERO (full viewport)
 - **Layout**: centered, min-h-screen, flex column
 - **Background**: video (mp4, autoplay loop muted) with gradient overlay to black at bottom
-- **Badge**: liquid-glass rounded-full pill — "New" tag + announcement text
+- **Badge**: liquid-glass rounded-full pill with "New" tag + announcement text
 - **Heading**: BlurText component (motion/react), word-by-word blur-to-clear animation
   - text-6xl md:text-7xl lg:text-[5.5rem] font-heading italic
   - leading-[0.8] tracking-[-4px]
@@ -61,7 +61,7 @@ Based on motionsites.ai-level specifications.
 
 ### PARTNERS BAR
 - **Layout**: centered column, below hero
-- **Badge**: liquid-glass rounded-full — "Trusted by the teams behind"
+- **Badge**: liquid-glass rounded-full labeled "Trusted by the teams behind"
 - **Names**: horizontal row, text-2xl md:text-3xl font-heading italic text-white, gap-12
 - **Companies**: Stripe, Vercel, Linear, Notion, Figma
 - **Responsive**: reduce gap, text-xl on mobile, wrap if needed
@@ -71,7 +71,7 @@ Based on motionsites.ai-level specifications.
 - **Background**: HLS video (hls.js), absolute cover, z-0
   - Top + bottom fade gradients (200px each, black ↔ transparent)
 - **Content** (z-10, centered):
-  - Badge: liquid-glass rounded-full — "How It Works"
+  - Badge: liquid-glass rounded-full labeled "How It Works"
   - Heading: "You dream it. We ship it."
   - Subtext: description paragraph
   - Button: liquid-glass-strong rounded-full + ArrowUpRight
@@ -82,7 +82,7 @@ Based on motionsites.ai-level specifications.
 - **Row 1** (text left, image right):
   - H3 + paragraph + CTA button
   - Image in liquid-glass rounded-2xl container
-- **Row 2** (image left, text right — lg:flex-row-reverse):
+- **Row 2** (image left, text right; lg:flex-row-reverse):
   - Same structure, reversed layout
 - **Responsive**: stack vertically, image above text on mobile
 
@@ -125,7 +125,7 @@ Based on motionsites.ai-level specifications.
 
 ## Dependencies
 - hls.js (HLS video streaming)
-- motion (animation — import from "motion/react")
+- motion (animation; import from "motion/react")
 - lucide-react (icons)
 - tailwindcss-animate
 

@@ -1,6 +1,6 @@
 ---
 name: tools
-description: Manage MCP tools with natural language commands — list, enable, disable tools and tool groups
+description: Manage MCP tools with natural language commands to list, enable, and disable tools and tool groups
 ---
 <!-- oma:generated -->
 

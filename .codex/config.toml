@@ -1,10 +1,18 @@
 [features]
-codex_hooks = true
+goals = true
+child_agents_md = true
 
+hooks = true
 [mcp_servers.serena]
-command = "uvx"
-args = [ "--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex", "--project", "." ]
+command = "serena"
+args = [ "start-mcp-server", "--context", "codex", "--project", "." ]
 
 [mcp_servers.serena.env]
 SERENA_LOG_LEVEL = "info"
+
+[analytics]
+enabled = false
+
+[feedback]
+enabled = false
 

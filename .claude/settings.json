@@ -73,5 +73,6 @@
     "pr": "Generated with [oh-my-agent](https://github.com/first-fluke/oh-my-agent)"
   },
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "effortLevel": "xhigh",
+  "skillListingBudgetFraction": 0.02
 }

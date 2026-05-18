@@ -151,7 +151,7 @@ oma recap --date 2026-04-10 --json
 oma recap --tool claude,gemini --json
 ```
 
-**Fallback when CLI is not installed** — process Claude history only via inline jq:
+**Fallback when CLI is not installed**: process Claude history only via inline jq:
 
 ```bash
 TARGET_DATE=$(date +%Y-%m-%d)
@@ -201,7 +201,7 @@ Output in the following markdown format. **Response language follows `language` 
 ## {date} Recap
 
 > **TL;DR**
-> - {What I accomplished 1 — project name + outcome}
+> - {What I accomplished 1: project name + outcome}
 > - {What I accomplished 2}
 > - {What I accomplished 3}
 
@@ -235,7 +235,7 @@ Focus on what was accomplished per project, not day-by-day chronology.
 ## {start} ~ {end} Monthly Recap
 
 > **TL;DR**
-> - {What I accomplished 1 — project name + outcome}
+> - {What I accomplished 1: project name + outcome}
 > - {What I accomplished 2}
 > - {What I accomplished 3}
 
@@ -267,7 +267,7 @@ Projects with <30 prompts, summarized briefly.
 - Group by **project**, not by date
 - Order projects by activity volume (most active first)
 - Each project section: what it is, what was accomplished, key decisions, current status
-- Do NOT include prompt counts or date ranges in project headers — those are internal metrics
+- Do NOT include prompt counts or date ranges in project headers (those are internal metrics)
 - Small projects (<30 prompts) go into "Side Projects" as one-liners
 - Overview should read like a sprint report narrative, not a log
 

@@ -15,7 +15,7 @@ UI-edited dashboards and alerts accumulate silent debt:
 - **Scale problem.** 100+ dashboards across N environments managed by hand drift within weeks. Each environment develops its own undocumented fork.
 - **Compliance.** SOC 2 change-management controls require an audit trail for every change to detection and response configuration. Git history provides that trail; Grafana's internal change log does not. Cross-ref `signals/audit.md` for WORM immutability requirements.
 
-The non-negotiable principle: version every observability artifact — dashboards, alert rules, SLO definitions, collector config — in git, applied via CI/CD. This is design decision D9 in the design document.
+The non-negotiable principle: version every observability artifact; dashboards, alert rules, SLO definitions, collector config; in git, applied via CI/CD. This is design decision D9 in the design document.
 
 ---
 
@@ -25,7 +25,7 @@ The non-negotiable principle: version every observability artifact — dashboard
 
 Source: <https://grafana.github.io/grafonnet/> (Grafonnet 11.x, replacing legacy grafonnet-lib)
 
-Grafonnet is a Jsonnet library that generates Grafana's JSON dashboard model declaratively. Dashboards are composed programmatically — panels, data sources, variables, and annotations are all typed functions.
+Grafonnet is a Jsonnet library that generates Grafana's JSON dashboard model declaratively. Dashboards are composed programmatically; panels, data sources, variables, and annotations are all typed functions.
 
 ```jsonnet
 // dashboards/collector-health.jsonnet
@@ -66,7 +66,7 @@ jsonnetfmt --test dashboards/*.jsonnet
 
 ### 2.2 Perses (CNCF Sandbox)
 
-Source: <https://perses.dev> — CNCF Sandbox (accepted 2023). YAML-first, vendor-neutral dashboard definition targeting a future CNCF standard for dashboards-as-code. Stricter schema than Grafana JSON; import from Grafana JSON is under development.
+Source: <https://perses.dev>; CNCF Sandbox (accepted 2023). YAML-first, vendor-neutral dashboard definition targeting a future CNCF standard for dashboards-as-code. Stricter schema than Grafana JSON; import from Grafana JSON is under development.
 
 ```yaml
 # dashboards/collector-health.yaml (Perses)
@@ -217,7 +217,7 @@ jobs:
 
 ### 4.1 OpenSLO YAML
 
-Source: <https://openslo.com> — community-driven (not CNCF). Adopted by Sloth, Pyrra, and Nobl9. Cross-ref `boundaries/slo.md §5` for the full OpenSLO spec example.
+Source: <https://openslo.com>; community-driven (not CNCF). Adopted by Sloth, Pyrra, and Nobl9. Cross-ref `boundaries/slo.md §5` for the full OpenSLO spec example.
 
 ```yaml
 apiVersion: openslo.com/v1
@@ -247,7 +247,7 @@ spec:
 
 ### 4.2 Sloth: YAML to PrometheusRule
 
-Source: <https://sloth.dev> — generates multi-window burn-rate `PrometheusRule` CRDs from a concise YAML definition.
+Source: <https://sloth.dev>; generates multi-window burn-rate `PrometheusRule` CRDs from a concise YAML definition.
 
 ```yaml
 # sloth/checkout-slo.yaml
@@ -274,7 +274,7 @@ sloth generate -i sloth/checkout-slo.yaml | kubectl apply -f -
 
 ### 4.3 Pyrra: Kubernetes CRD Operator
 
-Source: <https://github.com/pyrra-dev/pyrra> — Kubernetes operator that reconciles `ServiceLevelObjective` CRDs directly into `PrometheusRule` + recording rules.
+Source: <https://github.com/pyrra-dev/pyrra>; Kubernetes operator that reconciles `ServiceLevelObjective` CRDs directly into `PrometheusRule` + recording rules.
 
 ```yaml
 apiVersion: pyrra.dev/v1alpha1
@@ -295,7 +295,7 @@ spec:
           - { key: code, operator: In, values: ["5xx"] }
 ```
 
-Pyrra reconciles this into recording rules and PrometheusRule alerts automatically — no separate generation step.
+Pyrra reconciles this into recording rules and PrometheusRule alerts automatically; no separate generation step.
 
 ---
 
@@ -305,7 +305,7 @@ Pyrra reconciles this into recording rules and PrometheusRule alerts automatical
 
 Source: <https://github.com/open-telemetry/opentelemetry-operator>
 
-The `OpenTelemetryCollector` CRD (`v1beta1`, beta) is the Kubernetes-native way to manage collector config as code. Four `spec.mode` values map to the four deployment strategies — cross-ref `transport/collector-topology.md §1`:
+The `OpenTelemetryCollector` CRD (`v1beta1`, beta) is the Kubernetes-native way to manage collector config as code. Four `spec.mode` values map to the four deployment strategies; cross-ref `transport/collector-topology.md §1`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -481,7 +481,7 @@ Argo CD reconciles git state to the cluster on every commit. Drift is detected a
 
 Source: <https://fluxcd.io>
 
-Flux `Kustomization` resources watch git paths and apply them to the cluster. Flagger (a Flux ecosystem project) handles progressive delivery gates — cross-ref `boundaries/release.md` for canary/blue-green integration.
+Flux `Kustomization` resources watch git paths and apply them to the cluster. Flagger (a Flux ecosystem project) handles progressive delivery gates; cross-ref `boundaries/release.md` for canary/blue-green integration.
 
 ```yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -525,7 +525,7 @@ Audit trail: git history is the authoritative change log. Cross-ref `signals/aud
 
 ## 9. Secrets Management for Observability Stack
 
-Backend API keys, Grafana service account tokens, and OAuth client secrets MUST NOT be committed to git — even in encrypted form inside dashboard YAML.
+Backend API keys, Grafana service account tokens, and OAuth client secrets MUST NOT be committed to git; even in encrypted form inside dashboard YAML.
 
 | Pattern | Tool | Notes |
 |---------|------|-------|
@@ -603,7 +603,7 @@ Source: <https://perses.dev> | CNCF Sandbox status as of 2026-Q2.
 
 ## 13. Matrix Coverage Note
 
-Observability-as-code is cross-cutting: it covers every row in `matrix.md` (all layers, all boundaries, all signals). It has no dedicated matrix row. Think of it as the delivery mechanism for everything else in the skill — the how, not the what.
+Observability-as-code is cross-cutting: it covers every row in `matrix.md` (all layers, all boundaries, all signals). It has no dedicated matrix row. Think of it as the delivery mechanism for everything else in the skill; the how, not the what.
 
 ---
 

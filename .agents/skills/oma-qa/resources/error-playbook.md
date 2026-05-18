@@ -12,8 +12,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. Check: is the tool installed? Note missing tool in result
 2. Check: are you in the correct directory?
 3. If `npm audit`: try `npm audit --production` to skip devDependencies
-4. If `bandit`: check Python path — may need `python -m bandit`
-5. If `lighthouse`: requires a running server — note if server not available
+4. If `bandit`: check Python path; may need `python -m bandit`
+5. If `lighthouse`: requires a running server; note if server not available
 6. **If tool unavailable**: Fall back to manual review, record `tool_unavailable: ["tool_name"]` in result
 
 ---
@@ -22,11 +22,11 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Finding looks like a vulnerability but might be safe
 
-1. Trace the data flow — does user input actually reach the dangerous operation?
+1. Trace the data flow: does user input actually reach the dangerous operation?
 2. Check: is there validation/sanitization upstream?
 3. Check: is the framework handling this automatically? (e.g., ORM prevents SQL injection)
 4. If uncertain: mark severity as `MEDIUM` with note "verify manually"
-5. **NEVER do this**: Mark as CRITICAL without certainty — false alarms erode trust
+5. **NEVER do this**: Mark as CRITICAL without certainty (false alarms erode trust)
 
 ---
 
@@ -73,7 +73,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**: do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks
@@ -92,4 +92,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **False positive prevention**: If finding is uncertain, lower severity and mark "verify manually"
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **No code modification**: QA only reports — delegate code changes to the appropriate agent
+- **No code modification**: QA only reports; delegate code changes to the appropriate agent

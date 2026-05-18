@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-The release boundary is the **temporal boundary between versions of a service** — the window
+The release boundary is the **temporal boundary between versions of a service**; the window
 where new code enters production and either stabilizes or is rolled back.
 
 Covers: progressive delivery strategies, Flagger canary analysis, Argo Rollouts, OpenFeature
@@ -245,7 +245,7 @@ argocd_app_info{sync_status="OutOfSync"} == 1
 
 ### 7.2 Flux (CNCF Graduated)
 
-Source: <https://fluxcd.io> — Flagger ships as part of the Flux ecosystem.
+Source: <https://fluxcd.io>; Flagger ships as part of the Flux ecosystem.
 
 | Metric | Type | Description |
 |--------|------|-------------|
@@ -288,7 +288,7 @@ guard and expose a `status.conditions` entry per managed resource.
 
 ## 9. Release Markers in Telemetry
 
-- `service.version` (OTel Stable) — set on every span, metric data point, and log record
+- `service.version` (OTel Stable): set on every span, metric data point, and log record
   via the OTel Resource at SDK initialization. Never patch per-signal.
 - Emit a **deployment event** at release time:
 
@@ -339,12 +339,12 @@ Cross-ref `../signals/audit.md` for the required audit log fields.
 
 | Layer | Signal | Status | Detail |
 |-------|--------|--------|--------|
-| L7 × release | metrics | ✅ | Canary SLI delta; error rate and latency per version |
-| L7 × release | logs | ✅ | Deployment events with `service.version` |
-| L7 × release | traces | ✅ | `service.version` tagging on every span |
-| L7 × release | profiles | ⚠️ | Regression comparison v(new) vs v(prev); tooling-dependent |
-| L7 × release | cost | ⚠️ | Cost delta per variant requires OpenCost label propagation |
-| mesh × release | metrics | ⚠️ | Canary routing rules observable via Envoy stats if mesh present |
+| L7 × release | metrics | PASS | Canary SLI delta; error rate and latency per version |
+| L7 × release | logs | PASS | Deployment events with `service.version` |
+| L7 × release | traces | PASS | `service.version` tagging on every span |
+| L7 × release | profiles | PARTIAL | Regression comparison v(new) vs v(prev); tooling-dependent |
+| L7 × release | cost | PARTIAL | Cost delta per variant requires OpenCost label propagation |
+| mesh × release | metrics | PARTIAL | Canary routing rules observable via Envoy stats if mesh present |
 
 ---
 

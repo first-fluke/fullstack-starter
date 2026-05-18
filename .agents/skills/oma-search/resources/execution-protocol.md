@@ -30,14 +30,14 @@
 Delegate to the native CLI: `oma search fetch <url>`. The pipeline
 auto-escalates through four strategies and stops on the first success:
 
-- **api** — platform-specific handlers (Twitter syndication, Reddit JSON,
+- **api**: platform-specific handlers (Twitter syndication, Reddit JSON,
   HN Firebase, arXiv Atom, SE v2.3, Bluesky AT Protocol, Mastodon, Wikipedia,
   CrossRef, OpenLibrary, Lobste.rs, dev.to, V2EX, npm, PyPI, Naver blog/finance).
-- **probe** — parallel Jina Reader + WebFetch + curl UA variants (first-wins).
-- **impersonate** — Python `curl_cffi` subprocess (safari→chrome→firefox;
+- **probe**: parallel Jina Reader + WebFetch + curl UA variants (first-wins).
+- **impersonate**: Python `curl_cffi` subprocess (safari→chrome→firefox;
   Korean hosts prefer safari). Auto-skips remaining TLS targets on
   JS-essential markers.
-- **browser** — `puppeteer-core` + system Chrome via CDP. No MCP runtime
+- **browser**: `puppeteer-core` + system Chrome via CDP. No MCP runtime
   dependency. Install Chrome or set `OMA_CHROME_PATH`.
 
 Sidecar: add `--include-archive` to try AMP → archive.today → Wayback

@@ -49,12 +49,12 @@ const prefersReduced = useReducedMotion()
 
 ### Landmarks
 Every page must use these semantic elements:
-- `<header>` — site header with navigation
-- `<nav>` — primary navigation
-- `<main>` — main content (one per page)
-- `<footer>` — site footer
-- `<section>` — thematic grouping with heading
-- `<article>` — self-contained content
+- `<header>`: site header with navigation
+- `<nav>`: primary navigation
+- `<main>`: main content (one per page)
+- `<footer>`: site footer
+- `<section>`: thematic grouping with heading
+- `<article>`: self-contained content
 
 ### Headings
 - Sequential hierarchy: h1 → h2 → h3 (never skip levels)
@@ -85,7 +85,7 @@ Every page must use these semantic elements:
 
 ### Rules
 - Don't use ARIA when native HTML semantics suffice
-- `aria-label` overrides visible text — use only when no visible label exists
+- `aria-label` overrides visible text; use only when no visible label exists
 - Test with screen readers (VoiceOver on Mac, NVDA on Windows)
 
 ## Focus Management

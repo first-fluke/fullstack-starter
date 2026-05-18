@@ -7,7 +7,7 @@ otel_semconv: "1.27.0 (2024-11)"
 
 ## Why Meta-Observability
 
-"Observing the observer" — if the OTel Collector is silently dropping 10% of traces, every SLO
+"Observing the observer"; if the OTel Collector is silently dropping 10% of traces, every SLO
 dashboard, every alerting rule, and every incident forensics query is built on incomplete data.
 You will not know the pipeline is degraded unless you instrument the pipeline itself.
 
@@ -135,9 +135,9 @@ receivers:
 
 Fluent Bit exposes its own Prometheus metrics at `:2020/api/v1/metrics/prometheus`:
 
-- `fluentbit_input_records_total` — records ingested per input plugin
-- `fluentbit_output_proc_records_total` — records successfully processed per output plugin
-- `fluentbit_output_errors_total` — output failures
+- `fluentbit_input_records_total`: records ingested per input plugin
+- `fluentbit_output_proc_records_total`: records successfully processed per output plugin
+- `fluentbit_output_errors_total`: output failures
 
 ### A6. Golden Signal: End-to-End Delivery Ratio
 
@@ -187,11 +187,11 @@ Cloud-provider time sources:
 | Cloud | NTP endpoint | Notes |
 |---|---|---|
 | AWS | `169.254.169.123` (Amazon Time Sync Service) | PTP-backed, link-local; add to `chrony.conf`; verify with `chronyc sources -v` |
-| GCP | `metadata.google.internal` | Internal hypervisor sync. `timedatectl show` only shows daemon state — use `chronyc sources -v` for actual offset |
+| GCP | `metadata.google.internal` | Internal hypervisor sync. `timedatectl show` only shows daemon state; use `chronyc sources -v` for actual offset |
 | Azure | Hyper-V IC timesync primary; `time.windows.com` external NTP is fallback only | Azure Linux VMs with IC tools use host time. External NTP as a parallel peer can conflict; configure as fallback. Docs: <https://learn.microsoft.com/azure/virtual-machines/linux/time-sync> |
 
 For sub-millisecond requirements (financial trading, high-frequency event processing):
-use **PTP (IEEE 1588)** with hardware timestamping. Cloud support varies — AWS supports PTP on
+use **PTP (IEEE 1588)** with hardware timestamping. Cloud support varies; AWS supports PTP on
 Nitro instances via the Amazon Time Sync Service; verify availability before committing.
 
 ### B3. Span-Level Drift Detection
@@ -249,8 +249,8 @@ separate time series. A metric with 3 labels each having 100 values creates 1,00
 
 Consequences of label explosion:
 - TSDB storage grows quadratically with cardinality.
-- Query latency increases — each query fans out across more series.
-- Vendor bill spikes — SaaS TSDBs charge per active series.
+- Query latency increases: each query fans out across more series.
+- Vendor bill spikes: SaaS TSDBs charge per active series.
 - Ingestion falls behind; scrape intervals are missed.
 
 ### C2. Hard Rules
@@ -258,7 +258,7 @@ Consequences of label explosion:
 | Label | Rule | Reason |
 |---|---|---|
 | `user.id` | **NEVER** as metric label | Unbounded; one series per user |
-| `request.id` | **NEVER** as metric label | One series per request — instant explosion |
+| `request.id` | **NEVER** as metric label | One series per request; instant explosion |
 | `trace.id` | **NEVER** as metric label | One series per trace |
 | `user.email` | **NEVER** as metric label | PII + cardinality double violation |
 | `tenant.id` | Cap at top-N (e.g., top-1000); overflow → label value `"other"` | Bounded set of known tenants |
@@ -292,7 +292,7 @@ topk(10, count({__name__!=""}) by (__name__))
 ```
 
 VictoriaMetrics exposes `/api/v1/status/tsdb` for cardinality breakdown by metric name
-and label value — use this for bulk auditing.
+and label value; use this for bulk auditing.
 
 OTel metric SDK cardinality limit (Development feature as of SDK 1.x):
 
@@ -312,7 +312,7 @@ Explicitly allow-listing attributes is the most effective cardinality control.
 
 ### C4. Series Budget
 
-Set a per-service series budget. The 5,000-series figure below is an illustrative starting baseline — high-throughput services legitimately operate at 20k-100k series. Calibrate to your service's traffic shape and TSDB ingestion cost.
+Set a per-service series budget. The 5,000-series figure below is an illustrative starting baseline; high-throughput services legitimately operate at 20k-100k series. Calibrate to your service's traffic shape and TSDB ingestion cost.
 
 ```promql
 # Alert: service approaching cardinality budget (example baseline: 5000 series/service)
@@ -337,11 +337,11 @@ and under what storage class. Failing to set explicit retention leads to either:
 |---|---|---|---|
 | Metrics | 15d full-res | 90d @ 5m resolution | 2y @ 1h resolution |
 | Logs (operational) | 7d | 30d | 90d |
-| Logs (audit — SOC2/ISO 27001) | 90d | 1y | **7y WORM** |
-| Traces (sampled, tail-based) | 30d | — | — |
-| Traces (full 100% sample) | 3d | — | — |
-| Profiles | 14d | — | — |
-| Events | 30d | 90d | — |
+| Logs (audit; SOC2/ISO 27001) | 90d | 1y | **7y WORM** |
+| Traces (sampled, tail-based) | 30d | N/A | N/A |
+| Traces (full 100% sample) | 3d | N/A | N/A |
+| Profiles | 14d | N/A | N/A |
+| Events | 30d | 90d | N/A |
 
 ### D2. Rationale by Signal
 
@@ -363,9 +363,9 @@ Cross-ref: `signals/audit.md` for WORM immutability requirements and hash-chain 
 
 **Traces (sampled, 30d)**: Sampled traces (tail-based, typically 1-10% of production traffic)
 are the primary debugging artifact. 30d covers cross-sprint incident investigations. No
-aggregation applies — traces are point-in-time artifacts, not time-series.
+aggregation applies; traces are point-in-time artifacts, not time-series.
 
-**Traces (full 100% sample, 3d)**: 100% sampling is expensive. Keep for 3 days only — long
+**Traces (full 100% sample, 3d)**: 100% sampling is expensive. Keep for 3 days only; long
 enough to cover a release rollout + initial stability period. Use head-based or tail-based
 sampling to reduce to 1-10% thereafter.
 
@@ -458,7 +458,7 @@ Cross-ref: `resources/anti-patterns.md §Section C Pipeline` for pipeline anti-p
 These five alerts MUST be in place before any other observability alerting is considered
 reliable. Without them, you cannot trust your alerts.
 
-**Alert 1 — Pipeline delivery ratio below threshold**
+**Alert 1; Pipeline delivery ratio below threshold**
 
 ```promql
 # otelcol_pipeline_delivery_ratio — traces
@@ -486,7 +486,7 @@ reliable. Without them, you cannot trust your alerts.
     description: "{{ $value | humanizePercentage }} of accepted spans are being delivered. Check exporter errors and backpressure queue."
 ```
 
-**Alert 2 — Exporter send failures above 1%**
+**Alert 2; Exporter send failures above 1%**
 
 ```promql
 # Ratio of failed exports to sent (any signal)
@@ -513,7 +513,7 @@ reliable. Without them, you cannot trust your alerts.
     description: "Check vendor rate limits, network connectivity, and exporter authentication."
 ```
 
-**Alert 3 — Node clock drift above 100 ms**
+**Alert 3; Node clock drift above 100 ms**
 
 ```yaml
 - alert: NodeClockDriftHigh
@@ -526,7 +526,7 @@ reliable. Without them, you cannot trust your alerts.
     description: "Trace waterfall ordering may be unreliable. Run chronyc makestep or check NTP source."
 ```
 
-**Alert 4 — Service approaching cardinality budget**
+**Alert 4; Service approaching cardinality budget**
 
 ```yaml
 - alert: MetricCardinalityBudgetExceeded
@@ -539,7 +539,7 @@ reliable. Without them, you cannot trust your alerts.
     description: "Identify high-cardinality labels with topk(10, count({job='{{ $labels.job }}'}) by (__name__)). Apply attribute filter."
 ```
 
-**Alert 5 — Audit log retention policy violation**
+**Alert 5; Audit log retention policy violation**
 
 This alert cannot be expressed in PromQL alone; implement it as a scheduled policy check in
 your compliance tooling or as a metric emitted by a retention audit job:

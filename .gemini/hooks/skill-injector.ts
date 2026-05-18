@@ -13,6 +13,7 @@
  */
 
 import {
+  type Dirent,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -20,7 +21,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { makePromptOutput, resolveGitRoot, type Vendor } from "./types.ts";
+import { resolveGitRoot, toPosixPath } from "./fs-utils.ts";
+import { makePromptOutput } from "./hook-output.ts";
+import type { Vendor } from "./types.ts";
 
 const MAX_SKILLS = 3;
 const SESSION_TTL_MS = 60 * 60 * 1000;
@@ -29,7 +32,7 @@ const DEFAULT_CJK_SCRIPTS = ["ko", "ja", "zh"];
 // ── Vendor Detection ──────────────────────────────────────────
 
 function inferVendorFromScriptPath(): Vendor | null {
-  const path = import.meta.path;
+  const path = import.meta.filename;
   if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
   if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
   if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
@@ -85,7 +88,7 @@ interface SkillsTriggerConfig {
 }
 
 function loadTriggersConfig(): SkillsTriggerConfig {
-  const configPath = join(dirname(import.meta.path), "triggers.json");
+  const configPath = join(import.meta.dirname, "triggers.json");
   if (!existsSync(configPath)) return {};
   try {
     return JSON.parse(readFileSync(configPath, "utf-8"));
@@ -139,9 +142,12 @@ export function discoverSkills(projectDir: string): SkillEntry[] {
   if (!existsSync(skillsDir)) return [];
 
   const out: SkillEntry[] = [];
-  let entries: ReturnType<typeof readdirSync>;
+  let entries: Dirent<string>[];
   try {
-    entries = readdirSync(skillsDir, { withFileTypes: true });
+    entries = readdirSync(skillsDir, {
+      withFileTypes: true,
+      encoding: "utf8",
+    });
   } catch {
     return out;
   }
@@ -205,8 +211,10 @@ export function matchSkills(
     let score = 0;
 
     for (let i = 0; i < patterns.length; i++) {
-      if (patterns[i].test(prompt)) {
-        matched.push(allTriggers[i]);
+      const pattern = patterns[i];
+      const trigger = allTriggers[i];
+      if (pattern && trigger && pattern.test(prompt)) {
+        matched.push(trigger);
         score += 10;
       }
     }
@@ -320,6 +328,97 @@ export function startsWithSlashCommand(prompt: string): boolean {
   return /^\/[a-zA-Z][\w-]*/.test(prompt.trim());
 }
 
+// Match an explicit `/<name>` token at the very start of the prompt
+// or after whitespace. Stays conservative to avoid path/URL false positives.
+export function parseExplicitSlash(prompt: string): string | null {
+  const m = /(?:^|\s)\/([a-z][a-z0-9_-]{0,40})\b/i.exec(prompt);
+  return m?.[1] ?? null;
+}
+
+// ── Claude Slash Skill Resolution ─────────────────────────────
+// Claude Code deprecated `.claude/commands/` and now uses `.claude/skills/`
+// for slash-invocable workflows. To express "user-only invocation" (slash
+// command typed by the user but NOT auto-callable by the model), the
+// Claude Code idiom is `disable-model-invocation: true` in SKILL.md
+// frontmatter. Such skills are absent from the available-skills list,
+// so when the user types /<name> the model has no native signal that it
+// exists. This resolver bridges that gap. Other vendors use different
+// command/skill mechanisms; this is intentionally Claude-specific.
+
+export interface ClaudeSlashSkillEntry {
+  name: string;
+  skillRelPath: string;
+  body: string;
+}
+
+export function parseSkillFrontmatter(content: string): {
+  frontmatter: Record<string, string | boolean>;
+  body: string;
+} {
+  const m = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/.exec(content);
+  if (!m) return { frontmatter: {}, body: content };
+  const fm: Record<string, string | boolean> = {};
+  const block = m[1] ?? "";
+  for (const line of block.split(/\r?\n/)) {
+    const kv = /^([a-z][\w-]*)\s*:\s*(.*)$/i.exec(line);
+    if (!kv) continue;
+    const key = kv[1];
+    const rawValue = (kv[2] ?? "").trim();
+    if (!key) continue;
+    if (rawValue === "true") fm[key] = true;
+    else if (rawValue === "false") fm[key] = false;
+    else fm[key] = rawValue.replace(/^['"]|['"]$/g, "");
+  }
+  return { frontmatter: fm, body: m[2] ?? "" };
+}
+
+export function findClaudeSlashSkill(
+  name: string,
+  projectDir: string,
+): ClaudeSlashSkillEntry | null {
+  const candidates = [
+    join(projectDir, ".claude", "skills", name, "SKILL.md"),
+    join(projectDir, ".agents", "skills", name, "SKILL.md"),
+  ];
+
+  for (const skillPath of candidates) {
+    if (!existsSync(skillPath)) continue;
+    let content: string;
+    try {
+      content = readFileSync(skillPath, "utf-8");
+    } catch {
+      continue;
+    }
+    const { frontmatter, body } = parseSkillFrontmatter(content);
+    if (frontmatter["disable-model-invocation"] !== true) continue;
+    const posixPath = toPosixPath(skillPath);
+    const posixRoot = toPosixPath(projectDir);
+    return {
+      name,
+      skillRelPath: posixPath.startsWith(`${posixRoot}/`)
+        ? posixPath.slice(posixRoot.length + 1)
+        : posixPath,
+      body: body.trim(),
+    };
+  }
+  return null;
+}
+
+export function formatClaudeSlashSkillContext(
+  entry: ClaudeSlashSkillEntry,
+): string {
+  return [
+    `[OMA CLAUDE SLASH SKILL INVOKED: ${entry.name}]`,
+    `User explicitly typed /${entry.name}. Claude Code deprecated \`.claude/commands/\`, so this slash-only workflow lives in SKILL.md with \`disable-model-invocation: true\` — it is NOT in the available-skills list and is NOT callable via the Skill tool.`,
+    "",
+    `Honor the user's explicit invocation by reading \`${entry.skillRelPath}\` and following its instructions:`,
+    "",
+    entry.body,
+    "",
+    "Read any referenced workflow / resource files and proceed step by step. Do NOT respond that the skill is unavailable.",
+  ].join("\n");
+}
+
 export function stripCodeBlocks(text: string): string {
   return text
     .replace(/(`{3,})[^\n]*\n[\s\S]*?\1/g, "")
@@ -365,6 +464,25 @@ async function main() {
   const prompt = (input.prompt as string) ?? "";
 
   if (!prompt.trim()) process.exit(0);
+
+  // Claude-specific: when the user types /<name>, surface the
+  // SKILL.md body for slash-only skills (disable-model-invocation: true).
+  // The model otherwise has no signal these skills exist — they are
+  // intentionally hidden from the available-skills list. Must run BEFORE
+  // the slash early-exit and persistent-workflow guard.
+  if (vendor === "claude") {
+    const slashName = parseExplicitSlash(prompt);
+    if (slashName) {
+      const slashSkill = findClaudeSlashSkill(slashName, projectDir);
+      if (slashSkill) {
+        process.stdout.write(
+          makePromptOutput(vendor, formatClaudeSlashSkillContext(slashSkill)),
+        );
+        process.exit(0);
+      }
+    }
+  }
+
   if (startsWithSlashCommand(prompt)) process.exit(0);
   if (isPersistentWorkflowActive(projectDir, sessionId)) process.exit(0);
 

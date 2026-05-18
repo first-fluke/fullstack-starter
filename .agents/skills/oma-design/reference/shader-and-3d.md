@@ -129,7 +129,7 @@ useEffect(() => {
 
 ### General
 - Limit to 1 shader/WebGL canvas per viewport
-- Target 60fps — if dropping below 30fps, simplify or disable
+- Target 60fps; if dropping below 30fps, simplify or disable
 - Use `Intersection Observer` to pause off-screen canvases
 - Reduce canvas resolution on mobile: `renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))`
 

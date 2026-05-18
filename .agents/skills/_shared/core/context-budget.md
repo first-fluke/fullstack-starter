@@ -7,10 +7,10 @@ Follow this guide to use context efficiently.
 
 ## Core Principles
 
-1. **No full file reads** — Read only necessary functions/classes
-2. **No duplicate reads** — Do not re-read files already read
-3. **Lazy resource loading** — Load resources only when needed
-4. **Maintain records** — Note read files and symbols in progress
+1. **No full file reads**: Read only necessary functions/classes
+2. **No duplicate reads**: Do not re-read files already read
+3. **Lazy resource loading**: Load resources only when needed
+4. **Maintain records**: Note read files and symbols in progress
 
 ---
 
@@ -19,17 +19,17 @@ Follow this guide to use context efficiently.
 ### When Using Serena MCP (Recommended)
 
 ```
-❌ Bad: read_file("app/api/todos.py")          ← entire file 500 lines
-✅ Good: find_symbol("create_todo")             ← just that function 30 lines
-✅ Good: get_symbols_overview("app/api")        ← function list only
-✅ Good: find_referencing_symbols("TodoService") ← usage only
+Bad: read_file("app/api/todos.py")          ← entire file 500 lines
+Good: find_symbol("create_todo")             ← just that function 30 lines
+Good: get_symbols_overview("app/api")        ← function list only
+Good: find_referencing_symbols("TodoService") ← usage only
 ```
 
 ### When Reading Files Without Serena
 
 ```
-❌ Bad: Read entire file at once
-✅ Good: Check first 50 lines (imports + class definitions) → read additional functions as needed
+Bad: Read entire file at once
+Good: Check first 50 lines (imports + class definitions) → read additional functions as needed
 ```
 
 ---
@@ -124,7 +124,7 @@ This approach:
 Long-running agents degrade in quality as context fills up. Rather than passively
 responding to symptoms, agents must actively detect and reset.
 Detection is the **Orchestrator's responsibility** via external observation.
-Individual agents do NOT self-monitor for anxiety — they focus on their task.
+Individual agents do NOT self-monitor for anxiety; they focus on their task.
 
 ### Detection (Orchestrator Only)
 

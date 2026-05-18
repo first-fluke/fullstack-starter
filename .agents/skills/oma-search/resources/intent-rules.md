@@ -2,10 +2,10 @@
 
 ## Classification Priority
 
-1. **Override flags** — always win, skip classification entirely
-2. **Keyword pattern matching** — scan query for mode-specific keywords
-3. **Signal detection** — contextual clues (library name + version, error message, etc.)
-4. **Fallback** — `web` + `docs` parallel when no clear signal
+1. **Override flags**: always win, skip classification entirely
+2. **Keyword pattern matching**: scan query for mode-specific keywords
+3. **Signal detection**: contextual clues (library name + version, error message, etc.)
+4. **Fallback**: `web` + `docs` parallel when no clear signal
 
 ## Override Flags
 
@@ -82,7 +82,7 @@ When no clear intent is detected:
 
 | Query | Detected Mode | Reason |
 |-------|--------------|--------|
-| "React useState" | `web` + `docs` (fallback) | Ambiguous — could be docs or tutorial |
+| "React useState" | `web` + `docs` (fallback) | Ambiguous: could be docs or tutorial |
 | "React useState 공식 문서" | `docs` | "공식 문서" keyword |
 | "React useState 사용 사례" | `web` | "사용 사례" keyword |
 | "React useState implementation" | `code` | "implementation" keyword |

@@ -1,4 +1,4 @@
-# TF Infra Agent — Examples
+# TF Infra Agent: Examples
 
 ## Example 1: GCP Cloud Run Service with Cloud SQL
 
@@ -33,6 +33,6 @@
 
 **Output:**
 - Summary: 3 to add, 1 to change, 1 to destroy
-- Risk: HIGH — `aws_db_instance` will be destroyed and recreated (engine version change)
+- Risk: HIGH; `aws_db_instance` will be destroyed and recreated (engine version change)
 - Recommendation: Use `lifecycle { prevent_destroy = true }` or manual migration
 - Checklist: backup verified, maintenance window set, rollback plan documented

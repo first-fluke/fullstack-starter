@@ -8,14 +8,14 @@ tools:
 
 ## 1. Scope & Distinction
 
-Audit trails answer **who did what when** — immutable evidence for compliance, legal hold, and forensic investigation. They are a distinct signal from both operational logs (`logs.md`) and privacy records (`privacy.md`).
+Audit trails answer **who did what when**; immutable evidence for compliance, legal hold, and forensic investigation. They are a distinct signal from both operational logs (`logs.md`) and privacy records (`privacy.md`).
 
 ### Mutability model: the deliberate opposite of privacy
 
 | Dimension        | Audit                                  | Privacy                                |
 |------------------|----------------------------------------|----------------------------------------|
 | Retention goal   | Append-only, immutable, 7y+ minimum    | Collect less, delete on request (GDPR Art. 17) |
-| Storage model    | WORM — cannot be deleted or modified   | Erasable — must honour right to erasure |
+| Storage model    | WORM; cannot be deleted or modified   | Erasable; must honour right to erasure |
 | Consumers        | Auditors, legal, compliance officers   | Data subjects, DPO, engineering |
 | Default posture  | Keep everything, forever               | Keep nothing, unless justified |
 
@@ -27,7 +27,7 @@ This is why audit and privacy are separate files in this skill (design decision 
 |-----------------|-------------------------------------|----------------------------------------|
 | Retention       | 7–90 days hot                       | 7 years, tiered (Section 7)           |
 | Consumers       | On-call engineers, SRE              | Auditors, legal, compliance            |
-| Mutability      | May be rotated and purged           | WORM — immutable after write           |
+| Mutability      | May be rotated and purged           | WORM; immutable after write           |
 | Storage         | Loki / Elasticsearch / ClickHouse   | WORM object store + compliance appliance |
 | Primary tools   | Fluent Bit, OTel Collector          | Falco, auditd, pgaudit, audit pipeline |
 
@@ -43,7 +43,7 @@ Cross-ref `../meta-observability.md §Retention Matrix` for unified policy acros
 | **ISO/IEC 27001:2022** | A.8.15 logging; A.8.16 monitoring; A.5.25 audit logging | Log protection, log administrator access control |
 | **ISO/IEC 27002:2022** | 8.15 logging controls | Protect logs from tampering and unauthorized access |
 | **HIPAA Security Rule** | §164.312(b) audit controls | Audit logs retained ≥ 6 years |
-| **PCI DSS v4.0** | Requirement 10 — track and monitor all access to cardholder data | 1 year online + offline retention; tamper detection |
+| **PCI DSS v4.0** | Requirement 10; track and monitor all access to cardholder data | 1 year online + offline retention; tamper detection |
 | **GDPR Art. 30** | Records of processing activities | Audit of data processing operations |
 
 Cross-ref `../standards.md §ISO/IEC 27001/27002` for the normative standards baseline.
@@ -71,13 +71,13 @@ Every audit event MUST carry these fields. Map to OTel `security.*` semconv name
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `user.id` | string | Authenticated identity — pseudonymized or hashed; never plain email (PII) |
+| `user.id` | string | Authenticated identity; pseudonymized or hashed; never plain email (PII) |
 | `actor.type` | enum | `user` \| `service_account` \| `system` |
 | `action` | string | Verb: `read`, `write`, `delete`, `approve`, `login`, `logout` |
 | `resource.type` | string | What was acted on: `order`, `user_record`, `api_key`, `rbac_role` |
 | `resource.id` | string | Identifier of the affected resource |
 | `event.outcome` | enum | `success` \| `failure` \| `denied` |
-| `ip.address` | string | Source IP — may be PII; cross-ref `privacy.md §IP addresses` |
+| `ip.address` | string | Source IP; may be PII; cross-ref `privacy.md §IP addresses` |
 | `timestamp` | ISO 8601 UTC | Event time; required for chain ordering (Section 6) |
 | `trace_id` | 32-char hex | Correlation with operational trace; cross-ref `../incident-forensics.md` |
 
@@ -105,7 +105,7 @@ WORM storage is required for SOC 2 CC7.2, HIPAA §164.312(b), and PCI DSS Requir
 
 | Platform | Mechanism | Key constraint |
 |----------|-----------|----------------|
-| **AWS S3** | Object Lock — Compliance mode | Cannot delete even by root or AWS support |
+| **AWS S3** | Object Lock; Compliance mode | Cannot delete even by root or AWS support |
 | **GCS** | Retention Policy with locked bucket | Lock is irreversible once applied |
 | **Azure Blob** | Immutability policy (time-based retention) | Legal hold override available |
 | **On-premises** | WORM tape, compliance appliances | Hardware write-protect; chain of custody required |
@@ -126,7 +126,7 @@ S3 Object Lock Compliance mode policy example:
 }
 ```
 
-`COMPLIANCE` mode prevents deletion by any principal, including the AWS account root. Do not use `GOVERNANCE` mode for regulatory audit logs — it allows privileged override.
+`COMPLIANCE` mode prevents deletion by any principal, including the AWS account root. Do not use `GOVERNANCE` mode for regulatory audit logs; it allows privileged override.
 
 ---
 
@@ -134,13 +134,13 @@ S3 Object Lock Compliance mode policy example:
 
 WORM prevents deletion; tamper evidence proves no records were silently modified or omitted.
 
-**Hash chain:** each event record includes `prev_hash` — the SHA-256 of the previous event. Any insertion, deletion, or modification breaks the chain.
+**Hash chain:** each event record includes `prev_hash`; the SHA-256 of the previous event. Any insertion, deletion, or modification breaks the chain.
 
 ```
 event_N.hash = SHA256(event_N.payload + event_{N-1}.hash)
 ```
 
-**Merkle root anchoring:** daily, compute the Merkle root of all events in the period. Anchor this root to an external transparency log — detached from the audit system — so the anchoring timestamp is independently verifiable.
+**Merkle root anchoring:** daily, compute the Merkle root of all events in the period. Anchor this root to an external transparency log; detached from the audit system; so the anchoring timestamp is independently verifiable.
 
 | Tool | Type | Notes |
 |------|------|-------|
@@ -150,7 +150,7 @@ event_N.hash = SHA256(event_N.payload + event_{N-1}.hash)
 
 Source: [github.com/sigstore/rekor](https://github.com/sigstore/rekor)
 
-**Verification schedule:** run chain integrity check weekly (automated), and before any compliance audit. Verification failure is a CRITICAL security event — trigger incident response.
+**Verification schedule:** run chain integrity check weekly (automated), and before any compliance audit. Verification failure is a CRITICAL security event; trigger incident response.
 
 ---
 
@@ -166,7 +166,7 @@ Automated tiering via object lifecycle policy satisfies all regulatory minimums 
 
 **Legal hold:** when an active investigation or litigation hold is active, suppress automated expiry for all affected records regardless of tier. Implement via S3 Object Lock legal hold or equivalent.
 
-**Lifecycle policy:** apply S3 Lifecycle rules to transition objects automatically. Compliance mode Object Lock must be set at write time — it cannot be applied retroactively.
+**Lifecycle policy:** apply S3 Lifecycle rules to transition objects automatically. Compliance mode Object Lock must be set at write time; it cannot be applied retroactively.
 
 ---
 
@@ -201,7 +201,7 @@ Custom Falco rule example (detect secret access in production namespace):
 
 ## 9. Kubernetes Audit Logs
 
-Kubernetes API server audit logs record every API call — essential for cluster-admin accountability, secret access auditing, and RBAC change tracking.
+Kubernetes API server audit logs record every API call; essential for cluster-admin accountability, secret access auditing, and RBAC change tracking.
 
 | Audit level | Records | Use case |
 |-------------|---------|----------|
@@ -231,7 +231,7 @@ Database audit events feed the same audit pipeline as application events. Normal
 
 ## 11. Access Control on Audit Data
 
-Audit data must be readable by auditors and legal — and not writable by anyone after initial ingest.
+Audit data must be readable by auditors and legal; and not writable by anyone after initial ingest.
 
 - Separate RBAC role: `audit-reader` is distinct from `operations-engineer` and `developer`
 - Auditors have read-only access, scoped to approved time ranges
@@ -249,7 +249,7 @@ Every audit event carries `trace_id`. During an incident:
 3. Join with logs (`logs.md §Trace ID Injection Rules`) for execution detail
 4. Reference `../incident-forensics.md` for the full MRA playbook
 
-Audit events are the authoritative source of truth for incident timelines — operational traces provide the execution context.
+Audit events are the authoritative source of truth for incident timelines; operational traces provide the execution context.
 
 ---
 
@@ -259,10 +259,10 @@ Cells from `../matrix.md` owned by this file:
 
 | Layer | Boundary | Status | Notes |
 |-------|----------|--------|-------|
-| L3-network | any | ✅ | VPC flow audit trail — who connected to what |
-| L4-transport | any | ⚠️ | Limited: connection-level only, no payload |
-| L7-application | multi-tenant | ✅ | Per-tenant audit trail; supports GDPR data subject right of access |
-| release | any | ✅ | Deployment audit: who deployed what when (actor, SHA, timestamp) |
+| L3-network | any | PASS | VPC flow audit trail; who connected to what |
+| L4-transport | any | PARTIAL | Limited: connection-level only, no payload |
+| L7-application | multi-tenant | PASS | Per-tenant audit trail; supports GDPR data subject right of access |
+| release | any | PASS | Deployment audit: who deployed what when (actor, SHA, timestamp) |
 | privacy | audit | overlap | See `privacy.md`; audit records data processing; privacy governs erasure |
 
 ---
@@ -284,13 +284,13 @@ Append candidates for `../anti-patterns.md §Section F Security & Compliance`:
 
 ## 15. References
 
-1. ISO/IEC 27001:2022 — <https://www.iso.org/standard/27001>
-2. ISO/IEC 27002:2022 — <https://www.iso.org/standard/27002>
-3. AICPA SOC 2 Common Criteria — <https://www.aicpa.org/soc2>
-4. HIPAA Security Rule §164.312(b) — <https://www.hhs.gov/hipaa/for-professionals/security/index.html>
-5. PCI DSS v4.0 Requirement 10 — <https://www.pcisecuritystandards.org>
-6. GDPR Art. 30 — <https://gdpr-info.eu/art-30-gdpr/>
-7. Falco — <https://falco.org>
-8. sigstore rekor — <https://github.com/sigstore/rekor>
-9. OTel security semconv (proposed) — <https://opentelemetry.io/docs/specs/semconv/attributes-registry/security/>
+1. ISO/IEC 27001:2022; <https://www.iso.org/standard/27001>
+2. ISO/IEC 27002:2022; <https://www.iso.org/standard/27002>
+3. AICPA SOC 2 Common Criteria: <https://www.aicpa.org/soc2>
+4. HIPAA Security Rule §164.312(b): <https://www.hhs.gov/hipaa/for-professionals/security/index.html>
+5. PCI DSS v4.0 Requirement 10: <https://www.pcisecuritystandards.org>
+6. GDPR Art. 30: <https://gdpr-info.eu/art-30-gdpr/>
+7. Falco: <https://falco.org>
+8. sigstore rekor: <https://github.com/sigstore/rekor>
+9. OTel security semconv (proposed): <https://opentelemetry.io/docs/specs/semconv/attributes-registry/security/>
 10. `../standards.md` · `../matrix.md` · `../meta-observability.md` · `../incident-forensics.md` · `privacy.md` · `logs.md`

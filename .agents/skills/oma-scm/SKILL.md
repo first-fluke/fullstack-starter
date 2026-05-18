@@ -1,9 +1,9 @@
 ---
 name: oma-scm
-description: SCM (software configuration management) and Git — branching, merges, conflicts, worktrees, baselines, audit readiness, plus Conventional Commits and safe staging.
+description: SCM (software configuration management) and Git: branching, merges, conflicts, worktrees, baselines, audit readiness, plus Conventional Commits and safe staging.
 ---
 
-# Software configuration management — SCM (`oma-scm`)
+# Software configuration management: SCM (`oma-scm`)
 
 ## Scheduling
 
@@ -144,7 +144,7 @@ EOF
 | File | Role |
 |------|------|
 | `config/commit-config.yaml` | Conventional Commit types, branch prefixes, message rules |
-| `config/cm-config.yaml` | CM pointers — documented process, branching model, baselines, changelog |
+| `config/cm-config.yaml` | CM pointers (documented process, branching model, baselines, changelog) |
 
 ### Operating mode (choose first)
 

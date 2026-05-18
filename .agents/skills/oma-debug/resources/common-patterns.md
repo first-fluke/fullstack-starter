@@ -4,18 +4,18 @@ Quick reference guide for frequently encountered bugs and their fixes.
 
 ---
 
-## 🔴 Frontend Bugs
+## Frontend Bugs
 
 ### 1. Undefined/Null Errors
 
-**❌ Problem**: `Cannot read property 'X' of undefined`
+**Problem**: `Cannot read property 'X' of undefined`
 
 ```typescript
 // Crash when data not loaded yet
 const name = user.profile.name;
 ```
 
-**✅ Solutions**:
+**Solutions**:
 
 ```typescript
 // Option 1: Optional chaining + nullish coalescing
@@ -32,7 +32,7 @@ if (!user?.profile) return <div>Loading...</div>;
 
 ### 2. Stale Closures in useEffect
 
-**❌ Problem**: Event handlers/callbacks use old state values
+**Problem**: Event handlers/callbacks use old state values
 
 ```typescript
 function Counter() {
@@ -49,7 +49,7 @@ function Counter() {
 }
 ```
 
-**✅ Solutions**:
+**Solutions**:
 
 ```typescript
 // Option 1: Include dependency
@@ -87,7 +87,7 @@ useEffect(() => {
 
 ### 3. Missing Cleanup in useEffect
 
-**❌ Problem**: Memory leaks from subscriptions/listeners
+**Problem**: Memory leaks from subscriptions/listeners
 
 ```typescript
 useEffect(() => {
@@ -96,7 +96,7 @@ useEffect(() => {
 }, []);
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 useEffect(() => {
@@ -119,7 +119,7 @@ useEffect(() => {
 
 ### 4. Race Conditions in Async Effects
 
-**❌ Problem**: Old requests overwrite new ones
+**Problem**: Old requests overwrite new ones
 
 ```typescript
 useEffect(() => {
@@ -128,7 +128,7 @@ useEffect(() => {
 }, [userId]);
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 useEffect(() => {
@@ -150,7 +150,7 @@ useEffect(() => {
 
 ### 5. Infinite Re-render Loops
 
-**❌ Problem**: Component re-renders infinitely
+**Problem**: Component re-renders infinitely
 
 ```typescript
 function Component() {
@@ -164,7 +164,7 @@ function Component() {
 }
 ```
 
-**✅ Solutions**:
+**Solutions**:
 
 ```typescript
 // Option 1: Remove problematic dependency
@@ -191,7 +191,7 @@ useEffect(() => {
 
 ### 6. Key Prop Issues in Lists
 
-**❌ Problem**: List items reordering incorrectly
+**Problem**: List items reordering incorrectly
 
 ```typescript
 // Using index as key
@@ -200,7 +200,7 @@ useEffect(() => {
 ))}
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 // Use stable, unique ID
@@ -218,7 +218,7 @@ useEffect(() => {
 
 ### 7. Form Input Controlled/Uncontrolled Switch
 
-**❌ Problem**: `Warning: A component is changing an uncontrolled input to be controlled`
+**Problem**: `Warning: A component is changing an uncontrolled input to be controlled`
 
 ```typescript
 const [value, setValue] = useState(); // undefined initially
@@ -226,7 +226,7 @@ const [value, setValue] = useState(); // undefined initially
 <input value={value} onChange={e => setValue(e.target.value)} />
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 // Initialize with empty string
@@ -240,11 +240,11 @@ const [value, setValue] = useState('');
 
 ---
 
-## 🔴 Backend Bugs
+## Backend Bugs
 
 ### 1. SQL Injection
 
-**❌ Problem**: User input directly in SQL query
+**Problem**: User input directly in SQL query
 
 ```python
 # DANGEROUS!
@@ -254,7 +254,7 @@ db.execute(query)
 # User can input: ' OR '1'='1
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 # Use parameterized queries
@@ -272,7 +272,7 @@ user = db.query(User).filter(User.email == email).first()
 
 ### 2. N+1 Query Problem
 
-**❌ Problem**: One query per item in a loop
+**Problem**: One query per item in a loop
 
 ```python
 # 1 query to get todos
@@ -284,7 +284,7 @@ for todo in todos:
     print(f"{todo.title} by {user.name}")
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 # Use JOIN - single query
@@ -300,7 +300,7 @@ for todo in todos:
 
 ### 3. Missing Authentication Check
 
-**❌ Problem**: Protected endpoint accessible without auth
+**Problem**: Protected endpoint accessible without auth
 
 ```python
 @app.get("/api/admin/users")
@@ -308,7 +308,7 @@ async def get_all_users(db: DatabaseDep):
     return db.query(User).all() # Anyone can access!
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 @app.get("/api/admin/users")
@@ -325,7 +325,7 @@ async def get_all_users(
 
 ### 4. Missing Input Validation
 
-**❌ Problem**: Invalid data causes errors
+**Problem**: Invalid data causes errors
 
 ```python
 @app.post("/api/users")
@@ -336,7 +336,7 @@ async def create_user(email: str, age: int):
     db.commit()
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 from pydantic import BaseModel, EmailStr, Field
@@ -357,7 +357,7 @@ async def create_user(user: UserCreate):
 
 ### 5. Unhandled Exceptions
 
-**❌ Problem**: Server crashes on error
+**Problem**: Server crashes on error
 
 ```python
 @app.post("/api/todos")
@@ -368,7 +368,7 @@ async def create_todo(todo: TodoCreate, user: User = Depends(get_current_user)):
     return db_todo
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 from fastapi import HTTPException
@@ -394,14 +394,14 @@ async def create_todo(todo: TodoCreate, user: User = Depends(get_current_user)):
 
 ### 6. Missing CORS Configuration
 
-**❌ Problem**: Frontend can't call API
+**Problem**: Frontend can't call API
 
 ```
 Access to fetch at 'http://localhost:8000/api/todos' from origin
 'http://localhost:3000' has been blocked by CORS policy
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 from fastapi.middleware.cors import CORSMiddleware
@@ -422,13 +422,13 @@ app.add_middleware(
 
 ### 7. Password Storage
 
-**❌ Problem**: Passwords stored in plain text
+**Problem**: Passwords stored in plain text
 
 ```python
 user = User(email=email, password=password) # NEVER DO THIS!
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 from passlib.context import CryptContext
@@ -446,11 +446,11 @@ if not pwd_context.verify(plain_password, user.password_hash):
 
 ---
 
-## 🔴 Mobile Bugs
+## Mobile Bugs
 
 ### 1. Memory Leaks in Flutter
 
-**❌ Problem**: Controllers not disposed
+**Problem**: Controllers not disposed
 
 ```dart
 class MyWidget extends StatefulWidget {
@@ -469,7 +469,7 @@ class _MyWidgetState extends State<MyWidget> {
 }
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```dart
 class _MyWidgetState extends State<MyWidget> {
@@ -492,7 +492,7 @@ class _MyWidgetState extends State<MyWidget> {
 
 ### 2. Platform-Specific Code Not Checked
 
-**❌ Problem**: iOS-specific code crashes on Android
+**Problem**: iOS-specific code crashes on Android
 
 ```dart
 // Crashes on Android
@@ -501,7 +501,7 @@ import 'dart:io' show Platform;
 final deviceName = Platform.isIOS ? 'iPhone' : 'Unknown';
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```dart
 import 'dart:io' show Platform;
@@ -522,11 +522,11 @@ if (Platform.isIOS) {
 
 ---
 
-## 🔴 Performance Bugs
+## Performance Bugs
 
 ### 1. Unnecessary Re-renders (React)
 
-**❌ Problem**: Component re-renders on every parent render
+**Problem**: Component re-renders on every parent render
 
 ```typescript
 function Parent() {
@@ -541,7 +541,7 @@ function Parent() {
 }
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 // Memoize the expensive component
@@ -568,7 +568,7 @@ function Parent() {
 
 ### 2. Large Bundle Size
 
-**❌ Problem**: Importing entire library
+**Problem**: Importing entire library
 
 ```typescript
 // Imports all of lodash (~70KB)
@@ -577,7 +577,7 @@ import _ from 'lodash';
 const unique = _.uniq(array);
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 // Import only what you need
@@ -591,18 +591,18 @@ const unique = [...new Set(array)];
 
 ---
 
-## 🔴 Security Bugs
+## Security Bugs
 
 ### 1. XSS (Cross-Site Scripting)
 
-**❌ Problem**: User input rendered as HTML
+**Problem**: User input rendered as HTML
 
 ```typescript
 // Dangerous!
 <div dangerouslySetInnerHTML={{ __html: userComment }} />
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```typescript
 // React escapes by default
@@ -620,7 +620,7 @@ import DOMPurify from 'dompurify';
 
 ### 2. Missing Rate Limiting
 
-**❌ Problem**: API can be abused
+**Problem**: API can be abused
 
 ```python
 @app.post("/api/auth/login")
@@ -629,7 +629,7 @@ async def login(credentials: LoginRequest):
     ...
 ```
 
-**✅ Solution**:
+**Solution**:
 
 ```python
 from slowapi import Limiter
@@ -645,7 +645,7 @@ async def login(request: Request, credentials: LoginRequest):
 
 ---
 
-## 📊 Common Error Messages & Solutions
+## Common Error Messages & Solutions
 
 | Error | Likely Cause | Solution |
 |-------|--------------|----------|
@@ -661,7 +661,7 @@ async def login(request: Request, credentials: LoginRequest):
 
 ---
 
-## 🎯 Quick Debugging Commands
+## Quick Debugging Commands
 
 ### Frontend
 ```bash
@@ -706,7 +706,7 @@ flutter build apk --analyze-size
 
 ---
 
-## 🔍 When to Use Each Agent
+## When to Use Each Agent
 
 | Bug Type | Best Agent | Reason |
 |----------|-----------|---------|
@@ -719,7 +719,7 @@ flutter build apk --analyze-size
 
 ---
 
-## 💡 Prevention Tips
+## Prevention Tips
 
 1. **Write tests first** - Catch bugs before they ship
 2. **Use TypeScript** - Catch type errors at compile time

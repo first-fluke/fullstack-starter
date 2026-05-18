@@ -1,4 +1,4 @@
-# Knows Sidecar Spec — Generation Rules (v0.9.0)
+# Knows Sidecar Spec: Generation Rules (v0.9.0)
 
 This is the v0.9.0 record shape verified against `knows.academy` production sidecars
 (JSON Schema id: `https://knows.dev/schema/record-0.9.json`, profile `paper@1`).
@@ -165,7 +165,7 @@ freshness:
 | Evidence category | `evidence_type` | `type` |
 | Relation verb | `predicate` | `type`, `relation_type` |
 | Artifact category | `artifact_type` | `type` |
-| Actor category | `type` (with closed enum) | — |
+| Actor category | `type` (with closed enum) | (none) |
 | Top-level metadata | `title`, `authors`, `venue`, `year` (no wrapper) | `metadata.title` etc. |
 | Provenance attribution | `provenance.actor` (single object) | `provenance.actors` (array) |
 | Confidence | object with `claim_strength` + `extraction_fidelity` | bare string |

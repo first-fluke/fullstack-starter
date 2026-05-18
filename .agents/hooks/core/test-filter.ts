@@ -3,7 +3,9 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { makePreToolOutput, resolveGitRoot, type Vendor } from "./types.ts";
+import { resolveGitRoot } from "./fs-utils.ts";
+import { makePreToolOutput } from "./hook-output.ts";
+import type { Vendor } from "./types.ts";
 
 // --- Vendor detection (same logic as keyword-detector.ts) ---
 

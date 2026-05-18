@@ -1,8 +1,8 @@
 ---
-description: PM planning workflow — gather requirements, decompose into prioritized tasks, define API contracts, and produce both a machine-readable plan and a human-readable tracker in docs/plans/
+description: PM planning workflow that gathers requirements, decomposes them into prioritized tasks, defines API contracts, and produces both a machine-readable plan and a human-readable tracker in docs/plans/
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.
@@ -21,12 +21,12 @@ description: PM planning workflow — gather requirements, decompose into priori
 
 ## Core Philosophy
 
-**Plans are first-class artifacts** — structured, templated, and consumed by other workflows. They are local working artifacts (not committed to the repo; `docs/plans/` is gitignored), but they follow strict conventions so any agent can read and update them.
+**Plans are first-class artifacts**: structured, templated, and consumed by other workflows. They are local working artifacts (not committed to the repo; `docs/plans/` is gitignored), but they follow strict conventions so any agent can read and update them.
 
 Two artifacts per plan:
 
-1. **Machine-readable** — `.agents/results/plan-{sessionId}.json` consumed by `/orchestrate` and `/work`.
-2. **Human-readable** — `docs/plans/work/{NNN}-{name}.md` with task table, decision log, and progress notes. Lifecycle is tracked via the `Status` field in the file header (`Active` → `Completed`); no folder moves required.
+1. **Machine-readable**: `.agents/results/plan-{sessionId}.json` consumed by `/orchestrate` and `/work`.
+2. **Human-readable**: `docs/plans/work/{NNN}-{name}.md` with task table, decision log, and progress notes. Lifecycle is tracked via the `Status` field in the file header (`Active` → `Completed`); no folder moves required.
 
 ### Layout
 
@@ -63,7 +63,7 @@ If an existing codebase exists, use MCP code analysis tools to scan:
 - `get_symbols_overview` for project structure and architecture patterns.
 - `find_symbol` and `search_for_pattern` to identify reusable code and what needs to be built.
 
-Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references — reuse patterns from similar work.
+Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 
 ---
 
@@ -99,6 +99,8 @@ Break down the project into actionable tasks. Each task must have:
 - Assigned agent (frontend/backend/mobile/qa/debug)
 - Title, acceptance criteria
 - Priority (P0–P3), dependencies
+
+**Engineering-first decomposition:** prefer tasks that address root causes over tasks that patch individual symptoms. When a deliberate workaround or hotfix is included, record the reason in the Decision Log.
 
 ---
 
@@ -188,7 +190,7 @@ When all "Done When" criteria are met:
 
 1. Set the header `Status` field: `Active` → `Completed`.
 2. Append a completion summary to Progress Notes with the date.
-3. The file stays in `docs/plans/work/` — no move required.
+3. The file stays in `docs/plans/work/`; no move required.
 4. If any tech debt was introduced, update `docs/plans/work/tech-debt-tracker.md`.
 
 To list in-progress plans: `grep -l "^\*\*Status\*\*: Active" docs/plans/work/*.md`.
@@ -209,4 +211,4 @@ To list in-progress plans: `grep -l "^\*\*Status\*\*: Active" docs/plans/work/*.
 
 - Add entries when shortcuts are taken during plan execution.
 - Remove entries when debt is resolved.
-- Review periodically — debt items can become plans themselves.
+- Review periodically; debt items can become plans themselves.

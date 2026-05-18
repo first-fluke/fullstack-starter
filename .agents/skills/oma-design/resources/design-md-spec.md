@@ -19,28 +19,28 @@ copy-paste instructions.
 ### 1. Visual Theme & Atmosphere
 
 Evocative description of mood, density, and aesthetic philosophy.
-This section is about intent and feeling — NOT technical specs.
+This section is about intent and feeling, NOT technical specs.
 
 Example:
 > A sophisticated dark interface with gallery-like spaciousness.
 > Clean geometric forms float on deep backgrounds with subtle glass effects.
-> The atmosphere is confident and minimal — every element earns its place.
+> The atmosphere is confident and minimal; every element earns its place.
 
 ### 2. Color Palette & Roles
 
 Each color entry must include:
 - Descriptive Name + Hex Code + Functional Role
 
-Format: `Descriptive Name (#hexcode) — functional role`
+Format: `Descriptive Name (#hexcode): functional role`
 
 Example:
 ```
-- Deep Space Black (#0a0a0a) — primary background, page canvas
-- Warm Ivory (#f5f0eb) — primary text on dark surfaces
-- Signal Green (#22c55e) — CTAs, success states, active indicators
-- Soft Mist (rgba(255,255,255,0.1)) — borders, dividers, glass surfaces
-- Ember Red (#ef4444) — error states, destructive actions
-- Steel Gray (#6b7280) — secondary text, placeholders, disabled states
+- Deep Space Black (#0a0a0a): primary background, page canvas
+- Warm Ivory (#f5f0eb): primary text on dark surfaces
+- Signal Green (#22c55e): CTAs, success states, active indicators
+- Soft Mist (rgba(255,255,255,0.1)): borders, dividers, glass surfaces
+- Ember Red (#ef4444): error states, destructive actions
+- Steel Gray (#6b7280): secondary text, placeholders, disabled states
 ```
 
 Include shade scales (100-900) for primary and neutral colors if needed.
@@ -51,12 +51,12 @@ Accent, Interactive, Neutral Scale, Surface & Borders, Shadow Colors.
 
 Specify:
 - Font families (with fallback stacks)
-- Hierarchy as a **table** (mandatory format — not prose):
+- Hierarchy as a **table** (mandatory format, not prose):
 
 | Role | Font | Size | Weight | Line Height | Letter Spacing | Features | Notes |
 |---|---|---|---|---|---|---|---|
-| Display | Instrument Serif | clamp(48px, 8vw, 96px) | 400 italic | 0.9 | -0.04em | — | Hero only |
-| H1 | Pretendard Variable | 40px | 700 | 1.2 | -0.02em | — | Section headings |
+| Display | Instrument Serif | clamp(48px, 8vw, 96px) | 400 italic | 0.9 | -0.04em | none | Hero only |
+| H1 | Pretendard Variable | 40px | 700 | 1.2 | -0.02em | none | Section headings |
 | Body | Pretendard Variable | 16px | 400 | 1.6 | 0 | ss01 | ≥16px on mobile |
 | Code | JetBrains Mono | 13px | 500 | 1.5 | 0 | tnum | Data tables |
 
@@ -85,7 +85,7 @@ exact measurements, transition durations, and accessibility notes.
 
 ### 5. Layout Principles
 
-- Spacing System (base unit, full scale — typically 4px/8px grid)
+- Spacing System (base unit, full scale, typically 4px/8px grid)
 - Grid & Container (12-column, responsive gutters, max content widths)
 - Whitespace Philosophy (breathing room per section)
 - Border Radius Scale (`sm`, `md`, `lg`, `xl`, `full`)
@@ -122,7 +122,7 @@ Project-specific rules that encode visual discipline. Pull from
 ### 9. Agent Prompt Guide
 
 **This section is mandatory.** Downstream coding agents read this verbatim.
-Keep it copy-paste ready — no prose padding.
+Keep it copy-paste ready, no prose padding.
 
 #### Quick Color Reference
 
@@ -162,7 +162,7 @@ reproduce the component without referring back to other sections:
 
 #### Iteration Guide
 
-5-8 numbered rules that capture the system's DNA — the things a
+5-8 numbered rules that capture the system's DNA, the things a
 downstream agent must respect when iterating on the design:
 
 ```
@@ -170,9 +170,9 @@ downstream agent must respect when iterating on the design:
 2. Body opacity is 0.72 on dark surfaces; drop to 0.56 for metadata.
 3. Border-radius ladder: 8px (inputs) → 12px (buttons) → 16px (cards)
    → 24px (modals). Never pill shapes except badges.
-4. Glass surfaces only on navigation and badges — never content cards.
+4. Glass surfaces only on navigation and badges, never content cards.
 5. Motion: 150ms for hovers, 250ms for transitions, 400ms for entrances.
-6. Mobile body size is 16px minimum — never shrink below.
+6. Mobile body size is 16px minimum; never shrink below.
 7. Never stack more than two cards inside a single section.
 ```
 
@@ -194,11 +194,11 @@ downstream agent must respect when iterating on the design:
 When extracting DESIGN.md from an existing site, Stitch project, or
 getdesign vendor template:
 
-1. **Retrieval** — fetch source (HTML/CSS, Stitch screen data, or
+1. **Retrieval**: fetch source (HTML/CSS, Stitch screen data, or
    vendor template via `resources/getdesign-fetcher.md`)
-2. **Extraction** — identify fonts, colors, spacing, component patterns
-3. **Translation** — convert raw CSS values to semantic descriptions
-4. **Synthesis** — organize into the 9 sections above
-5. **Alignment** — verify consistency, resolve conflicts, fill gaps,
+2. **Extraction**: identify fonts, colors, spacing, component patterns
+3. **Translation**: convert raw CSS values to semantic descriptions
+4. **Synthesis**: organize into the 9 sections above
+5. **Alignment**: verify consistency, resolve conflicts, fill gaps,
    apply the Seed rule in Section 3 (override vendor typography with
    project language strategy)

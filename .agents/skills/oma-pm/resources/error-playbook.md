@@ -11,8 +11,8 @@ When you encounter a failure during planning, follow these recovery steps.
 1. Break down what you DO understand
 2. List specific assumptions you're making
 3. Create plan based on reasonable assumptions
-4. Mark assumptions clearly: `⚠️ Assumption: [description]`
-5. **NEVER do this**: Create tasks while still ambiguous — agents will lose direction
+4. Mark assumptions clearly: `Assumption: [description]`
+5. **NEVER do this**: Create tasks while still ambiguous (agents will lose direction)
 
 ---
 
@@ -23,7 +23,7 @@ When you encounter a failure during planning, follow these recovery steps.
 1. Use Serena: `get_symbols_overview("src/")` or `get_symbols_overview("app/")`
 2. Look for framework indicators: `package.json`, `pyproject.toml`, `pubspec.yaml`
 3. Check for existing patterns: `search_for_pattern("@app.get|@app.post")` (FastAPI)
-4. If Serena unavailable: note in plan "architecture assumptions — verify before execution"
+4. If Serena unavailable: note in plan "architecture assumptions: verify before execution"
 
 ---
 
@@ -52,7 +52,7 @@ When you encounter a failure during planning, follow these recovery steps.
 
 **Symptoms**: Multiple valid options, no clear winner
 
-1. Check existing codebase — consistency wins over "better" tech
+1. Check existing codebase first; consistency wins over "better" tech
 2. If greenfield: use the project's default stack (see SKILL.md tech-stack references)
 3. Default choices: refer to each domain skill's `resources/tech-stack.md` for current versions
    - Frontend: `oma-frontend/resources/tech-stack.md`
@@ -72,4 +72,4 @@ Same as backend-agent playbook: See relevant sections.
 
 - **Plans are not code**: They don't need to be perfect. Agents can adjust during execution
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **No code writing**: PM only plans — delegate implementation to other agents
+- **No code writing**: PM only plans; delegate implementation to other agents

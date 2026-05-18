@@ -2,7 +2,7 @@
 description: Auto-detect project tech stack and generate stack-specific references for domain skills
 ---
 
-# /stack-set — Stack Configuration Workflow
+# /stack-set: Stack Configuration Workflow
 
 ## Goal
 Analyze project files to detect the tech stack, then generate language-specific references in the domain skill's `stack/` directory.

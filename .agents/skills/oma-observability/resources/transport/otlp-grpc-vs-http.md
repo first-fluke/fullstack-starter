@@ -106,7 +106,7 @@ receivers:
 
 ### 4.3 Memory Limiter (Required)
 
-Place `memory_limiter` first in every pipeline — it back-pressures receivers before OOM.
+Place `memory_limiter` first in every pipeline; it back-pressures receivers before OOM.
 
 ```yaml
 processors:
@@ -167,7 +167,7 @@ exporters:
 ```
 
 **OTLP retry semantics** (opentelemetry.io/docs/specs/otlp/): `RESOURCE_EXHAUSTED` returns
-`RetryInfo.retry_delay` — honor it. `UNAVAILABLE` → exponential backoff. `INVALID_ARGUMENT` →
+`RetryInfo.retry_delay`; honor it. `UNAVAILABLE` → exponential backoff. `INVALID_ARGUMENT` →
 permanent failure, do not retry.
 
 ### 5.3 Persistent Queue Extension

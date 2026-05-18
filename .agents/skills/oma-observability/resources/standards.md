@@ -36,10 +36,10 @@ Four pillars in scope for this skill:
 
 | Pillar | Specification | Wire protocol |
 |--------|---------------|---------------|
-| API / SDK | opentelemetry.io/docs/specs/otel/ | — |
-| Semantic Conventions (semconv) | opentelemetry.io/docs/specs/semconv/ | — |
+| API / SDK | opentelemetry.io/docs/specs/otel/ | N/A |
+| Semantic Conventions (semconv) | opentelemetry.io/docs/specs/semconv/ | N/A |
 | Protocol (OTLP) | opentelemetry.io/docs/specs/otlp/ | gRPC :4317 / HTTP :4318 |
-| Collector | opentelemetry.io/docs/collector/ | — |
+| Collector | opentelemetry.io/docs/collector/ | N/A |
 
 Key constraints:
 - Use the stable semconv groups listed in Section 3 for production instrumentation.
@@ -56,9 +56,9 @@ W3C Trace Context defines the `traceparent` and `tracestate` HTTP headers that e
 Mandatory propagation rule: every outbound HTTP/gRPC call MUST forward `traceparent`. Stripping it silently is an anti-pattern.
 
 Vendor header compatibility reference (informative):
-- AWS X-Ray: `X-Amzn-Trace-Id` — compatible bridge via OTel X-Ray propagator
+- AWS X-Ray: `X-Amzn-Trace-Id`; compatible bridge via OTel X-Ray propagator
 - GCP Cloud Trace: prefers W3C; legacy `X-Cloud-Trace-Context` is supported for backward compat
-- Datadog: `X-Datadog-Trace-Id` — use OTel Datadog exporter for bridging
+- Datadog: `X-Datadog-Trace-Id`; use OTel Datadog exporter for bridging
 
 ### 2.3 W3C Baggage
 
@@ -113,8 +113,8 @@ ISO/IEC 25010:2023 (<https://www.iso.org/standard/78176.html>) defines the Syste
 This mapping is informative, not normative. It is useful when presenting observability investment in terms that quality assurance or audit stakeholders recognize.
 
 Related standards:
-- **ISO/IEC 27001:2022 / 27002:2022** (<https://www.iso.org/standard/27001>) — controls for information security management systems; governs log integrity, access control on observability backends, and audit trail requirements.
-- **ISO/IEC 42010:2011** (<https://www.iso.org/standard/50508.html>) — architecture description standard. An "observability viewpoint" is a valid architecture viewpoint under 42010 for documenting how stakeholders inspect system internals.
+- **ISO/IEC 27001:2022 / 27002:2022** (<https://www.iso.org/standard/27001>); controls for information security management systems; governs log integrity, access control on observability backends, and audit trail requirements.
+- **ISO/IEC 42010:2011** (<https://www.iso.org/standard/50508.html>); architecture description standard. An "observability viewpoint" is a valid architecture viewpoint under 42010 for documenting how stakeholders inspect system internals.
 
 ---
 
@@ -195,21 +195,21 @@ NTP drift left unmonitored is anti-pattern #18 in this skill: waterfall charts a
 
 Primary sources, in order of precedence:
 
-1. OpenTelemetry specification — <https://opentelemetry.io/docs/specs/otel/>
-2. OTel Semantic Conventions — <https://opentelemetry.io/docs/specs/semconv/>
-3. OTLP specification — <https://opentelemetry.io/docs/specs/otlp/>
-4. W3C Trace Context L1 Recommendation — <https://www.w3.org/TR/trace-context/>
-5. W3C Trace Context L2 Candidate Recommendation — <https://www.w3.org/TR/trace-context-2/>
-6. W3C Baggage Recommendation — <https://www.w3.org/TR/baggage/>
-7. ISO/IEC 25010:2023 — <https://www.iso.org/standard/78176.html>
-8. ISO/IEC 27001:2022 — <https://www.iso.org/standard/27001>
-9. ISO/IEC 42010:2011 — <https://www.iso.org/standard/50508.html>
-10. CNCF Projects — <https://www.cncf.io/projects/>
-11. CNCF Landscape (authoritative vendor registry) — <https://landscape.cncf.io/>
-12. OTel TLS attributes registry — <https://opentelemetry.io/docs/specs/semconv/attributes-registry/tls/>
-13. OTel network attributes registry — <https://opentelemetry.io/docs/specs/semconv/attributes-registry/network/>
-14. OTel RPC/gRPC semconv — <https://opentelemetry.io/docs/specs/semconv/rpc/grpc/>
-15. OTel Baggage API — <https://opentelemetry.io/docs/specs/otel/baggage/api/>
-16. AWS Time Sync Service — <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html>
-17. Azure Linux time sync — <https://learn.microsoft.com/azure/virtual-machines/linux/time-sync>
-18. OTEP 0239 (profiling signal) — <https://github.com/open-telemetry/oteps/blob/main/text/profiles/0239-profiles-data-model.md>
+1. OpenTelemetry specification: <https://opentelemetry.io/docs/specs/otel/>
+2. OTel Semantic Conventions: <https://opentelemetry.io/docs/specs/semconv/>
+3. OTLP specification: <https://opentelemetry.io/docs/specs/otlp/>
+4. W3C Trace Context L1 Recommendation: <https://www.w3.org/TR/trace-context/>
+5. W3C Trace Context L2 Candidate Recommendation: <https://www.w3.org/TR/trace-context-2/>
+6. W3C Baggage Recommendation: <https://www.w3.org/TR/baggage/>
+7. ISO/IEC 25010:2023; <https://www.iso.org/standard/78176.html>
+8. ISO/IEC 27001:2022; <https://www.iso.org/standard/27001>
+9. ISO/IEC 42010:2011; <https://www.iso.org/standard/50508.html>
+10. CNCF Projects: <https://www.cncf.io/projects/>
+11. CNCF Landscape (authoritative vendor registry): <https://landscape.cncf.io/>
+12. OTel TLS attributes registry: <https://opentelemetry.io/docs/specs/semconv/attributes-registry/tls/>
+13. OTel network attributes registry: <https://opentelemetry.io/docs/specs/semconv/attributes-registry/network/>
+14. OTel RPC/gRPC semconv: <https://opentelemetry.io/docs/specs/semconv/rpc/grpc/>
+15. OTel Baggage API: <https://opentelemetry.io/docs/specs/otel/baggage/api/>
+16. AWS Time Sync Service: <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html>
+17. Azure Linux time sync: <https://learn.microsoft.com/azure/virtual-machines/linux/time-sync>
+18. OTEP 0239 (profiling signal): <https://github.com/open-telemetry/oteps/blob/main/text/profiles/0239-profiles-data-model.md>

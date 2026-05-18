@@ -50,7 +50,7 @@ bun = "latest"
 description = "Check release-please status"
 run = '''
 #!/usr/bin/env bash
-echo "🔍 Checking release status..."
+echo "Checking release status..."
 echo ""
 echo "Open release PRs:"
 bunx gh pr list --label "autorelease: pending" --state open
@@ -67,7 +67,7 @@ run = "cat .release-please-manifest.json"
 description = "Preview changelog (local dry-run)"
 run = '''
 #!/usr/bin/env bash
-echo "📋 Recent conventional commits:"
+echo "Recent conventional commits:"
 git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD | grep -E "^(feat|fix|docs|style|refactor|test|chore|ci)(\(.+\))?:"
 '''
 ```
@@ -149,11 +149,11 @@ git diff origin/main...release-please--branches--main
 description = "Verify latest release"
 run = '''
 #!/usr/bin/env bash
-echo "✅ Latest release:"
+echo "Latest release:"
 bunx gh release view --json tagName,name,createdAt
 
 echo ""
-echo "📦 Assets:"
+echo "Assets:"
 bunx gh release view --json assets
 '''
 ```
@@ -167,7 +167,7 @@ If needed, manually trigger release-please:
 description = "Manually trigger release-please (CI will handle)"
 run = '''
 #!/usr/bin/env bash
-echo "🚀 Triggering release-please..."
+echo "Triggering release-please..."
 echo "Push to main will trigger the workflow automatically"
 echo ""
 echo "Current status:"
@@ -182,7 +182,7 @@ mise run release:check
 description = "Cleanup after release"
 run = '''
 #!/usr/bin/env bash
-echo "🧹 Post-release cleanup..."
+echo "Post-release cleanup..."
 
 # Pull latest changes with tags
 git pull origin main --tags
@@ -197,7 +197,7 @@ echo "Latest tag:"
 git describe --tags --abbrev=0
 
 echo ""
-echo "✅ Release cleanup complete"
+echo "Release cleanup complete"
 '''
 ```
 
@@ -208,7 +208,7 @@ echo "✅ Release cleanup complete"
 description = "Debug release issues"
 run = '''
 #!/usr/bin/env bash
-echo "🔍 Release Debugging"
+echo "Release Debugging"
 echo ""
 
 echo "1. Conventional commits since last tag:"
@@ -237,8 +237,8 @@ bunx gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release
 
 ## Benefits
 
-- ✅ Automated versioning based on commits
-- ✅ Auto-generated CHANGELOG.md
-- ✅ GitHub releases with notes
-- ✅ No manual version bumping
-- ✅ Integrated with GitHub PR workflow
+- Automated versioning based on commits
+- Auto-generated CHANGELOG.md
+- GitHub releases with notes
+- No manual version bumping
+- Integrated with GitHub PR workflow

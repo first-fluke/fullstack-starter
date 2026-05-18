@@ -46,14 +46,11 @@
   },
   "mcpServers": {
     "serena": {
-      "command": "uvx",
+      "command": "serena",
       "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
         "start-mcp-server",
         "--context",
-        "agent",
+        "ide",
         "--project",
         "."
       ],
@@ -61,5 +58,8 @@
         "SERENA_LOG_LEVEL": "info"
       }
     }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
   }
 }

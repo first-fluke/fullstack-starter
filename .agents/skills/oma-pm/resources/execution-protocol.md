@@ -1,16 +1,16 @@
 # PM Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty** — see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
    - **Simple**: Lightweight plan, 3-5 tasks | **Medium**: Full 4 steps | **Complex**: Full + API contracts
-2. **Clarify requirements** — follow `../../_shared/core/clarification-protocol.md` (critical for PM)
+2. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md` (critical for PM)
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-3. **Use reasoning templates** — for architecture decisions, use `../../_shared/core/reasoning-templates.md` (decision matrix)
-4. **Check lessons** — read cross-domain section in `../../_shared/core/lessons-learned.md`
-5. **If governance, risk, or formal planning matters** — read `resources/iso-planning.md`
+3. **Use reasoning templates**: for architecture decisions, use `../../_shared/core/reasoning-templates.md` (decision matrix)
+4. **Check lessons**: read cross-domain section in `../../_shared/core/lessons-learned.md`
+5. **If governance, risk, or formal planning matters**: read `resources/iso-planning.md`
 
-**⚠️ Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
+**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
 Follow these steps in order (adjust depth by difficulty).
 
@@ -44,7 +44,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Minimize dependencies for maximum parallel execution
 - Priority tiers: 1 = independent (run first), 2 = depends on tier 1, etc.
 - Complexity: Low / Medium / High / Very High
-- Save to `.agents/results/plan-{sessionId}.json` and `.agents/results/current-plan.md`
+- Save to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-pm.md`
 
 ## Step 4: Validate Plan
 - Check: Can each task be done independently given its dependencies?

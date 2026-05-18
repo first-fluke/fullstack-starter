@@ -13,7 +13,7 @@ beyond the (currently 2026-only) knows.academy index.
 
 When a paper is in **both**, prefer knows.academy (richer structure). When a
 paper is **only in OpenAlex** (most pre-2026 work), use OpenAlex metadata as
-the source for **Mode 1 Generate** — host LLM produces a local sidecar from
+the source for **Mode 1 Generate**, where the host LLM produces a local sidecar from
 the abstract.
 
 ## Cascade Logic
@@ -76,14 +76,14 @@ Returns the best match from each source side-by-side, plus a recommendation.
 
 Fallback to OpenAlex is the right move when:
 
-- **Pre-2026 papers** — knows.academy doesn't index them
-- **Cross-archive coverage** — non-arXiv venues, journals, books
-- **Citation counts** — knows.academy doesn't track citations; OpenAlex does
-- **Reference resolution** — when a sidecar's `cites` predicate points to a paper not in knows.academy
+- **Pre-2026 papers**: knows.academy doesn't index them
+- **Cross-archive coverage**: non-arXiv venues, journals, books
+- **Citation counts**: knows.academy doesn't track citations; OpenAlex does
+- **Reference resolution**: when a sidecar's `cites` predicate points to a paper not in knows.academy
 
 Fallback is NOT needed for:
-- Recent (2026) arXiv papers — knows.academy has them with rich sidecars
-- Full-text reading — neither source provides full text; fetch the OA PDF and use `oma-pdf`
+- Recent (2026) arXiv papers, since knows.academy has them with rich sidecars
+- Full-text reading, since neither source provides full text; fetch the OA PDF and use `oma-pdf`
 
 ## Local Generate from Fallback Result
 
@@ -96,7 +96,7 @@ When OpenAlex returns metadata + abstract, but you want a structured sidecar:
 4. oma scholar lint             → validate locally
 ```
 
-The locally-generated sidecar is **not registered** with knows.academy — it's
+The locally-generated sidecar is **not registered** with knows.academy; it's
 yours. If you want it shared, that's a separate publishing flow (out of scope
 for this skill).
 
@@ -106,20 +106,20 @@ OpenAlex anonymous use is free up to ~$1/day. For higher limits or polite
 pool access, see `setup-openalex.md`. The skill works without any key.
 
 `oma scholar` reads:
-- `OPENALEX_API_KEY` — passed as `?api_key=` (recommended)
-- `OPENALEX_EMAIL` — passed as `?mailto=` (polite pool, no signup)
+- `OPENALEX_API_KEY`: passed as `?api_key=` (recommended)
+- `OPENALEX_EMAIL`: passed as `?mailto=` (polite pool, no signup)
 
 Neither is required.
 
 ## Trust Considerations
 
-- **knows.academy sidecars are AI-generated** — all have `provenance.origin: machine`. Verified `lint_passed: true` is platform-internal; our local `oma scholar lint` finds dangling refs in ~47% (use `--lenient` when consuming)
-- **OpenAlex metadata is curated** — generally reliable for title/authors/DOI/year, but venue and abstract can be missing for older works
-- **Reconstructed abstracts** from OpenAlex's inverted index are exact — no paraphrasing — but punctuation/formatting may be lossy
+- **knows.academy sidecars are AI-generated**: all have `provenance.origin: machine`. Verified `lint_passed: true` is platform-internal; our local `oma scholar lint` finds dangling refs in ~47% (use `--lenient` when consuming)
+- **OpenAlex metadata is curated**: generally reliable for title/authors/DOI/year, but venue and abstract can be missing for older works
+- **Reconstructed abstracts** from OpenAlex's inverted index are exact (no paraphrasing), but punctuation/formatting may be lossy
 
 ## Limitations
 
 - arXiv-only papers without DOI may show `doi: None` in OpenAlex
-- Some 2026 papers exist in both sources with slightly different titles — `resolve` does case-insensitive contain matching as a heuristic
+- Some 2026 papers exist in both sources with slightly different titles; `resolve` does case-insensitive contain matching as a heuristic
 - knows.academy proxy can timeout under load; fallback to OpenAlex is automatic
 - OpenAlex rate-limits: respect ~10 req/sec courtesy limit

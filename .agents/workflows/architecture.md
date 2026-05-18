@@ -1,8 +1,8 @@
 ---
-description: Software architecture workflow — diagnose architecture problems, select the right analysis method, compare options, synthesize stakeholder input, and produce a recommendation, review, or ADR
+description: Software architecture workflow that diagnoses architecture problems, selects the right analysis method, compares options, synthesizes stakeholder input, and produces a recommendation, review, or ADR
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.

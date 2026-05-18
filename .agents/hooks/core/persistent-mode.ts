@@ -20,14 +20,11 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
+import { resolveGitRoot } from "./fs-utils.ts";
+import { makeBlockOutput } from "./hook-output.ts";
 import { isDeactivationRequest } from "./keyword-detector.ts";
-import {
-  type ModeState,
-  makeBlockOutput,
-  resolveGitRoot,
-  type Vendor,
-} from "./types.ts";
+import type { ModeState, Vendor } from "./types.ts";
 
 const MAX_REINFORCEMENTS = 5;
 const STALE_HOURS = 2;
@@ -51,7 +48,7 @@ interface TriggerConfig {
 }
 
 function loadPersistentWorkflows(): string[] {
-  const configPath = join(dirname(import.meta.path), "triggers.json");
+  const configPath = join(import.meta.dirname, "triggers.json");
   try {
     const config: TriggerConfig = JSON.parse(readFileSync(configPath, "utf-8"));
     return Object.entries(config.workflows)

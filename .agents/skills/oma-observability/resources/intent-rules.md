@@ -13,10 +13,10 @@ otel_semconv: "1.27.0 (2024-11)"
 
 ## Classification Priority
 
-1. **Override flags** — always win, skip classification entirely (e.g., `--investigate`, `--tune`)
-2. **Keyword pattern matching** — scan query for intent-specific keywords
-3. **Signal detection** — contextual clues (tool names, error messages, metric names, cloud regions)
-4. **Fallback** — `investigate + tune` parallel when no clear signal
+1. **Override flags**: always win, skip classification entirely (e.g., `--investigate`, `--tune`)
+2. **Keyword pattern matching**: scan query for intent-specific keywords
+3. **Signal detection**: contextual clues (tool names, error messages, metric names, cloud regions)
+4. **Fallback**: `investigate + tune` parallel when no clear signal
 
 ## Override Flags
 
@@ -129,7 +129,7 @@ Production incident or bug root-cause analysis. Use when something is broken, de
 - "Why is checkout service p99 high?"
 - "특정 테넌트만 느린데 왜 그런지 조사해줘"
 - "결제 서비스 에러율 갑자기 올라감, 원인 분석"
-- "Auth service started timing out after today's release — help"
+- "Auth service started timing out after today's release; help"
 
 #### Primary Route
 
@@ -197,7 +197,7 @@ Design or debug distributed tracing: propagators, baggage, cross-service context
 
 #### Example Queries
 
-- "Our traces break at the Istio ingress — how to propagate context?"
+- "Our traces break at the Istio ingress; how to propagate context?"
 - "Design baggage for multi-tenant trace correlation"
 - "Istio 들어가면 트레이스가 끊어짐, 전파 어떻게 해?"
 - "테넌트 ID baggage로 전파할 때 주의점"
@@ -209,7 +209,7 @@ Design or debug distributed tracing: propagators, baggage, cross-service context
 
 #### Secondary Considerations
 
-`resources/signals/privacy.md` (baggage PII rules — no user identifiers in traceparent/baggage without redaction)
+`resources/signals/privacy.md` (baggage PII rules; no user identifiers in traceparent/baggage without redaction)
 
 ---
 
@@ -233,7 +233,7 @@ Optimize performance, reduce cost, tame cardinality, configure sampling, or fix 
 
 #### Example Queries
 
-- "Datadog bill jumped 3x — need to reduce cardinality"
+- "Datadog bill jumped 3x: need to reduce cardinality"
 - "UDP statsd throughput is low at peak"
 - "Datadog 비용 3배 뛰었음, 카디널리티 줄여야 해"
 - "테일 샘플링 레시피 추천"

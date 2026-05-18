@@ -28,7 +28,7 @@ Standards, architecture rules, safety requirements, or project conventions.
 - "Must be backward-compatible with v2 API"
 
 ### 4. Done When
-How to verify the task is complete — testable, observable criteria.
+How to verify the task is complete using testable, observable criteria.
 
 - "All existing tests pass + new tests for auth endpoints"
 - "The 500 error no longer occurs and returns 200"
@@ -59,4 +59,4 @@ Use "Done When" criteria as the primary review checklist. A task is not complete
 
 - Starting implementation with only a Goal (no constraints or done-when)
 - Inventing constraints the user didn't specify
-- Accepting vague done-when like "it works" — push for testable criteria
+- Accepting vague done-when like "it works"; push for testable criteria

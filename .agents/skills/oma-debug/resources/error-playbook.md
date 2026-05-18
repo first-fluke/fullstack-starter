@@ -9,7 +9,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Bug described by user but you can't trigger it
 
-1. Re-read user's reproduction steps — are you following them exactly?
+1. Re-read user's reproduction steps; are you following them exactly?
 2. Check environment differences: browser, OS, node/python version
 3. Check data-dependent: does it need specific DB state or test data?
 4. Check timing: is it a race condition? Try adding delays or rapid repetition
@@ -22,9 +22,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Original bug fixed but other tests break
 
-1. Read the failing tests — are they testing the old (buggy) behavior?
+1. Read the failing tests; are they testing the old (buggy) behavior?
 2. If yes: update tests to reflect correct behavior
-3. If no: your fix has side effects — revert and try a more targeted approach
+3. If no: your fix has side effects. Revert and try a more targeted approach
 4. `find_referencing_symbols("fixedFunction")` to check all callers
 5. Consider: is the function contract changing? If so, update all callers
 
@@ -37,7 +37,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 1. Add logging at each step of the execution path
 2. Binary search: is the bug before or after the midpoint?
 3. `search_for_pattern("suspicious_pattern")` to find related code
-4. Check git history: `git log --oneline -20 -- path/to/file` — when was it last changed?
+4. Check git history: `git log --oneline -20 -- path/to/file`. When was it last changed?
 5. Check: is it a dependency issue? Library version mismatch?
 6. **No progress after 5 turns**: Record current analysis in progress, switch to different hypothesis
 
@@ -53,7 +53,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
    - What the correct behavior should be
    - Evidence (request/response logs, stack trace)
 3. Record in result: `cross_domain_issue: {agent: "backend", description: "..."}`
-4. **Do NOT modify directly** — touching another agent's code causes conflicts
+4. **Do NOT modify directly**; touching another agent's code causes conflicts
 
 ---
 
@@ -65,7 +65,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 2. Backend: enable SQL query logging, count queries, check `EXPLAIN ANALYZE`
 3. Frontend: run Lighthouse, check React DevTools Profiler
 4. Mobile: use Flutter DevTools performance tab
-5. Profile before fixing — never optimize without data
+5. Profile before fixing; never optimize without data
 
 ---
 
@@ -91,4 +91,4 @@ Same as backend-agent playbook: See relevant sections.
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method
 - **Blocked**: If no progress after 5 turns, save current state, `Status: blocked`
-- **Out of scope**: Other agent's domain — only record, do not modify directly
+- **Out of scope**: Other agent's domain. Only record, do not modify directly

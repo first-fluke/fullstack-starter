@@ -234,7 +234,7 @@ jobs:
 
 set -e
 
-echo "🔍 Running Terraform validation..."
+echo "Running Terraform validation..."
 
 # Format check
 echo "  → Checking format..."
@@ -265,5 +265,5 @@ if [ -d "policies" ]; then
   opa test policies/
 fi
 
-echo "✅ All validation passed!"
+echo "All validation passed!"
 ```

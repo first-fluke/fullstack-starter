@@ -1,8 +1,8 @@
 ---
-description: Manage MCP tools with natural language commands — list, enable, disable tools and tool groups
+description: Manage MCP tools with natural language commands to list, enable, and disable tools and tool groups
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.
@@ -17,7 +17,7 @@ description: Manage MCP tools with natural language commands — list, enable, d
 ## Step 1: Show Current Status
 
 1. Read `.agents/mcp.json` (project configuration)
-2. Read `~/.gemini/settings.json` if exists (Gemini CLI global settings) — optional
+2. Read `~/.gemini/settings.json` if exists (Gemini CLI global settings); optional
 3. Display status for each MCP server:
    - `available_tools: null` → "All enabled (no restrictions)"
    - `available_tools: [...]` → "N tools enabled" + list
@@ -25,13 +25,13 @@ description: Manage MCP tools with natural language commands — list, enable, d
 
 **Output example:**
 ```
-📋 Current MCP Tool Status
+Current MCP Tool Status
 
 [serena]
 - Status: All enabled (no restrictions)
 - Available tools: 15
 
-📦 Available Tool Groups:
+Available Tool Groups:
 - memory: read_memory, write_memory, edit_memory, list_memories, delete_memory
 - code-analysis: get_symbols_overview, find_symbol, find_referencing_symbols, search_for_pattern
 - code-edit: replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol
@@ -68,7 +68,7 @@ Parse natural language commands:
 
 1. **Show before/after diff:**
    ```
-   📝 Pending mcp.json changes:
+   Pending mcp.json changes:
 
    Before:
    - serena.available_tools: null (all)
@@ -83,9 +83,9 @@ Parse natural language commands:
 
 3. **Completion message:**
    ```
-   ✅ Done! serena can now only use memory tools.
+   Done! serena can now only use memory tools.
 
-   ⚠️ Note: Changes will fully apply after IDE/CLI restart.
+   Note: Changes will fully apply after IDE/CLI restart.
    Previous settings may continue to apply in current session.
    ```
 
@@ -117,7 +117,7 @@ Temporary settings that apply only during the session:
 
 2. **Completion message:**
    ```
-   ✅ Temporarily applied!
+   Temporarily applied!
 
    serena will only use memory tools for this session.
    To apply permanently, run `/tools enable memory only` (without --temp).
@@ -129,7 +129,7 @@ Temporary settings that apply only during the session:
 
 ### Unknown Tool Name
 ```
-⚠️ '{tool_name}' is an unknown tool.
+'{tool_name}' is an unknown tool.
 
 Similar tools:
 - read_memory
@@ -141,7 +141,7 @@ Please enter the exact tool name.
 ### Server Conflict
 When multiple MCP servers are configured:
 ```
-📋 Multiple MCP servers detected:
+Multiple MCP servers detected:
 - serena
 - custom-memory
 
@@ -153,7 +153,7 @@ Which server's tools would you like to modify?
 
 ### Empty Tool List
 ```
-⚠️ Setting available_tools to an empty array will disable all tools for that server.
+Setting available_tools to an empty array will disable all tools for that server.
 Are you sure you want to continue? (Y/N)
 ```
 

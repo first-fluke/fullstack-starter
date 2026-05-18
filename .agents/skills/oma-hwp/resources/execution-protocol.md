@@ -6,7 +6,7 @@
 2. Check extension is one of `.hwp`, `.hwpx`, `.hwpml`
    - If `.pdf` -> hand off to `oma-pdf`
    - If `.xlsx` / `.docx` -> not in scope; advise user to run `bunx kordoc@latest <file>` directly
-3. Check file size (`wc -c` or `ls -lh`) — warn if >100MB
+3. Check file size (`wc -c` or `ls -lh`); warn if >100MB
 4. Determine output location:
    - If user specified output path (`-o` or `-d`) → use it
    - Otherwise → same directory as the input file
@@ -53,14 +53,14 @@ bunx kordoc@latest "{input_path}" --format json
 
 Notes:
 - Default format is `markdown`. Pass `--format json` only when you need the structured AST.
-- `--silent` suppresses progress output — useful in automation / piping contexts.
+- `--silent` suppresses progress output, useful in automation / piping contexts.
 
 ## Step 2.5: Post-process kordoc output (default)
 
 `resources/flatten-tables.ts` cleans up two kordoc artifacts that hurt downstream use:
 
-1. **HTML `<table>` blocks** — kordoc emits these when a table has `colspan` / `rowspan` because GFM cannot represent merged cells. Converted to GFM pipe tables via `turndown-plugin-gfm`.
-2. **Private Use Area characters** — HWP references Hancom-font-specific glyphs via U+E000-U+F8FF / U+F0000-U+FFFFD / U+100000-U+10FFFD code points. Without the Hancom font these render as blanks or tofu squares. Silently stripped.
+1. **HTML `<table>` blocks**: kordoc emits these when a table has `colspan` / `rowspan` because GFM cannot represent merged cells. Converted to GFM pipe tables via `turndown-plugin-gfm`.
+2. **Private Use Area characters**: HWP references Hancom-font-specific glyphs via U+E000-U+F8FF / U+F0000-U+FFFFD / U+100000-U+10FFFD code points. Without the Hancom font these render as blanks or tofu squares. Silently stripped.
 
 ```bash
 bun run "{skill_resources}/flatten-tables.ts" "{output_path}"
@@ -68,7 +68,7 @@ bun run "{skill_resources}/flatten-tables.ts" "{output_path}"
 
 - `{skill_resources}` = `.agents/skills/oma-hwp/resources`
 - Ensure `bun install` has been run once inside that directory (it installs `turndown` + `turndown-plugin-gfm` locally)
-- Merged cells get flattened during the conversion — accepted trade-off
+- Merged cells get flattened during the conversion (accepted trade-off)
 - Skip this step only if the caller explicitly needs HTML tables or PUA characters preserved (rare)
 
 ## Step 3: Verify
@@ -98,7 +98,7 @@ Tell the user:
 |-------|----------|
 | `bunx` / `bun` not found | Ask user to install Bun: `curl -fsSL https://bun.sh/install \| bash` |
 | `지원하지 않는 파일 형식` / `unsupported file format` | Confirm extension matches actual content; check magic bytes |
-| `암호화된 문서` / `encrypted document` | Ask user for password; current kordoc CLI may not accept it inline — document as limitation |
+| `암호화된 문서` / `encrypted document` | Ask user for password; current kordoc CLI may not accept it inline (document as limitation) |
 | Empty Markdown output | Likely a scanned-image-only HWP; suggest OCR pipeline (out of this skill's scope) |
 | Broken / missing tables | Complex merged-cell tables fall back to HTML `<table>`; accept as best-effort |
 | kordoc crash or stack trace | Ensure `@latest` is passed (bunx cache can be stale); if persistent, capture fixture and file issue upstream at https://github.com/chrisryugj/kordoc/issues |
@@ -106,7 +106,7 @@ Tell the user:
 
 ## Pin vs Latest
 
-- **Default**: `bunx kordoc@latest` (always latest). Gets upstream fixes automatically. `@latest` is required — a bare `bunx kordoc` can reuse a stale cached version indefinitely.
+- **Default**: `bunx kordoc@latest` (always latest). Gets upstream fixes automatically. `@latest` is required because a bare `bunx kordoc` can reuse a stale cached version indefinitely.
 - **Reproducibility**: pin with `bunx kordoc@2.4.0 ...` or similar. Record the pinned version in `config/hwp-config.yaml` under `version.pinned` and set `version.channel: pinned`.
 
 ## Scope Reminder

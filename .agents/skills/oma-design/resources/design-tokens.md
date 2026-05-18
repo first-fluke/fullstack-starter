@@ -145,7 +145,7 @@ When using shadcn/ui, map tokens to its expected HSL format in `globals.css`:
 
 ## Usage Notes
 
-- These are **templates** — replace values with project-specific colors, fonts, and spacing
+- These are **templates**; replace values with project-specific colors, fonts, and spacing
 - Always derive tokens from the DESIGN.md specification
 - CSS custom properties are the source of truth; Tailwind config references them via `var()`
 - For CJK projects, update `--font-body` to include Pretendard or Noto Sans CJK

@@ -30,7 +30,7 @@
     "file": ".codex/config.toml",
     "section": "features",
     "flags": {
-      "codex_hooks": true
+      "hooks": true
     }
   }
 }

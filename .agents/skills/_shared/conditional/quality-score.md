@@ -1,7 +1,7 @@
 # Quality Score Continuum
 
 Replaces binary PASS/FAIL gate evaluation with a **continuous quantitative score** (0-100).
-Inspired by autoresearch's val_bpb metric — objective, comparable, and trackable over time.
+Inspired by autoresearch's val_bpb metric: objective, comparable, and trackable over time.
 
 ---
 
@@ -67,10 +67,10 @@ Quality Score is measured **on demand**, not at every step. Load `quality-score.
 
 | Range | Grade | Gate Decision |
 |-------|-------|---------------|
-| 90-100 | A | PASS — proceed immediately |
-| 75-89 | B | CONDITIONAL PASS — proceed with noted improvements |
-| 60-74 | C | FAIL — must improve before proceeding |
-| 0-59 | D | HARD FAIL — rollback, re-plan required |
+| 90-100 | A | PASS, proceed immediately |
+| 75-89 | B | CONDITIONAL PASS, proceed with noted improvements |
+| 60-74 | C | FAIL, must improve before proceeding |
+| 0-59 | D | HARD FAIL, rollback and re-plan required |
 
 ---
 
@@ -82,9 +82,9 @@ Changes are evaluated by their **impact on the score**, not just by whether they
 IF score_after >= score_before:
     KEEP change
 ELSE IF (score_before - score_after) < 5:
-    REVIEW — minor regression, justify in experiment ledger
+    REVIEW (minor regression, justify in experiment ledger)
 ELSE:
-    DISCARD change — revert and try alternative
+    DISCARD change (revert and try alternative)
 ```
 
 ### Delta Recording

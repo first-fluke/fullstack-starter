@@ -38,8 +38,8 @@ Never produce desktop-only layouts.
 ### Dark Theme Token Pattern
 - **Surface layers**: bg-background → bg-card → bg-muted (increasing lightness)
 - **Text layers**: text-foreground → text-muted-foreground → text-foreground/50
-- **Borders**: use semantic `border-border` — not `border-gray-xxx`
-- **Elevation**: opacity-based (bg-white/[0.01] → /[0.05]) — not shadow-based
+- **Borders**: use semantic `border-border`, not `border-gray-xxx`
+- **Elevation**: opacity-based (bg-white/[0.01] → /[0.05]), not shadow-based
 
 ## Responsive Typography
 

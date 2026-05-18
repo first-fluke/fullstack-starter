@@ -1,8 +1,8 @@
 ---
-description: Automated CLI-based parallel agent execution — spawn subagents via Gemini CLI, coordinate through MCP Memory, monitor progress, and run verification
+description: Automated CLI-based parallel agent execution that spawns subagents via Gemini CLI, coordinates through MCP Memory, monitors progress, and runs verification
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
@@ -51,7 +51,7 @@ Look for a plan file:
 2. CLI 매핑 현황 표시:
 
    ```
-   📋 CLI 에이전트 매핑
+   CLI 에이전트 매핑
    ┌──────────┬─────────┐
    │ Agent    │ CLI     │
    ├──────────┼─────────┤
@@ -101,8 +101,9 @@ Spawn agents via **Agent tool** using `.claude/agents/{agent}.md` definitions.
 | pm | `.claude/agents/pm-planner.md` |
 | architecture | `.claude/agents/architecture-reviewer.md` |
 | tf-infra | `.claude/agents/tf-infra-engineer.md` |
+| docs | `.claude/agents/docs-curator.md` |
 
-- Include API contracts from `.agents/skills/_shared/api-contracts/` if they exist
+- Include API contracts from `.agents/skills/_shared/core/api-contracts/` if they exist
 - Load only task-relevant context (check codebase structure around affected domains)
 
 ### If Codex CLI and target vendor is Codex
@@ -140,7 +141,7 @@ At each poll, evaluate for every in-progress agent:
 | Turn Budget | Progress | Action |
 |-------------|----------|--------|
 | < 80% | any | Continue monitoring |
-| >= 80% | >= 50% | Continue — agent is on track to finish |
+| >= 80% | >= 50% | Continue (agent is on track to finish) |
 | >= 80% | < 50% | **Context Reset**: Checkpoint + re-spawn (see `_shared/core/context-budget.md`) |
 | 100% (max turns) | < 100% | **Context Reset**: Force checkpoint + re-spawn with remaining items |
 
@@ -150,7 +151,7 @@ Record reset events in `task-board.md`:
 | backend | reset-1 | Turn budget 80%, progress 40%, checkpoint saved |
 ```
 
-> **Claude Code note**: Agent tool returns results synchronously — no polling needed. Check status, files changed, and issues directly in each agent's return value.
+> **Claude Code note**: Agent tool returns results synchronously, so no polling is needed. Check status, files changed, and issues directly in each agent's return value.
 
 ---
 
@@ -166,9 +167,9 @@ bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
 - PASS (exit 0): accept result. If Quality Score is active, measure and record in Experiment Ledger.
 - FAIL (exit 1): Before re-spawning, apply the Review Loop termination check:
 
-  > **Review Loop termination conditions (OR — whichever fires first wins)**
+  > **Review Loop termination conditions** (OR, whichever fires first wins):
   > 1. Retry count for this agent has reached the configured maximum (default: 2 retries). Do not start another retry cycle.
-  > 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately — save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
+  > 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
   >
   > If neither condition is met, re-spawn the agent with error context and increment the retry counter.
 

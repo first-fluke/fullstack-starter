@@ -1,8 +1,8 @@
 ---
 name: plan
-description: PM planning workflow — gather requirements, decompose into
-  prioritized tasks, define API contracts, and produce both a machine-readable
-  plan and a human-readable tracker in docs/plans/
+description: PM planning workflow that gathers requirements, decomposes them
+  into prioritized tasks, defines API contracts, and produces both a
+  machine-readable plan and a human-readable tracker in docs/plans/
 disable-model-invocation: true
 ---
 

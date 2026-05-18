@@ -5,7 +5,7 @@
 
 ---
 
-## Scenario 1 — Greenfield: OSS Full-Stack on Kubernetes
+## Scenario 1: Greenfield: OSS Full-Stack on Kubernetes
 
 **Situation:** Series A startup, new k8s cluster. Team wants OTel-native metrics + logs + traces + Grafana
 dashboards at zero licensing cost.
@@ -23,7 +23,7 @@ dashboards at zero licensing cost.
 4. `transport/collector-topology.md §2 Two-Tier Hybrid` determines the deployment pattern:
    DaemonSet agent per node + Deployment gateway.
 
-**Agent CRD — DaemonSet (node-level collection):**
+**Agent CRD; DaemonSet (node-level collection):**
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -66,7 +66,7 @@ spec:
           exporters: [otlp]
 ```
 
-**Gateway CRD — Deployment (batching, `mode: deployment`, 2 replicas):**
+**Gateway CRD; Deployment (batching, `mode: deployment`, 2 replicas):**
 
 ```yaml
 # Key fields only — full config in observability-as-code.md §5
@@ -101,9 +101,9 @@ spec:
 
 ---
 
-## Scenario 2 — Incident Forensics: Payment Service 5xx Spike
+## Scenario 2: Incident Forensics: Payment Service 5xx Spike
 
-**Situation:** "ap-northeast-2 결제 서비스 5xx spike at 14:20 UTC" — alert fires with no `trace_id`
+**Situation:** "ap-northeast-2 결제 서비스 5xx spike at 14:20 UTC"; alert fires with no `trace_id`
 provided. On-call SRE must localize root cause in under 15 minutes.
 
 **Intent:** `investigate`
@@ -112,12 +112,12 @@ provided. On-call SRE must localize root cause in under 15 minutes.
 
 ### Walkthrough
 
-1. **Alert source:** multi-window burn-rate alert from `boundaries/slo.md §7` fires — 2 % budget
+1. **Alert source:** multi-window burn-rate alert from `boundaries/slo.md §7` fires; 2 % budget
    consumed in 1 h at 14.4× rate. `severity: critical`.
 2. Invoke `/oma-observability --investigate "5xx spike in ap-northeast-2"`.
 3. Router routes to `incident-forensics.md §3 Six-Dimension Narrowing Flow`.
 
-**Step 1 — Acquire `trace_id` via metric exemplar (`incident-forensics.md §2`):**
+**Step 1; Acquire `trace_id` via metric exemplar (`incident-forensics.md §2`):**
 
 ```promql
 histogram_quantile(0.99,
@@ -133,17 +133,17 @@ histogram_quantile(0.99,
 
 Exemplar retrieved: `trace_id = 9a3f1c8e2b7d4e50a1c3f9d2b8e7a4c0`.
 
-**Step 2 — Six-dimension narrowing:**
+**Step 2; Six-dimension narrowing:**
 
 | Dimension | Finding |
 |-----------|---------|
 | Region | `cloud.region = ap-northeast-2` only. `ap-southeast-1` healthy. Single-region blast radius. |
 | Server | Errors on 3 of 6 pods, all on `k8s.node.name = ip-10-0-2-11.ec2.internal`. |
 | Service | Earliest ERROR span: `service.name = payments-checkout`, `service.version = v2.4.1`. |
-| Layer | `span.kind = CLIENT`, `db.system = redis` — L7 DB call, not a network-layer issue. |
+| Layer | `span.kind = CLIENT`, `db.system = redis`; L7 DB call, not a network-layer issue. |
 | Code | `exception.type = TimeoutException`, `exception.message = "Redis pool exhausted after 5000ms"`, `code.function = processPayment`, `code.lineno = 287`. |
 
-**Step 3 — Cross-signal validation (`incident-forensics.md §4`):**
+**Step 3; Cross-signal validation (`incident-forensics.md §4`):**
 
 ```
 # Grafana Tempo — TraceQL lookup
@@ -157,12 +157,12 @@ Exemplar retrieved: `trace_id = 9a3f1c8e2b7d4e50a1c3f9d2b8e7a4c0`.
 Logs reveal: `WARN: connection pool at capacity (256/256)` at 14:21. Redis
 `redis_pool_active_connections / redis_pool_max_connections` metric at 100 %.
 
-**Step 4 — Release correlation:**
+**Step 4; Release correlation:**
 
-`service.version = v2.4.1` deployed at 13:57 UTC — 25 minutes before incident.
+`service.version = v2.4.1` deployed at 13:57 UTC; 25 minutes before incident.
 Changelog: Redis connection pool reduced from 512 → 256 in this version.
 
-**Step 5 — Remediation:**
+**Step 5; Remediation:**
 
 Flagger canary analysis `successRate` already < 99 % → auto-rollback to `v2.4.0` triggers
 per `boundaries/release.md §Flagger Canary CR`. Error rate returns to baseline in 3 minutes.
@@ -170,7 +170,7 @@ Deployment event chain preserved in `signals/audit.md` for post-mortem.
 
 ---
 
-## Scenario 3 — Multi-Tenant Cost Attribution
+## Scenario 3: Multi-Tenant Cost Attribution
 
 **Situation:** B2B SaaS now has 50+ tenants. CFO asks: "Which tenants cost most to serve, and
 how does our observability bill break down per customer?"
@@ -181,7 +181,7 @@ how does our observability bill break down per customer?"
 
 ### Walkthrough
 
-1. Tag every pod at deploy time with `tenant.id` — applied via Helm values or admission webhook
+1. Tag every pod at deploy time with `tenant.id`; applied via Helm values or admission webhook
    per `boundaries/multi-tenant.md §7`:
 
 ```yaml
@@ -215,7 +215,7 @@ sum by (tenant_id) (
 )
 ```
 
-4. Cardinality guard — keep top-1 000 tenants labeled, bucket overflow as `"other"` to prevent
+4. Cardinality guard: keep top-1 000 tenants labeled, bucket overflow as `"other"` to prevent
    TSDB series explosion (`meta-observability.md §Cardinality Guardrails`, `boundaries/multi-tenant.md §13`):
 
 ```yaml
@@ -243,7 +243,7 @@ Those tenants were moved to a stricter free-tier cap, reducing monthly egress sp
 
 ---
 
-## Scenario 4 — Migrating off Fluentd to Fluent Bit
+## Scenario 4: Migrating off Fluentd to Fluent Bit
 
 **Situation:** Legacy Fluentd DaemonSet is consuming 400 MB RAM per node vs. Fluent Bit's typical
 80 MB. The CNCF 2025-10 migration guide is now the normative reference. Team needs zero-downtime
@@ -261,7 +261,7 @@ migration with log parity verification before decommission.
 
 **Migration phases (zero-downtime):**
 
-**Phase 1 — Dual-send:** Deploy Fluent Bit DaemonSet alongside the existing Fluentd DaemonSet.
+**Phase 1; Dual-send:** Deploy Fluent Bit DaemonSet alongside the existing Fluentd DaemonSet.
 Fluent Bit ships logs to the same backend; Fluentd continues as primary. Confirm both streams
 reach the backend without duplicates by comparing log record counts.
 
@@ -288,7 +288,7 @@ reach the backend without duplicates by comparing log record counts.
     Logs_uri  /v1/logs
 ```
 
-**Phase 2 — Parity verification:** query log record count per `service.name` in both pipelines
+**Phase 2; Parity verification:** query log record count per `service.name` in both pipelines
 over a 1-hour window. Expect < 0.1 % divergence accounting for timing windows.
 
 ```promql
@@ -299,7 +299,7 @@ sum by (service_name) (rate(fluentbit_output_proc_records_total[1h]))
 sum by (service_name) (rate(fluentd_output_emit_records_total[1h]))
 ```
 
-**Phase 3 — Decommission Fluentd:** once parity is confirmed over 24 h, scale down Fluentd
+**Phase 3; Decommission Fluentd:** once parity is confirmed over 24 h, scale down Fluentd
 DaemonSet to 0 and remove its resources.
 
 ```bash
@@ -312,17 +312,17 @@ kubectl delete daemonset fluentd -n logging
 4. Validate with `otelcol validate` on the gateway config; run `promtool check rules` on any
    log-based alerting rules.
 
-**Outcome:** Node-level log collection RAM drops from 400 MB (Fluentd/Ruby) to ~80 MB (Fluent Bit/C)
-— a 5× reduction typical per the CNCF 2025-10 guide. CPU overhead at steady state also reduces by
+**Outcome:** Node-level log collection RAM drops from 400 MB (Fluentd/Ruby) to ~80 MB (Fluent Bit/C),
+a 5× reduction typical per the CNCF 2025-10 guide. CPU overhead at steady state also reduces by
 ~60 %. No log gaps observed during the dual-send window.
 
 ---
 
-## Scenario 5 — SLO with Burn-Rate Alerts (GitOps End-to-End)
+## Scenario 5: SLO with Burn-Rate Alerts (GitOps End-to-End)
 
 **Situation:** Platform team adopts the SLO practice for the checkout service. Target: 99.9 %
 availability on a 28-day rolling window. Everything must be versioned in git and applied
-via Argo CD — no manual UI edits.
+via Argo CD; no manual UI edits.
 
 **Intent:** `alert`
 
@@ -425,7 +425,7 @@ new deploys (`boundaries/release.md`).
 
 ## Appendix: Vendor Query Cross-Reference
 
-From `incident-forensics.md §4` — trace lookup by `trace_id` across backends:
+From `incident-forensics.md §4`; trace lookup by `trace_id` across backends:
 
 | Vendor | Query syntax |
 |--------|-------------|
@@ -442,8 +442,8 @@ From `incident-forensics.md §4` — trace lookup by `trace_id` across backends:
 
 - Add new scenarios only if they demonstrate cross-file value spanning 3+ skill files.
 - Each scenario must cite at least 3 other skill files by relative path from `resources/`.
-- Scenarios are for human learning — keep them narrative, not exhaustive.
+- Scenarios are for human learning: keep them narrative, not exhaustive.
 - Code and YAML snippets are illustrative excerpts; for authoritative full config see the
   referenced files.
-- Do not add future skill references — if a domain is out of scope, cite the external tool
+- Do not add future skill references: if a domain is out of scope, cite the external tool
   from `SKILL.md §When NOT to use`.

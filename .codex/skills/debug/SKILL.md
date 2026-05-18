@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Structured bug diagnosis and fixing workflow — reproduce, diagnose root cause, apply minimal fix, write regression test, and scan for similar patterns
+description: Structured bug diagnosis and fixing workflow that reproduces, diagnoses root cause, applies a minimal fix, writes regression tests, and scans for similar patterns
 ---
 <!-- oma:generated -->
 

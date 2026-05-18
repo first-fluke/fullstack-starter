@@ -1,1 +1,17 @@
-../.agents/mcp.json
+{
+  "mcpServers": {
+    "serena": {
+      "command": "serena",
+      "args": [
+        "start-mcp-server",
+        "--context",
+        "ide",
+        "--project",
+        "."
+      ],
+      "env": {
+        "SERENA_LOG_LEVEL": "info"
+      }
+    }
+  }
+}

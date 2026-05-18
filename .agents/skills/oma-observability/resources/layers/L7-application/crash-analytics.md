@@ -2,7 +2,7 @@
 otel_semconv: "1.27.0 (2024-11)"
 ---
 
-# Crash Analytics — L7 Application Layer
+# Crash Analytics: L7 Application Layer
 
 ## 1. Scope and Why Separate from RUM
 
@@ -56,7 +56,7 @@ Near-crash experiences that degrade user perception without a fatal signal:
 
 | Metric | Definition |
 |--------|-----------|
-| Affected Users % | `(users who hit crash X) / (DAU)` — scope of a specific crash group |
+| Affected Users % | `(users who hit crash X) / (DAU)`; scope of a specific crash group |
 | Time-to-Symbolication | Duration from crash report ingestion to readable stack trace |
 | Crash Volume | Raw crash event count; use with CFR, not instead of it |
 
@@ -130,7 +130,7 @@ Release tracking is the most commonly omitted step in crash pipelines. Without i
 - Gradle plugin: `io.sentry.android.gradle` for Android automatic upload
 - Firebase: `firebase crashlytics:symbols:upload` for dSYM (Fastlane or Gradle)
 
-**Release marker events** are structured log records written at deploy time (see `../../boundaries/release.md`). Crash vendors use these to draw vertical lines on CFR trend charts, enabling before/after comparison. Flagger and Argo Rollouts canary analysis can use CFR as a promotion/rollback gate signal — cross-reference `../../boundaries/release.md §Canary analysis`.
+**Release marker events** are structured log records written at deploy time (see `../../boundaries/release.md`). Crash vendors use these to draw vertical lines on CFR trend charts, enabling before/after comparison. Flagger and Argo Rollouts canary analysis can use CFR as a promotion/rollback gate signal; cross-reference `../../boundaries/release.md §Canary analysis`.
 
 ---
 
@@ -206,7 +206,7 @@ Context attached to every crash report:
 | `service.version` | Build config | Release version; must match symbol upload |
 | `screen_resolution` | OS API | Pixel dimensions |
 | `free_memory_mb` | OS API | Available RAM at crash time |
-| `user.id` | App session | Hash or opaque ID only — see Section 8 |
+| `user.id` | App session | Hash or opaque ID only; see Section 8 |
 
 Custom keys (e.g., `order.id`, `tenant.id`, `experiment.variant`) enable correlation with business context. Restrict to non-PII values or apply redaction before send.
 

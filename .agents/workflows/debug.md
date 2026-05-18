@@ -1,13 +1,13 @@
 ---
-description: Structured bug diagnosis and fixing workflow — reproduce, diagnose root cause, apply minimal fix, write regression test, and scan for similar patterns
+description: Structured bug diagnosis and fixing workflow that reproduces, diagnoses root cause, applies a minimal fix, writes regression tests, and scans for similar patterns
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation — NOT raw file reads or grep.
+  - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation, NOT raw file reads or grep.
   - Use memory write tool to record debugging results.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
   - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
@@ -76,7 +76,7 @@ Use `find_symbol` to identify the exact function and file. Do NOT grep or read f
 ## Step 3: Diagnose Root Cause
 
 Use MCP `find_referencing_symbols` to trace the execution path backward from the error point.
-Identify the root cause — not just the symptom. Check:
+Identify the root cause, not just the symptom. Check:
 - null/undefined access
 - Race conditions
 - Missing error handling
