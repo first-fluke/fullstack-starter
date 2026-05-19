@@ -1,6 +1,6 @@
 # Session Metrics & Clarification Debt Tracking
 
-Tracks per-session agent performance metrics, with emphasis on **Clarification Debt (CD)** — the cost of unclear requirements, scope creep, and charter violations.
+Tracks per-session agent performance metrics, with emphasis on **Clarification Debt (CD)**, the cost of unclear requirements, scope creep, and charter violations.
 
 ---
 
@@ -124,7 +124,7 @@ At session end, if total CD >= 50:
 ```
 Turn 3: frontend asked about icon library preference → clarify (+10)
 Turn 15: All tasks completed successfully
-Total CD: 10 ✅
+Total CD: 10
 ```
 
 ### Unhealthy Session (CD = 95)
@@ -133,7 +133,7 @@ Turn 2: backend assumed REST, user wanted GraphQL → correct (+25)
 Turn 8: backend used wrong auth method → correct (+25)
 Turn 12: frontend built wrong layout → redo (+40)
 Turn 14: Charter not checked before redo → modifier (+15, but capped)
-Total CD: 95 ❌ → RCA REQUIRED
+Total CD: 95 → RCA REQUIRED
 ```
 
 ---
@@ -149,7 +149,7 @@ When Quality Score measurement is active (see `quality-score.md`), the session l
 
 | Checkpoint | Phase | Composite | Grade | Delta |
 |-----------|-------|-----------|-------|-------|
-| Baseline | IMPL end | 72 | C | — |
+| Baseline | IMPL end | 72 | C | n/a |
 | Post-VERIFY | VERIFY end | 78 | B | +6 |
 | Post-REFINE | REFINE end | 84 | B | +6 |
 | Final | SHIP | 86 | B | +2 |
@@ -183,17 +183,17 @@ This data is sourced from the Experiment Ledger at session end (see `experiment-
 
 QA agents improve only when their judgment errors are tracked.
 Unlike CD (tracked in real-time), Evaluator Accuracy (EA) is a
-**retrospective metric** — most errors are discovered after the session ends.
+**retrospective metric**; most errors are discovered after the session ends.
 
 ### Accuracy Events
 
 | Event | Points | When Discovered |
 |-------|--------|-----------------|
-| `false_negative` | +30 | Next session or production — bug that QA missed |
-| `false_positive` | +15 | During session — impl agent disputes QA finding successfully |
-| `severity_mismatch` | +10 | During session or retro — wrong severity assigned |
-| `missed_stub` | +20 | During session — runtime verification catches display-only feature |
-| `good_catch` | -10 | During session — QA caught non-obvious bug (reward signal) |
+| `false_negative` | +30 | Next session or production: bug that QA missed |
+| `false_positive` | +15 | During session: impl agent disputes QA finding successfully |
+| `severity_mismatch` | +10 | During session or retro: wrong severity assigned |
+| `missed_stub` | +20 | During session: runtime verification catches display-only feature |
+| `good_catch` | -10 | During session: QA caught non-obvious bug (reward signal) |
 
 ### Recording
 

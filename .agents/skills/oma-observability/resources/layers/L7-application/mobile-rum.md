@@ -5,7 +5,7 @@ notes:
   - "OTel mobile semconv still experimental; vendor-native SDKs dominate in 2026"
 ---
 
-# Mobile RUM — L7 Application Layer
+# Mobile RUM: L7 Application Layer
 
 ---
 
@@ -60,7 +60,7 @@ Offline queuing is the defining mobile-specific concern. Mobile networks are int
 Events queued to disk are **PII at rest on user devices**. Requirements:
 - Encrypt the queue using platform-native key storage: iOS Keychain, Android Keystore.
 - Apply the same field-level redaction to queued events as to events sent immediately (mask email, card number, password fields before write, not before send).
-- Anti-pattern: unencrypted telemetry queue on device — see Section 12.
+- Anti-pattern: unencrypted telemetry queue on device; see Section 12.
 
 ---
 
@@ -124,7 +124,7 @@ RUM SDKs are frequently among the largest third-party battery consumers on a mob
 
 ### Carbon operations consideration
 
-Mobile device CPU and network activity contribute to device-level energy consumption. For green observability practices, minimize telemetry flush frequency and batch size. Server-side carbon impact is tracked via Kepler (CNCF Sandbox) using CPU and network metrics on the collector nodes — mobile-side impact is the device CPU time and radio-on duration during flush.
+Mobile device CPU and network activity contribute to device-level energy consumption. For green observability practices, minimize telemetry flush frequency and batch size. Server-side carbon impact is tracked via Kepler (CNCF Sandbox) using CPU and network metrics on the collector nodes; mobile-side impact is the device CPU time and radio-on duration during flush.
 
 ---
 
@@ -242,10 +242,10 @@ These cells supplement the L7 rows in `../../matrix.md` with mobile-specific cav
 
 | Cell | Symbol | Detail |
 |------|--------|--------|
-| L7 × multi-tenant × metrics | ⚠️ | `tenant.id` on mobile is typically derived from the authenticated user ID, not a direct tenant header. Map `user.id → tenant.id` server-side in the pipeline; avoid attaching `tenant.id` as a metric label on-device (cardinality risk). |
-| L7 × cross-application × traces | ✅ | Mobile → backend `traceparent` propagation; mobile span is the root CLIENT span. See Section 9. |
-| L7 × slo × metrics | ✅ | Mobile-side SLIs: cold start time p95, ANR rate, Hang rate. Define SLO targets in OpenSLO YAML referencing mobile metrics ingested via OTLP. Cross-reference `../../boundaries/slo.md`. |
-| L7 × privacy × logs | ✅ | On-device queued events contain PII at rest. Encryption via Keychain/Keystore required. Field-level masking of card numbers, emails, and passwords before write. Cross-reference `../../signals/privacy.md`. |
+| L7 × multi-tenant × metrics | PARTIAL | `tenant.id` on mobile is typically derived from the authenticated user ID, not a direct tenant header. Map `user.id → tenant.id` server-side in the pipeline; avoid attaching `tenant.id` as a metric label on-device (cardinality risk). |
+| L7 × cross-application × traces | PASS | Mobile → backend `traceparent` propagation; mobile span is the root CLIENT span. See Section 9. |
+| L7 × slo × metrics | PASS | Mobile-side SLIs: cold start time p95, ANR rate, Hang rate. Define SLO targets in OpenSLO YAML referencing mobile metrics ingested via OTLP. Cross-reference `../../boundaries/slo.md`. |
+| L7 × privacy × logs | PASS | On-device queued events contain PII at rest. Encryption via Keychain/Keystore required. Field-level masking of card numbers, emails, and passwords before write. Cross-reference `../../signals/privacy.md`. |
 
 ---
 

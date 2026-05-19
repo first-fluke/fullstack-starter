@@ -11,7 +11,7 @@ notes:
 
 Logs are the "L" in MELT+P. Covers: OTel LogRecord data model, structured logging, events-as-logs, systemd journal, and pipeline options.
 
-**Normative base:** `../standards.md`. **Deprecated:** Fluentd (CNCF 2025-10) — use Fluent Bit or OTel Collector.
+**Normative base:** `../standards.md`. **Deprecated:** Fluentd (CNCF 2025-10); use Fluent Bit or OTel Collector.
 
 ---
 
@@ -23,7 +23,7 @@ Source: <https://opentelemetry.io/docs/specs/otel/logs/data-model/>
 |---|---|---|
 | `Timestamp` | uint64 (ns) | When the event occurred; 0 if unknown |
 | `ObservedTimestamp` | uint64 (ns) | When the collector observed the record; always set |
-| `SeverityText` | string | e.g. `"ERROR"` — original string from source |
+| `SeverityText` | string | e.g. `"ERROR"`; original string from source |
 | `SeverityNumber` | int (1–24) | Normalized OTel severity |
 | `Body` | any | String, map, or primitive |
 | `Attributes` | map[string]any | Semconv-stable keys preferred |
@@ -63,7 +63,7 @@ JSON over text: queryable, typed, machine-readable. No grok patterns.
 | `timestamp` | ISO 8601 UTC (`Z`) | Clock-ordered queries; cross-ref `../standards.md §Clock Discipline` |
 | `level` | OTel SeverityText | Filtering and sampling |
 | `message` | human-readable string | On-call readability |
-| `trace_id` + `span_id` | 32/16-char hex | Join with traces — critical for incident forensics |
+| `trace_id` + `span_id` | 32/16-char hex | Join with traces; critical for incident forensics |
 | `service.name`, `service.version` | semconv stable | Release comparison |
 | `deployment.environment` | `production` / `staging` | Noise isolation |
 
@@ -142,7 +142,7 @@ Cross-ref `../vendor-categories.md §Log Pipeline Collection` (category h).
 | **Fluent Bit** | C/Rust | 5–15 MB | Graduated | Edge DaemonSet; native OTLP output |
 | **OTel Collector** | Go | 30–100 MB | Incubating | Unified MELT; gateway aggregation |
 | **Vector** | Rust | 20–60 MB | Datadog OSS | Log + metric pipeline with transforms |
-| **Cribl Stream** | — | 100+ MB | Commercial | Advanced routing |
+| **Cribl Stream** | Proprietary | 100+ MB | Commercial | Advanced routing |
 | ~~Fluentd~~ | Ruby | 100+ MB | **Deprecated** | CNCF 2025-10 |
 
 **2026 best practice:** Fluent Bit DaemonSet (edge) → OTLP → OTel Collector gateway (enrichment, PII redaction, routing) → backends.
@@ -226,16 +226,16 @@ Cells from `../matrix.md` owned by this file:
 
 | Layer | Boundary | Status | Artifact |
 |---|---|---|---|
-| L3-network | multi-tenant | ✅ | VPC flow log stream tagged by tenant CIDR |
-| L4-transport | multi-tenant | ✅ | TCP connection events per tenant socket namespace |
-| mesh | multi-tenant | ✅ | Envoy access logs with baggage-derived tenant tag |
-| mesh | cross-application | ✅ | Envoy access logs; `trace_id` correlation |
-| mesh | slo | ⚠️ | Burn-rate event source; metric-based SLI preferred |
-| mesh | release | ✅ | Deployment event with `service.version` tag |
-| L7-application | multi-tenant | ✅ | `tenant.id` on every record; OTel Collector `routing_connector` |
-| L7-application | cross-application | ✅ | `trace_id` + `span_id` enables log-trace join across services |
-| L7-application | slo | ⚠️ | Log-based SLI valid fallback; metric-based preferred |
-| L7-application | release | ✅ | Deployment SHA, version, rollout strategy as structured event |
+| L3-network | multi-tenant | PASS | VPC flow log stream tagged by tenant CIDR |
+| L4-transport | multi-tenant | PASS | TCP connection events per tenant socket namespace |
+| mesh | multi-tenant | PASS | Envoy access logs with baggage-derived tenant tag |
+| mesh | cross-application | PASS | Envoy access logs; `trace_id` correlation |
+| mesh | slo | PARTIAL | Burn-rate event source; metric-based SLI preferred |
+| mesh | release | PASS | Deployment event with `service.version` tag |
+| L7-application | multi-tenant | PASS | `tenant.id` on every record; OTel Collector `routing_connector` |
+| L7-application | cross-application | PASS | `trace_id` + `span_id` enables log-trace join across services |
+| L7-application | slo | PARTIAL | Log-based SLI valid fallback; metric-based preferred |
+| L7-application | release | PASS | Deployment SHA, version, rollout strategy as structured event |
 
 ---
 
@@ -247,17 +247,17 @@ Append candidates for `../anti-patterns.md §Logs`:
 |---|---|---|
 | A-L1 | Free-form log text without JSON | Adopt structured JSON; no grok |
 | A-L2 | `trace_id` missing in logs | Inject via SDK hook (Section 7); enforce in CI |
-| A-L3 | `user.email` in log body | PII violation — redact at collection tier; cross-ref `privacy.md` |
-| A-L4 | Unique message IDs as log labels | Cardinality explosion in Loki — use attributes, not labels |
-| A-L5 | Fluentd as new deployment in 2026+ | Deprecated — use Fluent Bit or OTel Collector |
+| A-L3 | `user.email` in log body | PII violation; redact at collection tier; cross-ref `privacy.md` |
+| A-L4 | Unique message IDs as log labels | Cardinality explosion in Loki; use attributes, not labels |
+| A-L5 | Fluentd as new deployment in 2026+ | Deprecated; use Fluent Bit or OTel Collector |
 
 ---
 
 ## 14. References
 
-1. OTel log data model — <https://opentelemetry.io/docs/specs/otel/logs/data-model/>
-2. OTel event API — <https://opentelemetry.io/docs/specs/otel/logs/event-api/>
-3. journaldreceiver — <https://github.com/open-telemetry/opentelemetry-collector-contrib/receiver/journaldreceiver>
-4. CNCF Fluentd migration guide — <https://cncf.io/blog/2025/10/01/fluentd-to-fluent-bit-migration-guide>
-5. Fluent Bit docs — <https://docs.fluentbit.io>
+1. OTel log data model: <https://opentelemetry.io/docs/specs/otel/logs/data-model/>
+2. OTel event API: <https://opentelemetry.io/docs/specs/otel/logs/event-api/>
+3. journaldreceiver: <https://github.com/open-telemetry/opentelemetry-collector-contrib/receiver/journaldreceiver>
+4. CNCF Fluentd migration guide: <https://cncf.io/blog/2025/10/01/fluentd-to-fluent-bit-migration-guide>
+5. Fluent Bit docs: <https://docs.fluentbit.io>
 6. `../standards.md` · `../matrix.md` · `../incident-forensics.md §MRA` · `../meta-observability.md §Retention Matrix` · `../transport/sampling-recipes.md` · `../vendor-categories.md`

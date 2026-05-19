@@ -1,14 +1,11 @@
 {
   "mcpServers": {
     "serena": {
-      "command": "uvx",
+      "command": "serena",
       "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
         "start-mcp-server",
         "--context",
-        "antigravity",
+        "claude-code",
         "--project",
         "."
       ],
@@ -49,7 +46,10 @@
       "insert_before_symbol",
       "rename_symbol"
     ],
-    "file-ops": ["list_dir", "find_file"],
+    "file-ops": [
+      "list_dir",
+      "find_file"
+    ],
     "project": [
       "activate_project",
       "get_current_config",

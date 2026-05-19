@@ -2,7 +2,7 @@
 
 Use this checklist when investigating bugs to ensure thorough analysis.
 
-## 📋 Initial Information Gathering
+## Initial Information Gathering
 
 - [ ] **Bug description** - What is the expected vs actual behavior?
 - [ ] **Error messages** - Exact error text, stack trace, error codes
@@ -13,7 +13,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
 - [ ] **Recent changes** - New deploy? Code changes? Configuration updates?
 - [ ] **Screenshots/videos** - Visual evidence of the bug
 
-## 🔍 Frontend Debugging
+## Frontend Debugging
 
 ### JavaScript/TypeScript Errors
 
@@ -72,7 +72,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] Disabled buttons during load?
   - [ ] Optimistic updates causing issues?
 
-## 🖥️ Backend Debugging
+## Backend Debugging
 
 ### Python/FastAPI Errors
 
@@ -132,7 +132,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] External services reachable?
   - [ ] Database migrations applied?
 
-## 📱 Mobile Debugging
+## Mobile Debugging
 
 ### Platform-Specific Issues
 
@@ -168,7 +168,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
 - [ ] Large images not optimized?
 - [ ] Too many simultaneous network requests?
 
-## 🔐 Security Bugs
+## Security Bugs
 
 - [ ] **Authentication bypassed?**
   - [ ] Token validation on all protected routes?
@@ -192,7 +192,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] API keys exposed?
   - [ ] Error messages leaking info?
 
-## 🐌 Performance Bugs
+## Performance Bugs
 
 ### Frontend Performance
 
@@ -226,7 +226,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] Query plan optimized? (EXPLAIN)
   - [ ] N+1 queries eliminated?
 
-## 🔬 Root Cause Analysis
+## Root Cause Analysis
 
 - [ ] **Reproduce the bug**
   - [ ] Follow exact reproduction steps
@@ -248,7 +248,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] Why does this happen?
   - [ ] What assumption was wrong?
 
-## ✅ Fix Verification
+## Fix Verification
 
 - [ ] **Fix applied**
   - [ ] Code changed in correct file(s)
@@ -272,7 +272,7 @@ Use this checklist when investigating bugs to ensure thorough analysis.
   - [ ] Fix explained
   - [ ] Prevention notes added
 
-## 🚨 When to Escalate
+## When to Escalate
 
 Escalate to other agents if:
 
@@ -283,34 +283,34 @@ Escalate to other agents if:
 - [ ] Database schema changes needed → **Backend Agent**
 - [ ] Platform-specific mobile issue → **Mobile Agent**
 
-## 📊 Priority Assessment
+## Priority Assessment
 
-**🔴 CRITICAL** - Fix immediately:
+**CRITICAL** - Fix immediately:
 - [ ] App crashes on launch
 - [ ] Data loss or corruption
 - [ ] Security vulnerability
 - [ ] Payment/auth completely broken
 - [ ] Affects all users
 
-**🟠 HIGH** - Fix within 24 hours:
+**HIGH** - Fix within 24 hours:
 - [ ] Major feature broken
 - [ ] Affects >50% of users
 - [ ] No workaround available
 - [ ] Significant revenue impact
 
-**🟡 MEDIUM** - Fix within sprint:
+**MEDIUM** - Fix within sprint:
 - [ ] Minor feature broken
 - [ ] Affects <50% of users
 - [ ] Workaround exists
 - [ ] Moderate inconvenience
 
-**🔵 LOW** - Schedule for future:
+**LOW** - Schedule for future:
 - [ ] Edge case
 - [ ] Cosmetic issue
 - [ ] Rarely encountered
 - [ ] No user impact
 
-## 📝 Documentation Template
+## Documentation Template
 
 After fixing, document in `.agents/results/bugs/`:
 
@@ -343,7 +343,7 @@ After fixing, document in `.agents/results/bugs/`:
 
 ---
 
-## 💡 Pro Tips
+## Pro Tips
 
 1. **Read the error message** - It usually tells you exactly what's wrong
 2. **Reproduce first** - Don't waste time fixing unconfirmed bugs
@@ -352,7 +352,7 @@ After fixing, document in `.agents/results/bugs/`:
 5. **Document everything** - Future you will be grateful
 6. **Look for patterns** - One bug often reveals more
 
-## 🛠️ Tools Reference
+## Tools Reference
 
 - **Browser DevTools**: F12 (Console, Network, React DevTools)
 - **Serena MCP**: find_symbol, search_for_pattern, find_referencing_symbols

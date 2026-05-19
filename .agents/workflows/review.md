@@ -1,8 +1,8 @@
 ---
-description: Full QA review pipeline — security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
+description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
 ---
 
-# MANDATORY RULES — VIOLATION IS FORBIDDEN
+# MANDATORY RULES: VIOLATION IS FORBIDDEN
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.

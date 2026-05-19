@@ -129,13 +129,13 @@ oma image generate --reference "<absolute-path>" --vendor codex "<prompt>"
 
 ### Guardrails
 
-1. **Clarify before invoking** — if the user's request is ambiguous about subject, style, composition, or usage context, **ask the user first** or **amplify the prompt explicitly** (showing the user the expanded version for approval). Do NOT silently generate from a vague prompt. See `Clarification Protocol` below.
-2. **Authentication-aware dispatch** — detect which vendor CLIs are authenticated and run only those; with `--vendor all`, every requested vendor must be available (strict).
-3. **Cost guardrail** — confirm before executing runs whose estimated cost is ≥ `$0.20` (configurable). `--yes` / `OMA_IMAGE_YES=1` bypass. Default vendor `pollinations` (flux/zimage) is free, so auto-triggering on keywords is safe.
-4. **Path safety** — output paths outside `$PWD` require `--allow-external-out`.
-5. **Cancellable** — SIGINT/SIGTERM aborts in-flight provider calls and the orchestrator.
-6. **Deterministic outputs** — every run writes `manifest.json` next to the images for reproducibility.
-7. **Max `n` = 5** — wall-time bound.
+1. **Clarify before invoking**: if the user's request is ambiguous about subject, style, composition, or usage context, **ask the user first** or **amplify the prompt explicitly** (showing the user the expanded version for approval). Do NOT silently generate from a vague prompt. See `Clarification Protocol` below.
+2. **Authentication-aware dispatch**: detect which vendor CLIs are authenticated and run only those; with `--vendor all`, every requested vendor must be available (strict).
+3. **Cost guardrail**: confirm before executing runs whose estimated cost is ≥ `$0.20` (configurable). `--yes` / `OMA_IMAGE_YES=1` bypass. Default vendor `pollinations` (flux/zimage) is free, so auto-triggering on keywords is safe.
+4. **Path safety**: output paths outside `$PWD` require `--allow-external-out`.
+5. **Cancellable**: SIGINT/SIGTERM aborts in-flight provider calls and the orchestrator.
+6. **Deterministic outputs**: every run writes `manifest.json` next to the images for reproducibility.
+7. **Max `n` = 5**: wall-time bound.
 8. **Exit codes align with `oma search fetch`** (0, 1, 2=safety, 3=not-found, 4=invalid-input, 5=auth-required, 6=timeout).
 
 ### Clarification Protocol
@@ -143,16 +143,16 @@ oma image generate --reference "<absolute-path>" --vendor codex "<prompt>"
 Before invoking `oma image generate`, the calling agent runs this checklist against the user's request. **If any answer is "no / unknown", clarify with the user first.**
 
 **Required signal (must be present or inferable):**
-- [ ] **Subject** — what is the primary thing in the image? (object, person, scene)
-- [ ] **Setting / backdrop** — where is it? (context, environment)
+- [ ] **Subject**: what is the primary thing in the image? (object, person, scene)
+- [ ] **Setting / backdrop**: where is it? (context, environment)
 
 **Strongly recommended (ask if absent AND not inferable from context):**
-- [ ] **Style** — photorealistic, illustration, 3D render, oil painting, concept art, flat vector, …?
-- [ ] **Mood / lighting** — bright vs moody, warm vs cool, dramatic vs minimal
-- [ ] **Usage context** — hero image, icon, thumbnail, product shot, poster? (dictates aspect ratio + composition)
-- [ ] **Aspect ratio** — square (`1024x1024`), portrait (`1024x1536`), landscape (`1536x1024`)?
+- [ ] **Style**: photorealistic, illustration, 3D render, oil painting, concept art, flat vector, …?
+- [ ] **Mood / lighting**: bright vs moody, warm vs cool, dramatic vs minimal
+- [ ] **Usage context**: hero image, icon, thumbnail, product shot, poster? (dictates aspect ratio + composition)
+- [ ] **Aspect ratio**: square (`1024x1024`), portrait (`1024x1536`), landscape (`1536x1024`)?
 
-**Amplification shortcut.** For brief prompts (e.g. "a red apple"), do not pop clarifying questions if the request is genuinely that simple — instead **amplify inline and show the user** the expanded version before invoking:
+**Amplification shortcut.** For brief prompts (e.g. "a red apple"), do not pop clarifying questions if the request is genuinely that simple. Instead **amplify inline and show the user** the expanded version before invoking:
 
 > User: "a red apple"
 > Agent: "I'll generate this as: *a single glossy red apple centered on a clean white background, soft studio lighting, photorealistic, shallow depth of field, 1024×1024*. Shall I proceed, or would you like a different style/composition?"
@@ -169,8 +169,8 @@ This skill follows oh-my-agent's CLI-first concept: whenever a vendor's native C
 
 | Vendor | Strategy | Models | Trigger |
 |--------|----------|--------|---------|
-| `codex` | CLI-first — `codex exec` via ChatGPT OAuth (`codex login`), built-in `image_gen` | `gpt-image-2` | Logged in via Codex CLI (no API key) |
-| `pollinations` | Direct HTTP — `gen.pollinations.ai/v1/images/generations` (free signup for key) | Free: `flux`, `zimage`. Credit-gated: `qwen-image`, `wan-image`, `gpt-image-2`, `klein`, `kontext`, `gptimage`, `gptimage-large` | `POLLINATIONS_API_KEY` set (free at https://enter.pollinations.ai). No native CLI exists. |
+| `codex` | CLI-first via `codex exec` over ChatGPT OAuth (`codex login`), built-in `image_gen` | `gpt-image-2` | Logged in via Codex CLI (no API key) |
+| `pollinations` | Direct HTTP via `gen.pollinations.ai/v1/images/generations` (free signup for key) | Free: `flux`, `zimage`. Credit-gated: `qwen-image`, `wan-image`, `gpt-image-2`, `klein`, `kontext`, `gptimage`, `gptimage-large` | `POLLINATIONS_API_KEY` set (free at https://enter.pollinations.ai). No native CLI exists. |
 | `gemini` | CLI-first fallback → direct API. `gemini -p` (stream) is the preferred path but currently disabled at precheck (CLI's agentic loop does not return raw `inlineData` bytes on stdout as of Gemini CLI 0.38). Until the CLI exposes a non-agentic image surface, the provider falls back to the direct `generativelanguage.googleapis.com` API. | `gemini-2.5-flash-image`, `gemini-3.1-flash-image-preview` | Preferred: `gemini auth login`. Fallback: `GEMINI_API_KEY` + billing. |
 
 ### Invocation
@@ -212,9 +212,9 @@ Supported vendors:
 
 | Vendor | Support | How |
 |--------|---------|-----|
-| `codex` (gpt-image-2) | ✅ | Passes `-i <path>` to `codex exec` |
-| `gemini` (2.5-flash-image) | ✅ | Inlines base64 `inlineData` parts in request |
-| `pollinations` | ❌ | Rejected with exit code 4 (requires URL hosting; see PR #2 roadmap) |
+| `codex` (gpt-image-2) | PASS | Passes `-i <path>` to `codex exec` |
+| `gemini` (2.5-flash-image) | PASS | Inlines base64 `inlineData` parts in request |
+| `pollinations` | N/A | Rejected with exit code 4 (requires URL hosting; see PR #2 roadmap) |
 
 **Paths**: absolute or relative to `$CWD`. Host CLIs usually expose attached images via:
 - **Claude Code**: `~/.claude/image-cache/<session>/N.png` (surfaced in system messages as `[Image: source: <path>]`)
@@ -226,7 +226,7 @@ Supported vendors:
 When ALL of the following are true, the calling agent MUST pass the attached image via `--reference <path>` automatically. Never describe the image in prose as a workaround.
 
 1. The user asks to generate or edit an image (referencing the attached one by phrases like "이거", "this image", "same style as this", "이 수달", etc.).
-2. A host-surfaced attached image is visible to the agent — e.g. a Claude Code system message with `[Image: source: <path>]`, or an Antigravity workspace upload path, or an explicit filesystem path in the user's message.
+2. A host-surfaced attached image is visible to the agent (e.g. a Claude Code system message with `[Image: source: <path>]`, or an Antigravity workspace upload path, or an explicit filesystem path in the user's message).
 3. The selected vendor supports references (`codex` or `gemini`).
 
 **Required action**: invoke `oma image generate --reference <absolute-path> --vendor <codex|gemini> "<prompt>"`. If the user didn't specify a vendor, default to `codex` (CLI-first, widest availability). Do NOT:

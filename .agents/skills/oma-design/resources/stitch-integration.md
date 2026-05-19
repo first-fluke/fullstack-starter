@@ -5,12 +5,12 @@
 Google Stitch is an AI-powered UI design platform. Its MCP server enables
 coding agents to interact with design projects programmatically.
 
-Stitch MCP is **optional** — all 7 phases of the design workflow work
+Stitch MCP is **optional**; all 7 phases of the design workflow work
 without it. It adds visual preview and design extraction capabilities.
 
 ## Prerequisites
 
-### Option A: API Key (Recommended — simplest)
+### Option A: API Key (Recommended, simplest)
 1. Go to [stitch.withgoogle.com](https://stitch.withgoogle.com/)
 2. Profile → Stitch Settings → API Keys → Create Key
 3. Set environment variable: `STITCH_API_KEY="your-key"`

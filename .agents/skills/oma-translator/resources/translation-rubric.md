@@ -49,7 +49,7 @@ Does the tone match the configured register throughout?
 | 9-10 | Perfect register match, consistent throughout |
 | 7-8 | Mostly consistent with rare slips |
 | 5-6 | Noticeable register shifts |
-| 3-4 | Inconsistent — mixes formal and casual |
+| 3-4 | Inconsistent: mixes formal and casual |
 | 1-2 | Wrong register entirely |
 
 Red flags:
@@ -103,7 +103,7 @@ Red flags:
 ## Quick Self-Check (for translator)
 
 Before submitting, verify:
-- [ ] Read the full translation aloud — does it flow?
+- [ ] Read the full translation aloud: does it flow?
 - [ ] Glossary terms are consistent across all strings
 - [ ] Register matches config from start to finish
 - [ ] All placeholders survived intact

@@ -4,7 +4,34 @@ Copy-paste ready patterns. Use these as starting points, adapt to the specific t
 
 ---
 
-## React Component with Props
+## Next.js 16 framework canonicals (use these, never the legacy alternatives)
+
+```tsx
+// Internal nav: <Link>, never <a href="/...">
+import Link from "next/link";
+<Link href="/gallery" className="...">View gallery</Link>
+
+// Custom font: next/font, never <link rel="stylesheet">
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"] });
+<body className={inter.className}>...</body>
+
+// Images: next/image, never raw <img>
+import Image from "next/image";
+<Image src="/hero.png" alt="Hero scene" width={1200} height={600} priority />
+
+// Imports: only what you use. After refactoring, remove orphans.
+// useCallback / useEffect deps: list every referenced symbol exactly.
+```
+
+---
+
+## Accessible Card (focus ring + semantic + keyboard)
+
+Baseline for an interactive surface. Adjust colors via theme tokens; verify
+the resulting contrast ratio against the actual `--card` / `--foreground` /
+`--muted-foreground` values (theme tokens alone do NOT guarantee 4.5:1; the
+designer / token system has to make them so).
 
 ```tsx
 interface CardProps {
@@ -16,19 +43,66 @@ interface CardProps {
 export function Card({ title, description, onClick }: CardProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="rounded-lg border bg-card p-4 text-left shadow-sm transition-colors hover:bg-accent"
+      className={[
+        "rounded-lg border bg-card p-4 text-left shadow-sm transition-colors",
+        "hover:bg-accent",
+        // visible focus indicator (WCAG 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured)
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      ].join(" ")}
     >
-      <h3 className="text-lg font-semibold">{title}</h3>
+      {/* Visible text inside the button is the accessible name —
+          do NOT add aria-label here, that would override and hide the
+          description from screen readers. */}
+      <span className="block text-lg font-semibold text-foreground">{title}</span>
       {description && (
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <span className="mt-1 block text-sm text-muted-foreground">
+          {description}
+        </span>
       )}
     </button>
   );
 }
 ```
 
+Accessibility checklist for interactive surfaces:
+- **Semantic element**: `<button>`, `<a>`, `<Link>`. Never `<div onClick>`.
+- **Keyboard reachable**: implicit when using semantic elements.
+- **Visible focus**: `focus-visible:ring-2 ring-offset-2` (or equivalent). Never strip the outline without replacing it.
+- **Accessible name**: visible text inside the element IS the name. Add `aria-label` ONLY for icon-only buttons (e.g., `<button aria-label="Close">×</button>`); when visible text exists, `aria-label` overrides it and is an anti-pattern.
+- **Contrast**: verify the actual color values against background reach 4.5:1 (normal text) or 3:1 (large text >= 18pt or 14pt bold). Run an axe/Lighthouse pass; theme tokens are not a proof.
+- **Heading semantics**: keep heading tags (`<h1>`-`<h6>`) outside interactive elements. Inside a button, use `<span>` with type-scale classes; promote to a heading at the surrounding section level.
+
 ---
+
+## React 19 hook patterns
+
+```tsx
+// Derive in render — no state, no effect
+function ItemCount({ items }: { items: Item[] }) {
+  const count = items.length;
+  return <span>{count}</span>;
+}
+
+// Initialize once with a lazy initializer
+const [id] = useState(() => crypto.randomUUID());
+
+// Pass the ref OBJECT (not its current value) to children that need an instance.
+//   The child reads .current inside its own effect or event handler, never in render.
+function Selectable({ targetRef }: { targetRef: React.RefObject<THREE.Object3D> }) {
+  // ...
+}
+
+// Never: useEffect that calls setState to mirror props/state
+//    eslint: react-hooks/set-state-in-effect
+// useEffect(() => { setCount(items.length); }, [items]);
+
+// Never: gate JSX on ref.current — it is null on first render, and refs
+//    do not trigger re-renders when they attach
+//    eslint: react-hooks/refs
+// return ref.current ? <Child target={ref.current} /> : null;
+```
 
 ## TanStack Query Hook
 

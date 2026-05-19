@@ -131,24 +131,24 @@ oma scholar lint "<paper.knows.yaml>"
 
 ### Guardrails
 
-1. **Target spec is v0.9.0 / `paper@1` profile** — verified against production sidecars from knows.academy; see `resources/sidecar-spec.md`
-2. **Host LLM generates sidecars** — never shell out to `anthropic` SDK or external LLM CLI; this skill runs inside an agent
-3. **Anti-fabrication** — if DOI/venue/year is not visible in source, **omit the key entirely**; never write `doi: TODO` or guess
-4. **Top-level metadata** — `title`, `authors`, `venue`, `year` live at the top level (no `metadata` wrapper)
-5. **Field names are exact** — `statement_type`, `evidence_type`, `predicate`, `artifact_type` (not `type`/`claim`)
-6. **Provenance has SINGLE actor** — `provenance.actor` is one object, NOT a `provenance.actors` array
-7. **Confidence is an object** — `{claim_strength: ..., extraction_fidelity: ...}`, both from `high|medium|low`
-8. **Coverage is an object** — `coverage.statements` (4-value enum) + `coverage.evidence` (3-value enum)
-9. **Closed enums** — actor `tool|person|org` (never `ai`/`llm`/`model`); artifact role `subject|supporting|cited`; predicates in present tense
-10. **Numbers unquoted** — `value: 22`, never `value: '22'`
-11. **Relation density** — average ≥1.5 relations per statement; every claim needs `supported_by` evidence (lint warns when ratio is below; orphan statements warned per-id)
-12. **ID format** — descriptive kebab-case with prefix: `stmt:privacy-budget-tradeoff`, `ev:cifar10-accuracy-table`, `art:paper`
-13. **Validate before sharing** — run `oma scholar lint` after Generate
-14. **Remote API has no auth** — `https://knows.academy/api/proxy/*` is public; do not invent auth headers
-15. **Partial fetch param is `section` (singular)** — fixed enum `statements|evidence|relations|artifacts|citation`
-16. **OpenAlex key is optional** — metadata enrichment only; gracefully degrade when missing
-17. **Sidecar content stays English** — schema fields, IDs, statement text follow upstream convention; user-facing responses follow `oma-config.yaml` `language`
-18. **Spec drift awareness** — our local rules track v0.9.0 production behavior, which differs from the upstream `knows.md` natural-language description; refresh `resources/upstream-spec-cache.md` periodically
+1. **Target spec is v0.9.0 / `paper@1` profile**: verified against production sidecars from knows.academy; see `resources/sidecar-spec.md`
+2. **Host LLM generates sidecars**: never shell out to `anthropic` SDK or external LLM CLI; this skill runs inside an agent
+3. **Anti-fabrication**: if DOI/venue/year is not visible in source, **omit the key entirely**; never write `doi: TODO` or guess
+4. **Top-level metadata**: `title`, `authors`, `venue`, `year` live at the top level (no `metadata` wrapper)
+5. **Field names are exact**: `statement_type`, `evidence_type`, `predicate`, `artifact_type` (not `type`/`claim`)
+6. **Provenance has SINGLE actor**: `provenance.actor` is one object, NOT a `provenance.actors` array
+7. **Confidence is an object**: `{claim_strength: ..., extraction_fidelity: ...}`, both from `high|medium|low`
+8. **Coverage is an object**: `coverage.statements` (4-value enum) + `coverage.evidence` (3-value enum)
+9. **Closed enums**: actor `tool|person|org` (never `ai`/`llm`/`model`); artifact role `subject|supporting|cited`; predicates in present tense
+10. **Numbers unquoted**: `value: 22`, never `value: '22'`
+11. **Relation density**: average ≥1.5 relations per statement; every claim needs `supported_by` evidence (lint warns when ratio is below; orphan statements warned per-id)
+12. **ID format**: descriptive kebab-case with prefix: `stmt:privacy-budget-tradeoff`, `ev:cifar10-accuracy-table`, `art:paper`
+13. **Validate before sharing**: run `oma scholar lint` after Generate
+14. **Remote API has no auth**: `https://knows.academy/api/proxy/*` is public; do not invent auth headers
+15. **Partial fetch param is `section` (singular)**: fixed enum `statements|evidence|relations|artifacts|citation`
+16. **OpenAlex key is optional**: metadata enrichment only; gracefully degrade when missing
+17. **Sidecar content stays English**: schema fields, IDs, statement text follow upstream convention; user-facing responses follow `oma-config.yaml` `language`
+18. **Spec drift awareness**: our local rules track v0.9.0 production behavior, which differs from the upstream `knows.md` natural-language description; refresh `resources/upstream-spec-cache.md` periodically
 
 ### Modes
 
@@ -206,7 +206,7 @@ oma scholar resolve "Attention Is All You Need"
 # knows.academy full sidecar
 oma scholar get "knows:generated/reconvla/1.0.0"
 
-# Partial fetch (claims only — ~700 tokens, 93% reduction vs PDF)
+# Partial fetch (claims only, ~700 tokens, 93% reduction vs PDF)
 oma scholar get --section statements "knows:generated/reconvla/1.0.0"
 
 # By DOI or OpenAlex W-id (works regardless of knows.academy availability)
@@ -215,15 +215,15 @@ oma scholar get "10.48550/arXiv.1706.03762"
 
 When knows.academy is unreachable, `get knows:...` automatically falls back
 to OpenAlex by extracting the slug from the record_id. The result is marked
-with `fallback: "openalex"` and contains metadata + abstract — useful for
+with `fallback: "openalex"` and contains metadata + abstract, useful for
 running Mode 1 Generate locally.
 
 ### Validate
 ```bash
-# Strict — for own Generate output (default)
+# Strict mode for own Generate output (default)
 oma scholar lint paper.knows.yaml
 
-# Lenient — for third-party / fetched sidecars
+# Lenient mode for third-party / fetched sidecars
 oma scholar lint --lenient remote.knows.yaml
 
 # Treat warnings as failures (CI mode)
@@ -257,10 +257,10 @@ Project-specific settings: `config/scholar-config.yaml`
 | `[ERROR] provenance.actors: v0.9 spec uses singular \`actor\`` | Replace `actors: [{...}]` array with `actor: {...}` object |
 | `[ERROR] *.object_ref: reference 'X' does not match any defined id` | Fix the `subject_ref`/`object_ref` to point to a real id, OR use `--lenient` if consuming third-party data |
 | `[WARN] relations: avg relations/statement is N.NN (target ≥ 1.5)` | Add more `supported_by`/`depends_on` relations |
-| `[WARN] statements: only N statements — most papers warrant ≥ 8` | Expected when generating from abstract only; full-paper Generate should hit 15+ |
+| `[WARN] statements: only N statements; most papers warrant ≥ 8` | Expected when generating from abstract only; full-paper Generate should hit 15+ |
 | `[WARN] *.predicate: past-tense '...' is suspicious` | Switch to present tense (`evaluated_on` -> `evaluates_on`) |
 | Remote API returns empty results | Try broader query; check `/api/proxy/jobs/stats`; CLI auto-falls-back to OpenAlex |
-| `knows.academy search failed: fetch failed` (stderr) | Platform timeout — fallback to OpenAlex is automatic; retry later for sidecars |
+| `knows.academy search failed: fetch failed` (stderr) | Platform timeout; fallback to OpenAlex is automatic; retry later for sidecars |
 | OpenAlex 403/429 | Set `OPENALEX_API_KEY` (see `resources/setup-openalex.md`) |
 | YAML won't parse | Check indentation; numbers/booleans must be unquoted; strings with `:` need quotes |
 

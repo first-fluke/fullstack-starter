@@ -9,7 +9,7 @@ otel_semconv: "1.27.0 (2024-11)"
 
 1. **Extract flags** from the query string:
    - `--setup`, `--migrate`, `--investigate`, `--alert`, `--trace`, `--tune`, `--route`: force specific intent
-   - `--strict`: require Stable semconv only — reject Development/Experimental attributes
+   - `--strict`: require Stable semconv only; reject Development/Experimental attributes
    - `--multi-tenant`, `--multi-cloud`: force boundary dimension to `multi-tenant`
    - `--layer=L3|L4|mesh|L7`: force specific layer focus
    - `--signal=metrics|logs|traces|profiles|cost|audit|privacy`: force signal focus
@@ -52,7 +52,7 @@ Intent vocabulary:
 
 1. Based on (intent × layer × boundary × signal), identify relevant cells in `resources/matrix.md`
 2. Collect file references for each cell marked as covered (checkmark) or conditional (warning marker)
-3. Flag any N/A cells the user is asking about — redirect to an alternative dimension rather than producing a stub answer
+3. Flag any N/A cells the user is asking about; redirect to an alternative dimension rather than producing a stub answer
 4. Record the active (layer, boundary, signal) triple for use in Step 6 output header
 
 ## Step 3: Route Dispatch
@@ -66,11 +66,11 @@ Dispatch based on intent. Use the table below as the primary routing map, then a
 | `investigate` | `resources/incident-forensics.md` (MRA + 6-dim localization) | `resources/signals/traces.md` + `resources/signals/logs.md` |
 | `alert` | `resources/boundaries/slo.md` (burn-rate rules) | `resources/observability-as-code.md` |
 | `trace` | `resources/boundaries/cross-application.md` (propagator matrix) | `resources/layers/mesh.md` (zero-code auto-instr) |
-| `tune` | `resources/transport/` (4 files — see below) | `resources/meta-observability.md` (cardinality guardrails) |
+| `tune` | `resources/transport/` (4 files; see below) | `resources/meta-observability.md` (cardinality guardrails) |
 | `route` | `resources/boundaries/multi-tenant.md` + `resources/transport/collector-topology.md` | `resources/boundaries/cross-application.md` |
 
 ### setup intent
-- Consult `resources/vendor-categories.md` — select category based on constraints (OSS vs commercial, high-cardinality, FinOps, profiling)
+- Consult `resources/vendor-categories.md`: select category based on constraints (OSS vs commercial, high-cardinality, FinOps, profiling)
 - Delegate to vendor-owned skill when one is installed (e.g., getsentry/sentry-sdk-setup, honeycombio/agent-skill, Dash0 otel-instrumentation, Datadog Labs dd-apm)
 - If no matching vendor skill is installed → guide user to `/oma-search --docs` for vendor documentation
 
@@ -91,26 +91,26 @@ Dispatch based on intent. Use the table below as the primary routing map, then a
 - Use `resources/layers/mesh.md` for zero-code auto-instrumentation via service mesh
 
 ### tune intent
-- `resources/transport/udp-statsd-mtu.md` — UDP payload size thresholds and fragmentation risk
-- `resources/transport/otlp-grpc-vs-http.md` — protocol selection by environment and firewall constraints
-- `resources/transport/collector-topology.md` — DaemonSet vs sidecar vs gateway deployment patterns
-- `resources/transport/sampling-recipes.md` — head-based vs tail-based sampling policy selection
+- `resources/transport/udp-statsd-mtu.md`: UDP payload size thresholds and fragmentation risk
+- `resources/transport/otlp-grpc-vs-http.md`: protocol selection by environment and firewall constraints
+- `resources/transport/collector-topology.md`: DaemonSet vs sidecar vs gateway deployment patterns
+- `resources/transport/sampling-recipes.md`: head-based vs tail-based sampling policy selection
 
 ### route intent
-- `resources/boundaries/multi-tenant.md` — tenant isolation strategies (attribute-based, pipeline-based, storage-based)
-- `resources/transport/collector-topology.md` — routing topology for signal fan-out and load balancing
+- `resources/boundaries/multi-tenant.md`: tenant isolation strategies (attribute-based, pipeline-based, storage-based)
+- `resources/transport/collector-topology.md`: routing topology for signal fan-out and load balancing
 
 ## Step 4: Collect Reference Material
 
 1. Pull referenced file sections into working context based on Step 3 routing results
-2. Check `resources/vendor-categories.md` timestamp — if older than one quarter, advise the user to verify against the CNCF landscape at https://landscape.cncf.io
+2. Check `resources/vendor-categories.md` timestamp: if older than one quarter, advise the user to verify against the CNCF landscape at https://landscape.cncf.io
 3. For commercial vendor references, check whether a vendor-owned skill is installed locally before suggesting manual setup
 
 ## Step 5: Validate Against Constraints
 
-1. Consult `resources/anti-patterns.md` — does the proposed approach violate any of the 18 items?
-2. Consult `resources/checklist.md` — will this pass Pre-prod and Prod gates?
-3. Run `resources/meta-observability.md` cardinality guardrail preview — flag any label dimension that risks unbounded growth
+1. Consult `resources/anti-patterns.md`: does the proposed approach violate any of the 18 items?
+2. Consult `resources/checklist.md`: will this pass Pre-prod and Prod gates?
+3. Run `resources/meta-observability.md` cardinality guardrail preview: flag any label dimension that risks unbounded growth
 4. If `--strict` flag is set → reject any semconv attribute in Development or Experimental stability tier; cite stable alternative
 5. If PII is involved → apply `resources/signals/privacy.md` redaction and sampling-aware baggage rules at collection, not only at storage
 6. If `--multi-tenant` or `--multi-cloud` → apply `resources/boundaries/multi-tenant.md` isolation rules; verify data residency is explicit

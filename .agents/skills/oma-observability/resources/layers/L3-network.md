@@ -7,7 +7,7 @@ otel_semconv: "1.27.0 (2024-11)"
 
 ## 1. Scope
 
-**In scope**: IP routing, VPC flow logs, ICMP (reachability and PMTUD), Path MTU Discovery, and — for organizations with their own Autonomous System Number (ASN) — BGP/BMP inter-AS routing monitoring.
+**In scope**: IP routing, VPC flow logs, ICMP (reachability and PMTUD), Path MTU Discovery, and; for organizations with their own Autonomous System Number (ASN); BGP/BMP inter-AS routing monitoring.
 
 **Out of scope**: L1 physical (NIC, cable, IPMI) and L2 data-link (MAC, VLAN, STP). Those domains belong to vendor DCIM tooling (Nlyte, Sunbird, Device42). See `../SKILL.md §Out of Scope` for the full boundary declaration.
 
@@ -25,7 +25,7 @@ The following attributes from the `network.*` group are **Stable** (semconv 1.27
 | `network.transport` | string enum | `tcp`, `udp`, `quic` | Stable; distinguish protocol at L4 framing |
 | `network.local.address` | string | `10.0.1.5` | Stable; local IP of the socket |
 | `network.local.port` | int | `443` | Stable; local port |
-| `network.peer.address` | string | `192.0.2.10` | Stable; remote IP — treat as PII, see Section 7 |
+| `network.peer.address` | string | `192.0.2.10` | Stable; remote IP; treat as PII, see Section 7 |
 | `network.peer.port` | int | `8080` | Stable; remote port |
 | `network.protocol.name` | string | `http`, `grpc` | Stable; application protocol atop L3/L4 |
 
@@ -56,14 +56,14 @@ References:
 
 | Field | AWS name | GCP name | Azure name | Notes |
 |-------|----------|----------|------------|-------|
-| Source IP | `srcaddr` | `src_ip` | `sourceAddress` | PII — see Section 7 |
-| Destination IP | `dstaddr` | `dest_ip` | `destinationAddress` | PII — see Section 7 |
+| Source IP | `srcaddr` | `src_ip` | `sourceAddress` | PII; see Section 7 |
+| Destination IP | `dstaddr` | `dest_ip` | `destinationAddress` | PII; see Section 7 |
 | Source port | `srcport` | `src_port` | `sourcePort` | |
 | Destination port | `dstport` | `dest_port` | `destinationPort` | |
 | Protocol | `protocol` | `protocol` | `protocol` | IANA protocol number |
 | Bytes | `bytes` | `bytes_sent` | `bytesForwardedDenied` + `bytesForwardedAllowed` | Used for egress cost attribution |
 | Packets | `packets` | `packets_sent` | `packetsForwardedAllowed` | |
-| Firewall action | `action` | N/A (use firewall logs) | `trafficType` | `ACCEPT` / `REJECT` — audit signal |
+| Firewall action | `action` | N/A (use firewall logs) | `trafficType` | `ACCEPT` / `REJECT`; audit signal |
 | Start/end time | `start`, `end` | `start_time`, `end_time` | `startTime`, `endTime` | |
 
 ### 3.3 Privacy Note
@@ -78,7 +78,7 @@ Cross-reference: `../signals/privacy.md §IP addresses` for the full masking dec
 
 ---
 
-## 4. PMTUD — Path MTU Discovery
+## 4. PMTUD: Path MTU Discovery
 
 ### 4.1 Mechanism
 
@@ -183,7 +183,7 @@ This pipeline is **not OTel**. It operates independently of OTLP. The two pipeli
 
 ### 6.4 Security Observability: Hijack and Route Leak Detection
 
-#### BGP Hijack — MOAS Detection
+#### BGP Hijack: MOAS Detection
 
 A BGP hijack occurs when a rogue AS announces a prefix it does not legitimately own, diverting traffic. Multiple Origin AS (MOAS) detection identifies prefixes announced by more than one origin AS simultaneously.
 
@@ -201,7 +201,7 @@ Tool: ARTEMIS (<https://github.com/FORTH-ICS-INSPIRE/artemis>) provides automate
 
 RPKI (Resource Public Key Infrastructure) and ROA (Route Origin Authorization) records bind a prefix to an authorized origin AS with a cryptographic signature. ROV (Route Origin Validation) is the process of checking incoming BGP announcements against the RPKI trust anchor.
 
-**Verify your own prefixes**: ensure all prefixes you announce have valid ROA records in your RIR (ARIN, RIPE NCC, APNIC, LACNIC, AFRINIC). An announced prefix without an ROA is marked "Not Found" by downstream validators — not "Invalid", but not cryptographically anchored either.
+**Verify your own prefixes**: ensure all prefixes you announce have valid ROA records in your RIR (ARIN, RIPE NCC, APNIC, LACNIC, AFRINIC). An announced prefix without an ROA is marked "Not Found" by downstream validators; not "Invalid", but not cryptographically anchored either.
 
 **Enforce ROV on your router**: configure BGP to drop or de-prefer routes with RPKI Invalid status. Reference NIST SP 800-189 (<https://csrc.nist.gov/publications/detail/sp/800-189/final>) for deployment guidance.
 
@@ -226,10 +226,10 @@ The L3 row of `../matrix.md` covers 28 cells (4 boundaries × 7 signals). The fo
 
 | Boundary | metrics | logs | traces | profiles | cost | audit | privacy |
 |----------|---------|------|--------|----------|------|-------|---------|
-| multi-tenant | ✅ per-tenant egress byte/packet counters from VPC flow logs | ✅ VPC flow stream tagged by tenant CIDR | ⚠️ trace-ID egress tagging only; no native L3 trace context | ❌ N/A | ⚠️ egress byte attribution as cost proxy | ✅ VPC flow audit trail tagged by tenant | ⚠️ IP addresses are PII (GDPR/PIPA) — mask before retention |
-| cross-application | ✅ inter-VPC peering flow metrics | ✅ VPC flow logs across peering / transit gateway | ⚠️ socket 5-tuple correlation to L7 spans only | ❌ N/A | ⚠️ cross-VPC egress cost proxy | ✅ inter-VPC flow audit for SOC2 network controls | ⚠️ source/destination IPs crossing app boundary are PII candidates |
-| slo | ❌ N/A — SLO belongs at L7 | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A |
-| release | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A |
+| multi-tenant | PASS per-tenant egress byte/packet counters from VPC flow logs | PASS VPC flow stream tagged by tenant CIDR | PARTIAL trace-ID egress tagging only; no native L3 trace context | N/A | PARTIAL egress byte attribution as cost proxy | PASS VPC flow audit trail tagged by tenant | PARTIAL IP addresses are PII (GDPR/PIPA); mask before retention |
+| cross-application | PASS inter-VPC peering flow metrics | PASS VPC flow logs across peering / transit gateway | PARTIAL socket 5-tuple correlation to L7 spans only | N/A | PARTIAL cross-VPC egress cost proxy | PASS inter-VPC flow audit for SOC2 network controls | PARTIAL source/destination IPs crossing app boundary are PII candidates |
+| slo | N/A; SLO belongs at L7 | N/A | N/A | N/A | N/A | N/A | N/A |
+| release | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
 
 Notes:
 - **SLO cells**: all N/A. SLO error budgets are computed from L7 application metrics. If an L3 event (BGP hijack, PMTUD black hole) causes an SLO burn, the causal chain surfaces as an L7 error-rate spike first. Investigate via `../incident-forensics.md` 6-dimension localization.
@@ -256,21 +256,21 @@ The following are candidates for `../anti-patterns.md §Section H` (L3-specific)
 
 Internal cross-references:
 
-- `../standards.md §3` — OTel semconv stability tiers
-- `../matrix.md §Layer: L3-network` — full 28-cell coverage map
-- `../signals/privacy.md §IP addresses` — IP address masking decision tree
-- `../signals/audit.md` — WORM storage and SOC2 audit trail requirements
-- `../signals/cost.md §egress attribution` — L3 egress byte cost proxy
-- `../transport/udp-statsd-mtu.md` — UDP MTU thresholds (1472/1452/1432/8192/16K)
-- `../incident-forensics.md` — 6-dimension localization when L3 event causes L7 SLO burn
+- `../standards.md §3`: OTel semconv stability tiers
+- `../matrix.md §Layer: L3-network`; full 28-cell coverage map
+- `../signals/privacy.md §IP addresses`: IP address masking decision tree
+- `../signals/audit.md`: WORM storage and SOC2 audit trail requirements
+- `../signals/cost.md §egress attribution`: L3 egress byte cost proxy
+- `../transport/udp-statsd-mtu.md`: UDP MTU thresholds (1472/1452/1432/8192/16K)
+- `../incident-forensics.md`: 6-dimension localization when L3 event causes L7 SLO burn
 
 ## References
 
-- RFC 7854 — BGP Monitoring Protocol (BMP): <https://www.rfc-editor.org/rfc/rfc7854>
-- RFC 1191 — Path MTU Discovery (IPv4): <https://www.rfc-editor.org/rfc/rfc1191>
-- RFC 8201 — Path MTU Discovery for IPv6: <https://www.rfc-editor.org/rfc/rfc8201>
-- RFC 8899 — Datagram PLPMTUD (used by QUIC/SCTP): <https://www.rfc-editor.org/rfc/rfc8899>
-- RFC 6811 — BGP Prefix Origin Validation (RPKI-ROV): <https://www.rfc-editor.org/rfc/rfc6811>
+- RFC 7854: BGP Monitoring Protocol (BMP): <https://www.rfc-editor.org/rfc/rfc7854>
+- RFC 1191: Path MTU Discovery (IPv4): <https://www.rfc-editor.org/rfc/rfc1191>
+- RFC 8201: Path MTU Discovery for IPv6: <https://www.rfc-editor.org/rfc/rfc8201>
+- RFC 8899: Datagram PLPMTUD (used by QUIC/SCTP): <https://www.rfc-editor.org/rfc/rfc8899>
+- RFC 6811: BGP Prefix Origin Validation (RPKI-ROV): <https://www.rfc-editor.org/rfc/rfc6811>
 - IANA ICMP Type registry: <https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml>
 - IANA protocol numbers: <https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml>
 - NIST SP 800-189 (RPKI deployment): <https://csrc.nist.gov/publications/detail/sp/800-189/final>

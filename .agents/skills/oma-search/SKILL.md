@@ -132,15 +132,15 @@ For docs and web routes, use the runtime's available official-docs or web-search
 |-------|-------------|----------|---------|
 | `docs` | Context7 MCP (`resolve-library-id` → `query-docs`) | `web` route | Official docs, API reference |
 | `web` | Runtime native search | `oma search fetch` (api/probe/impersonate/browser) | Tutorials, examples, solutions |
-| `code` | `gh search code` / `glab api` | — | Implementation patterns, repos |
-| `local` | Serena MCP (delegate) | — | Current project files, symbols |
+| `code` | `gh search code` / `glab api` | (none) | Implementation patterns, repos |
+| `local` | Serena MCP (delegate) | (none) | Current project files, symbols |
 
 ### Default Workflow
-1. **Parse** — Extract query, detect flags, classify intent
-2. **Route** — Dispatch to the appropriate search channel(s)
-3. **Collect** — Gather results from dispatched routes
-4. **Score** — Attach trust labels to each result domain
-5. **Present** — Format and rank results for the user
+1. **Parse**: Extract query, detect flags, classify intent
+2. **Route**: Dispatch to the appropriate search channel(s)
+3. **Collect**: Gather results from dispatched routes
+4. **Score**: Attach trust labels to each result domain
+5. **Present**: Format and rank results for the user
 
 ### Invocation
 

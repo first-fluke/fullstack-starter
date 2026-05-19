@@ -168,7 +168,7 @@ Auto-generated lessons use the RCA Entry Format above, with these additions:
 - Append `(Source: Experiment Ledger #{N}, Session {session_id})` to the summary line
 - Append to the relevant domain section (based on agent type)
 
-Only the Orchestrator performs this at session end — after all agents have completed and the ledger is finalized.
+Only the Orchestrator performs this at session end, after all agents have completed and the ledger is finalized.
 
 ### When Lessons Become Too Many (50+)
 - Move old lessons (6+ months) to archive

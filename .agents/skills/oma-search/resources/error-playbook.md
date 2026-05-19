@@ -28,7 +28,7 @@
 ### Native search blocked (402/403)
 **Symptom**: Target site returns access denied
 **Recovery**:
-1. Run `oma search fetch <url>` — auto-escalates api → probe → impersonate → browser
+1. Run `oma search fetch <url>`; this auto-escalates api → probe → impersonate → browser
 2. Each strategy tries progressively more aggressive access methods
 3. If all strategies fail: report "Unable to access this source"; rerun
    with `--include-archive` to try caches (AMP / archive.today / Wayback)
@@ -36,7 +36,7 @@
 ### `oma search fetch` all strategies fail
 **Symptom**: Non-zero exit code after api/probe/impersonate/browser exhausted.
 **Recovery**:
-1. Read the `attempts` array in JSON output — strategies, `elapsedMs`,
+1. Read the `attempts` array in JSON output: strategies, `elapsedMs`,
    HTTP status, detected `signals`.
 2. Rerun with `--include-archive` for cached fallbacks.
 3. `paywall` signal → content gated; report auth requirement.

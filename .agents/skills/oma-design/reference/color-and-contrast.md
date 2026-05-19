@@ -7,11 +7,11 @@ Define 5-7 core colors with semantic roles. Each color entry must include:
 
 Example:
 ```
-- Deep Space Black (#0a0a0a) — primary background, page canvas
-- Warm Ivory (#f5f0eb) — primary text on dark surfaces
-- Signal Green (#22c55e) — CTAs, success states, active indicators
-- Soft Mist (rgba(255,255,255,0.1)) — borders, dividers, glass surfaces
-- Ember Red (#ef4444) — error states, destructive actions
+- Deep Space Black (#0a0a0a): primary background, page canvas
+- Warm Ivory (#f5f0eb): primary text on dark surfaces
+- Signal Green (#22c55e): CTAs, success states, active indicators
+- Soft Mist (rgba(255,255,255,0.1)): borders, dividers, glass surfaces
+- Ember Red (#ef4444): error states, destructive actions
 ```
 
 Generate 100-900 shade scales for primary and neutral colors.
@@ -50,13 +50,13 @@ Test with color blindness simulators (protanopia, deuteranopia, tritanopia).
 - Elevated: bg-white/[0.03] to bg-white/[0.06]
 
 ### Text on Dark
-- Primary text: warm off-white (#f5f0eb or #e8e4df) — NOT pure white (#fff)
+- Primary text: warm off-white (#f5f0eb or #e8e4df), NOT pure white (#fff)
 - Secondary text: 60% opacity (text-white/60)
 - Tertiary/muted: 40% opacity (text-white/40)
 
 ### Borders & Dividers
 - Use white at 10-20% opacity: `border-white/10`, `border-white/20`
-- Never use gray hex values on dark backgrounds — use alpha transparency
+- Never use gray hex values on dark backgrounds; use alpha transparency
 
 ### Elevation
 - Convey depth through opacity, not shadow
@@ -78,7 +78,7 @@ box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
 - DON'T: Mesh gradient backgrounds as primary visual
 - DON'T: Gradient + glassmorphism + blur combo (triple AI slop)
 - DON'T: Gray text on colored backgrounds without checking contrast
-- DON'T: Pure white (#fff) on pure black (#000) — too harsh, causes eye strain
+- DON'T: Pure white (#fff) on pure black (#000); too harsh, causes eye strain
 - DON'T: Rely on color alone to convey meaning (accessibility)
 - DO: Use solid colors or subtle single-hue gradients
 - DO: Derive gradients from brand colors with clear purpose

@@ -1,31 +1,31 @@
 ---
 notes:
-  - "Example vendor lists are snapshots — verify via landscape.cncf.io before production selection"
+  - "Example vendor lists are snapshots: verify via landscape.cncf.io before production selection"
 ---
 
 # Observability Vendor Categories
 
-> as of 2026-Q2 — review quarterly. Verify live status at https://landscape.cncf.io
+> as of 2026-Q2; review quarterly. Verify live status at https://landscape.cncf.io
 
-## Preamble — Why Categories, Not a Registry
+## Preamble: Why Categories, Not a Registry
 
 This file is a **category taxonomy with timestamped example vendors**. It is not a vendor registry.
 
 **Why this distinction matters:**
 
 1. **Vendor names rot.** Examples from this codebase's own lifetime:
-   - Keptn — archived by CNCF, 2025-09
-   - Fluentd — deprecated by CNCF, 2025-10 (migration guide: Fluent Bit / OTel Collector)
-   - Pyroscope — was CNCF Sandbox; acquired by Grafana 2023; CNCF Sandbox status is uncertain post-acquisition (verify at landscape.cncf.io before citing)
+   - Keptn: archived by CNCF, 2025-09
+   - Fluentd: deprecated by CNCF, 2025-10 (migration guide: Fluent Bit / OTel Collector)
+   - Pyroscope: was CNCF Sandbox; acquired by Grafana 2023; CNCF Sandbox status is uncertain post-acquisition (verify at landscape.cncf.io before citing)
 
 2. **Categories are stable.** "OSS full-stack", "SIEM", and "profiling specialist" have been coherent for years. The vendors filling them change.
 
 3. **No duplication with vendor-owned skills.** The following published skills already describe themselves authoritatively:
-   - `getsentry/sentry-sdk-setup` — Sentry SDK instrumentation
-   - `honeycombio/agent-skill` — Honeycomb OTel setup (8+ published skills)
-   - `Dash0 otel-instrumentation` — Dash0 OTel
-   - `Microsoft Azure Monitor exporters` — Azure-specific exporters
-   - `Datadog Labs dd-apm` — Datadog APM
+   - `getsentry/sentry-sdk-setup`: Sentry SDK instrumentation
+   - `honeycombio/agent-skill`: Honeycomb OTel setup (8+ published skills)
+   - `Dash0 otel-instrumentation`: Dash0 OTel
+   - `Microsoft Azure Monitor exporters`: Azure-specific exporters
+   - `Datadog Labs dd-apm`: Datadog APM
    Duplicating their content here creates drift, not value.
 
 4. **CNCF landscape is the authoritative live registry.** `landscape.cncf.io` tracks CNCF project status (Graduated / Incubating / Sandbox / Archived), vendor landscape, and category membership in real time. This file complements it with decision guidance; it does not copy or compete with it.
@@ -116,7 +116,7 @@ When reviewing:
 
 **Traits:** Continuous profiling (CPU, memory, goroutine, heap). Always-on, low-overhead. pprof or OTel profiling (OTEP 0239, currently alpha) as wire format. MELT+P fifth pillar.
 
-**Note on Pyroscope:** Originally CNCF Sandbox. Acquired by Grafana Labs in 2023. CNCF Sandbox status is uncertain post-acquisition — verify at landscape.cncf.io before citing CNCF affiliation.
+**Note on Pyroscope:** Originally CNCF Sandbox. Acquired by Grafana Labs in 2023. CNCF Sandbox status is uncertain post-acquisition; verify at landscape.cncf.io before citing CNCF affiliation.
 
 **Example vendors** (as of 2026-Q2):
 
@@ -181,7 +181,7 @@ When reviewing:
 
 ### (g) Feature Flags / Progressive Delivery
 
-**Traits:** Controlled rollout of features to subsets of users or traffic. Release observability — correlate flag states with error rates and latency. GitOps-integrated progressive delivery.
+**Traits:** Controlled rollout of features to subsets of users or traffic. Release observability; correlate flag states with error rates and latency. GitOps-integrated progressive delivery.
 
 **Example vendors** (as of 2026-Q2):
 
@@ -334,7 +334,7 @@ For questions about current CNCF project status, vendor landscape membership, or
 oma-search --docs "site:landscape.cncf.io {category or vendor}"
 ```
 
-Or navigate directly to https://landscape.cncf.io — it is the authoritative live registry. This file does not attempt to replicate it.
+Or navigate directly to https://landscape.cncf.io; it is the authoritative live registry. This file does not attempt to replicate it.
 
 ---
 
@@ -347,6 +347,6 @@ Or navigate directly to https://landscape.cncf.io — it is the authoritative li
 **Authoritative live source:** https://landscape.cncf.io
 
 **Known pending verifications (as of 2026-Q2):**
-- Pyroscope CNCF status post-Grafana acquisition (2023) — check landscape.cncf.io before citing CNCF affiliation
-- Thanos Graduated status (confirmed 2024 per design verification log — verify remains current)
-- OpenFeature CNCF status timestamped as of 2024-11 Graduated — verify next tier/changes via landscape.cncf.io
+- Pyroscope CNCF status post-Grafana acquisition (2023): check landscape.cncf.io before citing CNCF affiliation
+- Thanos Graduated status (confirmed 2024 per design verification log; verify remains current)
+- OpenFeature CNCF status timestamped as of 2024-11 Graduated; verify next tier/changes via landscape.cncf.io

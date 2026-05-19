@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * flatten-tables.ts — post-process kordoc output:
+ * flatten-tables.ts: post-process kordoc output:
  *   1. convert HTML <table> blocks to GFM pipe tables
  *   2. strip Private Use Area characters (Hancom font-specific glyphs)
  *
@@ -9,14 +9,14 @@
  *     for a pure-Markdown output.
  * (2) HWP references Hancom-font-specific glyphs via Private Use Area code
  *     points (U+E000-U+F8FF, U+F0000-U+FFFFD, U+100000-U+10FFFD). Without
- *     the Hancom font these render as blanks or tofu squares — stripping is
+ *     the Hancom font these render as blanks or tofu squares; stripping is
  *     the pragmatic default for AI / plain-MD consumption.
  *
  * Usage: bun run flatten-tables.ts <file.md> [<file.md>...]
  */
 
 import TurndownService from "turndown";
-// @ts-ignore — no type defs published
+// @ts-ignore: no type defs published
 import { tables } from "turndown-plugin-gfm";
 
 const td = new TurndownService({
@@ -58,12 +58,12 @@ for (const path of files) {
   });
 
   if (tableCount === 0 && puaCount === 0) {
-    console.log(`[flatten-tables] ${path} — nothing to change`);
+    console.log(`[flatten-tables] ${path}: nothing to change`);
     continue;
   }
   await Bun.write(path, out);
   const parts: string[] = [];
   if (tableCount) parts.push(`${tableCount} table(s) flattened`);
   if (puaCount) parts.push(`${puaCount} PUA char(s) stripped`);
-  console.log(`[flatten-tables] ${path} — ${parts.join(", ")}`);
+  console.log(`[flatten-tables] ${path}: ${parts.join(", ")}`);
 }

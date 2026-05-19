@@ -43,7 +43,7 @@ UDP is connectionless and provides no retransmission. When an IP datagram exceed
 | Unix Domain Socket (`unixgram`)  | N/A           | **8192 B**      | Recommended; avoids kernel socket buffer pressure |
 
 > IPv6 minimum MTU is 1280 B (RFC 8200); on links with lower MTU, fragmentation is performed
-> by the source host only — not routers — making drops more likely. Always test your actual path.
+> by the source host only; not routers; making drops more likely. Always test your actual path.
 
 ---
 

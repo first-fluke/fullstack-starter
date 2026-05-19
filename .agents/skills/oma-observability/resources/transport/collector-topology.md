@@ -22,10 +22,10 @@ The OpenTelemetry Operator manages collectors via the `OpenTelemetryCollector` C
 | `statefulset` | StatefulSet | 1..N | Ordered, persistent-volume workloads |
 | `sidecar` | injected container | 1 per pod | Serverless (Fargate, Cloud Run), isolation |
 
-**`Deployment` (default — Gateway use case)**
+**`Deployment` (default; Gateway use case)**
 Runs as a standard Kubernetes Deployment. Suitable for centralized processing: batching, tail sampling, exporters to backend. Scales horizontally but cannot access node-local resources (e.g., `/var/log`, `/proc`). Source: [OTel Collector Deployment docs](https://opentelemetry.io/docs/collector/deployment/).
 
-**`DaemonSet` (Agent use case — one per node)**
+**`DaemonSet` (Agent use case; one per node)**
 Guarantees exactly one collector pod per node. Required for receivers that must run on the host: `hostmetrics`, `filelog`, `kubeletstats`. Accesses node filesystem and network namespaces directly.
 
 **`StatefulSet` (specialized)**
@@ -64,16 +64,16 @@ Observability Backend (e.g., Grafana Cloud, Jaeger, Prometheus)
 ```
 
 **Agent layer responsibilities** (must be per-host):
-- `hostmetrics` receiver — CPU, memory, disk, network from `/proc`, `/sys`
-- `filelog` receiver — container log files from `/var/log/pods/`
-- `k8sattributes` processor — enriches spans/metrics with pod, namespace, node labels
-- `kubeletstats` receiver — pod/container resource metrics via Kubelet API
+- `hostmetrics` receiver: CPU, memory, disk, network from `/proc`, `/sys`
+- `filelog` receiver: container log files from `/var/log/pods/`
+- `k8sattributes` processor: enriches spans/metrics with pod, namespace, node labels
+- `kubeletstats` receiver: pod/container resource metrics via Kubelet API
 
 **Gateway layer responsibilities**:
-- `batch` processor — reduce export RPCs, improve compression
-- `tail_sampling` processor — evaluate complete traces before sampling decision
-- `loadbalancing` exporter — consistent hash routing to tail-sampler replicas
-- `memory_limiter` processor — prevent OOM under backpressure
+- `batch` processor: reduce export RPCs, improve compression
+- `tail_sampling` processor: evaluate complete traces before sampling decision
+- `loadbalancing` exporter: consistent hash routing to tail-sampler replicas
+- `memory_limiter` processor: prevent OOM under backpressure
 
 Example agent `OpenTelemetryCollector` manifest snippet:
 
@@ -148,7 +148,7 @@ Source: [OTel Kubernetes Collector Components](https://opentelemetry.io/docs/pla
 |---------------------|---------------|-------|
 | `kubeletstats` receiver | DaemonSet | Requires access to Kubelet API per node |
 | `filelog` receiver | DaemonSet | Reads `/var/log/pods/` on each node |
-| `hostmetrics` receiver | DaemonSet | Reads `/proc`, `/sys` — host-only access |
+| `hostmetrics` receiver | DaemonSet | Reads `/proc`, `/sys`; host-only access |
 | `k8sattributes` processor | DaemonSet or Gateway | On agent: enriches at source; on gateway: enriches late |
 | `prometheus` receiver | Deployment (with caveats) | No automatic horizontal scaling for scrape target distribution; use sharding manually |
 | `tail_sampling` processor | Deployment (Gateway) | Requires complete trace; combine with `loadbalancing` exporter |

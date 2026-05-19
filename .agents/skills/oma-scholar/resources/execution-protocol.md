@@ -14,7 +14,7 @@ Create a `.knows.yaml` sidecar from a paper, draft, or research notes.
 
 ### Step 1: Read Source Thoroughly
 
-- Read the entire source — abstract, methods, results, discussion, limitations
+- Read the entire source: abstract, methods, results, discussion, limitations
 - Identify: claims, methods, evidence (tables/figures), datasets, code/repo links, cited works, assumptions
 - Note paper metadata: title, authors, venue, year, DOI (only if visible)
 
@@ -23,17 +23,17 @@ Create a `.knows.yaml` sidecar from a paper, draft, or research notes.
 Use the v0.9.0 spec rules in `sidecar-spec.md`. Top-level structure:
 
 - `knows_version: "0.9.0"`, `profile: "paper@1"`, `subject_ref: art:paper`
-- **Top-level metadata** — `title`, `authors`, `venue`, `year` (no `metadata` wrapper); omit `doi`/`venue`/`year` if not visible
-- `summary` — one-paragraph overview
-- `coverage` — object with `statements` and `evidence` enums (NOT a single value)
-- `provenance` — `origin`, single `actor` object (`type: tool|person|org`), `generated_at`, `method`
-- `version` — `{spec, record, source}`
-- `freshness` — `{as_of, update_policy}`
-- `artifacts` — list (`art:` prefix, `artifact_type`, `role: subject|supporting|cited`); include `representations` for the source
-- `statements` — list (`stmt:` prefix, `statement_type`, `modality`, `status`, `confidence` object, `source_anchors`)
-- `evidence` — list (`ev:` prefix, `evidence_type`)
-- `relations` — list (`rel:` prefix, `predicate` in present tense, `subject_ref`, `object_ref`)
-- `actions` — usually empty for paper profile
+- **Top-level metadata**: `title`, `authors`, `venue`, `year` (no `metadata` wrapper); omit `doi`/`venue`/`year` if not visible
+- `summary`: one-paragraph overview
+- `coverage`: object with `statements` and `evidence` enums (NOT a single value)
+- `provenance`: `origin`, single `actor` object (`type: tool|person|org`), `generated_at`, `method`
+- `version`: `{spec, record, source}`
+- `freshness`: `{as_of, update_policy}`
+- `artifacts`: list (`art:` prefix, `artifact_type`, `role: subject|supporting|cited`); include `representations` for the source
+- `statements`: list (`stmt:` prefix, `statement_type`, `modality`, `status`, `confidence` object, `source_anchors`)
+- `evidence`: list (`ev:` prefix, `evidence_type`)
+- `relations`: list (`rel:` prefix, `predicate` in present tense, `subject_ref`, `object_ref`)
+- `actions`: usually empty for paper profile
 
 ### Step 3: Wire Relations
 
@@ -76,7 +76,7 @@ If lint fails, fix the reported issues and re-run until clean.
 Tell the user:
 - Output path
 - Statement count, evidence count, relations/statement ratio
-- Any fields omitted due to anti-fabrication (e.g., "DOI not extracted — visible in source? If yes, paste it.")
+- Any fields omitted due to anti-fabrication (e.g., "DOI not extracted; visible in source? If yes, paste it.")
 - Lint status
 
 ## Mode 2: Validate
@@ -101,7 +101,7 @@ Lint an existing `.knows.yaml`.
 
 ## Mode 3: Review
 
-Generate a peer-review sidecar — what claims need stronger evidence, what assumptions are unstated, what limitations are missing.
+Generate a peer-review sidecar covering what claims need stronger evidence, what assumptions are unstated, and what limitations are missing.
 
 ### Steps
 
@@ -168,7 +168,7 @@ See `resources/fallback-providers.md` for full cascade design.
 
 ### Manual cascade (raw curl)
 
-1. **knows.academy search** — `curl -s "{base}/api/proxy/search?q={query}"`
+1. **knows.academy search**: `curl -s "{base}/api/proxy/search?q={query}"`
 2. If hits → fetch sidecar:
    - Full: `/api/proxy/sidecars/{record_id}`
    - Partial: `/api/proxy/partial?record_id={id}&section=statements|evidence|relations|artifacts|citation`
@@ -193,4 +193,4 @@ See `resources/fallback-providers.md` for full cascade design.
 | Empty search results | Broaden query; remove quotes; try keyword-only |
 | YAML parse error after Generate | Re-emit with stricter quoting on string values containing `:` `#` `&` `*` |
 | Source PDF has no text layer | Chain via `oma-pdf` with hybrid OCR mode first |
-| OpenAlex 403/429 | Tell user to set `OPENALEX_API_KEY` — see `setup-openalex.md` |
+| OpenAlex 403/429 | Tell user to set `OPENALEX_API_KEY`; see `setup-openalex.md` |

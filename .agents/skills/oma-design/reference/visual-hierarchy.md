@@ -26,7 +26,7 @@ viewer to work harder to find structure.
   elements share an alignment axis and why (e.g., "left-aligned heading
   and body text create a strong reading anchor").
 - **Phase 5**: DESIGN.md Section 5 (Layout Principles) should specify
-  alignment rules for key surfaces — cards should share top edges,
+  alignment rules for key surfaces. Cards should share top edges,
   headings should align with body containers.
 
 Practical checks:
@@ -47,14 +47,14 @@ viewer reads the highest-contrast element first.
 
 - **Phase 4**: explain how each proposed palette encodes hierarchy
   (e.g., "CTA green is the only high-saturation color on a desaturated
-  surface — it draws the eye instantly").
+  surface; it draws the eye instantly").
 - **Phase 5**: DESIGN.md Section 2 (Color Palette & Roles) must map
   every color to a hierarchy level (primary action > heading > body >
   metadata > decorative).
 
 Relationship to `color-and-contrast.md`: that file covers palette
 construction, WCAG ratios, and dark theme mechanics. This principle
-covers **why** you assign a specific color to a specific role — the
+covers **why** you assign a specific color to a specific role: the
 hierarchy intent behind the assignment.
 
 ---
@@ -63,7 +63,7 @@ hierarchy intent behind the assignment.
 
 **Juxtaposition of unlike elements heightens both.**
 
-Contrast is not just a WCAG ratio — it is a deliberate design tool.
+Contrast is not just a WCAG ratio; it is a deliberate design tool.
 Warm vs cool, heavy vs light, dense vs sparse, serif vs sans-serif.
 When two notably different things sit close together, both become more
 visible and more memorable.
@@ -71,7 +71,7 @@ visible and more memorable.
 - **Phase 4**: use contrast intentionally: pair a bold serif display
   heading with a light sans-serif body, or a bright CTA on a muted
   surface. Explain the contrast pairing and its effect.
-- **Phase 6**: audit for unintentional uniformity — if every component
+- **Phase 6**: audit for unintentional uniformity. If every component
   has the same visual weight, nothing stands out. The hierarchy is flat.
 
 Types of contrast to leverage:
@@ -94,7 +94,7 @@ between a heading and its body says "these belong together"; a 64px gap
 between two sections says "these are separate topics."
 
 - **Phase 5**: DESIGN.md Section 5 (Layout Principles) must define at
-  least two proximity tiers — intra-group spacing (tight, 8-16px) and
+  least two proximity tiers: intra-group spacing (tight, 8-16px) and
   inter-group spacing (loose, 48-96px). The ratio between them is more
   important than the absolute values.
 - **Phase 6**: check that spacing does not accidentally merge unrelated
@@ -102,7 +102,7 @@ between two sections says "these are separate topics."
 
 Relationship to `spatial-design.md`: that file provides the spacing
 scale (4px → 128px) and grid system. This principle explains **when**
-to pick which value — tight proximity for grouped elements, wide
+to pick which value: tight proximity for grouped elements, wide
 proximity for section separation.
 
 ---
@@ -121,7 +121,7 @@ relative importance of elements.
   produces a dramatic hierarchy; a 2:1 ratio (32px vs 16px) produces a
   flatter, more editorial feel.
 - **Phase 5**: DESIGN.md Section 3 (Typography Rules) table should
-  make the size progression explicit — Display > H1 > H2 > Body > Small.
+  make the size progression explicit: Display > H1 > H2 > Body > Small.
   The jump between adjacent levels should feel deliberate.
 
 Accessibility note: size as hierarchy tool must coexist with
@@ -141,11 +141,11 @@ and can communicate material quality, surface hierarchy, and interactive
 affordance.
 
 > "Texture can be used to create highlights, instead of relying on
-> color." — Jessica Cardona
+> color." (Jessica Cardona)
 
 **Active uses of texture:**
 - **Surface differentiation**: add subtle noise to a background to
-  distinguish it from a card surface that is flat — this communicates
+  distinguish it from a card surface that is flat; this communicates
   depth without using shadow.
 - **Brand warmth**: a grain overlay on hero photography creates a
   film/analog feel that humanizes a digital interface.
@@ -170,7 +170,7 @@ gradients are banned.
 
 ## 7. Time
 
-**Digital interfaces unfold over time — use that dimension.**
+**Digital interfaces unfold over time; use that dimension.**
 
 Unlike print, screens can change, react, and reveal. Time is a design
 material. How information appears, sequences, and transforms is a
@@ -191,7 +191,7 @@ hierarchy signal equal to size, color, and position.
   user scrolls create a story arc. The order of appearance IS the
   hierarchy. What appears first matters most.
 - **Micro-interactions**: a hover-triggered tooltip or a focus-ring
-  glow creates a momentary hierarchy shift — "pay attention to this
+  glow creates a momentary hierarchy shift, "pay attention to this
   right now."
 
 **This is broader than animation.** `motion-design.md` covers the
@@ -200,7 +200,7 @@ covers the design intent: **why** you sequence elements this way, and
 what hierarchy the temporal ordering communicates.
 
 - **Phase 4**: when proposing motion strategies, describe the temporal
-  hierarchy — what the viewer sees first, second, third. Not just
+  hierarchy: what the viewer sees first, second, third. Not just
   "fade-in on scroll" but "headline arrives first to anchor the
   message, supporting stats appear 200ms later to reinforce it."
 - **Phase 5**: DESIGN.md Section 9 (Agent Prompt Guide) component

@@ -7,7 +7,7 @@ notes:
   - "web-vitals JS library: 4.x (2024); INP replaced FID: March 2024"
 ---
 
-# Web RUM — Real User Monitoring
+# Web RUM: Real User Monitoring
 
 ## 1. Scope
 
@@ -37,9 +37,9 @@ Reference implementation: `web-vitals` JS library (`google/web-vitals`, v4.x).
 
 | Metric | Meaning | Typical target |
 |--------|---------|---------------|
-| TTFB | Time to First Byte — server + network latency | ≤ 800 ms |
-| FCP | First Contentful Paint — when first content is painted | ≤ 1.8 s |
-| TTI | Time to Interactive — main thread unblocked | ≤ 3.8 s (3G) |
+| TTFB | Time to First Byte; server + network latency | ≤ 800 ms |
+| FCP | First Contentful Paint; when first content is painted | ≤ 1.8 s |
+| TTI | Time to Interactive; main thread unblocked | ≤ 3.8 s (3G) |
 
 Use `web-vitals` to collect all signals with a uniform API:
 
@@ -129,7 +129,7 @@ registerInstrumentations({
 
 ## 4. Vendor Options
 
-Vendors below are examples as of 2026-Q2. This is not a registry — verify currency at `https://landscape.cncf.io` and `../../vendor-categories.md §RUM category`.
+Vendors below are examples as of 2026-Q2. This is not a registry; verify currency at `https://landscape.cncf.io` and `../../vendor-categories.md §RUM category`.
 
 | Vendor | Bundle size | Session replay | OTel-based | Full-stack correlation | Notes |
 |--------|------------|---------------|-----------|----------------------|-------|
@@ -148,7 +148,7 @@ For vendor-specific setup, delegate to the vendor skill listed or use `oma-searc
 
 **Solution:** emit the same `trace_id` on both sides using W3C `traceparent`.
 
-The `FetchInstrumentation` (OTel JS) and Datadog RUM inject `traceparent` automatically into outbound requests — but only for origins listed in the CORS allowlist configuration.
+The `FetchInstrumentation` (OTel JS) and Datadog RUM inject `traceparent` automatically into outbound requests; but only for origins listed in the CORS allowlist configuration.
 
 ```js
 // OTel JS SDK — propagateTraceHeaderCorsUrls
@@ -169,7 +169,7 @@ datadogRum.init({
 
 The server must emit the same `trace_id` in its own spans. When the browser console shows an error, the `trace_id` links directly to the backend trace in Sentry Performance, Datadog APM, or any OTel-compatible backend.
 
-**Anti-pattern to avoid:** client retry loop on 5xx without a circuit breaker. Retrying immediately amplifies server load. Implement exponential backoff + circuit breaker in the fetch layer before enabling distributed tracing — otherwise the correlation data documents a cascading failure, not a single event. Cross-reference: anti-patterns §Section G below and `../../signals/traces.md` for retry trace patterns.
+**Anti-pattern to avoid:** client retry loop on 5xx without a circuit breaker. Retrying immediately amplifies server load. Implement exponential backoff + circuit breaker in the fetch layer before enabling distributed tracing; otherwise the correlation data documents a cascading failure, not a single event. Cross-reference: anti-patterns §Section G below and `../../signals/traces.md` for retry trace patterns.
 
 ---
 
@@ -190,7 +190,7 @@ Reporting-Endpoints: csp-violations="https://csp-reports.example.com/collect"
 
 > `report-uri` is the legacy fallback directive for browsers that do not yet support the Reporting API Level 1 (`report-to`). Firefox gained full `Reporting-Endpoints` support in 2023; keeping both ensures older stable channels still deliver violation reports.
 
-CSP violations are reported to your server endpoint as JSON. Pipe them to your log backend and alert on new `blocked-uri` origins — these indicate either a new 3rd-party load attempt or a supply-chain injection.
+CSP violations are reported to your server endpoint as JSON. Pipe them to your log backend and alert on new `blocked-uri` origins; these indicate either a new 3rd-party load attempt or a supply-chain injection.
 
 ### Subresource Integrity (SRI)
 
@@ -214,7 +214,7 @@ Cross-reference: `../../signals/privacy.md` for 3rd-party cookie and tracking si
 
 ## 7. Synthetic Monitoring
 
-Synthetic monitoring provides an "outside-in" view that complements RUM. RUM shows what real users experience; synthetic shows what a deterministic probe experiences from a specific region, at any time — including before any real user visits.
+Synthetic monitoring provides an "outside-in" view that complements RUM. RUM shows what real users experience; synthetic shows what a deterministic probe experiences from a specific region, at any time; including before any real user visits.
 
 | Tool | Type | Best for |
 |------|------|---------|
@@ -275,7 +275,7 @@ sentry-cli sourcemaps inject ./dist
 sentry-cli sourcemaps upload --org my-org --project my-web ./dist
 ```
 
-Cross-reference: `../../boundaries/release.md` for CI integration patterns — source map upload should be gated on the same pipeline step as container image push.
+Cross-reference: `../../boundaries/release.md` for CI integration patterns; source map upload should be gated on the same pipeline step as container image push.
 
 ---
 
@@ -297,15 +297,15 @@ These cells from `../../matrix.md` are the primary drivers for this file:
 
 | Matrix cell | Symbol | Artifact |
 |------------|--------|---------|
-| L7 × multi-tenant × metrics | ✅ | Per-tenant CWV distribution (LCP p75, INP p75, CLS p75 segmented by `tenant.id`) |
-| L7 × cross-application × traces | ✅ | Primary: `traceparent` propagated via `propagateTraceHeaderCorsUrls` / `allowedTracingUrls` |
-| L7 × SLO × metrics | ✅ | CWV as SLI — LCP p75 ≤ 2.5s, INP p75 ≤ 200ms, CLS p75 ≤ 0.1 (see `../../boundaries/slo.md`) |
-| L7 × release × traces | ✅ | `service.version` on spans carries frontend build SHA + backend version for correlated release analysis |
-| L7 × privacy × logs | ✅ | PII masking in error stack traces and session replay; no `user.email` in metric labels |
+| L7 × multi-tenant × metrics | PASS | Per-tenant CWV distribution (LCP p75, INP p75, CLS p75 segmented by `tenant.id`) |
+| L7 × cross-application × traces | PASS | Primary: `traceparent` propagated via `propagateTraceHeaderCorsUrls` / `allowedTracingUrls` |
+| L7 × SLO × metrics | PASS | CWV as SLI; LCP p75 ≤ 2.5s, INP p75 ≤ 200ms, CLS p75 ≤ 0.1 (see `../../boundaries/slo.md`) |
+| L7 × release × traces | PASS | `service.version` on spans carries frontend build SHA + backend version for correlated release analysis |
+| L7 × privacy × logs | PASS | PII masking in error stack traces and session replay; no `user.email` in metric labels |
 
 ---
 
-## 12. Anti-Patterns (Section G — Frontend/Mobile Candidates)
+## 12. Anti-Patterns (Section G: Frontend/Mobile Candidates)
 
 These are candidates for `../../anti-patterns.md §Section G Frontend/Mobile`:
 
@@ -325,18 +325,18 @@ These are candidates for `../../anti-patterns.md §Section G Frontend/Mobile`:
 
 
 Internal cross-references:
-- `../../standards.md` — normative semconv stability tiers and W3C Trace Context requirements
-- `../../matrix.md` — full 112-cell coverage map (L7 row)
-- `../../vendor-categories.md` — RUM vendor category taxonomy and delegation targets
-- `../../anti-patterns.md` — full anti-pattern registry (Section G: Frontend/Mobile)
-- `../../boundaries/slo.md` — OpenSLO definitions for CWV SLIs and burn-rate alerts
-- `../../boundaries/release.md` — source map upload CI integration and `service.version` tagging
-- `../../boundaries/cross-application.md` — full propagator compatibility matrix (for `traceparent` CORS allowlist guidance)
-- `../../signals/privacy.md` — PII masking rules, 3rd-party tracking signals, replay sanitization
-- `../../signals/traces.md` — server-side trace patterns for backend correlation
-- `../mesh.md` — mesh propagator headers (cross-reference for `traceparent` propagation chain)
-- `mobile-rum.md` — mobile RUM (offline-first queuing, battery, app lifecycle)
-- `crash-analytics.md` — native crash symbolication and CFR tracking
+- `../../standards.md`: normative semconv stability tiers and W3C Trace Context requirements
+- `../../matrix.md`: full 112-cell coverage map (L7 row)
+- `../../vendor-categories.md`: RUM vendor category taxonomy and delegation targets
+- `../../anti-patterns.md`: full anti-pattern registry (Section G: Frontend/Mobile)
+- `../../boundaries/slo.md`: OpenSLO definitions for CWV SLIs and burn-rate alerts
+- `../../boundaries/release.md`: source map upload CI integration and `service.version` tagging
+- `../../boundaries/cross-application.md`: full propagator compatibility matrix (for `traceparent` CORS allowlist guidance)
+- `../../signals/privacy.md`: PII masking rules, 3rd-party tracking signals, replay sanitization
+- `../../signals/traces.md`: server-side trace patterns for backend correlation
+- `../mesh.md`: mesh propagator headers (cross-reference for `traceparent` propagation chain)
+- `mobile-rum.md`: mobile RUM (offline-first queuing, battery, app lifecycle)
+- `crash-analytics.md`: native crash symbolication and CFR tracking
 
 ## References
 

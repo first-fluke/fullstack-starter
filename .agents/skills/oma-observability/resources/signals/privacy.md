@@ -47,10 +47,10 @@ The reversibility question is the only legally meaningful test: *Can you recover
 
 | Technique | Reversible? | GDPR Applies? | Typical Tooling |
 |-----------|-------------|---------------|-----------------|
-| Anonymization | No — irreversible | No | k-anonymity, differential privacy, aggregation, generalization |
-| Pseudonymization | Yes — with key/salt | Yes | HMAC+salt, format-preserving encryption (FPE), AES-FF1 |
-| Tokenization | Yes — with vault lookup | Yes | Payment token vaults, HSM-backed services |
-| Hashing (no salt, low entropy) | Yes — brute-force feasible | Yes (treated as pseudonymization) | SHA-256 without salt on numeric IDs |
+| Anonymization | No; irreversible | No | k-anonymity, differential privacy, aggregation, generalization |
+| Pseudonymization | Yes; with key/salt | Yes | HMAC+salt, format-preserving encryption (FPE), AES-FF1 |
+| Tokenization | Yes; with vault lookup | Yes | Payment token vaults, HSM-backed services |
+| Hashing (no salt, low entropy) | Yes; brute-force feasible | Yes (treated as pseudonymization) | SHA-256 without salt on numeric IDs |
 
 **Decision rule.** Ask "Could we reverse this if compelled?" If no, it is anonymization and GDPR does not apply to the result. If yes (even theoretically), GDPR applies and you have pseudonymization obligations.
 
@@ -64,14 +64,14 @@ The reversibility question is the only legally meaningful test: *Can you recover
 |-------------|------------------------------|------------------------|
 | IP address | HTTP server spans, logs, network metrics | `client.address`, `network.peer.address` |
 | User ID | Span attributes, baggage, log body | `enduser.id` (deprecated → `user.id`) |
-| Email, name, phone | Log body, error traces, baggage | None — must not be added |
+| Email, name, phone | Log body, error traces, baggage | None; must not be added |
 | Session token / cookie | HTTP headers, span attributes | `http.request.header.*` |
 | Browser user-agent | HTTP server spans | `user_agent.original` |
 | Geolocation | IP-derived enrichment, custom attrs | `geo.city`, `geo.country_iso_code` |
 | Query string parameters | URL full string | `url.full`, `url.query` |
 | Stack trace with user data | Exception events | `exception.stacktrace` |
-| Request body on error | Trace event attributes | Custom — avoid entirely |
-| Baggage values | W3C Baggage header, propagated downstream | — (see `../boundaries/cross-application.md §Baggage rules`) |
+| Request body on error | Trace event attributes | Custom; avoid entirely |
+| Baggage values | W3C Baggage header, propagated downstream | See `../boundaries/cross-application.md §Baggage rules` |
 
 Baggage is especially dangerous: values propagate across service boundaries and can be logged or traced by any downstream collector. Apply trust-boundary filters before injecting user-derived values into baggage.
 
@@ -85,7 +85,7 @@ Baggage is especially dangerous: values propagate across service boundaries and 
 | IPv6 address | Mask last 80 bits or drop | Truncation / drop |
 | Email address | Drop local part (`***@example.com`) or drop entirely | Redaction |
 | User ID (internal) | Salted HMAC with vault-managed key | Pseudonymization |
-| Card number, SSN | Drop entirely — never collect | Drop |
+| Card number, SSN | Drop entirely; never collect | Drop |
 | Phone number | Drop entirely | Drop |
 | Session token, password, `Authorization` header | Drop entirely | Drop |
 | Timestamp (high-resolution) | Truncate to minute (metrics) or hour (logs) depending on aggregation tier | Generalization |
@@ -100,7 +100,7 @@ Baggage is especially dangerous: values propagate across service boundaries and 
 
 Use a layered pipeline: **attributes** (known PII keys) → **transform/OTTL** (pattern-based) → **redaction** (safety-net allowlist) → storage.
 
-### 6.1 `attributes` Processor — Named Key Actions
+### 6.1 `attributes` Processor: Named Key Actions
 
 ```yaml
 processors:
@@ -120,7 +120,7 @@ processors:
 
 > **Warning on `action: hash`**: the Collector's built-in `hash` action does not apply a salt. For low-entropy inputs such as numeric user IDs, an unsalted hash is reversible by brute force and is treated as pseudonymization (not anonymization) under GDPR. See §8 for salted-hash alternatives at the SDK layer.
 
-### 6.2 `transform` Processor (OTTL) — Pattern-Based Transformation
+### 6.2 `transform` Processor (OTTL): Pattern-Based Transformation
 
 ```yaml
 processors:
@@ -137,7 +137,7 @@ processors:
           - replace_pattern(attributes["user.email"], "^[^@]+", "***")
 ```
 
-### 6.3 `redaction` Processor — Allowlist Safety Net
+### 6.3 `redaction` Processor: Allowlist Safety Net
 
 ```yaml
 processors:
@@ -197,7 +197,7 @@ OTel Collector's built-in `hash` action uses SHA-256 **without salt**. On low-en
 **Requirements for safe pseudonymization:**
 
 1. Apply salt using a vault-managed key (e.g., HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager).
-2. Store the salt/key in a separate region and access-controlled vault — never co-located with the pseudonymized data (GDPR Art. 32).
+2. Store the salt/key in a separate region and access-controlled vault; never co-located with the pseudonymized data (GDPR Art. 32).
 3. Rotate the salt on a defined schedule (quarterly recommended); document rotation in the key management policy.
 4. Use HMAC-SHA256 with the salt, not bare SHA-256.
 5. Because the Collector `hash` action cannot inject vault-managed salts, perform HMAC at the **SDK layer** before emitting spans.
@@ -268,7 +268,7 @@ OTel `tls.*` semantic conventions are **Development** stability tier as of semco
 | `tls.resumed` | boolean | Session resumption analysis |
 | `tls.server.certificate.expiry` | int (epoch) | Certificate expiry alerting |
 
-**Scope boundary.** These attributes provide *security context* for observability purposes (downgrade detection, cert expiry alerting). Full TLS inspection (decrypting payload for content analysis) is out of scope — use dedicated network inspection tooling.
+**Scope boundary.** These attributes provide *security context* for observability purposes (downgrade detection, cert expiry alerting). Full TLS inspection (decrypting payload for content analysis) is out of scope; use dedicated network inspection tooling.
 
 **Privacy note.** TLS cipher and protocol version are not PII. Certificate subject fields (CN, SAN) may contain hostnames; do not log end-user certificate subjects from mTLS without legal basis.
 
@@ -287,7 +287,7 @@ Production traces and logs containing even pseudonymized data are sensitive. Acc
 | Finance | Cost metrics only | 90 days | See `cost.md` |
 | DPO / Privacy engineer | Redaction pipeline config, raw tier | Short window only | Separate admin role |
 
-**Environment isolation.** Production backends must be strictly separated from non-production. Never allow dev/staging pipelines to receive or store production telemetry — this is a direct PII leak path.
+**Environment isolation.** Production backends must be strictly separated from non-production. Never allow dev/staging pipelines to receive or store production telemetry; this is a direct PII leak path.
 
 Vendor-specific RBAC: Grafana folder permissions + team sync; Datadog Teams with scoped monitors; Honeycomb environments with team-scoped API keys.
 
@@ -314,10 +314,10 @@ The following cells in `../matrix.md` have privacy-specific guidance from this f
 
 | Layer × Boundary | Privacy Status | Notes |
 |-----------------|---------------|-------|
-| L3 (Network) × any | ⚠️ Warning | IP addresses are GDPR Art. 4(1) personal data identifiers; mask or drop |
-| L4 (Transport) × any | ⚠️ Warning | Connection 5-tuple (src IP, dst IP, ports) can identify individuals |
+| L3 (Network) × any | Warning | IP addresses are GDPR Art. 4(1) personal data identifiers; mask or drop |
+| L4 (Transport) × any | Warning | Connection 5-tuple (src IP, dst IP, ports) can identify individuals |
 | L7 (Application) × multi-tenant | Primary coverage | Per-tenant data minimization; tenant ID must not leak across boundaries |
-| L7 × cross-application | ⚠️ Warning | Baggage crosses trust boundaries; apply filter at ingress (§4) |
+| L7 × cross-application | Warning | Baggage crosses trust boundaries; apply filter at ingress (§4) |
 | Release / feature flags × any | Overlap | Feature flag cohort membership may constitute profiling under GDPR Art. 4(4) |
 
 ---

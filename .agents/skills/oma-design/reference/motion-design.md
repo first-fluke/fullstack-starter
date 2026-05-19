@@ -2,6 +2,8 @@
 
 ## Animation Libraries & When to Use
 
+> **`framer-motion` is BANNED.** It is the legacy package name for `motion`. Always import from `motion/react`, never from `framer-motion`. (Package install/manager rules live in the frontend rule.)
+
 | Library         | Import                      | Best For                              |
 |-----------------|-----------------------------|---------------------------------------|
 | motion          | `from "motion/react"`       | Declarative, springs, layout, gestures|
@@ -23,7 +25,7 @@
 
 ### Why Animate
 
-Motion is not decoration — it is information. Every animation must
+Motion is not decoration; it is information. Every animation must
 answer one of these questions for the viewer:
 
 - **Where did this come from?** (origin: slide-in from source direction)
@@ -46,7 +48,7 @@ If the animation does not answer any of these, remove it.
 
 ### Natural Feel
 
-- Use spring physics or ease-out — never linear for UI elements.
+- Use spring physics or ease-out, never linear for UI elements.
   Linear motion looks robotic; springs feel physical.
 - Overshoot (spring damping < 1) is fine for playful UIs; critically
   damped springs suit professional UIs.
@@ -54,11 +56,11 @@ If the animation does not answer any of these, remove it.
 ### Restraint
 
 - Maximum 2-3 animated elements visible simultaneously.
-- If everything moves, nothing stands out — motion hierarchy collapses.
+- If everything moves, nothing stands out; motion hierarchy collapses.
 - The MOST important element should be the ONLY thing moving at the
   moment it needs attention.
 
-## Temporal UX — Motion as Hierarchy
+## Temporal UX: Motion as Hierarchy
 
 Animation duration and sequence are hierarchy signals equal to size,
 color, and position. See `reference/visual-hierarchy.md` (Principle 7:
@@ -92,22 +94,22 @@ first.
 
 ### Reveal Sequence (Stagger as Narrative)
 
-The order of appearance IS the hierarchy. Don't stagger for decoration
-— stagger to tell a story:
+The order of appearance IS the hierarchy. Don't stagger for decoration;
+stagger to tell a story:
 
 ```
 Hero section reveal sequence:
-  0ms   — Badge ("Launching v2.0")      ← context first
-  150ms — Headline                       ← primary message
-  300ms — Subtitle                       ← supporting detail
-  450ms — CTA buttons                    ← action last
+  0ms     Badge ("Launching v2.0")      ← context first
+  150ms   Headline                       ← primary message
+  300ms   Subtitle                       ← supporting detail
+  450ms   CTA buttons                    ← action last
 ```
 
 Why this order: the badge primes the context ("this is new"), the
 headline delivers the core message, the subtitle elaborates, and the
 CTA appears only after the user understands what they're acting on.
 
-Reversing this (CTA first, headline last) would be disorienting — the
+Reversing this (CTA first, headline last) would be disorienting: the
 user sees an action before understanding the context.
 
 ### State Machines (Temporal Transitions)
@@ -132,12 +134,12 @@ Sections that animate into view as the user scrolls create a story arc.
 The viewport is a stage; scrolling is the user turning pages.
 
 Design rules:
-- Each section should have one primary entrance — not 5 elements
+- Each section should have one primary entrance, not 5 elements
   animating independently. Use stagger within the section but treat
   the section as a narrative beat.
 - Scroll-linked parallax (e.g., `useScroll` + `useTransform`) should
   reinforce depth, not just look cool. Background layers move slower
-  than foreground — this is physically accurate parallax.
+  than foreground; this is physically accurate parallax.
 - Never hijack scroll (scroll-jacking). The user's scroll input should
   always produce proportional visual movement.
 
@@ -229,8 +231,8 @@ const prefersReducedMotion = useReducedMotion()
 - DON'T: Animate layout-triggering properties (width, height, top, left)
 - DON'T: Auto-play animations that can't be paused (a11y violation)
 - DON'T: More than 2-3 animated elements visible simultaneously
-- DON'T: Use `will-change` on everything — it consumes GPU memory
-- DON'T: Use `linear` easing for UI elements — looks robotic
+- DON'T: Use `will-change` on everything; it consumes GPU memory
+- DON'T: Use `linear` easing for UI elements; looks robotic
 - DO: Animate only `transform` and `opacity` for 60fps
 - DO: Always honor `prefers-reduced-motion` media query
 - DO: Use `Intersection Observer` to trigger animations only when visible

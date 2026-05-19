@@ -10,13 +10,13 @@ If Serena MCP is available, you may also use `read_memory`/`write_memory`/`edit_
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** `.agents/` directory — never to a subdirectory's `.agents/`.
+All result, progress, and state files MUST be written to the **project root** `.agents/` directory, never to a subdirectory's `.agents/`.
 
 - **Project root** = the git repository root (where `.git` exists)
 - **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
   - `result-{agent-id}-{sessionId}.md` (e.g., `result-frontend-session-20260405-100835.md`)
   - `progress-{agent-id}-{sessionId}.md`
-- **Manual (non-orchestrated) runs**: no suffix — `result-{agent-id}.md`
+- **Manual (non-orchestrated) runs**: no suffix, `result-{agent-id}.md`
 
 ## On Start
 

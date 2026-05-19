@@ -1,4 +1,4 @@
-# TF Infra Agent — Error Recovery Playbook
+# TF Infra Agent: Error Recovery Playbook
 
 ## State Lock Error
 **Symptom:** `Error acquiring the state lock`

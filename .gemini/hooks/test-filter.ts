@@ -3,12 +3,14 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { makePreToolOutput, resolveGitRoot, type Vendor } from "./types.ts";
+import { resolveGitRoot } from "./fs-utils.ts";
+import { makePreToolOutput } from "./hook-output.ts";
+import type { Vendor } from "./types.ts";
 
 // --- Vendor detection (same logic as keyword-detector.ts) ---
 
 function inferVendorFromScriptPath(): Vendor | null {
-  const path = import.meta.path;
+  const path = import.meta.filename;
   if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
   if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
   if (path.includes(`${join(".claude", "hooks")}`)) return "claude";

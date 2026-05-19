@@ -1,4 +1,4 @@
-# Anti-Patterns — AI Design Slop Detection
+# Anti-Patterns: AI Design Slop Detection
 
 > "If you showed this interface to someone and said 'AI made this,'
 >  would they believe you immediately? If yes, that's the problem."
@@ -26,7 +26,7 @@
 - DON'T: Mesh gradient backgrounds as primary visual
 - DON'T: Gradient + glassmorphism + blur combo (triple AI slop)
 - DON'T: Gray text on colored backgrounds without checking contrast
-- DON'T: Pure white (#fff) on pure black (#000) — too harsh, causes eye strain
+- DON'T: Pure white (#fff) on pure black (#000); too harsh, causes eye strain
 - DON'T: Rely on color alone to convey meaning (accessibility violation)
 - DO: Use solid colors or subtle single-hue gradients
 - DO: Derive gradients from brand colors with clear functional purpose
@@ -55,8 +55,8 @@
 - DON'T: Animate layout-triggering properties (width, height, top, left)
 - DON'T: Auto-play animations that cannot be paused (a11y violation)
 - DON'T: More than 2-3 animated elements visible simultaneously
-- DON'T: Use will-change on everything — consumes GPU memory
-- DON'T: Use linear easing for UI elements — looks robotic
+- DON'T: Use will-change on everything; consumes GPU memory
+- DON'T: Use linear easing for UI elements; looks robotic
 - DO: Animate only transform and opacity for 60fps
 - DO: 150ms for micro-interactions, 200-500ms for transitions
 - DO: Always honor prefers-reduced-motion media query
@@ -64,7 +64,7 @@
 - DO: Pause off-screen Canvas/WebGL renderers
 
 ## Components
-- DON'T: Glassmorphism on every element — reserve for badges, nav pills, accent cards
+- DON'T: Glassmorphism on every element; reserve for badges, nav pills, accent cards
 - DON'T: Icon + Title + Description card grid as the only layout pattern
 - DON'T: Hover-only interactions without touch/keyboard alternatives
 - DON'T: Identical card heights forced with arbitrary min-height

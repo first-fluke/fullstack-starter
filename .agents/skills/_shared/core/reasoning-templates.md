@@ -14,7 +14,7 @@ Repeat the loop below when finding the cause of a bug. After 3 iterations withou
 
 Observation: {error message, symptoms, reproduction conditions}
 Hypothesis: "{phenomenon} is caused by {suspected cause}"
-Verification method: {how to verify — code reading, logs, tests, etc.}
+Verification method: {how to verify; code reading, logs, tests, etc.}
 Verification result: {what was actually confirmed}
 Verdict: Correct / Incorrect
 

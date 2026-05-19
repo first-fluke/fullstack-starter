@@ -3,7 +3,7 @@
 ## Step 0: Validate Input
 
 1. Confirm the PDF file path exists
-2. Check file size (`wc -c` or `ls -lh`) — warn if >100MB
+2. Check file size (`wc -c` or `ls -lh`); warn if >100MB
 3. Determine output location:
    - If user specified output path → use it
    - If not specified → use the same directory as the input PDF

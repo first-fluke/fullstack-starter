@@ -1,4 +1,4 @@
-# Checklist — before you run `oma image generate`
+# Checklist: before you run `oma image generate`
 
 - [ ] Prompt is specific about scene, subject, and style (see `prompt-tips.md`).
 - [ ] `--vendor` matches available authenticated CLIs. Run `oma image doctor` if unsure.
@@ -8,7 +8,7 @@
 - [ ] Secrets are not in the prompt, or `--no-prompt-in-manifest` is set.
 - [ ] For `--vendor all`, every enabled vendor is healthy (strict mode exits 5 otherwise).
 
-# Checklist — after the run
+# Checklist: after the run
 
 - [ ] `manifest.json` was written inside the run folder.
 - [ ] Each recorded run has an `ok` status or a classified error.

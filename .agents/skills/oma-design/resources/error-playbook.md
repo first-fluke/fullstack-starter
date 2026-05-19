@@ -20,13 +20,13 @@
 **Symptom**: Design looks generic, fails the "AI made this" test.
 
 **Fix**:
-1. Check anti-patterns.md — identify which patterns triggered
+1. Check anti-patterns.md to identify which patterns triggered
 2. Replace purple gradients with brand-derived colors
 3. Add texture (noise/grain) instead of plain gradients
 4. Vary layout patterns across sections (not all card grids)
 5. Inject project-specific design context from .design-context.md
 6. Replace Inter/Geist with system fonts or project-specific fonts
-7. Remove gratuitous glassmorphism — reserve for 1-2 accent elements
+7. Remove gratuitous glassmorphism; reserve for 1-2 accent elements
 
 **Prevention**: Always run Phase 1 (Setup) to establish project context before designing.
 
@@ -54,7 +54,7 @@
 **Symptom**: Janky scrolling, low FPS, dropped frames, laggy interactions.
 
 **Fix**:
-1. Only animate `transform` and `opacity` — never width, height, top, left
+1. Only animate `transform` and `opacity`; never width, height, top, left
 2. Reduce concurrent animations to max 2-3 visible simultaneously
 3. Pause off-screen Canvas/WebGL with Intersection Observer
 4. Add `will-change: transform` sparingly and remove after animation completes
@@ -77,7 +77,7 @@
 4. For OAuth: re-authenticate with `npx @_davideast/stitch-mcp init`
 5. For API key: verify STITCH_API_KEY environment variable is set
 
-**Fallback**: Proceed without Stitch — all workflow phases work standalone.
+**Fallback**: Proceed without Stitch; all workflow phases work standalone.
 
 ---
 
@@ -89,7 +89,7 @@
 1. Re-read DESIGN.md and compare against generated code
 2. Search for hardcoded hex values: `grep -r "#[0-9a-fA-F]\{6\}" src/`
 3. Replace hardcoded values with CSS custom properties or Tailwind theme tokens
-4. Check for arbitrary Tailwind values (e.g., `text-[13px]`) — replace with scale values
+4. Check for arbitrary Tailwind values (e.g., `text-[13px]`); replace with scale values
 5. Verify spacing uses 8px grid multiples only
 
 **Prevention**: Generate CSS custom properties from DESIGN.md before writing component code.
@@ -104,7 +104,7 @@
 1. Verify all color tokens have both :root and .dark variants
 2. Check for hardcoded colors that bypass the theme system
 3. Ensure borders use alpha transparency (border-white/10) not gray hex values
-4. Test both themes end-to-end — toggle and check every section
+4. Test both themes end-to-end; toggle and check every section
 5. Add system preference detection: prefers-color-scheme media query
 
 **Prevention**: Define complete light and dark token sets in DESIGN.md before implementing.

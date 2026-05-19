@@ -49,7 +49,7 @@ Execute each hypothesis **in isolation**.
   Task: "Fix input validation using Hypothesis A: Zod schema at router level.
          Context: Previous attempt (raw regex) failed QA twice."
   ```
-- Agents use existing IDs — no new agent definitions needed
+- Agents use existing IDs; no new agent definitions needed
 - Each agent works in a separate workspace (`-w ./hyp-a`, `-w ./hyp-b`)
 - Result files differentiated by workspace, not agent ID
 

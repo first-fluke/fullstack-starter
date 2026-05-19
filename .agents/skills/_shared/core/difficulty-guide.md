@@ -28,7 +28,7 @@ All agents assess task difficulty at the start and apply the appropriate protoco
 ## Protocol Branching
 
 ### Simple → Fast Track
-1. ~~Step 1 (Analyze)~~: Skip — proceed directly to implementation
+1. ~~Step 1 (Analyze)~~: Skip; proceed directly to implementation
 2. **Pre-check**: Confirm whether test files exist for the target module (e.g., `__tests__/`, `*.test.*`)
 3. Step 3 (Implement): Implementation
 4. Step 4 (Verify): Minimal checklist items:

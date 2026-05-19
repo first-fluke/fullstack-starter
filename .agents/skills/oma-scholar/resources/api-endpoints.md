@@ -2,7 +2,7 @@
 
 Base URL: `https://knows.academy`
 
-All endpoints are public proxies — **no authentication required**. Do not invent or send `Authorization` headers.
+All endpoints are public proxies. **No authentication required**, so do not invent or send `Authorization` headers.
 
 ## Search
 
@@ -42,7 +42,7 @@ Response shape (verified):
 }
 ```
 
-`record_id` format: `knows:generated/{slug}/{version}` — includes colons and slashes that **must be URL-encoded** when used as a path/query param.
+`record_id` format: `knows:generated/{slug}/{version}` includes colons and slashes that **must be URL-encoded** when used as a path/query param.
 
 ## Fetch Full Sidecar
 
@@ -50,7 +50,7 @@ Response shape (verified):
 GET /api/proxy/sidecars/{record_id}
 ```
 
-The full v0.9.0 record (~22 KB / ~4.5K tokens — 55% smaller than the source PDF).
+The full v0.9.0 record (~22 KB / ~4.5K tokens, 55% smaller than the source PDF).
 
 ```bash
 RID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('knows:generated/{slug}/1.0.0', safe=''))")
@@ -72,7 +72,7 @@ Available sections (verified):
 - `artifacts`
 - `citation`
 
-**Not available** via partial fetch: `methods` (statement_type), `provenance` — fetch the full sidecar instead.
+**Not available** via partial fetch: `methods` (statement_type), `provenance`. Fetch the full sidecar instead.
 
 ```bash
 RID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('knows:generated/{slug}/1.0.0', safe=''))")
@@ -157,7 +157,7 @@ No hard limits documented. Be polite:
 
 ## URL Encoding
 
-`record_id` contains `:` and `/` — always URL-encode when placing in a path or query parameter. Examples:
+`record_id` contains `:` and `/`, so always URL-encode when placing in a path or query parameter. Examples:
 
 ```bash
 # Bash with python3
@@ -170,5 +170,5 @@ echo -n "$RAW_RID" | jq -sRr @uri
 ## Notes
 
 - Endpoints starting with `/api/proxy/` are stable public routes
-- Direct (non-proxy) endpoints may exist but are not contract-stable — do not rely on them
+- Direct (non-proxy) endpoints may exist but are not contract-stable; do not rely on them
 - This skill **only consumes** the API. Submission/upload is out of scope

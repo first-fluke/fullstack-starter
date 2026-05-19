@@ -94,14 +94,14 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 ```text
 1. Define API/data contracts.
 2. Decompose tasks with agent, title, priority, dependencies, and acceptance criteria.
-3. Save `.agents/results/plan-{sessionId}.json` and `.agents/results/current-plan.md`.
+3. Save `.agents/results/plan-{sessionId}.json` and `.agents/results/result-pm.md`.
 ```
 
 ### Resource scope
 | Scope | Resource target |
 |-------|-----------------|
 | `MEMORY` | Requirements, assumptions, dependencies |
-| `LOCAL_FS` | `.agents/results/plan-{sessionId}.json`, `.agents/results/current-plan.md` |
+| `LOCAL_FS` | `.agents/results/plan-{sessionId}.json`, `.agents/results/result-pm.md` |
 | `CODEBASE` | Optional project context and API/data model references |
 
 ### Preconditions
@@ -132,7 +132,7 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 Follow `resources/execution-protocol.md` step by step.
 See `resources/examples.md` for input/output examples.
 Use `resources/iso-planning.md` when the user needs standards-based planning, risk framing, or governance-oriented recommendations.
-Save plan to `.agents/results/plan-{sessionId}.json` and `.agents/results/current-plan.md`.
+Save plan to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-pm.md`.
 Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
 Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Execution steps: `resources/execution-protocol.md`

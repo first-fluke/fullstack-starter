@@ -11,7 +11,7 @@ vendors:
     model: gpt-image-2
     extra_args: []
   gemini:
-    # Disabled by default — Gemini image models require billing on AI Studio
+    # Disabled by default; Gemini image models require billing on AI Studio
     # or Vertex AI. Flip to true after enabling billing + setting GEMINI_API_KEY.
     enabled: false
     model: gemini-2.5-flash-image

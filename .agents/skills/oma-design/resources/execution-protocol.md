@@ -1,4 +1,4 @@
-# Execution Protocol — 7-Phase Design Workflow
+# Execution Protocol: 7-Phase Design Workflow
 
 ## Phase 1: SETUP (Context Gathering)
 
@@ -6,10 +6,10 @@ Check for `.design-context.md` in the project root.
 
 If it does not exist:
 1. Scan codebase for existing design signals:
-   - `package.json` — font packages, UI libraries, CSS framework
-   - Tailwind config — existing theme, colors, fonts
-   - Existing CSS/SCSS — design tokens, custom properties
-   - `DESIGN.md` — if already present, use as starting point
+   - `package.json`: font packages, UI libraries, CSS framework
+   - Tailwind config: existing theme, colors, fonts
+   - Existing CSS/SCSS: design tokens, custom properties
+   - `DESIGN.md`: if already present, use as starting point
 2. Ask the user (one question at a time, prefer multiple-choice):
    - What languages does the service support? (determines font strategy)
    - Who is the target audience? (B2B/B2C, age range, tech level)
@@ -28,7 +28,7 @@ After `.design-context.md` exists (either newly created or already present):
 2. Load `resources/getdesign-fetcher.md` and run its Matching Algorithm
    against the live `getdesign@latest` manifest.
 3. Hold the resolved brand list in memory for Phase 2. No disk write.
-4. If zero matches, continue silently — vendor inspiration is optional.
+4. If zero matches, continue silently; vendor inspiration is optional.
 
 ### Stitch MCP Check (Optional)
 If the user wants to use Stitch for design extraction or generation:
@@ -46,19 +46,19 @@ If the user wants to use Stitch for design extraction or generation:
 Phase 2 runs through branches in priority order. Use the first branch
 that has data; subsequent branches are fallbacks.
 
-### Branch A — Stitch MCP (highest priority when available)
+### Branch A: Stitch MCP (highest priority when available)
 1. `list_projects` → find the relevant project
 2. `get_project` → extract `designTheme` (colors, fonts, roundness)
 3. `list_screens` → enumerate all screens
 4. `get_screen_code` → download HTML/CSS for analysis
 5. Extract design tokens → synthesize into DESIGN.md draft
 
-### Branch B — getdesign Vendor Seed
+### Branch B: getdesign Vendor Seed
 Triggered when Phase 1 resolved at least one vendor brand from the
 `## Reference Sites` section.
 
 1. For each resolved brand: follow `resources/getdesign-fetcher.md`
-   steps — fetch via `bunx getdesign@latest add <brand> --out <tmp>`
+   steps. Fetch via `bunx getdesign@latest add <brand> --out <tmp>`
    with `GETDESIGN_DISABLE_TELEMETRY=1`, verify the SHA256 against the
    manifest `templateHash`, then load the file into context with the
    prompt-injection framing described in the fetcher doc.
@@ -71,7 +71,7 @@ Triggered when Phase 1 resolved at least one vendor brand from the
    color/spacing/components/depth/responsive; reject typography;
    rewrite theme/do-don't/agent-prompt-guide in Phase 5.
 
-### Branch C — Reference URL (no Stitch, no vendor seed)
+### Branch C: Reference URL (no Stitch, no vendor seed)
 1. If the user supplied a URL that did not match any getdesign brand:
    fetch and analyze HTML/CSS directly.
 2. Extract: font families, color values, spacing patterns, component
@@ -79,7 +79,7 @@ Triggered when Phase 1 resolved at least one vendor brand from the
 3. Translate raw values into the 9-section DESIGN.md format
    (`resources/design-md-spec.md`).
 
-### Branch D — No Reference
+### Branch D: No Reference
 Skip to Phase 3.
 
 ---
@@ -87,7 +87,7 @@ Skip to Phase 3.
 ## Phase 3: ENHANCE (Prompt Augmentation)
 
 **Skip Phase 3 entirely if Phase 2 Branch B (getdesign vendor seed) was
-triggered** — a vendor seed already carries section-by-section detail,
+triggered.** A vendor seed already carries section-by-section detail,
 so further prompt enhancement would duplicate work. Jump straight to
 Phase 4 PROPOSE.
 
@@ -106,7 +106,7 @@ If the request is already detailed: skip to Phase 4.
 
 ## Phase 4: PROPOSE (Multi-Concept)
 
-### Default — No vendor seed
+### Default: No vendor seed
 Present 2-3 distinct design directions. Each direction must include:
 
 1. **Color palette**: 5-7 colors with semantic names and functional roles
@@ -122,13 +122,13 @@ Present as a comparison table with pros/cons for each direction.
 Replace the "2-3 distinct directions" rule with a **3-variation
 formula** anchored on the seed:
 
-- **A — Faithful**: stay as close to the vendor template as possible;
+- **A (Faithful)**: stay as close to the vendor template as possible;
   apply only the mandatory Seed Application Rules (typography override
   for CJK, anti-pattern removal flagged in Phase 2 pre-audit).
-- **B — Hybrid**: blend the seed's color/spacing/components with the
+- **B (Hybrid)**: blend the seed's color/spacing/components with the
   project's brand tone from `.design-context.md`. This is usually the
   best default for production work.
-- **C — Loose inspiration**: keep only the seed's structural patterns
+- **C (Loose inspiration)**: keep only the seed's structural patterns
   (rhythm, density, component philosophy) and rebuild the visual layer
   from the project brand.
 
@@ -151,7 +151,7 @@ presenting variations A/B/C.
 Based on the chosen direction:
 
 1. Write `DESIGN.md` following `resources/design-md-spec.md`
-   (9 sections — including the mandatory Section 9 "Agent Prompt
+   (9 sections, including the mandatory Section 9 "Agent Prompt
    Guide" with Quick Color Reference, Example Component Prompts, and
    Iteration Guide).
 2. If a vendor seed fed Phase 2, apply the Seed Application Rules from
@@ -184,13 +184,13 @@ Every section must specify:
 
 The final audit below runs against the synthesized DESIGN.md. Note
 that Phase 2 Branch B already ran a **pre-audit** on any vendor seeds
-before synthesis — those findings should appear as decisions in the
+before synthesis. Those findings should appear as decisions in the
 final DESIGN.md Section 7 (Do's and Don'ts) rather than as violations
 here.
 
 Load `resources/checklist.md` and run all checks in order:
 
-1. **Responsive** (MANDATORY — run first)
+1. **Responsive** (MANDATORY, run first)
    - All sections render at 375px width
    - No horizontal scroll
    - Touch targets >= 44x44pt

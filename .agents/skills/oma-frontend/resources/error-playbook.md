@@ -11,7 +11,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 1. **STOP. This is a fatal self-error.** Next.js 16+ renamed `middleware.ts` → `proxy.ts`.
 2. The canonical request-proxy / auth-gate file is `proxy.ts` (root or `src/`) exporting a `proxy` function.
-3. `middleware.ts` is BANNED in this project — not "deprecated", BANNED. Touch it and you die.
+3. `middleware.ts` is BANNED in this project, not "deprecated", BANNED. Touch it and you die.
 4. Verify by checking `package.json` for `next@16+`; `proxy.ts` is the only correct answer.
 5. Reference: https://nextjs.org/docs/messages/middleware-to-proxy
 6. **Retract the finding.** Do NOT raise this as critical / security / medium / low at any severity.
@@ -22,12 +22,12 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `TS2322`, `TS2345`, `Type X is not assignable to type Y`
 
-1. Read the error — which file, which line, which types conflict
+1. Read the error: which file, which line, which types conflict
 2. Check: is the interface/type definition correct?
 3. Check: is the API response type matching the expected shape?
 4. If API mismatch: update the type to match actual response (don't cast with `as any`)
 5. If generic issue: use explicit type parameter `<Type>` instead of inference
-6. **NEVER do this**: `@ts-ignore`, `as any` — hides type issues without resolving them
+6. **NEVER do this**: `@ts-ignore`, `as any` (hides type issues without resolving them)
 
 ---
 
@@ -35,8 +35,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `next build` fails, `Module not found`, `SyntaxError`
 
-1. Read the full error — which module, which file
-2. If missing dependency: note in result as "requires `npm install X`" — do NOT install yourself
+1. Read the full error: which module, which file
+2. If missing dependency: note in result as "requires `npm install X`"; do NOT install yourself
 3. If import path wrong: use `search_for_pattern("export.*ComponentName")` to find actual path
 4. If dynamic import issue: ensure component is client-side (`'use client'`)
 5. Re-run build after fix to confirm
@@ -47,7 +47,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `vitest` FAILED, `expect(X).toBe(Y)` assertion errors
 
-1. Read the error — expected vs received, which test file
+1. Read the error: expected vs received, which test file
 2. `find_symbol("ComponentName")` to check current implementation
 3. Determine: test outdated or implementation wrong?
    - Test expects old behavior → update test
@@ -75,8 +75,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `Network Error`, `CORS`, `401 Unauthorized`, wrong data shape
 
-1. **CORS**: Check backend CORS config — is frontend origin allowed?
-2. **401**: Check token — is it in the header? is it expired?
+1. **CORS**: Check backend CORS config; is frontend origin allowed?
+2. **401**: Check token; is it in the header? is it expired?
 3. **Wrong data**: Log `response.data` and compare with expected type
 4. **Network Error**: Is the backend running? Correct port?
 5. If backend isn't your responsibility: document the expected API contract in result
@@ -87,8 +87,8 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: Component renders but looks wrong, responsive breakpoint fails
 
-1. Check Tailwind classes — typo? wrong breakpoint prefix?
-2. Check parent container — is it blocking layout? (`overflow-hidden`, fixed width)
+1. Check Tailwind classes: typo? wrong breakpoint prefix?
+2. Check parent container: is it blocking layout? (`overflow-hidden`, fixed width)
 3. Test at specific breakpoints: 320px, 768px, 1024px, 1440px
 4. Use browser DevTools to inspect computed styles
 5. If dark mode issue: check `dark:` variants applied
@@ -99,7 +99,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 **Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
 
-1. **Stop immediately** — do not make additional API calls
+1. **Stop immediately**: do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`
 3. Record Status: `quota_exceeded` in `result-{agent-id}[-{sessionId}].md`
 4. Specify remaining tasks
@@ -118,4 +118,4 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method
 - **Blocked**: If no progress after 5 turns, save current state and record `Status: blocked`
-- **Out of scope**: If you find backend issues, only record in result — do not modify directly
+- **Out of scope**: If you find backend issues, only record in result; do not modify directly

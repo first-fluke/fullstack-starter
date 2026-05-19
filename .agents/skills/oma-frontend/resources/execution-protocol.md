@@ -1,15 +1,15 @@
 # Frontend Agent - Execution Protocol
 
 ## Step 0: Prepare
-1. **Assess difficulty** — see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons** — read your domain section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements** — follow `../../_shared/core/clarification-protocol.md`
+2. **Check lessons**: read your domain section in `../../_shared/core/lessons-learned.md`
+3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context** — follow `../../_shared/core/context-budget.md` (read symbols, not whole files)
+4. **Budget context**: follow `../../_shared/core/context-budget.md` (read symbols, not whole files)
 
-**⚠️ Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
+**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
 
 Follow these steps in order (adjust depth by difficulty).
 
@@ -36,7 +36,6 @@ Follow these steps in order (adjust depth by difficulty).
   4. Feature components (compose UI + logic)
   5. Page components (route-level)
   6. Tests (unit + integration)
-- Use `resources/component-template.tsx` as reference
 - Follow `resources/tailwind-rules.md` for styling
 
 ## Step 4: Verify

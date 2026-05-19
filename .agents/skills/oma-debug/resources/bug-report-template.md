@@ -12,12 +12,12 @@ Save to: `.agents/results/bugs/bug-YYYYMMDD-[short-description].md`
 **Date Fixed**: YYYY-MM-DD (or "In Progress")
 **Reporter**: [User name or issue number]
 **Assignee**: [Agent that fixed it]
-**Severity**: 🔴 CRITICAL | 🟠 HIGH | 🟡 MEDIUM | 🔵 LOW
-**Status**: 🐛 OPEN | 🔧 IN PROGRESS | ✅ FIXED | ⏸️ ON HOLD | ❌ WON'T FIX
+**Severity**: CRITICAL | HIGH | MEDIUM | LOW
+**Status**: OPEN | IN PROGRESS | FIXED | ON HOLD | WON'T FIX
 
 ---
 
-## 📝 Problem Description
+## Problem Description
 
 **What happened?**
 [Clear description of the bug from user's perspective]
@@ -32,7 +32,7 @@ Save to: `.agents/results/bugs/bug-YYYYMMDD-[short-description].md`
 
 ---
 
-## 🔄 Reproduction Steps
+## Reproduction Steps
 
 1. Navigate to [page/route]
 2. Click on [button/element]
@@ -46,7 +46,7 @@ Save to: `.agents/results/bugs/bug-YYYYMMDD-[short-description].md`
 
 ---
 
-## 🖼️ Evidence
+## Evidence
 
 **Error Messages**:
 ```
@@ -77,7 +77,7 @@ Response: [relevant response data]
 
 ---
 
-## 🌍 Environment
+## Environment
 
 **Frontend**:
 - Browser: [Chrome 120 | Firefox 121 | Safari 17]
@@ -97,7 +97,7 @@ Response: [relevant response data]
 
 ---
 
-## 🔍 Investigation
+## Investigation
 
 ### Initial Analysis
 
@@ -130,7 +130,7 @@ const user = data.user.profile.name; // Crashes if profile is undefined
 
 ---
 
-## 🔧 Solution
+## Solution
 
 ### Fix Applied
 
@@ -142,10 +142,10 @@ const user = data.user.profile.name; // Crashes if profile is undefined
 ```typescript
 // File: path/to/file.tsx (line 145)
 
-// ❌ BEFORE (buggy code)
+// BEFORE (buggy code)
 const user = data.user.profile.name;
 
-// ✅ AFTER (fixed code)
+// AFTER (fixed code)
 const user = data?.user?.profile?.name ?? 'Unknown';
 ```
 
@@ -154,9 +154,9 @@ const user = data?.user?.profile?.name ?? 'Unknown';
 
 ### Files Modified
 
-- ✏️ `src/components/UserProfile.tsx` - Added null check for profile
-- ✏️ `src/lib/api/users.ts` - Improved error handling
-- ➕ `src/components/UserProfile.test.tsx` - Added regression test
+- `src/components/UserProfile.tsx` - Added null check for profile
+- `src/lib/api/users.ts` - Improved error handling
+- `src/components/UserProfile.test.tsx` - Added regression test
 
 ### Migration/Deployment Notes
 
@@ -167,7 +167,7 @@ const user = data?.user?.profile?.name ?? 'Unknown';
 
 ---
 
-## ✅ Verification
+## Verification
 
 ### Testing Performed
 
@@ -188,14 +188,14 @@ const user = data?.user?.profile?.name ?? 'Unknown';
 
 ### Test Results
 
-**Unit Tests**: ✅ 15/15 passing
-**Integration Tests**: ✅ 8/8 passing
-**E2E Tests**: ✅ 3/3 passing
-**Manual QA**: ✅ Verified on Chrome, Firefox, Safari
+**Unit Tests**: 15/15 passing
+**Integration Tests**: 8/8 passing
+**E2E Tests**: 3/3 passing
+**Manual QA**: Verified on Chrome, Firefox, Safari
 
 ---
 
-## 📚 Prevention
+## Prevention
 
 ### How to Avoid Similar Bugs
 
@@ -208,20 +208,20 @@ const user = data?.user?.profile?.name ?? 'Unknown';
 ### Code Patterns to Follow
 
 ```typescript
-// ✅ GOOD: Safe access with fallback
+// GOOD: Safe access with fallback
 const name = user?.profile?.name ?? 'Anonymous';
 
-// ✅ GOOD: Explicit null check
+// GOOD: Explicit null check
 if (user?.profile) {
   const name = user.profile.name;
 }
 
-// ✅ GOOD: Early return
+// GOOD: Early return
 if (!user?.profile) {
   return <div>No profile available</div>;
 }
 
-// ❌ BAD: Unsafe nested access
+// BAD: Unsafe nested access
 const name = user.profile.name; // Crashes if profile undefined
 ```
 
@@ -233,7 +233,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 ---
 
-## 🔗 Related
+## Related
 
 **Similar Bugs**:
 - Bug #123: Similar null check issue in `CommentList`
@@ -252,7 +252,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 ---
 
-## 📊 Metrics
+## Metrics
 
 **Time to Fix**: [2 hours | 1 day | 1 week]
 **Lines Changed**: [+15 -5]
@@ -261,7 +261,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 ---
 
-## 💬 Communication
+## Communication
 
 **Notified**:
 - [x] Product Manager - Impact assessment
@@ -277,7 +277,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 ---
 
-## 🎓 Lessons Learned
+## Lessons Learned
 
 **What went well**:
 - Quick identification of root cause
@@ -297,7 +297,7 @@ const name = user.profile.name; // Crashes if profile undefined
 
 ---
 
-## 🏷️ Tags
+## Tags
 
 `frontend` `null-check` `crash` `typescript` `user-profile` `high-priority`
 

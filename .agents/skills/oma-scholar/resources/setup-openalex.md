@@ -1,6 +1,6 @@
 # OpenAlex API Key Setup (Optional)
 
-OpenAlex powers metadata enrichment during Generate mode — backfilling missing DOI, venue, and year from a vast academic catalog. **The skill works without a key**, but enrichment is skipped.
+OpenAlex powers metadata enrichment during Generate mode by backfilling missing DOI, venue, and year from a vast academic catalog. **The skill works without a key**, but enrichment is skipped.
 
 ## When you need this
 
@@ -66,7 +66,7 @@ A 200 response with JSON results means the key is live.
 
 ## Pricing Beyond Free Tier
 
-OpenAlex uses pay-as-you-go past the daily free allowance — no monthly subscription. Most academic users never exceed the free tier. See https://openalex.org/pricing for current rates.
+OpenAlex uses pay-as-you-go past the daily free allowance, with no monthly subscription. Most academic users never exceed the free tier. See https://openalex.org/pricing for current rates.
 
 ## Skill Behavior
 
@@ -81,5 +81,5 @@ When this skill needs metadata enrichment:
 ## Privacy
 
 - The key (or email) is sent to OpenAlex servers as a query parameter
-- No source paper content is sent to OpenAlex — only title/author search strings
+- No source paper content is sent to OpenAlex; only title/author search strings
 - OpenAlex is operated by OurResearch (a non-profit); see their privacy policy at https://openalex.org/

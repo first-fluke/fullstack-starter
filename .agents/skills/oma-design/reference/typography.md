@@ -33,11 +33,11 @@ Only add custom fonts when:
 ```css
 --font-body: 'Noto Sans', system-ui, sans-serif;
 ```
-Noto Sans covers 1000+ languages — best for international products.
+Noto Sans covers 1000+ languages, best for international products.
 
 ## Font Pairing Patterns
 - **Display + Body**: serif heading + sans-serif body (classic contrast)
-- **Mono accent**: JetBrains Mono, Fira Code — for code/data-heavy UIs
+- **Mono accent**: JetBrains Mono, Fira Code (for code/data-heavy UIs)
 - **Variable fonts preferred**: fewer HTTP requests, finer weight/width control
 
 ## Type Scale
@@ -76,6 +76,6 @@ font-size: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
 - DON'T: Use light font-weight (300) for body on dark backgrounds without testing contrast
 - DON'T: Apply identical letter-spacing to headings and body
 - DON'T: Use latin-only fonts when the service targets CJK users
-- DO: Test CJK characters at every size — they need more line-height than latin
+- DO: Test CJK characters at every size; they need more line-height than latin
 - DO: Use `font-display: swap` for custom fonts to prevent FOIT
 - DO: Subset fonts to only needed character ranges for performance

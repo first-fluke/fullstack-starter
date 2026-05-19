@@ -4,16 +4,16 @@ otel_semconv: "1.27.0 (2024-11)"
 
 # L4 Transport Layer Observability
 
-> **DISAMBIGUATION — read before proceeding.**
+> **DISAMBIGUATION; read before proceeding.**
 >
-> This file covers **observing the OSI Layer 4 (TCP/UDP/QUIC) transport in your application systems** —
+> This file covers **observing the OSI Layer 4 (TCP/UDP/QUIC) transport in your application systems**; 
 > retransmits, RTT, connection lifecycle, eBPF-based socket instrumentation, and QUIC/HTTP3 semantics.
 >
 > This file is **NOT** about the observability pipeline transport:
-> - `../transport/udp-statsd-mtu.md` — StatsD payload sizing over UDP
-> - `../transport/otlp-grpc-vs-http.md` — OTLP exporter protocol choice
-> - `../transport/collector-topology.md` — OTel Collector deployment topologies
-> - `../transport/sampling-recipes.md` — tail/head sampling strategies
+> - `../transport/udp-statsd-mtu.md`; StatsD payload sizing over UDP
+> - `../transport/otlp-grpc-vs-http.md`; OTLP exporter protocol choice
+> - `../transport/collector-topology.md`; OTel Collector deployment topologies
+> - `../transport/sampling-recipes.md`; tail/head sampling strategies
 >
 > The word "transport" is overloaded. When a cross-reference says `transport/`, it refers to the
 > observability pipeline. When it says "L4", "TCP/UDP/QUIC", or this filename, it refers to this file.
@@ -38,7 +38,7 @@ Source: <https://opentelemetry.io/docs/specs/semconv/attributes-registry/network
 | `network.transport` | `tcp`, `udp`, `unix`, `pipe`, `quic` | **Stable** | Set on spans and metrics describing a socket |
 | `network.protocol.name` | `http`, `grpc`, `amqp`, … | **Stable** | Application protocol over the transport |
 | `network.protocol.version` | `1.1`, `2`, `3` | **Stable** | `3` = HTTP/3 over QUIC |
-| `network.peer.address` | IP or hostname | **Stable** | Apply IP-masking before retention — `../signals/privacy.md §IP addresses` |
+| `network.peer.address` | IP or hostname | **Stable** | Apply IP-masking before retention; `../signals/privacy.md §IP addresses` |
 | `network.connection.state` | `established`, `close_wait`, … | **Development** | Do not build SLOs against this; schema may change |
 | `network.connection.type` | `wifi`, `cell`, … | **Development** | Mobile/RUM only; flag in production use |
 
@@ -171,14 +171,14 @@ LISTEN → SYN_RECEIVED → ESTABLISHED → (data transfer)
 | FIN_WAIT / TIME_WAIT | TIME_WAIT gauge; ephemeral port pressure | hostmetrics `/proc/net/sockstat` |
 | CLOSE_WAIT growth | Server not releasing half-open connections | hostmetrics + eBPF alert |
 
-**TLS handshake boundary.** TLS sits at L4/L5. `tls.*` semconv is Development tier — do not build
+**TLS handshake boundary.** TLS sits at L4/L5. `tls.*` semconv is Development tier; do not build
 production SLOs on it. Use eBPF uprobes on OpenSSL/BoringSSL or vendor tooling for handshake latency.
 Cross-ref: `../signals/privacy.md §TLS context`.
 
 **Keepalive tuning.** TCP keepalive interval must be shorter than the upstream LB idle timeout
 (AWS ALB: 60 s; AWS NLB: 350 s; GCP CLB: 600 s default). Mismatches cause silent connection resets.
 
-**WebSocket and gRPC streams** — full lifecycle coverage is deferred to L7 (`../standards.md §5`).
+**WebSocket and gRPC streams**; full lifecycle coverage is deferred to L7 (`../standards.md §5`).
 Long-lived streams mitigate TIME_WAIT accumulation but introduce reconnection-storm risk on restart.
 
 ---
@@ -213,7 +213,7 @@ distinguishing 0-RTT from 1-RTT connections to detect replay exposure on non-ide
 
 ### 7.4 Firewall and Enterprise Deployment Considerations
 
-Enterprise networks frequently block outbound UDP 443 and UDP 8443 because legacy firewall rules assume HTTP(S) is TCP-only. QUIC (and therefore HTTP/3) rides on UDP and silently falls back to HTTP/1.1 or HTTP/2 when UDP is blocked — the fallback is invisible to application telemetry unless you instrument it.
+Enterprise networks frequently block outbound UDP 443 and UDP 8443 because legacy firewall rules assume HTTP(S) is TCP-only. QUIC (and therefore HTTP/3) rides on UDP and silently falls back to HTTP/1.1 or HTTP/2 when UDP is blocked; the fallback is invisible to application telemetry unless you instrument it.
 
 Detect QUIC blocking:
 - Emit `network.transport` attribute on client spans; compare ratio of `quic` vs `tcp` across deployment zones
@@ -227,10 +227,10 @@ Action: coordinate with network security to allowlist UDP 443/8443 for validated
 | Tool | QUIC support |
 |------|-------------|
 | Envoy 1.29+ | QUIC upstream and downstream; stats in admin API and access logs |
-| Istio 1.22+ | QUIC upstream via Envoy; mTLS over QUIC experimental — see `layers/mesh.md` |
+| Istio 1.22+ | QUIC upstream via Envoy; mTLS over QUIC experimental; see `layers/mesh.md` |
 | Grafana Beyla | HTTP/3 uprobes in roadmap; verify release notes before QUIC-heavy deployments |
-| Cloudflare QUIC telemetry | <https://blog.cloudflare.com/tag/quic/> — public connection migration + 0-RTT metrics |
-| Google QUIC metrics | <https://research.google> — packet loss recovery timing |
+| Cloudflare QUIC telemetry | <https://blog.cloudflare.com/tag/quic/>; public connection migration + 0-RTT metrics |
+| Google QUIC metrics | <https://research.google>; packet loss recovery timing |
 
 ---
 
@@ -244,20 +244,20 @@ Action: coordinate with network security to allowlist UDP 443/8443 for validated
 
 ---
 
-## 9. Matrix Cells — L4 Row
+## 9. Matrix Cells: L4 Row
 
 From `../matrix.md §L4-transport`:
 
 | Cell | Symbol | Rationale |
 |------|--------|-----------|
-| L4 × cross-application × traces | ⚠️ | TCP is not trace-native; log socket 5-tuple for post-hoc correlation to L7 spans only |
-| L4 × * × profiles | ✅ | eBPF off-CPU profiling via Parca captures kernel socket overhead and network-wait; pprof output |
-| L4 × privacy (all boundaries) | ⚠️ | Source/destination IPs in TCP logs are PII (GDPR Art. 4(1)); apply masking at pipeline ingress |
-| L4 × SLO and L4 × release | ❌ | SLO budgets and release markers are application-layer; TCP health is infra-SLI fallback only |
+| L4 × cross-application × traces | PARTIAL | TCP is not trace-native; log socket 5-tuple for post-hoc correlation to L7 spans only |
+| L4 × * × profiles | PASS | eBPF off-CPU profiling via Parca captures kernel socket overhead and network-wait; pprof output |
+| L4 × privacy (all boundaries) | PARTIAL | Source/destination IPs in TCP logs are PII (GDPR Art. 4(1)); apply masking at pipeline ingress |
+| L4 × SLO and L4 × release | N/A | SLO budgets and release markers are application-layer; TCP health is infra-SLI fallback only |
 
 ---
 
-## 10. Anti-Patterns — Candidates for `../anti-patterns.md §Section H`
+## 10. Anti-Patterns: Candidates for `../anti-patterns.md §Section H`
 
 **H-L4-1: Connection pool observability absent.** Pool queue saturation is invisible in TCP metrics
 alone; neither retransmit rate nor error rate spikes until the pool times out. Instrument pool size,

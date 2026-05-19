@@ -1,22 +1,22 @@
-# TF Infra Agent — Execution Protocol
+# TF Infra Agent: Execution Protocol
 
 ## Step 0: Prepare
 
-1. **Assess difficulty** — see `../../_shared/core/difficulty-guide.md`
+1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
    - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons** — read the infrastructure section in `../../_shared/core/lessons-learned.md` for past Terraform pitfalls
-3. **Clarify requirements** — follow `../../_shared/core/clarification-protocol.md`
+2. **Check lessons**: read the infrastructure section in `../../_shared/core/lessons-learned.md` for past Terraform pitfalls
+3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
    - Check **Uncertainty Triggers**: IAM/security, compliance (PII, residency, audit), cost/sizing, existing-resource or state conflicts, provider/region ambiguity?
    - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context** — follow `../../_shared/core/context-budget.md` (read symbols and file overviews, not whole files)
+4. **Budget context**: follow `../../_shared/core/context-budget.md` (read symbols and file overviews, not whole files)
 
-**⚠️ Intelligent Escalation**: When uncertain, escalate early. Provisioning on wrong assumptions costs more than asking. Don't blindly proceed.
+**Intelligent Escalation**: When uncertain, escalate early. Provisioning on wrong assumptions costs more than asking. Don't blindly proceed.
 
 Follow these steps in order (adjust depth by difficulty).
 
 ## Step 1: Analyze
 
-1. **Identify Cloud Provider** — Detect from `provider.tf`, backend config, or existing resources
+1. **Identify Cloud Provider**: Detect from `provider.tf`, backend config, or existing resources
 2. Scan existing Terraform files for naming conventions, module patterns, and state configuration
 3. Identify required services, resource dependencies, and security constraints
 4. Load domain-specific references:

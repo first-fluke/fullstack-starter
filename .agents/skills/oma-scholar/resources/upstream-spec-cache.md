@@ -21,7 +21,7 @@ Recommend refreshing every 1-2 weeks until the upstream stabilizes.
 
 ---
 
-## Snapshot — captured 2026-04-25
+## Snapshot (captured 2026-04-25)
 
 ```markdown
 # Knows Sidecar Skill — Complete Reference
@@ -99,14 +99,14 @@ Use descriptive kebab-case with prefix: `stmt:privacy-budget-tradeoff`, `ev:cifa
 
 ## Local Adaptations
 
-Where our local skill diverges from upstream — recorded for spec drift tracking:
+Where our local skill diverges from upstream (recorded for spec drift tracking):
 
 1. **Generation engine**: upstream suggests `pip install anthropic`; we use the host LLM directly (no subprocess SDK call). Cost and key savings.
 2. **Validation tooling**: upstream references `pip install knows-sidecar`; that package is **not yet on PyPI** (verified 2026-04-25). We ship rule-based validation as the `oma scholar lint` CLI subcommand (TypeScript, no Python dependency).
 3. **JSON Schema host unreachable**: production sidecars reference `https://knows.dev/schema/record-0.9.json` but the host's HTTPS port times out. We cannot redistribute or fetch the schema, so lint encodes empirically-derived rules instead.
 4. **Submission**: not implemented. This skill is read/generate-only, not a publisher.
 
-## v0.9.0 Production Spec — Differences From Upstream `knows.md`
+## v0.9.0 Production Spec: Differences From Upstream `knows.md`
 
 The upstream `knows.md` document above describes a simplified shape; production
 sidecars served by `knows.academy/api/proxy/sidecars/*` follow the v0.9.0 schema
@@ -126,31 +126,31 @@ Key differences:
 
 Not mentioned in upstream `knows.md` but present in every production sidecar:
 
-- `$schema` — URL of the JSON Schema (currently unreachable but referenced)
-- `knows_version` — e.g., `"0.9.0"`
-- `record_id` — `knows:generated/{slug}/{version}` for published records
-- `profile` — e.g., `"paper@1"`
-- `subject_ref` — points to the artifact representing the paper itself
-- `summary` — one-paragraph overview
-- `license` — e.g., `"CC-BY-4.0"`
-- `actions` — list (typically empty for paper profile)
-- `version` — `{spec, record, source}`
-- `freshness` — `{as_of, update_policy}`
+- `$schema`: URL of the JSON Schema (currently unreachable but referenced)
+- `knows_version`: e.g., `"0.9.0"`
+- `record_id`: `knows:generated/{slug}/{version}` for published records
+- `profile`: e.g., `"paper@1"`
+- `subject_ref`: points to the artifact representing the paper itself
+- `summary`: one-paragraph overview
+- `license`: e.g., `"CC-BY-4.0"`
+- `actions`: list (typically empty for paper profile)
+- `version`: `{spec, record, source}`
+- `freshness`: `{as_of, update_policy}`
 
 ## Statement Extra Fields (v0.9.0)
 
 Not mentioned in upstream `knows.md`:
 
-- `modality` — `empirical` \| `theoretical` \| `descriptive`
-- `about_ref` — what the statement is about (usually the subject artifact)
-- `status` — observed value `asserted`
-- `source_anchors` — list of `{representation_ref, locator_type, locator}` pointers
-- `provenance` — per-statement provenance block (same shape as top-level)
+- `modality`: `empirical` \| `theoretical` \| `descriptive`
+- `about_ref`: what the statement is about (usually the subject artifact)
+- `status`: observed value `asserted`
+- `source_anchors`: list of `{representation_ref, locator_type, locator}` pointers
+- `provenance`: per-statement provenance block (same shape as top-level)
 
 ## Artifact Extra Fields (v0.9.0)
 
-- `identifiers` — `{url, doi, ...}` (omit unknown keys)
-- `representations` — list of `{id: rep:..., media_type, locator: {type, value}}`
+- `identifiers`: `{url, doi, ...}` (omit unknown keys)
+- `representations`: list of `{id: rep:..., media_type, locator: {type, value}}`
 
 ## Predicate Vocabulary (Verified in Production)
 

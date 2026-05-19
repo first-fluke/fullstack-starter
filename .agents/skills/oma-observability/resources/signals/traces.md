@@ -9,13 +9,13 @@ specs:
 
 ## 1. Scope
 
-Traces are the "T" in MELT+P — the correlation backbone of distributed observability. A single trace links every span produced by every service that participated in one request, job, or message.
+Traces are the "T" in MELT+P; the correlation backbone of distributed observability. A single trace links every span produced by every service that participated in one request, job, or message.
 
 Covers: OTel span data model, SpanKind, W3C Trace Context, DB patterns (N+1, slow query, pool exhaustion, `db.*` Stable), messaging patterns (Kafka, Flink, Spark, DLQ, `messaging.*`), RPC (`rpc.*` RC), sampling, backends, exemplars, baggage security.
 
 Cross-references:
-- `../boundaries/cross-application.md` — propagator matrix per cloud and mesh vendor
-- `../layers/mesh.md` — zero-code auto-instrumentation; propagator headers
+- `../boundaries/cross-application.md`: propagator matrix per cloud and mesh vendor
+- `../layers/mesh.md`: zero-code auto-instrumentation; propagator headers
 
 ---
 
@@ -31,7 +31,7 @@ Every span carries the following fields:
 | `SpanId` | 8-byte hex | Unique identifier for this span |
 | `ParentSpanId` | 8-byte hex | SpanId of the parent; absent for root spans |
 | `Name` | string | Operation name (e.g., `HTTP GET /api/orders`) |
-| `Kind` | enum | SpanKind — see table below |
+| `Kind` | enum | SpanKind; see table below |
 | `StartTime` | timestamp | Monotonic clock at span start |
 | `EndTime` | timestamp | Monotonic clock at span end |
 | `Attributes` | key-value map | Semantic convention attributes describing the operation |
@@ -65,10 +65,10 @@ Source: <https://www.w3.org/TR/trace-context/>
 traceparent: 00-<trace-id>-<span-id>-<flags>
 ```
 
-- `00` — version (currently always `00`)
-- `<trace-id>` — 32 hex chars (128-bit TraceId)
-- `<span-id>` — 16 hex chars (64-bit SpanId of the sending span)
-- `<flags>` — 8-bit flags; `01` = sampled, `00` = not sampled
+- `00`: version (currently always `00`)
+- `<trace-id>`: 32 hex chars (128-bit TraceId)
+- `<span-id>`: 16 hex chars (64-bit SpanId of the sending span)
+- `<flags>`: 8-bit flags; `01` = sampled, `00` = not sampled
 
 Example:
 
@@ -100,10 +100,10 @@ All DB spans use `SpanKind = CLIENT`. The span name follows the pattern `<db.ope
 |-----------|-----------|---------|-------|
 | `db.system` | Stable | `postgresql`, `mysql`, `mongodb`, `redis` | Required; identifies the DB technology |
 | `db.operation.name` | Stable | `SELECT`, `INSERT`, `HMGET` | SQL verb or command name |
-| `db.query.text` | Stable | `SELECT * FROM orders WHERE id = $1` | Parameterized query text; PII risk — see caveat |
+| `db.query.text` | Stable | `SELECT * FROM orders WHERE id = $1` | Parameterized query text; PII risk; see caveat |
 | `db.namespace` | Stable | `mydb` | Database name / schema |
 | `db.collection.name` | Stable | `orders` | Table or collection name |
-| `db.client.connections.used` | Development | `14` | Active connections in pool (attribute name varies by semconv draft — pin to version in `../standards.md`) |
+| `db.client.connections.used` | Development | `14` | Active connections in pool (attribute name varies by semconv draft; pin to version in `../standards.md`) |
 | `db.client.connection.pool.utilization` | Development | `0.875` | Ratio: used / max (current semconv draft name; older drafts use `db.client.connections.usage`) |
 
 `db.query.text` caveat: WHERE clause literals may contain PII (email addresses, phone numbers). Always use parameterized queries so that literals are replaced by `$1`, `?`, or `:name` placeholders. If the ORM or driver captures the raw query, apply redaction at the OTel SDK layer or in the Collector processor. Cross-ref `../signals/privacy.md`.
@@ -140,7 +140,7 @@ Slow queries surface as `CLIENT` spans with duration above the p99 threshold.
 3. Correlate `db.query.text` with `pg_stat_statements` / MySQL `slow_query_log` to obtain execution plans.
 4. Apply `EXPLAIN ANALYZE` and add the missing index or rewrite the query.
 
-Privacy: if `db.query.text` captures literal values, redact before export — see `../signals/privacy.md §query text redaction`.
+Privacy: if `db.query.text` captures literal values, redact before export; see `../signals/privacy.md §query text redaction`.
 
 ### 4.3 Connection Pool Exhaustion
 
@@ -175,8 +175,8 @@ Source: <https://opentelemetry.io/docs/specs/semconv/messaging/>
 
 ### SpanKind assignment
 
-- `PRODUCER` — set when calling `producer.send()` or equivalent.
-- `CONSUMER` — set when calling `consumer.poll()` or the message handler.
+- `PRODUCER`: set when calling `producer.send()` or equivalent.
+- `CONSUMER`: set when calling `consumer.poll()` or the message handler.
 - Connect the two with a **span link** (not parent-child): async messaging breaks the synchronous call chain; span links preserve trace continuity across the queue boundary.
 
 ```
@@ -198,13 +198,13 @@ Kafka consumer lag is an external metric, not a trace attribute: MSK (`kafka.con
 
 ### 5.2 Flink and Spark Streaming
 
-Create one span per pipeline stage; the trace covers end-to-end job from source read to sink write. Flink OTel instrumentation is emerging (not stable as of semconv 1.27.0) — use `messaging.system = kafka` for source/sink spans and `INTERNAL` for operator chains. Spark: instrument at the `foreachBatch` boundary; each micro-batch is one `INTERNAL` span. Checkpoint metrics: cross-ref `../signals/metrics.md §streaming`.
+Create one span per pipeline stage; the trace covers end-to-end job from source read to sink write. Flink OTel instrumentation is emerging (not stable as of semconv 1.27.0); use `messaging.system = kafka` for source/sink spans and `INTERNAL` for operator chains. Spark: instrument at the `foreachBatch` boundary; each micro-batch is one `INTERNAL` span. Checkpoint metrics: cross-ref `../signals/metrics.md §streaming`.
 
 ### 5.3 Dead Letter Queue (DLQ) Observability
 
 A DLQ receives messages that failed all retries. Losing trace context at DLQ ingestion prevents diagnosis.
 
-1. **Trace propagation**: copy the original `traceparent` from the failed message headers into the DLQ message headers — do not generate a new trace ID.
+1. **Trace propagation**: copy the original `traceparent` from the failed message headers into the DLQ message headers; do not generate a new trace ID.
 2. **DLQ depth alert**: alert on `kafka_consumer_group_lag{topic="orders-dlq"}` > 0 for critical queues.
 3. **DLQ arrival span**: create a `CONSUMER` span at DLQ arrival with `messaging.destination.name = orders-dlq` and the original `trace_id`.
 4. **Replay tooling**: re-inject the original trace context into replayed messages. A new `trace_id` at replay orphans the original failure span.
@@ -231,7 +231,7 @@ Use `http.*` attributes for REST and JSON-RPC over HTTP. `rpc.*` is for binary R
 
 ### Error handling
 
-Set `status.code = ERROR` and `status.description` on RPC failures. Use `span.recordException(e)` to atomically populate `exception.type`, `exception.message`, and `exception.stacktrace` — required by MRA in `../incident-forensics.md §2.2`.
+Set `status.code = ERROR` and `status.description` on RPC failures. Use `span.recordException(e)` to atomically populate `exception.type`, `exception.message`, and `exception.stacktrace`; required by MRA in `../incident-forensics.md §2.2`.
 
 ---
 
@@ -295,7 +295,7 @@ Cross-ref `../incident-forensics.md §Step 2` for the exemplar-based trace acqui
 
 ## 10. Propagating Baggage (Security and Privacy)
 
-W3C Baggage (`baggage` header) carries key-value pairs alongside the trace context. It is not part of the trace itself — it is a side-channel for business attributes that downstream services need.
+W3C Baggage (`baggage` header) carries key-value pairs alongside the trace context. It is not part of the trace itself; it is a side-channel for business attributes that downstream services need.
 
 ### Allowed vs. prohibited baggage content
 
@@ -308,12 +308,12 @@ W3C Baggage (`baggage` header) carries key-value pairs alongside the trace conte
 
 W3C Baggage Recommendation §3.1: baggage propagates to all downstream services within the same distributed operation. Any data placed in baggage is visible to every service on the call path, including third-party services. Data that is proprietary, confidential, or personally identifiable MUST NOT be placed in baggage without explicit downstream trust agreement.
 
-Enforcement rule: strip or validate incoming baggage at the API gateway / ingress before forwarding to internal services. The mesh ingress gateway is the correct enforcement point — see `../layers/mesh.md §Baggage scrubbing`.
+Enforcement rule: strip or validate incoming baggage at the API gateway / ingress before forwarding to internal services. The mesh ingress gateway is the correct enforcement point; see `../layers/mesh.md §Baggage scrubbing`.
 
 Cross-ref:
 
-- `../boundaries/cross-application.md` — trust-boundary baggage validation rules per cloud and mesh
-- `../signals/privacy.md` — PII classification and redaction for baggage content
+- `../boundaries/cross-application.md`: trust-boundary baggage validation rules per cloud and mesh
+- `../signals/privacy.md`: PII classification and redaction for baggage content
 
 ---
 
@@ -323,13 +323,13 @@ These cells from `../matrix.md` have trace-specific behavior worth noting:
 
 | Layer | Boundary | Status | Rationale |
 |-------|----------|--------|-----------|
-| L3-network | cross-application | ⚠️ | L3 packets carry no trace context natively; use trace-ID tagging at egress only |
-| L4-transport | any | ⚠️ | TCP is not trace-native; trace context begins at mesh or L7 |
-| mesh | cross-application | ✅ | Primary trace origin; Envoy injects spans with zero application code changes |
-| L7-application | cross-application | ✅ | Primary; W3C `traceparent` on all outbound HTTP/gRPC calls |
-| L7-application | multi-tenant | ✅ | `tenant.id` propagated in W3C Baggage on every span |
-| L7-application | release | ✅ | `service.version` resource attribute on all spans; canary routing by version |
-| L7-application | slo | ⚠️ | Tail sampling must retain error traces within the error budget window; traces are forensic input, not the SLI computation source |
+| L3-network | cross-application | PARTIAL | L3 packets carry no trace context natively; use trace-ID tagging at egress only |
+| L4-transport | any | PARTIAL | TCP is not trace-native; trace context begins at mesh or L7 |
+| mesh | cross-application | PASS | Primary trace origin; Envoy injects spans with zero application code changes |
+| L7-application | cross-application | PASS | Primary; W3C `traceparent` on all outbound HTTP/gRPC calls |
+| L7-application | multi-tenant | PASS | `tenant.id` propagated in W3C Baggage on every span |
+| L7-application | release | PASS | `service.version` resource attribute on all spans; canary routing by version |
+| L7-application | slo | PARTIAL | Tail sampling must retain error traces within the error budget window; traces are forensic input, not the SLI computation source |
 
 ---
 

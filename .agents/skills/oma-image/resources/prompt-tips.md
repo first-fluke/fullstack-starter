@@ -20,9 +20,9 @@ Example: `minimalist product photography: single white ceramic coffee cup on dar
 
 ## Don'ts
 
-- Avoid vague prompts like "a nice picture" — both models produce generic output.
+- Avoid vague prompts like "a nice picture"; both models produce generic output.
 - Don't stack contradicting styles ("photorealistic cel-shaded 3D").
-- Skip negative prompts — neither `gpt-image-2` nor `gemini-2.5-flash-image` treats them as first-class.
+- Skip negative prompts; neither `gpt-image-2` nor `gemini-2.5-flash-image` treats them as first-class.
 
 ## Examples
 
@@ -38,8 +38,8 @@ Example: `minimalist product photography: single white ceramic coffee cup on dar
 
 ## Vendor Nuances
 
-- **Codex (`gpt-image-2`)** — prefers slightly longer, descriptive prompts. Quality flag `high` noticeably sharpens fine detail but doubles generation time.
-- **Gemini (`gemini-2.5-flash-image`)** — robust on CJK-composed scenes ("hanok", "cherry blossom"); slightly stronger on illustrated/painterly styles.
+- **Codex (`gpt-image-2`)**: prefers slightly longer, descriptive prompts. Quality flag `high` noticeably sharpens fine detail but doubles generation time.
+- **Gemini (`gemini-2.5-flash-image`)**: robust on CJK-composed scenes ("hanok", "cherry blossom"); slightly stronger on illustrated/painterly styles.
 
 ## Comparing Output
 
@@ -54,12 +54,12 @@ When the **Clarification Protocol** (see `SKILL.md`) reaches the *amplify* step,
 | [awesome-gpt-image-2](https://github.com/YouMind-OpenLab/awesome-gpt-image-2) | `codex` (gpt-image-2) | ~100 | Profile/Avatar · Social Post · Infographic · YouTube Thumbnail · Comic/Storyboard · Poster/Flyer · App/Web Design |
 | [awesome-nano-banana-pro-prompts](https://github.com/YouMind-OpenLab/awesome-nano-banana-pro-prompts) | `gemini` (nano-banana-pro) | 10,000+ | Same taxonomy; 16 localized READMEs (en, ko-KR, ja-JP, zh-TW, de-DE, …) |
 
-For `pollinations` (flux / zimage), patterns from either library transfer — use the subject framing, lighting cues, and style-keyword structure, not the literal wording.
+For `pollinations` (flux / zimage), patterns from either library transfer; use the subject framing, lighting cues, and style-keyword structure, not the literal wording.
 
 **How to use (agent-side):**
 
 1. Classify the user's intent into one of the 7 categories. If no match, fall back to the *Scene/backdrop → Subject → Details → Constraints* template at the top of this file.
-2. Fetch the relevant README section via `gh api` — e.g. Korean user + nano-banana:
+2. Fetch the relevant README section via `gh api`, e.g. Korean user + nano-banana:
    ```
    gh api repos/YouMind-OpenLab/awesome-nano-banana-pro-prompts/contents/README_ko-KR.md \
      --jq .content | base64 -d | less

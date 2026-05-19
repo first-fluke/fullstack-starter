@@ -15,12 +15,12 @@ Memory base path is configurable via `memoryConfig.basePath` (default: `.serena/
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** memory path — never to a subdirectory's memory path.
+All result, progress, and state files MUST be written to the **project root** memory path, never to a subdirectory's memory path.
 
 - **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
   - `result-{agent-id}-{sessionId}.md` (e.g., `result-frontend-session-20260405-100835.md`)
   - `progress-{agent-id}-{sessionId}.md`
-- **Manual (non-orchestrated) runs**: no suffix — `result-{agent-id}.md`
+- **Manual (non-orchestrated) runs**: no suffix, `result-{agent-id}.md`
 
 ## On Start
 

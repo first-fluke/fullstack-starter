@@ -1,4 +1,4 @@
-# .design-context.md — Example
+# .design-context.md: Example
 
 This is an example of what `.design-context.md` looks like after Phase 1 (Setup).
 The file lives in the project root and captures project-specific design decisions.
@@ -12,7 +12,7 @@ The file lives in the project root and captures project-specific design decision
 
 ## Target Audience
 - **Role**: Sales leaders, revenue ops managers, growth teams
-- **Tech level**: Moderate — comfortable with dashboards, not developers
+- **Tech level**: Moderate; comfortable with dashboards, not developers
 - **Age range**: 28-45
 - **Context**: Evaluating tools during work hours, often on laptop
 
@@ -37,8 +37,8 @@ The file lives in the project root and captures project-specific design decision
 
 ## Color Direction
 - **Background**: Deep near-black (#0a0a0a)
-- **Text**: Warm off-white (#f5f0eb) — not pure white
-- **Primary accent**: Signal Green (#22c55e) — CTAs, success states
+- **Text**: Warm off-white (#f5f0eb), not pure white
+- **Primary accent**: Signal Green (#22c55e) for CTAs, success states
 - **Avoid**: Purple gradients, rainbow effects, mesh gradients
 - **Borders**: White at 10% opacity (rgba(255,255,255,0.1))
 
@@ -49,9 +49,9 @@ The file lives in the project root and captures project-specific design decision
 - **Touch targets**: 44x44pt minimum on mobile
 
 ## Reference Sites
-- [linear.app](https://linear.app) — clean dark UI, minimal, professional
-- [vercel.com](https://vercel.com) — developer-premium aesthetic, great typography
-- [stripe.com](https://stripe.com) — strong hierarchy, purposeful animation
+- [linear.app](https://linear.app): clean dark UI, minimal, professional
+- [vercel.com](https://vercel.com): developer-premium aesthetic, great typography
+- [stripe.com](https://stripe.com): strong hierarchy, purposeful animation
 
 > **Note**: every domain in this section is automatically matched
 > against the `getdesign` vendor catalog during Phase 1. All three
@@ -60,7 +60,7 @@ The file lives in the project root and captures project-specific design decision
 > vendor matching, use a domain that is not in the catalog (e.g., an
 > internal design reference or a custom portfolio URL). See
 > `resources/getdesign-fetcher.md` for the matching algorithm and the
-> Seed Application Rules — notably, Typography is never adopted from
+> Seed Application Rules. Notably, Typography is never adopted from
 > the vendor seed, so the Pretendard Variable choice in this file will
 > still win on the Korean-localized project above.
 

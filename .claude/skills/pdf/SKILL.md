@@ -1,6 +1,6 @@
 ---
 name: pdf
-description: Convert PDF to Markdown using opendataloader-pdf — extracts text,
+description: Convert PDF to Markdown using opendataloader-pdf, extracting text,
   tables, headings, and images with correct reading order
 disable-model-invocation: true
 ---

@@ -40,7 +40,7 @@ Automatically classify as MEDIUM/HIGH level in the following situations:
 
 ### LOW → Proceed (Assumed)
 ```
-⚠️ Assumptions applied:
+Assumptions applied:
 - JWT authentication included
 - PostgreSQL database
 - REST API
@@ -51,29 +51,29 @@ Proceeding with these defaults. Override if needed.
 
 ### MEDIUM → Request Selection (Options)
 ```
-🔍 Uncertainty detected: {specific issue}
+Uncertainty detected: {specific issue}
 
 Option A: {approach}
-  ✅ Pros: {benefits}
-  ❌ Cons: {drawbacks}
-  💰 Effort: {low/medium/high}
+  Pros: {benefits}
+  Cons: {drawbacks}
+  Effort: {low/medium/high}
 
 Option B: {approach}
-  ✅ Pros: {benefits}
-  ❌ Cons: {drawbacks}
-  💰 Effort: {low/medium/high}
+  Pros: {benefits}
+  Cons: {drawbacks}
+  Effort: {low/medium/high}
 
 Option C: {approach}
-  ✅ Pros: {benefits}
-  ❌ Cons: {drawbacks}
-  💰 Effort: {low/medium/high}
+  Pros: {benefits}
+  Cons: {drawbacks}
+  Effort: {low/medium/high}
 
 Which approach do you prefer? (A/B/C)
 ```
 
 ### HIGH → Blocked
 ```
-❌ Cannot proceed: Requirements too ambiguous
+Cannot proceed: Requirements too ambiguous
 
 Specific uncertainty: {what is unclear}
 
@@ -91,7 +91,7 @@ Status: BLOCKED (awaiting clarification)
 
 ## Required Verification Items
 
-If any of the items below are unclear, **do not assume** — explicitly record them.
+If any of the items below are unclear, **do not assume**; explicitly record them.
 
 ### Common to All Agents
 | Item | Verification Question | Default (if assumed) | Uncertainty |
@@ -138,7 +138,7 @@ Example: "Create a TODO app"
 
 **Response**: Apply defaults and record assumption list in result
 ```
-⚠️ Assumptions:
+Assumptions:
 - JWT authentication included
 - PostgreSQL database
 - REST API
@@ -150,7 +150,7 @@ Example: "Create a user management system"
 
 **Response**: Narrow scope to 3 core features, specify and proceed
 ```
-⚠️ Interpreted scope (3 core features):
+Interpreted scope (3 core features):
 1. User registration + login (JWT)
 2. Profile management (view/edit)
 3. Admin user list (admin role only)
@@ -166,7 +166,7 @@ Example: "Create a good app", "Improve this"
 
 **Response**: Do not proceed, record clarification request in result
 ```
-❌ Cannot proceed: Requirements too ambiguous
+Cannot proceed: Requirements too ambiguous
 
 Questions needed:
 1. What is the app's primary purpose?

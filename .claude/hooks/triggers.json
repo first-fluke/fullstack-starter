@@ -117,6 +117,15 @@
           "zautomatyzuj",
           "wszystko naraz"
         ]
+      },
+      "patterns": {
+        "*": [
+          "\\b(build|create|make|develop|implement|scaffold)\\s+(?:me\\s+)?(?:an?|the)\\s+(?:[\\w-]+\\s+){0,3}(app|api|service|server|cli|tool|website|dashboard|system|feature|backend|frontend|prototype|mvp|bot)\\b",
+          "\\bi\\s+want\\s+(?:a|an)\\s+(?:[\\w-]+\\s+){0,3}(app|api|service|server|cli|tool|website|dashboard|system|feature|backend|frontend|prototype|mvp|bot)\\b"
+        ],
+        "ko": [
+          "(앱|API|서비스|서버|CLI|도구|웹사이트|대시보드|시스템|기능|백엔드|프론트엔드|프로토타입|MVP|봇)\\s*(?:을|를|이|가)?\\s*(?:만들어\\s*(?:주세요|줘|줄래)?|구현해\\s*(?:주세요|줘|줄래)?|개발해\\s*(?:주세요|줘|줄래)?|만들자|구현하자|개발하자)"
+        ]
       }
     },
     "ultrawork": {
@@ -487,6 +496,41 @@
           "przejrzyj kod",
           "skontroluj",
           "zweryfikuj kod"
+        ]
+      }
+    },
+    "deepsec": {
+      "persistent": false,
+      "keywords": {
+        "*": ["/deepsec", "deepsec workflow"],
+        "en": [
+          "run deepsec",
+          "deepsec scan this repo",
+          "scan repo with deepsec",
+          "deepsec pr review",
+          "deepsec ci gate",
+          "deepsec triage",
+          "deepsec matchers"
+        ],
+        "ko": [
+          "딥섹 워크플로우",
+          "딥섹 실행",
+          "딥섹 스캔",
+          "딥섹으로 검사",
+          "딥섹 PR 리뷰",
+          "딥섹 CI 게이트"
+        ],
+        "ja": [
+          "ディープセック実行",
+          "deepsecワークフロー",
+          "deepsecでスキャン",
+          "deepsec PRレビュー"
+        ],
+        "zh": [
+          "运行 deepsec",
+          "deepsec 工作流",
+          "用 deepsec 扫描",
+          "deepsec PR 审查"
         ]
       }
     },
@@ -1531,6 +1575,146 @@
           "makieta"
         ]
       }
+    },
+    "docs": {
+      "persistent": false,
+      "keywords": {
+        "*": ["oma-docs", "doc-refs", "docs verify", "docs sync"],
+        "en": [
+          "verify docs",
+          "verify documentation",
+          "check docs",
+          "check documentation",
+          "docs drift",
+          "documentation drift",
+          "broken docs",
+          "broken doc links",
+          "stale docs",
+          "stale documentation",
+          "sync docs",
+          "sync documentation",
+          "update docs after change",
+          "patch docs",
+          "doc verify",
+          "doc sync"
+        ],
+        "ko": [
+          "문서 검증",
+          "문서 검증해줘",
+          "문서 점검",
+          "문서 점검해줘",
+          "문서 드리프트",
+          "문서 동기화",
+          "문서 동기화해줘",
+          "문서 싱크",
+          "문서 싱크 맞춰",
+          "문서 싱크 맞춰줘",
+          "깨진 문서 링크",
+          "깨진 문서",
+          "오래된 문서",
+          "낡은 문서",
+          "문서 갱신",
+          "문서 업데이트",
+          "docs 검증",
+          "docs 싱크",
+          "docs 동기화"
+        ],
+        "ja": [
+          "ドキュメント検証",
+          "ドキュメント点検",
+          "ドキュメントドリフト",
+          "ドキュメント同期",
+          "ドキュメントを同期",
+          "壊れたドキュメントリンク",
+          "古いドキュメント",
+          "ドキュメント更新",
+          "docsを検証",
+          "docsを同期"
+        ],
+        "zh": [
+          "文档校验",
+          "文档检查",
+          "文档漂移",
+          "文档同步",
+          "同步文档",
+          "失效文档链接",
+          "陈旧文档",
+          "更新文档",
+          "docs 校验",
+          "docs 同步"
+        ],
+        "es": [
+          "verificar documentación",
+          "comprobar documentación",
+          "deriva de documentación",
+          "sincronizar documentación",
+          "enlaces rotos en documentación",
+          "documentación obsoleta",
+          "actualizar documentación"
+        ],
+        "fr": [
+          "vérifier la documentation",
+          "contrôler la documentation",
+          "dérive de documentation",
+          "synchroniser la documentation",
+          "liens cassés dans la documentation",
+          "documentation obsolète",
+          "mettre à jour la documentation"
+        ],
+        "de": [
+          "Doku verifizieren",
+          "Dokumentation prüfen",
+          "Dokumentations-Drift",
+          "Doku synchronisieren",
+          "kaputte Doku-Links",
+          "veraltete Dokumentation",
+          "Doku aktualisieren"
+        ],
+        "pt": [
+          "verificar documentação",
+          "checar documentação",
+          "drift de documentação",
+          "sincronizar documentação",
+          "links quebrados na documentação",
+          "documentação desatualizada",
+          "atualizar documentação"
+        ],
+        "ru": [
+          "проверить документацию",
+          "верифицировать документацию",
+          "дрейф документации",
+          "синхронизировать документацию",
+          "битые ссылки в документации",
+          "устаревшая документация",
+          "обновить документацию"
+        ],
+        "nl": [
+          "documentatie verifiëren",
+          "documentatie controleren",
+          "documentatie-drift",
+          "documentatie synchroniseren",
+          "kapotte documentatielinks",
+          "verouderde documentatie",
+          "documentatie bijwerken"
+        ],
+        "pl": [
+          "zweryfikuj dokumentację",
+          "sprawdź dokumentację",
+          "dryf dokumentacji",
+          "zsynchronizuj dokumentację",
+          "zepsute linki w dokumentacji",
+          "przestarzała dokumentacja",
+          "zaktualizuj dokumentację"
+        ]
+      }
+    },
+    "recap": {
+      "persistent": false,
+      "keywords": {
+        "*": ["recap"],
+        "ko": ["리캡"],
+        "ja": ["リキャップ"]
+      }
     }
   },
   "skills": {
@@ -1787,7 +1971,16 @@
     },
     "oma-frontend": {
       "keywords": {
-        "*": ["shadcn", "FSD"],
+        "*": [
+          "shadcn",
+          "FSD",
+          "next.js",
+          "nextjs",
+          "react",
+          "tailwind",
+          "tsx",
+          "frontend"
+        ],
         "en": [
           "make a react component",
           "build a next page",
@@ -1884,6 +2077,41 @@
           "dart 组件",
           "安卓 ios",
           "移动端应用"
+        ]
+      }
+    },
+    "oma-market": {
+      "keywords": {
+        "*": [],
+        "en": [
+          "market research",
+          "pain point",
+          "pain points",
+          "voice of customer",
+          "competitor research",
+          "competitor analysis",
+          "trend detection",
+          "user complaints",
+          "discovery research",
+          "market signal"
+        ],
+        "ko": [
+          "시장조사",
+          "시장 조사",
+          "사용자 페인",
+          "페인 포인트",
+          "트렌드 분석",
+          "경쟁구도",
+          "경쟁사 분석",
+          "사용자 불만",
+          "경쟁 분석"
+        ],
+        "ja": [
+          "市場調査",
+          "ペインポイント",
+          "ユーザー不満",
+          "競合調査",
+          "トレンド分析"
         ]
       }
     },
@@ -2346,6 +2574,64 @@
         "zh": ["翻译一下", "帮我翻译", "多语言", "本地化", "翻成英文"]
       }
     },
+    "oma-deepsec": {
+      "keywords": {
+        "*": [
+          "deepsec",
+          ".deepsec",
+          "bunx deepsec",
+          "pnpm deepsec",
+          "npx deepsec",
+          "deepsec.config",
+          "process --diff",
+          "INFO.md",
+          "MatcherPlugin",
+          "noiseTier",
+          "AI_GATEWAY_API_KEY"
+        ],
+        "en": [
+          "scan repo for vulnerabilities",
+          "scan the repo for vulns",
+          "security scan with an agent",
+          "vulnerability scanner",
+          "agent security scan",
+          "run a security scan",
+          "pr security review",
+          "ci security gate",
+          "diff security review",
+          "write a custom matcher",
+          "revalidate findings",
+          "triage findings"
+        ],
+        "ko": [
+          "취약점 스캔",
+          "보안 스캔",
+          "딥섹",
+          "딥섹 돌려",
+          "PR 보안 리뷰",
+          "보안 점검",
+          "매처 작성",
+          "파인딩 트리아지",
+          "파인딩 재검증"
+        ],
+        "ja": [
+          "脆弱性スキャン",
+          "セキュリティスキャン",
+          "ディープセック",
+          "PRセキュリティレビュー",
+          "マッチャーを書く",
+          "ファインディングをトリアージ"
+        ],
+        "zh": [
+          "漏洞扫描",
+          "安全扫描",
+          "深度安全扫描",
+          "PR 安全审查",
+          "编写自定义匹配器",
+          "重新验证发现"
+        ]
+      }
+    },
     "oma-image": {
       "keywords": {
         "*": [
@@ -2433,25 +2719,111 @@
           "zeichne mir"
         ]
       }
+    },
+    "oma-voice": {
+      "keywords": {
+        "*": ["voicebox", "oma-voice", "tts", "stt"],
+        "en": [
+          "text to speech",
+          "speech to text",
+          "transcribe audio",
+          "transcribe this",
+          "generate speech",
+          "voice notification",
+          "narrate this",
+          "make a voiceover",
+          "create a voiceover",
+          "read this aloud",
+          "speak this",
+          "say this",
+          "dictation",
+          "voice memo",
+          "meeting transcript",
+          "audio to text"
+        ],
+        "ko": [
+          "음성으로 알려",
+          "음성으로 읽어",
+          "음성으로 말해",
+          "음성 만들어",
+          "음성 만들어줘",
+          "음성 생성",
+          "음성 생성해",
+          "음성 생성해줘",
+          "보이스오버 만들어",
+          "보이스오버 생성",
+          "나레이션 만들어",
+          "오디오 파일 전사",
+          "오디오를 텍스트로",
+          "받아 적어",
+          "받아적어",
+          "받아 써",
+          "받아써",
+          "회의록 만들어",
+          "회의록 작성",
+          "음성 메모"
+        ],
+        "ja": [
+          "音声を生成",
+          "音声生成",
+          "音声で読み上げ",
+          "ナレーション",
+          "テキストを読み上げ",
+          "音声に変換",
+          "文字起こし",
+          "音声を文字に",
+          "ボイスオーバー"
+        ],
+        "zh": [
+          "生成语音",
+          "语音生成",
+          "朗读这段",
+          "文字转语音",
+          "语音转文字",
+          "音频转写",
+          "转录音频",
+          "语音备忘",
+          "会议转录"
+        ]
+      }
     }
   },
   "informationalPatterns": {
-    "en": [
+    "*": [
       "what is",
       "what are",
       "how to",
       "how does",
+      "how do",
+      "how can",
+      "how would",
       "explain",
       "describe",
       "tell me about",
       "keyword",
       "false positive",
+      "false-positive",
       "detected",
       "detector",
-      "뭐야",
-      "무엇",
-      "是什么",
-      "とは"
+      "fires when",
+      "trigger when",
+      "auto-trigger",
+      "auto trigger",
+      "what triggers",
+      "should we trigger",
+      "if we trigger",
+      "trigger logic",
+      "trigger mechanism",
+      "should we",
+      "should i",
+      "should you",
+      "could we",
+      "would you",
+      "what if",
+      "what about",
+      "why build",
+      "why create",
+      "why make"
     ],
     "ko": [
       "뭐야",
@@ -2462,7 +2834,29 @@
       "알려줘",
       "키워드",
       "감지",
-      "오탐"
+      "오탐",
+      "트리거",
+      "발동",
+      "메타",
+      "트리거하면",
+      "트리거 해주면",
+      "트리거해야",
+      "키워드 나오면",
+      "왜 만들",
+      "어떻게 만들",
+      "어떨까",
+      "하면 좋을",
+      "한다면",
+      "할까요",
+      "보강할",
+      "에 대해",
+      "에 대한",
+      "한번 봐",
+      "깊게 봐",
+      "코드를 한번",
+      "그 워크플로우",
+      "이 워크플로우",
+      "워크플로우 자체"
     ],
     "ja": [
       "とは",

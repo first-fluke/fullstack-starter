@@ -1,4 +1,4 @@
-# TF Infra Agent — Self-Verification Checklist
+# TF Infra Agent: Self-Verification Checklist
 
 ## Configuration
 - [ ] `terraform validate` passes without errors
