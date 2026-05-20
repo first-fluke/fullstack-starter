@@ -2190,7 +2190,15 @@
           "mobile crash analytics",
           "crash-free rate",
           "symbolication pipeline",
-          "offline telemetry queue"
+          "offline telemetry queue",
+          "WAF observability",
+          "WAF rule hit rate",
+          "WAF false positive",
+          "edge 403 storm",
+          "ruleset rollback",
+          "cascading failure observability",
+          "third-party dependency outage",
+          "fail-closed dependency"
         ],
         "ko": [
           "관측성",
@@ -2246,7 +2254,18 @@
           "모바일 크래시 분석",
           "크래시 프리 레이트",
           "심볼리케이션",
-          "오프라인 텔레메트리 큐"
+          "오프라인 텔레메트리 큐",
+          "WAF 관측",
+          "WAF 차단",
+          "WAF 오탐",
+          "방화벽 차단",
+          "엣지 403 폭주",
+          "룰셋 롤백",
+          "연쇄 장애",
+          "디펜던시 장애",
+          "외부 의존성 장애",
+          "서드파티 장애",
+          "페일클로즈드"
         ],
         "ja": [
           "オブザーバビリティ",
@@ -2281,7 +2300,17 @@
           "モバイルクラッシュ分析",
           "クラッシュフリーレート",
           "シンボリケーション",
-          "オフラインテレメトリ"
+          "オフラインテレメトリ",
+          "WAF観測",
+          "WAFブロック",
+          "WAF誤検知",
+          "ファイアウォールブロック",
+          "エッジ403",
+          "ルールセットロールバック",
+          "カスケード障害",
+          "依存サービス障害",
+          "サードパーティ障害",
+          "フェイルクローズド"
         ],
         "zh": [
           "可观测性",
@@ -2317,7 +2346,17 @@
           "移动崩溃分析",
           "崩溃无事率",
           "符号化",
-          "离线遥测队列"
+          "离线遥测队列",
+          "WAF 观测",
+          "WAF 拦截",
+          "WAF 误报",
+          "防火墙拦截",
+          "边缘 403 风暴",
+          "规则集回滚",
+          "级联故障",
+          "依赖方故障",
+          "第三方故障",
+          "故障关闭"
         ]
       }
     },

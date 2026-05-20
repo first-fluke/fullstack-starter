@@ -2,7 +2,7 @@
 
 ## Example 1: GCP Cloud Run Service with Cloud SQL
 
-**Input:** "Cloud Run에 API 서비스를 배포하고 Cloud SQL PostgreSQL 연결해줘"
+**Input:** "Deploy an API service on Cloud Run and connect it to Cloud SQL PostgreSQL"
 
 **Output:**
 - Files created: `compute.tf`, `database.tf`, `networking.tf`, `iam.tf`, `outputs.tf`
@@ -16,7 +16,7 @@
 
 ## Example 2: AWS ECS Fargate with GitHub OIDC
 
-**Input:** "GitHub Actions에서 ECS Fargate로 배포할 수 있게 OIDC 설정해줘"
+**Input:** "Set up OIDC so GitHub Actions can deploy to ECS Fargate"
 
 **Output:**
 - Files created: `cicd-auth.tf`, `iam.tf`
@@ -29,7 +29,7 @@
 
 ## Example 3: Terraform Plan Review
 
-**Input:** "이 terraform plan 결과 리뷰해줘"
+**Input:** "Review this terraform plan output"
 
 **Output:**
 - Summary: 3 to add, 1 to change, 1 to destroy

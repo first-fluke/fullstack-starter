@@ -103,7 +103,7 @@ spec:
 
 ## Scenario 2: Incident Forensics: Payment Service 5xx Spike
 
-**Situation:** "ap-northeast-2 결제 서비스 5xx spike at 14:20 UTC"; alert fires with no `trace_id`
+**Situation:** "ap-northeast-2 payment service 5xx spike at 14:20 UTC"; alert fires with no `trace_id`
 provided. On-call SRE must localize root cause in under 15 minutes.
 
 **Intent:** `investigate`

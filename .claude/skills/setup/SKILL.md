@@ -1,6 +1,7 @@
 ---
 name: setup
-description: oh-my-agent project setup verification and configuration
+description: Initial setup workflow — verify CLI installations, check MCP
+  connections, configure language and agent-CLI mapping
 disable-model-invocation: true
 ---
 

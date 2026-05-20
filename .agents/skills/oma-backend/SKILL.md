@@ -197,3 +197,4 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Clarification: `../_shared/core/clarification-protocol.md`
 - Context budget: `../_shared/core/context-budget.md`
 - Lessons learned: `../_shared/core/lessons-learned.md`
+- Observability handoff: `../oma-observability/SKILL.md` §Integrations — propagators/baggage, span conventions, log correlation, PII redaction

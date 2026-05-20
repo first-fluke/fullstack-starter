@@ -4,15 +4,15 @@
 
 **Input:**
 ```
-/oma-search "React useEffect 공식 문서"
+/oma-search "React useEffect official docs"
 ```
 
 **Intent Classification:**
-- Keyword "공식 문서" detected -> `docs` mode
+- Keyword "official docs" detected -> `docs` mode
 
 **Output:**
 ```
-Query: "React useEffect 공식 문서"
+Query: "React useEffect official docs"
 Mode: docs (auto)
 
 DOCS #1  useEffect — react.dev                  [verified,lang-docs 0.95]
@@ -24,15 +24,15 @@ DOCS #3  useEffect API Reference — react.dev     [verified,lang-docs 0.95]
 
 **Input:**
 ```
-/oma-search "Redis pub/sub 사용 사례"
+/oma-search "Redis pub/sub use cases"
 ```
 
 **Intent Classification:**
-- Keyword "사용 사례" detected -> `web` mode
+- Keyword "use cases" detected -> `web` mode
 
 **Output:**
 ```
-Query: "Redis pub/sub 사용 사례"
+Query: "Redis pub/sub use cases"
 Mode: web (auto)
 
 WEB  #1  Redis Pub/Sub Guide — redis.io/docs     [verified,vendor-docs 0.90]

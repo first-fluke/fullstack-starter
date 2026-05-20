@@ -22,11 +22,7 @@
 
 ### docs mode
 
-| Language | Keywords |
-|----------|----------|
-| English | official, docs, documentation, API ref, reference, spec, specification |
-| Korean | 공식, 문서, 레퍼런스, API 문서, 명세 |
-| Japanese | 公式, ドキュメント, リファレンス, 仕様 |
+**Keywords:** official, docs, documentation, API ref, reference, spec, specification
 
 **Signals:**
 - Library/framework name + version mentioned (e.g., "React 19 docs")
@@ -34,11 +30,7 @@
 
 ### web mode
 
-| Language | Keywords |
-|----------|----------|
-| English | example, tutorial, how to, guide, blog, comparison, vs, use case, best practice |
-| Korean | 사례, 예제, 튜토리얼, 가이드, 블로그, 비교, 사용법, 모범 사례 |
-| Japanese | 例, チュートリアル, 使い方, ガイド, ブログ, 比較, ベストプラクティス |
+**Keywords:** example, tutorial, how to, guide, blog, comparison, vs, use case, best practice
 
 **Signals:**
 - Opinion/comparison queries ("X vs Y", "best way to")
@@ -47,11 +39,7 @@
 
 ### code mode
 
-| Language | Keywords |
-|----------|----------|
-| English | implementation, pattern, repo, repository, source code, code search, codebase |
-| Korean | 구현, 패턴, 레포, 소스코드, 코드 검색 |
-| Japanese | 実装, パターン, リポジトリ, ソースコード, コード検索 |
+**Keywords:** implementation, pattern, repo, repository, source code, code search, codebase
 
 **Signals:**
 - Language/framework + "how is it implemented"
@@ -60,16 +48,14 @@
 
 ### local mode
 
-| Language | Keywords |
-|----------|----------|
-| English | this project, here, this file, function, class, method, variable, our code |
-| Korean | 이 프로젝트, 여기서, 이 파일, 함수, 클래스, 메서드, 우리 코드 |
-| Japanese | このプロジェクト, ここで, このファイル, 関数, クラス, メソッド |
+**Keywords:** this project, here, this file, function, class, method, variable, our code
 
 **Signals:**
 - References to current codebase context
 - Relative file paths mentioned
 - "Where is X defined" type queries
+
+> Multi-language activation (Korean, Japanese, etc.) is owned by `.agents/hooks/core/triggers.json §oma-search.keywords`. This file documents English mode classifiers only.
 
 ## Fallback Rule
 
@@ -83,9 +69,9 @@ When no clear intent is detected:
 | Query | Detected Mode | Reason |
 |-------|--------------|--------|
 | "React useState" | `web` + `docs` (fallback) | Ambiguous: could be docs or tutorial |
-| "React useState 공식 문서" | `docs` | "공식 문서" keyword |
-| "React useState 사용 사례" | `web` | "사용 사례" keyword |
+| "React useState official docs" | `docs` | "official docs" keyword |
+| "React useState use case" | `web` | "use case" keyword |
 | "React useState implementation" | `code` | "implementation" keyword |
-| "handleAuth 함수 찾아줘" | `local` | "함수" + "찾아줘" signals local |
+| "find handleAuth function" | `local` | "function" + "find" signals local |
 | "Next.js vs Remix" | `web` | "vs" comparison signal |
 | "OAuth PKCE github" | `code` | "github" platform signal |

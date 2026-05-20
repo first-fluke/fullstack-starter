@@ -10,12 +10,14 @@
 
 ## Keyword Pattern Table
 
-| Intent | English keywords | Korean keywords |
-|---|---|---|
-| pain | broken, bug, crash, slow, freeze, lag, outage, migrate, migrating, ditched, quit, ditch, alternative, replacing, painful, frustrating, hate, worst, unusable, deprecated | 불편, 버그, 느림, 먹통, 이탈, 떠났다, 마이그레이션, 짜증, 답답, 최악, 문제, 고장, 오류, 대안, 탈출 |
-| trend | trend, trending, growth, adoption, rising, popular, 2024, 2025, 2026, new, emerging, hot, forecast, survey, report, state of | 트렌드, 성장, 채택, 인기, 신규, 등장, 보고서, 현황, 최신 |
-| competitor | vs, versus, alternative, replaced, switched, migrating from, comparison, compare, benchmark, better than, worse than, switch from | 대안, 대체, 비교, 옮겨, 갈아탔, 전환, 스위치, 비교군 |
-| discovery | wish, need, missing, underrated, underserved, I want, if only, why doesn't, gap, overlooked, nobody, nobody builds, unmet | 있었으면, 필요하다, 아쉽다, 왜 없지, 부족하다, 못 찾겠다, 니즈, 발굴 |
+| Intent | English keywords |
+|---|---|
+| pain | broken, bug, crash, slow, freeze, lag, outage, migrate, migrating, ditched, quit, ditch, alternative, replacing, painful, frustrating, hate, worst, unusable, deprecated |
+| trend | trend, trending, growth, adoption, rising, popular, 2024, 2025, 2026, new, emerging, hot, forecast, survey, report, state of |
+| competitor | vs, versus, alternative, replaced, switched, migrating from, comparison, compare, benchmark, better than, worse than, switch from |
+| discovery | wish, need, missing, underrated, underserved, I want, if only, why doesn't, gap, overlooked, nobody, nobody builds, unmet |
+
+Korean and other-locale intent routing is handled by the LLM reading the user's prompt directly; per-intent Korean keyword detection lives in the LLM's classification step, not in this file. Skill activation tokens for `ko` / `ja` / `zh` are owned by `.agents/hooks/core/triggers.json §oma-market.keywords`.
 
 ## Scoring Rules
 

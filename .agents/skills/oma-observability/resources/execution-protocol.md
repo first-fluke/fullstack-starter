@@ -33,7 +33,7 @@ otel_semconv: "1.27.0 (2024-11)"
    - `tune`: signal type (metrics/logs/traces) OR problem (cost/cardinality/MTU)
    - `route`: tenant OR region OR cloud axis
 
-   If the minimum is not present, request clarification from the user before consuming reference material. A 1-2 keyword query that hits one intent keyword but carries no context (e.g., "metrics broken", "trace 안 돼") should prompt for service/symptom/scope rather than executing a playbook that cannot succeed.
+   If the minimum is not present, request clarification from the user before consuming reference material. A 1-2 keyword query that hits one intent keyword but carries no context (e.g., "metrics broken", "tracing broken") should prompt for service/symptom/scope rather than executing a playbook that cannot succeed.
 5. Log selected intent and whether selection was `flag` or `auto`, plus any clarification requested
 
 Intent vocabulary:

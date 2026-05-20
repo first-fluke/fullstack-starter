@@ -148,3 +148,4 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Reasoning templates: `../_shared/core/reasoning-templates.md`
 - Context budget: `../_shared/core/context-budget.md`
 - Lessons learned: `../_shared/core/lessons-learned.md`
+- Observability handoff: `../oma-observability/SKILL.md` §Integrations — traces/logs by `trace_id`, 6-dim forensics

@@ -257,18 +257,16 @@ Before submitting, run `resources/checklist.md`.
 
 ### Integrations with OMA Ecosystem
 
-> **Integration status (2026-Q2)**: rows below describe **recommended handoff patterns** from the oma-observability side. As of this version, reciprocal cross-references from the other skills' SKILL.md files are not yet in place; this is a v1.1 follow-up item. Users invoking the other skills directly will need to surface this integration manually until the reciprocal links land.
-
-| Skill | Integration point | Reciprocal link status |
-|-------|------------------|-------|
-| `oma-debug` | On failure: pull traces + logs by `request_id` → trigger `resources/incident-forensics.md` 6-dim localization playbook | ⏳ pending (v1.1) |
-| `oma-qa` | Canary post-deploy loop via chrome-devtools MCP: console errors + Core Web Vitals trend; INP/LCP/CLS from `layers/L7-application/web-rum.md` | ⏳ pending (v1.1) |
-| `oma-tf-infra` | Terraform modules for OTel Collector, Grafana, and Loki stack provisioning | ⏳ pending (v1.1) |
-| `oma-scm` | Deployment SHA → `service.version` OTel attribute + release marker events; see `boundaries/release.md` | ⏳ pending (v1.1) |
-| `oma-backend` | Propagator and baggage rules cross-referenced in `backend.md` ruleset; DB N+1 + Kafka patterns in `signals/traces.md` | ⏳ pending (v1.1) |
-| `oma-frontend` | `layers/L7-application/web-rum.md` INP/LCP/CLS checklist cross-referenced in `frontend.md` ruleset | ⏳ pending (v1.1) |
-| `oma-mobile` | `layers/L7-application/mobile-rum.md` offline-queuing pattern cross-referenced in `mobile.md` ruleset | ⏳ pending (v1.1) |
-| `oma-db` | `signals/traces.md` DB patterns (N+1, connection pool) cross-referenced in `database.md` ruleset | ⏳ pending (v1.1) |
+| Skill | Integration point |
+|-------|------------------|
+| `oma-debug` | On failure: pull traces + logs by `request_id` → trigger `resources/incident-forensics.md` 6-dim localization playbook |
+| `oma-qa` | Canary post-deploy loop via chrome-devtools MCP: console errors + Core Web Vitals trend; INP/LCP/CLS from `layers/L7-application/web-rum.md` |
+| `oma-tf-infra` | Terraform modules for OTel Collector, Grafana, and Loki stack provisioning |
+| `oma-scm` | Deployment SHA → `service.version` OTel attribute + release marker events; see `boundaries/release.md` |
+| `oma-backend` | Propagator and baggage rules cross-referenced in `backend.md` ruleset; DB N+1 + Kafka patterns in `signals/traces.md` |
+| `oma-frontend` | `layers/L7-application/web-rum.md` INP/LCP/CLS checklist cross-referenced in `frontend.md` ruleset |
+| `oma-mobile` | `layers/L7-application/mobile-rum.md` offline-queuing pattern cross-referenced in `mobile.md` ruleset |
+| `oma-db` | `signals/traces.md` DB patterns (N+1, connection pool) cross-referenced in `database.md` ruleset |
 
 ### Versioning & Deprecation
 
@@ -310,6 +308,7 @@ Before submitting, run `resources/checklist.md`.
   - `resources/layers/L7-application/web-rum.md`
   - `resources/layers/L7-application/mobile-rum.md`
   - `resources/layers/L7-application/crash-analytics.md`
+  - `resources/layers/L7-application/waf.md`
 - Boundaries:
   - `resources/boundaries/multi-tenant.md`
   - `resources/boundaries/cross-application.md`

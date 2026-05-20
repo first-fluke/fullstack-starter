@@ -27,6 +27,12 @@
             "type": "command",
             "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
             "timeout": 5000
+          },
+          {
+            "name": "hud",
+            "type": "command",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
+            "timeout": 3000
           }
         ],
         "matcher": "*"
@@ -43,6 +49,32 @@
           }
         ],
         "matcher": "run_shell_command"
+      }
+    ],
+    "AfterTool": [
+      {
+        "hooks": [
+          {
+            "name": "hud",
+            "type": "command",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
+            "timeout": 3000
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "hud",
+            "type": "command",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
+            "timeout": 3000
+          }
+        ],
+        "matcher": "*"
       }
     ]
   },

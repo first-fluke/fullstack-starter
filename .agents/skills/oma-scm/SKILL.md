@@ -1,6 +1,6 @@
 ---
 name: oma-scm
-description: SCM (software configuration management) and Git: branching, merges, conflicts, worktrees, baselines, audit readiness, plus Conventional Commits and safe staging.
+description: "SCM (software configuration management) and Git: branching, merges, conflicts, worktrees, baselines, audit readiness, plus Conventional Commits and safe staging."
 ---
 
 # Software configuration management: SCM (`oma-scm`)
@@ -325,6 +325,7 @@ Use HEREDOC by default, and switch to `-F` for long or flaky terminal sessions.
 - `resources/conventional-commits.md`
 - `resources/onboarding-risk-signals.md`
 - `resources/codeowners-playbook.md`
+- Observability handoff: `../oma-observability/SKILL.md` §Integrations — release markers (`service.version`), revert baseline diff
 
 ### Important notes
 

@@ -343,6 +343,41 @@
 **Remediation**: Re-inject the original `traceparent` and `causation_id` from the failed message headers when replaying. Use a span link; not parent-child; to connect replay span to the original trace.
 **See also**: `boundaries/cross-application.md §8 Idempotency and Event-Driven Trace Lineage`
 
+### F.6 WAF rule hit / block rate unmonitored
+
+**Severity**: HIGH
+**Why it fails**: When a WAF rule update over-blocks legitimate traffic, the edge returns 403 to users while backend services see request volume drop. Service-level error rate stays flat; the on-call investigates "missing traffic" rather than "WAF blocking my users", and the FP storm is discovered only via customer complaints. MTTR runs into hours.
+**Remediation**: Emit `waf_action_total{action, rule_id, rule_set_version}` from the edge tier. Alert when the block rate per `rule.id` step-changes more than 3σ above its rolling 24h baseline. Dashboard the action distribution alongside the application 5xx rate so block-vs-error is visible side-by-side.
+**See also**: `layers/L7-application/waf.md §5 False-Positive Surge`
+
+### F.7 WAF rule-set deploy without release marker
+
+**Severity**: HIGH
+**Why it fails**: Without a release marker stream for ruleset rollouts, an edge 403 surge cannot be aligned with the rule change that caused it. The rollback decision is guesswork; engineers may roll back the application instead of the ruleset.
+**Remediation**: Emit a structured deployment event on every ruleset rollout carrying `waf.rule.set.version`, `waf.vendor`, and the rollout strategy (full vs canary). Treat WAF ruleset versions as a peer to `service.version` for release-correlation purposes per `boundaries/release.md`.
+**See also**: `layers/L7-application/waf.md §3 Required Attributes`, `boundaries/release.md`
+
+### F.8 WAF fail-closed without dependency-health signal
+
+**Severity**: HIGH
+**Why it fails**: WAFs that consult external services (IP reputation, bot scoring, GeoIP, threat-intel API) inherit those dependencies' failure modes. A fail-closed policy without dependency telemetry means a third-party API outage silently blocks 100% of traffic; on-call has no signal that the security layer is the cause.
+**Remediation**: Emit `waf_dependency_failure_total{dependency, policy}` per external dependency. Alert when non-zero for more than 60 s. Document the fail-open vs fail-closed policy per rule and surface it on the WAF dashboard.
+**See also**: `layers/L7-application/waf.md §6 Fail-Open vs Fail-Closed`
+
+### F.9 WAF logs detached from application trace context
+
+**Severity**: MEDIUM
+**Why it fails**: When the WAF blocks a request and emits a log without trace correlation, the application has no record of the attempt. On-call cannot answer "did this user even reach our service?" without manually joining vendor-specific identifiers (e.g., `cf-ray`, `X-Amzn-Trace-Id`) to the application trace.
+**Remediation**: Configure the WAF to propagate `traceparent` even on block actions. Map vendor headers (`cf-ray`, `X-Amzn-Trace-Id`, Akamai `X-Akamai-*`) to W3C baggage at the edge so application traces and WAF logs join cleanly on `trace_id`.
+**See also**: `layers/L7-application/waf.md §7 Vendor Telemetry Surfaces`, `boundaries/cross-application.md §Propagators`
+
+### F.10 WAF rules promoted to `block` without `log`-mode soak
+
+**Severity**: MEDIUM
+**Why it fails**: A new rule promoted directly to `block` action carries unknown FP rate; first contact with production traffic doubles as the rule's correctness test. The failure mode is a mass-block incident affecting real customers.
+**Remediation**: Mandatory minimum 24 h `log`-mode (detect-only) soak per new rule with FP rate verified below a target ratio (commonly < 0.1% of matched traffic) before promotion to `block`. Encode the soak requirement as a CI gate on the ruleset repository so promotion bypass is auditable.
+**See also**: `layers/L7-application/waf.md §2 WAF Action Model §5 False-Positive Surge`
+
 ---
 
 ## G: Frontend / Mobile

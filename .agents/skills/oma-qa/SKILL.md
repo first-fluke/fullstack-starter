@@ -141,3 +141,4 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Context loading: `../_shared/core/context-loading.md`
 - Context budget: `../_shared/core/context-budget.md`
 - Lessons learned: `../_shared/core/lessons-learned.md`
+- Observability handoff: `../oma-observability/SKILL.md` §Integrations — canary RUM (Core Web Vitals), backend perf spans

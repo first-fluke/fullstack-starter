@@ -1,6 +1,6 @@
 ---
 name: oma-image
-description: Multi-vendor AI image generation with authentication-aware parallel dispatch. Routes to Codex (gpt-image-2 via ChatGPT OAuth) and Pollinations (flux/zimage, free with signup). Gemini provider is present but disabled by default (requires billing). Use for image generation, image creation, visual asset generation, and AI art.
+description: Multi-vendor AI image generation with authentication-aware parallel dispatch. Routes to Codex (gpt-image-2 via ChatGPT OAuth), Antigravity (gemini-2.5-flash-image aka nano-banana via `agy` CLI + Gemini Code Assist), and Pollinations (flux/zimage, free with signup). Use for image generation, image creation, visual asset generation, and AI art.
 ---
 
 # Image Agent - Multi-Vendor Image Router
@@ -131,7 +131,7 @@ oma image generate --reference "<absolute-path>" --vendor codex "<prompt>"
 
 1. **Clarify before invoking**: if the user's request is ambiguous about subject, style, composition, or usage context, **ask the user first** or **amplify the prompt explicitly** (showing the user the expanded version for approval). Do NOT silently generate from a vague prompt. See `Clarification Protocol` below.
 2. **Authentication-aware dispatch**: detect which vendor CLIs are authenticated and run only those; with `--vendor all`, every requested vendor must be available (strict).
-3. **Cost guardrail**: confirm before executing runs whose estimated cost is ≥ `$0.20` (configurable). `--yes` / `OMA_IMAGE_YES=1` bypass. Default vendor `pollinations` (flux/zimage) is free, so auto-triggering on keywords is safe.
+3. **Cost guardrail**: confirm before executing runs whose estimated cost is ≥ `$0.20` (configurable). `--yes` / `OMA_IMAGE_YES=1` bypass. Default vendors `pollinations` (flux/zimage) and `antigravity` (nano-banana via Gemini Code Assist) are free, so auto-triggering on keywords is safe.
 4. **Path safety**: output paths outside `$PWD` require `--allow-external-out`.
 5. **Cancellable**: SIGINT/SIGTERM aborts in-flight provider calls and the orchestrator.
 6. **Deterministic outputs**: every run writes `manifest.json` next to the images for reproducibility.
@@ -150,7 +150,7 @@ Before invoking `oma image generate`, the calling agent runs this checklist agai
 - [ ] **Style**: photorealistic, illustration, 3D render, oil painting, concept art, flat vector, …?
 - [ ] **Mood / lighting**: bright vs moody, warm vs cool, dramatic vs minimal
 - [ ] **Usage context**: hero image, icon, thumbnail, product shot, poster? (dictates aspect ratio + composition)
-- [ ] **Aspect ratio**: square (`1024x1024`), portrait (`1024x1536`), landscape (`1536x1024`)?
+- [ ] **Aspect ratio / resolution**: any `WxH` where each edge is a multiple of 16 between 16 and 3840 and aspect ∈ [1:3, 3:1] (e.g. `1024x1024` square, `2048x1152` 16:9, `3840x2160` 4K UHD, `1024x1536` portrait), or `auto`.
 
 **Amplification shortcut.** For brief prompts (e.g. "a red apple"), do not pop clarifying questions if the request is genuinely that simple. Instead **amplify inline and show the user** the expanded version before invoking:
 
@@ -171,7 +171,9 @@ This skill follows oh-my-agent's CLI-first concept: whenever a vendor's native C
 |--------|----------|--------|---------|
 | `codex` | CLI-first via `codex exec` over ChatGPT OAuth (`codex login`), built-in `image_gen` | `gpt-image-2` | Logged in via Codex CLI (no API key) |
 | `pollinations` | Direct HTTP via `gen.pollinations.ai/v1/images/generations` (free signup for key) | Free: `flux`, `zimage`. Credit-gated: `qwen-image`, `wan-image`, `gpt-image-2`, `klein`, `kontext`, `gptimage`, `gptimage-large` | `POLLINATIONS_API_KEY` set (free at https://enter.pollinations.ai). No native CLI exists. |
-| `gemini` | CLI-first fallback → direct API. `gemini -p` (stream) is the preferred path but currently disabled at precheck (CLI's agentic loop does not return raw `inlineData` bytes on stdout as of Gemini CLI 0.38). Until the CLI exposes a non-agentic image surface, the provider falls back to the direct `generativelanguage.googleapis.com` API. | `gemini-2.5-flash-image`, `gemini-3.1-flash-image-preview` | Preferred: `gemini auth login`. Fallback: `GEMINI_API_KEY` + billing. |
+| `antigravity` | `agy -p --dangerously-skip-permissions --add-dir <outDir>` — Antigravity's agentic CLI runs over the user's Gemini Code Assist subscription. agy writes raw bytes to absolute target paths we embed in the prompt; the provider sniffs format via magic bytes and renames the file extension to match. Model selection is opaque — agy picks internally, we never name a model. | (opaque — chosen by agy) | `agy` CLI installed + signed in. No API key, no per-image charge. |
+
+> The direct Gemini path (`gemini -p` stream, `generativelanguage.googleapis.com` API) is deprecated. `agy` is the supported Gemini image route — it's free with Gemini Code Assist and doesn't require billing on AI Studio.
 
 ### Invocation
 
@@ -186,8 +188,8 @@ This skill follows oh-my-agent's CLI-first concept: whenever a vendor's native C
 #### Shell CLI
 
 ```
-oma image generate "<prompt>" [--vendor auto|codex|pollinations|gemini|all] [-n 1..5] \
-                             [--size 1024x1024|1024x1536|1536x1024|auto] \
+oma image generate "<prompt>" [--vendor auto|codex|pollinations|antigravity|all] [-n 1..5] \
+                             [--size WxH|auto] \
                              [--quality low|medium|high|auto] \
                              [--out <dir>] [--allow-external-out] \
                              [-r <path>]... \
@@ -196,8 +198,6 @@ oma image generate "<prompt>" [--vendor auto|codex|pollinations|gemini|all] [-n 
 oma image doctor
 oma image list-vendors
 ```
-
-Gemini-only escalation flag: `--strategy mcp,stream,api` (overrides `vendors.gemini.strategies`).
 
 #### Reference Images (`-r`, `--reference`)
 
@@ -213,7 +213,7 @@ Supported vendors:
 | Vendor | Support | How |
 |--------|---------|-----|
 | `codex` (gpt-image-2) | PASS | Passes `-i <path>` to `codex exec` |
-| `gemini` (2.5-flash-image) | PASS | Inlines base64 `inlineData` parts in request |
+| `antigravity` | PASS | Refs copied to a per-run temp dir, `agy --add-dir <tmpdir>` grants access, paths inlined into the prompt |
 | `pollinations` | N/A | Rejected with exit code 4 (requires URL hosting; see PR #2 roadmap) |
 
 **Paths**: absolute or relative to `$CWD`. Host CLIs usually expose attached images via:
@@ -227,9 +227,9 @@ When ALL of the following are true, the calling agent MUST pass the attached ima
 
 1. The user asks to generate or edit an image (referencing the attached one by phrases like "이거", "this image", "same style as this", "이 수달", etc.).
 2. A host-surfaced attached image is visible to the agent (e.g. a Claude Code system message with `[Image: source: <path>]`, or an Antigravity workspace upload path, or an explicit filesystem path in the user's message).
-3. The selected vendor supports references (`codex` or `gemini`).
+3. The selected vendor supports references (`codex` or `antigravity`).
 
-**Required action**: invoke `oma image generate --reference <absolute-path> --vendor <codex|gemini> "<prompt>"`. If the user didn't specify a vendor, default to `codex` (CLI-first, widest availability). Do NOT:
+**Required action**: invoke `oma image generate --reference <absolute-path> --vendor <codex|antigravity> "<prompt>"`. If the user didn't specify a vendor, default to `codex` (CLI-first, widest availability). Do NOT:
 
 - Fall back to prose description ("I'll describe the otter's appearance...").
 - Ask the user to re-type or re-attach the path.
@@ -267,7 +267,7 @@ Before submitting, run `resources/checklist.md`.
 ### Configuration
 
 Project-specific settings: `config/image-config.yaml`.
-Env vars: `OMA_IMAGE_DEFAULT_VENDOR`, `OMA_IMAGE_DEFAULT_OUT`, `OMA_IMAGE_YES`, `POLLINATIONS_API_KEY`, `GEMINI_API_KEY`, `OMA_IMAGE_GEMINI_STRATEGIES`.
+Env vars: `OMA_IMAGE_DEFAULT_VENDOR`, `OMA_IMAGE_DEFAULT_OUT`, `OMA_IMAGE_YES`, `POLLINATIONS_API_KEY`.
 
 - Execution steps: `resources/execution-protocol.md`
 - Vendor matrix: `resources/vendor-matrix.md`

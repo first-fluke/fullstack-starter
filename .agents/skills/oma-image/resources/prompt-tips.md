@@ -1,6 +1,6 @@
 # Prompt Tips
 
-Good prompts are specific about scene, subject, lighting, and style. Both `gpt-image-2` (codex) and `gemini-2.5-flash-image` (gemini) respond well to the same structural cues.
+Good prompts are specific about scene, subject, lighting, and style. Both `gpt-image-2` (codex) and `gemini-2.5-flash-image` (antigravity / nano-banana) respond well to the same structural cues.
 
 ## Structure
 
@@ -39,7 +39,7 @@ Example: `minimalist product photography: single white ceramic coffee cup on dar
 ## Vendor Nuances
 
 - **Codex (`gpt-image-2`)**: prefers slightly longer, descriptive prompts. Quality flag `high` noticeably sharpens fine detail but doubles generation time.
-- **Gemini (`gemini-2.5-flash-image`)**: robust on CJK-composed scenes ("hanok", "cherry blossom"); slightly stronger on illustrated/painterly styles.
+- **Antigravity (`gemini-2.5-flash-image` aka nano-banana)**: robust on CJK-composed scenes ("hanok", "cherry blossom"); slightly stronger on illustrated/painterly styles. Driven via the `agy` CLI's agentic loop — output is JPEG by default even if `.png` is requested (the provider sniffs magic bytes and renames the extension accordingly).
 
 ## Comparing Output
 
@@ -52,7 +52,7 @@ When the **Clarification Protocol** (see `SKILL.md`) reaches the *amplify* step,
 | Source | Vendor match | Prompts | Categories |
 |--------|--------------|---------|-----------|
 | [awesome-gpt-image-2](https://github.com/YouMind-OpenLab/awesome-gpt-image-2) | `codex` (gpt-image-2) | ~100 | Profile/Avatar · Social Post · Infographic · YouTube Thumbnail · Comic/Storyboard · Poster/Flyer · App/Web Design |
-| [awesome-nano-banana-pro-prompts](https://github.com/YouMind-OpenLab/awesome-nano-banana-pro-prompts) | `gemini` (nano-banana-pro) | 10,000+ | Same taxonomy; 16 localized READMEs (en, ko-KR, ja-JP, zh-TW, de-DE, …) |
+| [awesome-nano-banana-pro-prompts](https://github.com/YouMind-OpenLab/awesome-nano-banana-pro-prompts) | `antigravity` (nano-banana-pro) | 10,000+ | Same taxonomy; 16 localized READMEs (en, ko-KR, ja-JP, zh-TW, de-DE, …) |
 
 For `pollinations` (flux / zimage), patterns from either library transfer; use the subject framing, lighting cues, and style-keyword structure, not the literal wording.
 

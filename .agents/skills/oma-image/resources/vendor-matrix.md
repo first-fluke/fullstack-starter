@@ -5,7 +5,7 @@
 | Vendor | Reference input | Transport | Notes |
 |--------|-----------------|-----------|-------|
 | `codex` | PASS | `codex exec -i <path>` (repeatable) | Local file path; 5MB-per-file cap enforced by Codex CLI |
-| `gemini` | PASS | `inlineData` parts (base64) prepended to text prompt | Up to 14 refs supported by `gemini-2.5-flash-image`; OMA caps at 10 |
+| `antigravity` | PASS | Per-run temp dir staged via `agy --add-dir`; paths referenced inline in prompt | Up to 10 refs (skill cap); copied so agy sandboxes don't need access to the originals' parent dir |
 | `pollinations` | N/A | (none) | Requires URL hosting; rejected with exit 4. Planned for PR #2. |
 
 All paths are validated in `reference-guard.ts` (magic-byte MIME check + size + count + duplicate rejection) before dispatch. The magic-byte-detected MIME is threaded through `GenerateInput.referenceImages` and used verbatim at the vendor API boundary; file extension is never trusted for MIME type.
@@ -20,48 +20,41 @@ All paths are validated in `reference-guard.ts` (magic-byte MIME check + size + 
 | Model | `gpt-image-2` |
 | Transport | `codex exec "<instruction>"` (internal bridge invokes `image_gen` tool) |
 | Image location | `~/.codex/generated_images/<session>/ig_*.png` → copied to `outDir` |
-| Sizes | `1024x1024`, `1024x1536`, `1536x1024` |
+| Sizes | Any `WxH` passing `size-guard.ts` (each edge ∈ [16, 3840], multiples of 16, aspect 1:3..3:1) or `auto`. Codex CLI clamps to its own gpt-image-2 limits internally. |
 | Qualities | `low`, `medium`, `high`, `auto` |
 
 Codex requires `--skip-git-repo-check` for invocation inside a git worktree; this is inherited from the upstream `codex-image` skill and is a known dependency of the Codex CLI image path.
 
-## Gemini
+## Antigravity
 
-Strategies are tried in order from `vendors.gemini.strategies` (default `mcp → stream → api`). Each strategy has a `precheck()` that returns `{ ok, reason? }`; a failed precheck is recorded as `skipped` and the runner continues.
-
-### α: mcp
+The Antigravity CLI (`agy`) is an agentic CLI that runs against the user's Gemini Code Assist subscription (no separate API key, no per-image charge). It exposes an internal image generation tool that drives Gemini-family image models — including the one currently called "nano-banana" — but does **not** expose a model selector to callers. We deliberately do not pretend to choose: the prompt has no model hint, the manifest records `"model": "agy-internal"`, and the output filename is `antigravity-<runShortid>.<ext>` with no model segment.
 
 | Field | Value |
 |-------|-------|
-| Requirement | `mcp-genmedia` MCP server wired into the Gemini CLI |
-| Precheck | `OMA_IMAGE_GEMINI_MCP=1` (explicit opt-in) |
-| Model | vendor model (default `gemini-2.5-flash-image`) |
-| Status | v1: precheck scaffold only; full implementation deferred to P1+ |
+| Binary | `agy` (Antigravity CLI) |
+| Auth | Sign-in via Gemini Code Assist account during `agy install` |
+| Health check | `agy --version` exits 0 |
+| Model selection | Opaque — chosen by agy's internal agent loop. Not exposed via flags, not recorded as a vendor-side promise. |
+| Transport | `agy -p --dangerously-skip-permissions --add-dir <outDir> --print-timeout <s> "<instruction>"` (spawn `cwd` is forced to `<outDir>` to prevent agy from inheriting a stale workspace context) |
+| Output bytes | Saved directly by agy to absolute paths embedded in the prompt; detected via PNG/JPEG/WebP/GIF magic bytes and renamed accordingly |
+| Sizes | Any `WxH` allowed by `size-guard.ts` (each edge ∈ [16, 3840], multiples of 16, aspect 1:3..3:1) or `auto`. The dimension is passed as an advisory hint in the prompt — agy/Gemini may pick its own internal aspect. |
 
-### β: stream (disabled)
+### Why `agy` instead of the Gemini CLI / direct API
 
-| Field | Value |
-|-------|-------|
-| Status | **Disabled at precheck** as of Gemini CLI 0.38 |
-| Reason | `gemini -p` always runs the full agent loop. Its `stream-json` output contains `init`/`message`/`tool_use`/`tool_result` events, not raw `inlineData` image bytes. Asked to generate an image, `gemini` tries to invoke image-generation tools itself (including ironically this very `oma-image` skill), rather than returning bytes on stdout. |
-| Re-enable | When Gemini CLI exposes a non-agentic image surface, update `geminiStreamStrategy.precheck()` to return `{ ok: true }` and reuse the existing parser (`extractImageFromStream`) which is still unit-tested. |
-| Parser kept | `extractImageFromStream` remains in place + tested so the code path can be unbricked quickly when the CLI surface changes. |
+- `gemini -p` runs the full agent loop and does not emit raw `inlineData` bytes on stdout (as of Gemini CLI 0.38) — it tries to invoke image-generation tools itself, often recursing back into `oma-image`.
+- The direct `generativelanguage.googleapis.com` API requires `GEMINI_API_KEY` plus billing on AI Studio. Image models are not in the free tier.
+- `agy -p` already wraps Gemini Code Assist credentials in the user's Antigravity session and exposes a working `image_gen` tool. It writes raw bytes to disk for us, so we don't have to capture them from stdout.
 
-### γ: api
+### Output format gotcha
 
-| Field | Value |
-|-------|-------|
-| Requirement | `GEMINI_API_KEY` env var |
-| Transport | `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key=…` |
-| Parsing | First candidate part with `inlineData.data` |
-| Retry | 429 → throw `rate-limit` with `Retry-After` header |
+Gemini image surfaces currently return JPEG bytes regardless of the requested filename extension. The provider writes to a `.img` placeholder, sniffs the actual format from the first 12 bytes, then renames to `.png` / `.jpg` / `.webp` / `.gif`. The result's `mime` field reflects the sniffed format, not the user's requested extension.
 
 ## Strategy Attempt Record
 
 Manifest field `strategy_attempts` is always an array of objects:
 
 ```
-{ "strategy": "mcp" | "stream" | "api",
+{ "strategy": "codex-exec-oauth" | "agy-print" | "pollinations-http",
   "status": "ok" | "skipped" | "failed",
   "reason"?: string,
   "duration_ms"?: number }
@@ -73,11 +66,11 @@ The last successful strategy also appears on the run as `strategy`.
 
 | Error kind | Retry policy | Exit code when solo |
 |------------|-------------|---------------------|
-| `not-installed` | fail (the vendor skips the strategy via precheck before this kind appears) | 5 |
+| `not-installed` | fail (the vendor health check catches this first) | 5 |
 | `auth-required` | fail; printed hint tells user how to authenticate | 5 |
 | `invalid-input` | fail; surfaces validation problems from the provider | 4 |
-| `safety-refused` | short-circuit (no fallback to other strategies) | 2 |
-| `rate-limit` | record attempt as failed; continue to next strategy | 1 (if no vendor succeeded) |
-| `timeout` | record attempt as failed; continue | 6 |
-| `network` | `retryable=true` → continue; `false` → record and continue | 1 |
-| `other` | continue through remaining strategies | 1 |
+| `safety-refused` | short-circuit (no fallback) | 2 |
+| `rate-limit` | record attempt as failed | 1 (if no vendor succeeded) |
+| `timeout` | record attempt as failed | 6 |
+| `network` | `retryable=true` → record; `false` → record | 1 |
+| `other` | record | 1 |

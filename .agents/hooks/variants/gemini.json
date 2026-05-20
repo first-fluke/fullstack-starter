@@ -23,10 +23,27 @@
       "matcher": "run_shell_command",
       "timeout": 5000
     },
-    "AfterAgent": {
-      "hook": "persistent-mode.ts",
+    "AfterTool": {
+      "hook": "hud.ts",
       "matcher": "*",
-      "timeout": 5000
+      "timeout": 3000
+    },
+    "AfterAgent": [
+      {
+        "hook": "persistent-mode.ts",
+        "matcher": "*",
+        "timeout": 5000
+      },
+      {
+        "hook": "hud.ts",
+        "matcher": "*",
+        "timeout": 3000
+      }
+    ],
+    "SessionStart": {
+      "hook": "hud.ts",
+      "matcher": "*",
+      "timeout": 3000
     }
   }
 }
