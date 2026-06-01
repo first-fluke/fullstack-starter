@@ -29,10 +29,19 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
-4. Read `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (11 review guides)
-5. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
-6. Read `.agents/workflows/ultrawork/resources/phase-gates.md` (gate definitions)
-7. Record session start using memory write tool:
+4. Read `.agents/skills/_shared/runtime/event-spec.md` for L1 event protocol.
+5. Define the `oma_emit` helper for required L1 decisions:
+   ```bash
+   oma_emit() {
+     kind="$1"
+     payload="$2"
+     oma emit "$kind" "$payload"
+   }
+   ```
+6. Read `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (11 review guides)
+7. Read `.agents/skills/_shared/core/quality-principles.md` (4 principles)
+8. Read `.agents/workflows/ultrawork/resources/phase-gates.md` (gate definitions)
+9. Record session start using memory write tool:
    - Create `session-ultrawork.md` in the memory base path
    - Include: session start time, user request summary, workflow version (ultrawork)
 
@@ -70,7 +79,21 @@ Activate PM Agent to execute Steps 1-4:
 - [ ] Over-engineering review done
 - [ ] **User confirmation**
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**:
+1. Use memory edit tool to record phase completion in `session-ultrawork.md`.
+2. Emit the required L1 decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.plan-approved","decision":"Proceed with the approved PLAN output.","rationale":"PLAN_GATE passed and the user confirmed scope."}'
+   ```
+3. Verify the required decision before Phase 2:
+   ```bash
+   oma state:verify-decisions --workflow ultrawork --checkpoint plan-approved
+   ```
+4. Emit and verify the implementation scope lock before spawning implementation agents:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.impl-plan-locked","decision":"Use the approved task decomposition for IMPL.","rationale":"PLAN output is locked before implementation agents are spawned."}'
+   oma state:verify-decisions --workflow ultrawork --checkpoint impl-plan-locked
+   ```
 
 **Gate failure → Return to Step 1**
 
@@ -282,7 +305,13 @@ If baseline was measured at Step 5.2:
 - [ ] Code cleaned
 - [ ] (If measured) Quality Score >= Post-VERIFY score (no regression from refinement)
 
-**On gate pass**: Use memory edit tool to record phase completion in `session-ultrawork.md`
+**On gate pass**:
+1. Use memory edit tool to record phase completion in `session-ultrawork.md`.
+2. Emit and verify the REFINE outcome decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"ultrawork.refine-outcome","decision":"Keep the REFINE changes or explicitly skip refinement.","rationale":"REFINE_GATE passed or the documented skip condition applies."}'
+   oma state:verify-decisions --workflow ultrawork --checkpoint refine-outcome
+   ```
 
 **Gate failure → Before re-spawning the Debug Agent, apply the same termination check:**
 

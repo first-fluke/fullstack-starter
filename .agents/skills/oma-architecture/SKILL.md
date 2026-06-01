@@ -41,6 +41,14 @@ Analyze, compare, and document software architecture decisions with explicit tra
 - Assumptions, tradeoffs, risks, and validation steps
 - Saved architecture artifacts under `.agents/results/architecture/` when producing durable outputs
 
+```yaml
+outputs:
+  - name: architecture-artifact
+    description: ADR, comparison, or recommendation written to durable storage when the run is meant to persist
+    artifact: ".agents/results/architecture/*.md"
+    required: false
+```
+
 ### Dependencies
 - `resources/execution-protocol.md` for workflow
 - `resources/methodology-selection.md` for method choice

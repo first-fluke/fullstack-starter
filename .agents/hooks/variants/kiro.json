@@ -1,0 +1,33 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "kiro",
+  "hookDir": ".kiro/hooks",
+  "settingsFile": ".kiro/settings/cli.json",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "events": {
+    "userPromptSubmit": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      }
+    ],
+    "preToolUse": {
+      "hook": "test-filter.ts",
+      "matcher": "shell",
+      "timeout": 5
+    },
+    "stop": {
+      "hook": "persistent-mode.ts",
+      "timeout": 5
+    }
+  }
+}

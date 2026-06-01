@@ -32,6 +32,7 @@ Translate, review, or adapt multilingual content while preserving meaning, regis
 ### Expected inputs
 - Source text, target language, and optional locale or audience
 - Existing locale files, glossary, code context, or style constraints
+- Optional user/author writing sample for voice matching in prose, marketing, dialogue, or adaptation tasks
 - Placeholder syntax, formatting constraints, and output mode
 
 ### Expected outputs
@@ -44,9 +45,11 @@ Translate, review, or adapt multilingual content while preserving meaning, regis
 - Existing translations and surrounding code for register and terminology
 - `resources/translation-rubric.md` and `resources/anti-ai-patterns.md`
 - Project locale files when translating UI strings
+- User-provided voice samples when the task asks to preserve or match a specific author's style
 
 ### Control-flow features
 - Branches by content type, target language, batch size, register uncertainty, and placeholder/structure requirements
+- Branches by whether style-sample calibration is available and appropriate for the content type
 - Reads locale files and source context; may write translated content only when explicitly editing files
 - Blocks output until mechanical verification passes
 
@@ -164,6 +167,25 @@ Voice is applied **on top** of the content-type persona. Examples:
 
 The persona is then **localized to the target language** at execution time. Translating into Korean as a "technical reporter" with `interpreter` voice means thinking as a Korean technical reporter who values rhythm and audience scan-speed over formal completeness.
 
+#### Optional Layer 3: Voice sample calibration
+
+If the user provides an author/user writing sample, analyze it before drafting. Use it as a style constraint, not as permission to alter meaning.
+
+Extract:
+- Sentence length pattern: short/punchy, long/flowing, or mixed
+- Paragraph entry habit: immediate claim, context first, anecdote, question, or contrast
+- Word choice level: casual, technical, academic, literary, blunt, or polished
+- Punctuation habits: parentheses, colons, commas, semicolons, dashes, sparse punctuation
+- Transition style: explicit connectors, abrupt turns, numbered logic, or minimal signposting
+- Recurring phrases or verbal tics that are appropriate to preserve
+
+Apply only where style matters:
+- ON: blog posts, essays, speeches, interviews, marketing copy, narrative prose, adaptation requests, and user-authored documentation where preserving author voice is requested
+- LIMITED: technical documentation and reports; match rhythm and terminology, but do not add personal stance
+- OFF: UI strings, locale key batches, legal/official text, exact policy text, or any text where structure and fidelity outrank authorial style
+
+Guardrail: Voice matching may adjust rhythm, diction, and sentence shape. It must not add new opinions, first-person perspective, humor, facts, examples, or emotional color that is absent from the source.
+
 ### Stage 3: Reconstruct in Target Language
 
 Rebuild from meaning **as the assigned persona**, following target language norms:
@@ -215,10 +237,11 @@ If any mechanical check fails, revise and re-run. Do not proceed to the rubric u
 10. No source-language word order leaking through
 11. No unnecessary bold or formatting artifacts (em dashes already covered in mechanical check A)
 12. No Europeanized patterns (unnecessary connectives, passive voice, noun pile-up, over-nominalization, forced pronouns, cleft calques)
+13. No humanizer-pattern leftovers: generic positive conclusions, "let's dive in" signposting, persuasive-authority tropes, formulaic "challenges/future prospects" sections, title-restating warmups, emoji decoration, or vague media/notability padding
 
 **D. Figurative language handling:**
-13. Were all metaphors/idioms handled per the classify decision (interpret/substitute/retain)?
-14. Do figurative expressions read naturally in the target language, not as literal calques?
+14. Were all metaphors/idioms handled per the classify decision (interpret/substitute/retain)?
+15. Do figurative expressions read naturally in the target language, not as literal calques?
 
 **E. Pre-emit gate (must answer in writing before output):**
 
@@ -296,6 +319,8 @@ Start the review by explicitly answering this question first: **"What makes the 
 - **Emotional fidelity**: Were subjective/emotional word choices flattened into neutral descriptions?
 - **Tone drift**: Does the register stay consistent from start to finish, or does it shift mid-document (e.g., formal intro drifting into casual explanation)?
 - **Expression & flow**: Flag sentences that still read like "translation-ese" (stiff phrasing, unnatural word order, awkward transitions)
+- **Humanization patterns**: For prose, marketing, blog, report, and adaptation tasks, scan for sterile rhythm, evenly shaped paragraphs, signposting, generic conclusions, persuasive-authority tropes, formulaic challenge/future sections, emoji decoration, title-restating warmups, and filler phrases
+- **Voice sample fit**: If a sample was provided, check whether sentence rhythm, paragraph openings, diction, punctuation, and transition style match the sample without adding unsupported meaning
 - **Translator's notes quality**: Too many? Too few? Accurate and concise?
 
 **Stage 6: Revision**
@@ -439,6 +464,7 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 1. Analyze source register, intent, domain terms, placeholders, and structure.
 2. Reconstruct meaning in the target language, not word-for-word.
 3. Run mechanical checks and `resources/translation-rubric.md` before emitting output.
+4. For non-trivial prose, run Stage 5 humanization review before final polish; apply voice-sample calibration only when provided and appropriate.
 ```
 
 For UI files, scan sibling locale files first:
@@ -482,6 +508,8 @@ rg "<source-key-or-term>" .
 14. Never skip verification stage for batches > 10 strings
 15. Never modify source file structure (keys, nesting, comments)
 16. Never preserve source-language formatting artifacts that are unnatural in the target language. For CJK targets (Korean, Japanese, Chinese), em dashes (—), title case in headings, and trailing "-ing" participle clauses must be restructured, even when the source uses them. See `resources/anti-ai-patterns.md` rules 13–16.
+17. Never "humanize" by inventing personality. Do not add first person, jokes, opinions, examples, facts, citations, stronger emotion, or messiness unless the source or user explicitly calls for adaptation.
+18. When a voice sample is provided, match observable style traits only: rhythm, diction level, punctuation habits, transitions, and paragraph shape. Preserve source meaning and target-language naturalness above mimicry.
 
 ## References
 

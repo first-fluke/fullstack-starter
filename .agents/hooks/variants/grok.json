@@ -1,0 +1,33 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "grok",
+  "hookDir": ".grok/hooks",
+  "settingsFile": ".grok/hooks/oma-hooks.json",
+  "projectDirEnv": "GROK_WORKSPACE_ROOT",
+  "runtime": "bun",
+  "events": {
+    "UserPromptSubmit": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      }
+    ],
+    "PreToolUse": {
+      "hook": "test-filter.ts",
+      "matcher": "run_terminal_cmd",
+      "timeout": 5
+    },
+    "Stop": {
+      "hook": "persistent-mode.ts",
+      "timeout": 5
+    }
+  }
+}

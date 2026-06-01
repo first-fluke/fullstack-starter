@@ -35,6 +35,14 @@ Turn ambiguous or complex product requests into actionable, dependency-aware pla
 - API contracts or data model sketches when relevant
 - Saved plan artifacts under `.agents/results/`
 
+```yaml
+outputs:
+  - name: plan
+    description: PM task breakdown JSON for orchestrator consumption
+    artifact: ".agents/results/plan-*.json"
+    required: true
+```
+
 ### Dependencies
 - `resources/execution-protocol.md`, examples, task template, and ISO planning guide
 - Shared API contract references and project context-loading rules

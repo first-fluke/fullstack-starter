@@ -12,6 +12,10 @@
         "timeout": 5
       },
       {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
         "hook": "skill-injector.ts",
         "timeout": 3
       }
@@ -19,6 +23,10 @@
     "beforeSubmitPrompt": [
       {
         "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
         "timeout": 5
       },
       {

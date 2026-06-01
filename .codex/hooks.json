@@ -10,6 +10,12 @@
             "timeout": 5
           },
           {
+            "name": "state-boundary",
+            "type": "command",
+            "command": "bun .codex/hooks/state-boundary.ts",
+            "timeout": 5
+          },
+          {
             "name": "skill-injector",
             "type": "command",
             "command": "bun .codex/hooks/skill-injector.ts",

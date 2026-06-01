@@ -10,6 +10,12 @@
             "timeout": 5
           },
           {
+            "name": "state-boundary",
+            "type": "command",
+            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/state-boundary.ts\"",
+            "timeout": 5
+          },
+          {
             "name": "skill-injector",
             "type": "command",
             "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/skill-injector.ts\"",

@@ -300,27 +300,20 @@ export function buildClaudeStatusline(input: StatuslineStdin): string {
     parts.push(colorByThreshold(ctxPct, `ctx:${Math.round(ctxPct)}%`));
   }
 
-  // 4. Tokens (agy exposes these; Claude does not).
-  const inTok = input.context_window?.total_input_tokens ?? 0;
-  const outTok = input.context_window?.total_output_tokens ?? 0;
-  if (inTok > 0 || outTok > 0) {
-    parts.push(dim(`tok:${formatTokens(inTok)}↑${formatTokens(outTok)}↓`));
-  }
-
-  // 5. Session cost (Claude)
+  // 4. Session cost (Claude)
   const cost = input.cost?.total_cost_usd;
   if (cost != null && cost > 0) {
     parts.push(dim(`$${cost.toFixed(2)}`));
   }
 
-  // 6. Rate limits (Claude)
+  // 5. Rate limits (Claude)
   const rl5 = formatRateLimit("5h", input.rate_limits?.five_hour);
   const rl7 = formatRateLimit("7d", input.rate_limits?.seven_day);
   if (rl5 || rl7) {
     parts.push([rl5, rl7].filter(Boolean).join(dim(" ")));
   }
 
-  // 7. Lines changed (vendor-provided only; agy doesn't track this and we
+  // 6. Lines changed (vendor-provided only; agy doesn't track this and we
   //    intentionally don't synthesize from git — keep what the vendor knows).
   const added = input.cost?.total_lines_added;
   const removed = input.cost?.total_lines_removed;
@@ -331,7 +324,7 @@ export function buildClaudeStatusline(input: StatuslineStdin): string {
     parts.push(diffParts.join(dim("/")));
   }
 
-  // 8. agy-only: surface non-idle agent state and sandbox flag.
+  // 7. agy-only: surface non-idle agent state and sandbox flag.
   if (input.agent_state && input.agent_state !== "idle") {
     parts.push(yellow(input.agent_state));
   }
@@ -339,10 +332,18 @@ export function buildClaudeStatusline(input: StatuslineStdin): string {
     parts.push(dim("sandbox"));
   }
 
-  // 9. Active workflow
+  // 8. Active workflow
   const workflow = getActiveWorkflow(projectDir);
   if (workflow) {
     parts.push(yellow(`${workflow.workflow}:${workflow.reinforcementCount}`));
+  }
+
+  // 9. Tokens (agy exposes these; Claude usually does not). Keep this last
+  // because the token string is visually noisy and mostly informational.
+  const inTok = input.context_window?.total_input_tokens ?? 0;
+  const outTok = input.context_window?.total_output_tokens ?? 0;
+  if (inTok > 0 || outTok > 0) {
+    parts.push(dim(`tok:${formatTokens(inTok)}↑${formatTokens(outTok)}↓`));
   }
 
   return parts.join(dim(" │ "));

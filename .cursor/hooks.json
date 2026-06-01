@@ -10,6 +10,12 @@
             "timeout": 5
           },
           {
+            "name": "state-boundary",
+            "type": "command",
+            "command": "bun .cursor/hooks/state-boundary.ts",
+            "timeout": 5
+          },
+          {
             "name": "skill-injector",
             "type": "command",
             "command": "bun .cursor/hooks/skill-injector.ts",
@@ -25,6 +31,12 @@
             "name": "keyword-detector",
             "type": "command",
             "command": "bun .cursor/hooks/keyword-detector.ts",
+            "timeout": 5
+          },
+          {
+            "name": "state-boundary",
+            "type": "command",
+            "command": "bun .cursor/hooks/state-boundary.ts",
             "timeout": 5
           },
           {

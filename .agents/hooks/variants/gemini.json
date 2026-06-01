@@ -13,6 +13,11 @@
         "timeout": 5000
       },
       {
+        "hook": "state-boundary.ts",
+        "matcher": "*",
+        "timeout": 5000
+      },
+      {
         "hook": "skill-injector.ts",
         "matcher": "*",
         "timeout": 3000

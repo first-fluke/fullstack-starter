@@ -1,0 +1,39 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "antigravity",
+  "hookDir": ".gemini/antigravity-cli/hooks",
+  "settingsFile": ".gemini/antigravity-cli/settings.json",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "events": {
+    "PreInvocation": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      }
+    ],
+    "PreToolUse": {
+      "hook": "test-filter.ts",
+      "matcher": "Bash",
+      "timeout": 5
+    },
+    "Stop": {
+      "hook": "persistent-mode.ts",
+      "timeout": 5
+    }
+  },
+  "statusLine": {
+    "hook": "hud.ts"
+  },
+  "extra": {
+    "homeOnly": true
+  }
+}

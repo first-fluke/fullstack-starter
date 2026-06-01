@@ -123,8 +123,10 @@ export function shouldSkipAllWorkflows(text: string): boolean {
 // Hook event names that represent genuine user input (not agent responses)
 const VALID_USER_EVENTS = new Set([
   "UserPromptSubmit",
+  "user_prompt_submit", // Grok
   "beforeSubmitPrompt", // Cursor
   "BeforeAgent", // Gemini (fires before agent processes user prompt)
+  "PreInvocation", // Antigravity CLI (agy)
 ]);
 
 /**
@@ -255,18 +257,30 @@ export function recordKwTrigger(
 
 function inferVendorFromScriptPath(): Vendor | null {
   const path = import.meta.filename;
+  if (path.includes(`${join(".gemini", "antigravity-cli", "hooks")}`))
+    return "antigravity";
   if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
   if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
   if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
   if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
   if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
+  if (path.includes(`${join(".grok", "hooks")}`)) return "grok";
   return null;
 }
 
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
+  const hookEventName = input.hookEventName as string | undefined;
   const byScriptPath = inferVendorFromScriptPath();
   if (byScriptPath) return byScriptPath;
+
+  // Grok uses hookEventName (e.g. "user_prompt_submit") + GROK_* env vars
+  if (process.env.GROK_WORKSPACE_ROOT || hookEventName?.includes("prompt")) {
+    // Prefer explicit grok signal; fall through to other checks only if ambiguous
+    if (process.env.GROK_WORKSPACE_ROOT) return "grok";
+  }
+
+  if (event === "PreInvocation") return "antigravity";
   if (event === "BeforeAgent") return "gemini";
   if (event === "beforeSubmitPrompt") return "cursor";
   if (event === "UserPromptSubmit") {
@@ -288,8 +302,21 @@ function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
     case "gemini":
       dir = process.env.GEMINI_PROJECT_DIR || process.cwd();
       break;
+    case "antigravity":
+      dir =
+        (input.cwd as string) ||
+        process.env.ANTIGRAVITY_PROJECT_DIR ||
+        process.env.AGY_PROJECT_DIR ||
+        process.cwd();
+      break;
     case "qwen":
       dir = process.env.QWEN_PROJECT_DIR || process.cwd();
+      break;
+    case "grok":
+      dir =
+        process.env.GROK_WORKSPACE_ROOT ||
+        (input.cwd as string) ||
+        process.cwd();
       break;
     default:
       dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -607,6 +634,35 @@ function activateMode(
   );
 }
 
+async function activateL1WorkflowSession(
+  projectDir: string,
+  workflow: string,
+  vendor: string,
+  vendorSid: string,
+  category = "main",
+): Promise<string | null> {
+  try {
+    const [{ setActiveSession }, { createEventId, emitEvent }] =
+      await Promise.all([
+        import("./state-marker.ts"),
+        import("./state-emit.ts"),
+      ]);
+    const sid = `oma-${createEventId()}`;
+    setActiveSession(projectDir, category, sid);
+    await emitEvent(projectDir, sid, {
+      kind: "session.created",
+      vendor,
+      vendorSid,
+      payload: { workflow, category },
+    });
+    return sid;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    process.stderr.write(`[oma] L1 session activation failed: ${msg}\n`);
+    return null;
+  }
+}
+
 // ── Deactivation Detection ───────────────────────────────────
 
 export const DEACTIVATION_PHRASES: Record<string, string[]> = {
@@ -739,6 +795,7 @@ async function main() {
       if (def.persistent) {
         activateMode(projectDir, workflow, sessionId);
       }
+      await activateL1WorkflowSession(projectDir, workflow, vendor, sessionId);
       // Record this trigger for reinforcement tracking
       const updatedState = recordKwTrigger(kwState, workflow);
       saveKwState(projectDir, updatedState);

@@ -33,8 +33,31 @@ description: >
 - `{input_name}`: {meaning}
 
 ### Expected outputs
+
+Use freeform bullets when the skill has no machine-checkable artifacts:
+
 - {Primary output}
 - {Validation/reporting output}
+
+Or declare a structured `outputs:` block when artifacts can be globbed. `oma verify` reads this block via `parseExpectedOutputs` and fails the closure check when any `required: true` artifact is missing after the agent reports completion.
+
+```yaml
+outputs:
+  - name: plan
+    description: PM task breakdown
+    artifact: ".agents/results/plan-*.json"
+    required: true
+  - name: tests
+    description: regression tests
+    artifact: "**/test_*.py"
+    required: false
+```
+
+Field rules:
+- `name`: short identifier, lowercase
+- `description`: human-readable purpose
+- `artifact`: glob relative to workspace root (supports `**`)
+- `required`: defaults to `false`; only `true` blocks closure
 
 ### Dependencies
 - {Tools, files, standards, APIs, local resources}

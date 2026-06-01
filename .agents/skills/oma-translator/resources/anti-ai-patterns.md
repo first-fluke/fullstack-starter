@@ -42,6 +42,18 @@ AI defaults to positive, promotional language. Translation should match the sour
 
 If the source has a specific attribution, keep it specific. If the source is vague, don't make it vaguer.
 
+### 4a. Notability and Media Padding
+
+**Avoid:** unsupported authority padding such as *covered by major media*, *widely recognized*, *leading expert*, *active social presence*, or long publication-name lists that do not add a concrete claim.
+
+In translation and adaptation, do not make a weak source sound more notable than it is. If the source lists authority markers without substance, preserve the factual claim plainly or flag that the sentence needs a source.
+
+### 4b. Formulaic Challenges/Future and Generic Conclusions
+
+**Avoid:** formulaic endings such as *Despite these challenges*, *future outlook*, *exciting times ahead*, *the future looks bright*, *major step in the right direction*, or *continues its journey toward excellence*.
+
+These closers sound assembled. Translate the actual next step, risk, or conclusion instead. If the source itself is generic, keep it restrained rather than making it more polished.
+
 ---
 
 ## Language Patterns
@@ -179,6 +191,21 @@ AI capitalizes all main words in headings. This is an English convention. Korean
 
 AI creates small tables that would be better as prose. In translation, don't introduce tabular format that wasn't in the source.
 
+### 16a. Inline-Header Vertical Lists
+
+AI often writes bullets as bold mini-headings followed by colons. Do not introduce this style unless the source already uses it or the target format requires it.
+
+- Bad: `- **Performance:** Load times were improved.`
+- Better: `Load times improved.` or a normal bullet matching sibling style
+
+### 16b. Emoji Decoration
+
+Do not add emoji to headings, bullets, or status labels. Preserve emoji only when they are part of the source content or an established UI convention in the target file.
+
+### 16c. Fragmented Heading Warmups
+
+AI often places a heading, then a one-line paragraph that merely restates the heading before the real content starts. Remove or rewrite these warmups in adaptation/review mode. In strict translation mode, preserve structure but avoid adding a new warmup sentence.
+
 ---
 
 ## Communication Artifacts
@@ -198,6 +225,46 @@ These are chatbot artifacts, not content.
 **Avoid:** *it's important to note, worth noting, it's crucial to remember, may vary*
 
 If the source doesn't hedge, the translation shouldn't either.
+
+### 18a. Signposting and Announcements
+
+**Avoid:** *let's dive in*, *let's explore*, *let's break this down*, *here's what you need to know*, *now let's look at*, *without further ado*.
+
+These phrases announce the writing instead of doing the writing. In translation, usually drop them or replace them with the actual claim.
+
+### 18b. Persuasive-Authority Tropes
+
+**Avoid:** *the real question is*, *at its core*, *in reality*, *what really matters*, *fundamentally*, *the heart of the matter*, *the deeper issue*.
+
+Use these only if the source author genuinely uses that rhetorical stance. Otherwise, translate the concrete claim directly.
+
+### 18c. Knowledge-Cutoff and Availability Disclaimers
+
+**Avoid:** *as of my last update*, *based on available information*, *specific details are limited*, *readily available sources*.
+
+These are usually chatbot artifacts. Do not preserve them unless the source text is explicitly about uncertainty or source limitations.
+
+---
+
+## Filler and Rhythm Patterns
+
+### 18d. Filler Phrase Compression
+
+Compress empty setup phrases when reviewing or adapting prose:
+
+- `in order to` -> `to`
+- `due to the fact that` -> `because`
+- `at this point in time` -> `now`
+- `has the ability to` -> `can`
+- `it is important to note that` -> usually delete
+
+In strict translation mode, preserve the author's intended emphasis but do not add filler.
+
+### 18e. Sterile Rhythm
+
+For prose, marketing, blogs, interviews, and adaptation tasks, scan for writing that is technically correct but too evenly shaped: same-length sentences, identical paragraph arcs, neutral summary without a stance where the genre expects one, or transitions that feel like a template.
+
+Fix by matching the source/author voice: vary sentence rhythm, keep concrete details, and let the target language use its natural cadence. Do not add first person, opinions, humor, or stronger emotion unless the source or user asks for adaptation.
 
 ---
 
@@ -335,6 +402,13 @@ Before finalizing any translation, scan for:
 - [ ] Natural sentence structure for target language (not source-language word order)
 - [ ] No unnecessary bold, em dashes, or formatting artifacts
 - [ ] No chatbot communication artifacts
+- [ ] No signposting or announcement phrases such as "let's dive in" unless the source intentionally uses them
+- [ ] No persuasive-authority tropes such as "the real question is" or "at its core" unless the source voice requires them
+- [ ] No generic positive conclusions or formulaic challenge/future sections
+- [ ] No unsupported media/notability padding
+- [ ] No emoji decoration or inline-header vertical lists introduced by the translation
+- [ ] No filler phrases that can be compressed without changing meaning
+- [ ] For prose/adaptation tasks, rhythm matches the source or provided voice sample without invented personality
 - [ ] No unnecessary connectives where context already implies the relationship
 - [ ] No passive voice where active voice is more natural in target language
 - [ ] No long modifier chains (3+) stacked before a noun; break into clauses

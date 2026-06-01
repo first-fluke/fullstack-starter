@@ -33,18 +33,28 @@ const DEFAULT_CJK_SCRIPTS = ["ko", "ja", "zh"];
 
 function inferVendorFromScriptPath(): Vendor | null {
   const path = import.meta.filename;
+  if (path.includes(`${join(".gemini", "antigravity-cli", "hooks")}`))
+    return "antigravity";
   if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
   if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
   if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
   if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
   if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
+  if (path.includes(`${join(".grok", "hooks")}`)) return "grok";
   return null;
 }
 
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
+  const hookEventName = input.hookEventName as string | undefined;
   const byScriptPath = inferVendorFromScriptPath();
   if (byScriptPath) return byScriptPath;
+
+  if (process.env.GROK_WORKSPACE_ROOT || hookEventName?.includes("prompt")) {
+    if (process.env.GROK_WORKSPACE_ROOT) return "grok";
+  }
+
+  if (event === "PreInvocation") return "antigravity";
   if (event === "BeforeAgent") return "gemini";
   if (event === "beforeSubmitPrompt") return "cursor";
   if (event === "UserPromptSubmit") {
@@ -64,8 +74,21 @@ function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
     case "gemini":
       dir = process.env.GEMINI_PROJECT_DIR || process.cwd();
       break;
+    case "antigravity":
+      dir =
+        (input.cwd as string) ||
+        process.env.ANTIGRAVITY_PROJECT_DIR ||
+        process.env.AGY_PROJECT_DIR ||
+        process.cwd();
+      break;
     case "qwen":
       dir = process.env.QWEN_PROJECT_DIR || process.cwd();
+      break;
+    case "grok":
+      dir =
+        process.env.GROK_WORKSPACE_ROOT ||
+        (input.cwd as string) ||
+        process.cwd();
       break;
     default:
       dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
