@@ -42,6 +42,18 @@ DESIGN.md is the central artifact; all design work revolves around it.
 - Responsive-first, WCAG-aware design recommendations
 - Optional vendor seed attribution when getdesign is used
 
+```yaml
+outputs:
+  - name: design-doc
+    description: Updated DESIGN.md when the run materially advances the design system
+    artifact: "DESIGN.md"
+    required: false
+  - name: design-context
+    description: Refreshed .design-context.md snapshot when a discovery pass runs
+    artifact: ".design-context.md"
+    required: false
+```
+
 ### Dependencies
 - `.design-context.md` and `DESIGN.md`
 - Design resources, references, anti-pattern catalog, and optional Stitch/getdesign integrations

@@ -144,9 +144,9 @@ Create, revise, and validate OMA skills using the SSL-lite Markdown structure de
 
 ### Guardrails
 1. Keep the four top-level sections exactly: `Scheduling`, `Structural Flow`, `Logical Operations`, `References`.
-2. Keep YAML frontmatter with clear `name` and `description`; routing depends on description quality.
+2. Keep YAML frontmatter with clear `name` and `description`; routing depends on description quality. Run `oma skills audit` after editing description to confirm the new wording does not collide with adjacent skills (warn ≥ 60%, fail ≥ 75% TF-IDF cosine).
 3. Include concrete `When NOT to use` boundaries and cross-routes to adjacent skills.
-4. Include expected inputs, expected outputs, dependencies, and control-flow features.
+4. Include expected inputs, expected outputs, dependencies, and control-flow features. Prefer the structured `outputs:` block when artifacts can be globbed so `oma verify` can perform a closure check.
 5. Include structural scenes using SSL scene vocabulary where practical: `PREPARE`, `ACQUIRE`, `REASON`, `ACT`, `VERIFY`, `RECOVER`, `FINALIZE`.
 6. Include logical actions with SSL primitives such as `READ`, `SELECT`, `VALIDATE`, `INFER`, `WRITE`, `CALL_TOOL`, `NOTIFY`, and `TERMINATE`.
 7. Include resource scope and resource targets for filesystem, codebase, process, credentials, network, user data, or memory.

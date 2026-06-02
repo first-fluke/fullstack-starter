@@ -1,0 +1,273 @@
+/*
+ * viewport-base.css — oma-slide fixed-stage shared CSS
+ *
+ * Usage: paste or <link> into a single-file deck, viewer.html, or any per-slide fragment.
+ * No build step required. Self-contained.
+ *
+ * Stage model: 1920×1080 px authored size.
+ * The entire .deck-stage is scaled uniformly with transform: scale() so it
+ * always fits the viewport while preserving pixel-exact geometry.
+ * Letterbox (horizontal bars) or pillarbox (vertical bars) fill the rest.
+ *
+ * NEVER reflow slides by changing the stage dimensions per viewport.
+ * NEVER use display:none / display:block to hide/show slides —
+ * later layout classes can override those and show all slides at once.
+ * Use .active / .visible (visibility + opacity + pointer-events) instead.
+ */
+
+/* ─── Reset / base ───────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Viewport container ─────────────────────────────────────────────── */
+/*
+ * .deck-viewport fills the browser window and provides the black letterbox /
+ * pillarbox background. The stage is absolutely centred inside it.
+ */
+.deck-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Fixed 1920×1080 stage ──────────────────────────────────────────── */
+/*
+ * .deck-stage is always authored at exactly 1920×1080 px.
+ * deck-stage.js calculates scale = Math.min(vw/1920, vh/1080) and applies
+ * transform: scale(scale) here. transform-origin is top-left so the maths
+ * in the JS stays simple (translate the stage to centre manually).
+ *
+ * DO NOT change width/height — that would break the validator's geometry contract.
+ */
+.deck-stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: top left;
+  /* transform: scale(…) injected by deck-stage.js at runtime */
+  overflow: hidden;
+  background: #fff;
+  /* GPU compositing layer — avoids subpixel paint during scale animation */
+  will-change: transform;
+}
+
+/* ─── Individual slides ──────────────────────────────────────────────── */
+/*
+ * Each .slide is absolutely positioned to fill the entire stage.
+ * Visibility is controlled exclusively via .active and .visible classes —
+ * never via display:none / display:block.
+ *
+ * Base state: invisible and non-interactive.
+ */
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+
+  /* Hidden by default — do NOT change to display:none */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+
+  /* Default transition for enter/exit (overridden per-theme) */
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0.35s;
+}
+
+/*
+ * .active — the slide scheduled to be fully visible.
+ * Applied by deck-stage.js when navigating TO this slide.
+ * visibility fires immediately; opacity transitions in.
+ */
+.slide.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0s;
+  z-index: 1;
+}
+
+/*
+ * .visible — a slide that was active and is fading out.
+ * Applied briefly during a cross-fade so the outgoing slide stays rendered
+ * while the incoming one fades in.
+ */
+.slide.visible {
+  visibility: visible;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.35s ease,
+    visibility 0s linear 0.35s;
+  z-index: 0;
+}
+
+/* ─── Reduced-motion override ────────────────────────────────────────── */
+/*
+ * When the user prefers reduced motion, skip all opacity/transform
+ * transitions on slides and stage. The visibility swap happens instantly.
+ * This applies to slide transitions AND any CSS animations authored inside
+ * individual slide fragments that follow this convention.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .slide,
+  .slide.active,
+  .slide.visible {
+    transition: none;
+  }
+
+  /* Authors: wrap animated elements in .motion-safe to respect this. */
+  /* biome-ignore-start lint/complexity/noImportantStyles: reduced-motion reset must defeat author animation specificity — this is the canonical a11y override */
+  .motion-safe * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: reduced-motion reset must defeat author animation specificity — this is the canonical a11y override */
+}
+
+/* ─── Nav controls (viewer / viewer.html) ────────────────────────────── */
+/*
+ * Minimal accessible navigation buttons injected by deck-stage.js.
+ * Visible focus states are REQUIRED (WCAG 2.4.7 / 2.4.11).
+ */
+.deck-nav {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.75rem;
+  z-index: 100;
+  /* Hide during full-screen presentation; show on hover */
+  opacity: 0.15;
+  transition: opacity 0.2s ease;
+}
+
+.deck-nav:hover,
+.deck-nav:focus-within {
+  opacity: 1;
+}
+
+.deck-nav button {
+  appearance: none;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  line-height: 1;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.deck-nav button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: #fff;
+}
+
+/* REQUIRED: visible focus ring for keyboard nav */
+.deck-nav button:focus-visible {
+  outline: 3px solid #4af;
+  outline-offset: 2px;
+}
+
+/* ─── Slide counter ──────────────────────────────────────────────────── */
+.deck-counter {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  z-index: 100;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Print / Save-as-PDF ────────────────────────────────────────────── */
+/*
+ * Print: one slide per page at design size.
+ * deck-stage.js removes the transform scale so the browser sees
+ * a 1920×1080-equivalent layout. Each slide prints as its own page.
+ */
+@media print {
+  /* biome-ignore-start lint/complexity/noImportantStyles: print overrides must defeat per-slide author styles injected AFTER this sheet (see .slide note below) or pagination collapses and the PDF crops */
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .deck-viewport {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    background: transparent;
+    display: block;
+  }
+
+  .deck-stage {
+    position: static;
+    width: 1920px;
+    height: 1080px;
+    transform: none !important;
+    overflow: visible;
+    will-change: auto;
+  }
+
+  .deck-nav,
+  .deck-counter {
+    display: none !important;
+  }
+
+  /*
+   * Show all slides, each on its own page.
+   * These use !important because per-slide author styles (which set
+   * `.slide { position: absolute }` per the generation protocol) are injected
+   * AFTER this stylesheet in the merged viewer/bundle and would otherwise win
+   * by source order — leaving every slide absolutely positioned, stacked at
+   * 0,0, and collapsing page flow so nothing paginates (and the PDF crops).
+   */
+  .slide {
+    position: relative !important;
+    inset: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    transition: none !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* No trailing blank page: the last slide must not force a page break. */
+  .slide:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .slide.active,
+  .slide.visible {
+    z-index: auto;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: print overrides must defeat per-slide author styles injected AFTER this sheet (see .slide note below) or pagination collapses and the PDF crops */
+}

@@ -1,6 +1,6 @@
 ---
 name: oma-recap
-description: Analyze conversation histories from multiple AI tools (Claude, Codex, Gemini, Qwen, Cursor) and generate themed daily/period work summaries. Filter by date or time window.
+description: Analyze conversation histories from multiple AI tools (Claude, Codex, Qwen, Cursor, Antigravity) and generate themed daily/period work summaries. Filter by date or time window.
 ---
 
 # AI Tool Conversation History Summary

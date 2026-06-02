@@ -10,6 +10,12 @@
             "timeout": 5000
           },
           {
+            "name": "state-boundary",
+            "type": "command",
+            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/state-boundary.ts\"",
+            "timeout": 5000
+          },
+          {
             "name": "skill-injector",
             "type": "command",
             "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/skill-injector.ts\"",

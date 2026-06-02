@@ -29,7 +29,16 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
-4. Record session start using memory write tool:
+4. Read `.agents/skills/_shared/runtime/event-spec.md` for L1 event protocol.
+5. Define the `oma_emit` helper for required L1 decisions:
+   ```bash
+   oma_emit() {
+     kind="$1"
+     payload="$2"
+     oma emit "$kind" "$payload"
+   }
+   ```
+6. Record session start using memory write tool:
    - Create `session-work.md` in the memory base path
    - Include: session start time, user request summary.
 
@@ -140,17 +149,22 @@ If automated measurement is available:
 If QA finds CRITICAL or HIGH issues:
 
 1. Re-spawn the responsible agent with QA findings. **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
-2. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
-3. Repeat Steps 5-7.
-4. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (load `exploration-loop.md` per `context-loading.md`):
+2. Emit and verify the remediation decision before accepting any fix/ignore choice:
+   ```bash
+   oma_emit "decision.made" '{"subject":"work.remediation-choice","decision":"Fix the responsible QA finding with root-cause remediation or explicitly defer it.","rationale":"QA identified a CRITICAL/HIGH issue requiring a recorded remediation choice."}'
+   oma state:verify-decisions --workflow work --checkpoint remediation-choice
+   ```
+3. If Quality Score is active: measure after fix, apply Keep/Discard rule, record in Experiment Ledger.
+4. Repeat Steps 5-7.
+5. **If same issue persists after 2 fix attempts**: Activate **Exploration Loop** (load `exploration-loop.md` per `context-loading.md`):
    - Generate 2-3 alternative approaches via Exploration Decision template
    - Re-spawn the same agent type with different hypothesis prompts (separate workspaces)
    - QA scores each result
    - Best result adopted, others discarded
    - All experiments recorded in Experiment Ledger
-5. Continue until all critical issues are resolved.
-6. Use memory write tool to record final results.
-7. If Quality Score was measured: generate Experiment Ledger summary and auto-generate lessons from discarded experiments.
+6. Continue until all critical issues are resolved.
+7. Use memory write tool to record final results.
+8. If Quality Score was measured: generate Experiment Ledger summary and auto-generate lessons from discarded experiments.
 
 ---
 

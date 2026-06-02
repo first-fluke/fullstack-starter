@@ -22,9 +22,15 @@ Use this checklist after creating or updating a skill.
 - `Intent signature` contains concrete user prompt patterns or domain triggers.
 - `When to use` gives positive routing cases.
 - `When NOT to use` names boundaries and cross-routes to adjacent skills.
-- `Expected inputs` and `Expected outputs` are explicit.
+- `Expected inputs` and `Expected outputs` are explicit. If the skill produces machine-checkable artifacts, prefer the structured `outputs:` YAML block over freeform bullets so `oma verify` can run a closure check.
 - `Dependencies` names tools, files, standards, APIs, or resources.
 - `Control-flow features` describes branching, tool calls, writes, and clarification points.
+
+## Cross-Skill Boundary Check
+
+- Run `oma skills audit` (or `oma doctor`) after editing frontmatter `description`.
+- Resolve any `FAIL` (≥ 75% similarity) pair by rewriting one description to highlight distinct triggers, domains, or boundaries.
+- `WARN` (≥ 60%) pairs are acceptable when descriptions cover genuinely related domains; document the distinction in `When NOT to use` cross-routes.
 
 ## Structural Checks
 
