@@ -99,6 +99,58 @@ Same as backend-agent playbook: See "Rate Limit" and "Serena Memory" sections.
 
 ---
 
+## Swift: `swift build` Fails — Missing or Invalid OpenAPI Document
+
+**Symptoms**: Build error from the `swift-openapi-generator` plugin such as `error: openapi.yaml not found` or YAML parse error; the build fails before any Swift file is compiled.
+
+1. Confirm the spec exists at `Core/Networking/openapi.yaml` — this is where the build plugin looks.
+2. If the file is absent: re-sync it from the backend (`curl -o Sources/Core/Networking/openapi.yaml https://<backend>/api-docs/openapi.yaml` or copy from the CI artifact). The iOS project is a **consumer** of the spec; never edit `openapi.yaml` directly.
+3. If the file is present but the error is a parse error: validate the YAML (`python3 -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]))" Sources/Core/Networking/openapi.yaml`); fix the upstream spec and re-sync.
+4. After syncing, `swift build` will regenerate `Client`, `Operations`, and `Components` automatically — no manual code-gen step needed.
+5. **NEVER**: commit a placeholder or empty `openapi.yaml` just to silence the build; it will produce an incomplete `Client` and cause compile errors downstream.
+
+---
+
+## Swift: Generated `Client`/`Operations` Symbols Not Found
+
+**Symptoms**: Compile errors such as `cannot find type 'Client' in scope` or `use of unresolved identifier 'Operations'`; the generator plugin appears not to have run.
+
+1. Confirm the build plugin is attached in `Package.swift`:
+   - The target must list `.plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")` under its `plugins:` key.
+   - The target's dependencies must include `OpenAPIRuntime` and `OpenAPIURLSession`.
+2. Confirm `openapi-generator-config.yaml` exists **in the same directory** as `openapi.yaml` (`Core/Networking/`). Without this file the plugin silently skips generation.
+3. Check that both config files are inside the target's declared source directory (the directory that contains the `.target` in `Package.swift`). Files outside the source root are invisible to the build plugin.
+4. Run `swift package clean && swift build` to force a full regeneration.
+5. If Xcode is used: Product → Clean Build Folder, then build again. Derived data caching sometimes hides generation failures.
+
+---
+
+## Swift: Compile Error for Undocumented Response Case
+
+**Symptoms**: Compile error such as `expression pattern of type 'Operations.CreateTodo.Output.conflict' cannot match values of type '...'`; a response case (e.g., `.conflict`, `.created`, `.unprocessableContent`) referenced in the Swift code does not exist on the generated `Output` enum.
+
+1. The root cause is that the OpenAPI spec does not declare that HTTP status code for the operation. The generator only emits cases for status codes listed in the spec.
+2. Do NOT add the case manually to the generated file — it will be overwritten on the next `swift build`.
+3. Ask the backend team to add the missing status code to the spec (e.g., add `409: description: Conflict` under the operation's `responses:`).
+4. Re-sync `Core/Networking/openapi.yaml` once the spec is updated.
+5. Run `swift build` to regenerate; the new response case will appear and the compile error will resolve.
+6. Update the Swift `switch` in the service layer to handle the new case explicitly.
+
+---
+
+## Swift: `@Observable` State Not Updating the SwiftUI View
+
+**Symptoms**: Mutating a property on the view model has no visual effect; the view does not re-render even though the value changed.
+
+1. Confirm the view model class is annotated with `@Observable` (Observation framework, **not** `ObservableObject`). Without the macro the view has no tracking infrastructure.
+2. Check the deployment target: `@Observable` requires **iOS 17.0+**. If the target is set to iOS 16 or earlier the macro compiles but observation tracking is absent — raise the minimum deployment target in `Package.swift` (`.iOS(.v17)`) and the Xcode project settings.
+3. Verify the view holds the VM with `@State` (not a plain `let` or `var`): `@State private var viewModel: MyViewModel`. A non-`@State` reference is not tracked by SwiftUI.
+4. If the VM is passed into a child view that needs to mutate it, use `@Bindable` in the child: `@Bindable var viewModel: MyViewModel`. Passing it as a plain argument prevents change propagation.
+5. Confirm properties are mutated on the **main actor**. Mutations from a background `Task` without `await MainActor.run { … }` (or `@MainActor` on the method) can update state off-main and miss the SwiftUI render pass.
+6. Avoid wrapping the `@Observable` class in another `@Published` property or `ObservableObject` — mixing the two observation systems breaks change tracking.
+
+---
+
 ## General Principles
 
 - **After 3 failures**: If same approach fails 3 times, must try a different method

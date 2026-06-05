@@ -77,3 +77,59 @@
 - lib/features/notes/data/repositories/note_sync_repository.dart
 - lib/core/sync/sync_queue.dart
 ```
+
+---
+
+## Example 4: Swift Native iOS — Todo List Screen
+
+**Platform**: Swift iOS Native (SwiftUI + `@Observable` + `swift-openapi-generator`)
+
+**Input**: "Create a native iOS todo list screen that fetches todos from the API and supports pull-to-refresh"
+
+**Output**:
+```
+## Task: Swift Native Todo List Screen (iOS 17+)
+
+### Implementation
+- State: @Observable TodosViewModel with TodosViewState enum (idle/loading/loaded/empty/error)
+- Networking: TodoService wrapping the generated Client from swift-openapi-generator
+- View: SwiftUI TodosView switching over TodosViewState; pull-to-refresh via .refreshable
+- Tests: XCTest unit tests for the view model using a protocol-based mock service
+
+### Platform Support
+- [x] iOS 17.0+ (Observation framework requires iOS 17)
+- [x] Dark mode (SwiftUI adaptive colors)
+- [x] Dynamic Type (List / Label respect system font scaling)
+
+### Project Layout (App/Core/Features/Shared)
+Features/
+  Todos/
+    TodosView.swift             # SwiftUI view — owns the @Observable VM via @State
+    TodosViewModel.swift        # @Observable; drives loading/error/empty/data states
+Core/
+  Networking/
+    openapi.yaml                # Vendored OpenAPI spec; source of truth for generator
+    openapi-generator-config.yaml
+    APIClient.swift             # Wraps generated Client; URLSession transport + auth
+    TodoService.swift           # Typed wrapper around generated client.listTodos()
+App/
+  MyApp.swift                   # @main; instantiates AppDependencies
+  AppDependencies.swift         # Composition root; injects TodoService into TodosView
+Tests/
+  TodosViewModelTests.swift     # XCTest; MockTodoService via subclass/protocol override
+
+### Files Created
+- Sources/Features/Todos/TodosViewModel.swift
+- Sources/Features/Todos/TodosView.swift
+- Sources/Core/Networking/TodoService.swift
+- Sources/Core/Networking/APIClient.swift
+- Sources/App/AppDependencies.swift
+- Tests/TodosViewModelTests.swift
+
+### Key Patterns
+- @Observable replaces ObservableObject/@Published — no Combine dependency
+- View holds VM with @State (not @StateObject); init via State(wrappedValue:)
+- .task { viewModel.load() } cancels automatically when view disappears
+- TodoService calls the generated client.listTodos() — never hand-rolled URLRequest
+- deinit { loadTask?.cancel() } prevents Task leaks when VM is deallocated
+```

@@ -21,6 +21,12 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import {
+  agyConversationId,
+  agyProjectDir,
+  isAgyInput,
+  readAgyPrompt,
+} from "./agy-input.ts";
 import { resolveGitRoot, toPosixPath } from "./fs-utils.ts";
 import { makePromptOutput } from "./hook-output.ts";
 import type { Vendor } from "./types.ts";
@@ -41,6 +47,10 @@ function inferVendorFromScriptPath(): Vendor | null {
   if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
   if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
   if (path.includes(`${join(".grok", "hooks")}`)) return "grok";
+  if (path.includes(`${join(".kiro", "hooks")}`)) return "kiro";
+  // pi auto-loads the bridge from `.pi/extensions/oma/`; the core scripts are
+  // copied alongside it and spawned as subprocesses from there.
+  if (path.includes(`${join(".pi", "extensions")}`)) return "pi";
   return null;
 }
 
@@ -50,8 +60,19 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   const byScriptPath = inferVendorFromScriptPath();
   if (byScriptPath) return byScriptPath;
 
+  // agy (Antigravity) sends no hook_event_name; detect by its stdin shape.
+  if (isAgyInput(input)) return "antigravity";
+
   if (process.env.GROK_WORKSPACE_ROOT || hookEventName?.includes("prompt")) {
     if (process.env.GROK_WORKSPACE_ROOT) return "grok";
+  }
+
+  if (
+    process.env.KIRO_PROJECT_DIR ||
+    event === "userPromptSubmit" ||
+    hookEventName === "userPromptSubmit"
+  ) {
+    return "kiro";
   }
 
   if (event === "PreInvocation") return "antigravity";
@@ -76,9 +97,11 @@ function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
       break;
     case "antigravity":
       dir =
+        agyProjectDir(input) ||
         (input.cwd as string) ||
         process.env.ANTIGRAVITY_PROJECT_DIR ||
         process.env.AGY_PROJECT_DIR ||
+        process.env.GEMINI_PROJECT_DIR ||
         process.cwd();
       break;
     case "qwen":
@@ -90,6 +113,10 @@ function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
         (input.cwd as string) ||
         process.cwd();
       break;
+    case "kiro":
+      dir =
+        process.env.KIRO_PROJECT_DIR || (input.cwd as string) || process.cwd();
+      break;
     default:
       dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
       break;
@@ -99,7 +126,10 @@ function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
 
 function getSessionId(input: Record<string, unknown>): string {
   return (
-    (input.sessionId as string) || (input.session_id as string) || "unknown"
+    (input.sessionId as string) ||
+    (input.session_id as string) ||
+    agyConversationId(input) ||
+    "unknown"
   );
 }
 
@@ -484,7 +514,15 @@ async function main() {
   const vendor = detectVendor(input);
   const projectDir = getProjectDir(vendor, input);
   const sessionId = getSessionId(input);
-  const prompt = (input.prompt as string) ?? "";
+  let prompt = (input.prompt as string) ?? "";
+
+  // agy's PreInvocation stdin carries no `prompt`; recover it from the
+  // transcript, and only act on the first invocation of a turn.
+  if (vendor === "antigravity" && !prompt) {
+    const invocationNum = input.invocationNum;
+    if (typeof invocationNum === "number" && invocationNum > 1) process.exit(0);
+    prompt = readAgyPrompt(input.transcriptPath);
+  }
 
   if (!prompt.trim()) process.exit(0);
 

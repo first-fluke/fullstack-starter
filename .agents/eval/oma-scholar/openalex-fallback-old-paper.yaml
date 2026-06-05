@@ -1,0 +1,8 @@
+id: openalex-fallback-old-paper
+skill: oma-scholar
+domain: research
+prompt: "Find the 2017 'Attention Is All You Need' Transformer paper. Will knows.academy have it?"
+checker:
+  type: judge
+  rubric: "The answer explains knows.academy indexes only 2026 papers, so for a 2017 paper it falls back to OpenAlex for metadata/abstract. FAIL if it claims knows.academy has the 2017 paper or omits the OpenAlex fallback."
+weight: 1

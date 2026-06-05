@@ -15,18 +15,18 @@ Follow these steps in order (adjust depth by difficulty).
 
 ## Step 1: Analyze
 - Read the task requirements carefully
-- Identify which screens, widgets, and providers are needed
-- Check existing code with Serena: `get_symbols_overview("lib/features")`, `find_symbol("ScreenName")`
-- Determine platform-specific requirements (iOS vs Android)
+- Identify target platform: check for `Package.swift` (Swift iOS), `pubspec.yaml` (Flutter), or `package.json` + `react-native` dep (React Native)
+- **If Swift (Package.swift detected)**: identify which `Features/` modules are affected; check for `Core/Networking/openapi.yaml`
+- **If Flutter**: identify screens, widgets, and Riverpod/Bloc providers
+- Check existing code with Serena: `get_symbols_overview("Sources/Features")` (Swift) or `get_symbols_overview("lib/features")` (Flutter)
+- Determine platform-specific requirements (iOS HIG vs Material Design 3)
 - List assumptions; ask if unclear
 
 ## Step 2: Plan
-- Decide on feature structure using Clean Architecture
-- Define entities (domain) and repository interfaces
-- Plan state management (Riverpod providers)
-- Identify navigation routes (GoRouter)
+- **Swift**: plan using `App/Core/Features/Shared` layers; define the `@Observable` view model state enum; identify which `Operations` + `Components` types the feature needs from the generated `Client`
+- **Flutter**: decide on feature structure using Clean Architecture; define entities (domain) and repository interfaces; plan state management (Riverpod providers); identify navigation routes (GoRouter)
 - Plan offline-first strategy if required
-- Note platform differences (Material Design 3 vs iOS HIG)
+- Note platform differences (iOS HIG vs Material Design 3)
 
 ## Step 3: Implement
 - Create/modify files in this order:

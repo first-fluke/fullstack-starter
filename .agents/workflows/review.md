@@ -1,5 +1,7 @@
 ---
+name: review
 description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
+disable-model-invocation: true
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -19,6 +21,10 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 
 Before starting, determine your runtime environment by following `.agents/skills/_shared/core/vendor-detection.md`.
 The detected vendor determines how the QA agent is spawned (Step 7).
+
+### L1 Decision Events
+
+Use the `oma_emit` helper documented in `.agents/skills/_shared/runtime/event-spec.md` before required L1 decision checkpoints. The helper wraps `oma state:emit`.
 
 ---
 
@@ -91,6 +97,13 @@ Compile all findings into a prioritized report:
 
 Each finding must include: `file:line`, description, and remediation code.
 Use memory write tool to record the final report.
+
+After severity classification is complete, emit and verify the required review decision:
+
+```bash
+oma_emit "decision.made" '{"subject":"review.severity-classification","decision":"Use the classified finding severities for the QA report and follow-up routing.","rationale":"Findings have been reviewed and assigned CRITICAL/HIGH/MEDIUM/LOW severity with remediation context."}'
+oma state:verify --workflow review --checkpoint severity-classification
+```
 
 ---
 

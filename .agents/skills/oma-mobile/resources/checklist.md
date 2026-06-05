@@ -34,3 +34,14 @@ Run through every item before submitting your work.
 - [ ] E2E tests with Maestro for critical user flows
 - [ ] Edge cases: empty lists, error states, offline mode
 - [ ] Tests pass on both platforms
+
+## Swift Native (iOS)
+> Applies when the project is Swift native (`Package.swift` / `.xcodeproj` present). Skip for Flutter/RN.
+- [ ] `App/Core/Features/Shared` layout respected (App = entry/DI, Core = networking/generated client, Features = view+`@Observable` VM slices, Shared = reusable UI/util)
+- [ ] API access goes through the generated `Client` from `swift-openapi-generator` — no hand-rolled `URLRequest`/`JSONDecoder` for spec-covered endpoints
+- [ ] OpenAPI document present at `Core/Networking/openapi.yaml` and synced from the backend before build
+- [ ] SwiftUI state via `@Observable` (Observation framework); `Task`s cancelled in `deinit` to avoid leaks
+- [ ] Loading / error (with retry) / empty / data states handled in views
+- [ ] iOS Human Interface Guidelines followed
+- [ ] `swift build` succeeds (runs the generator plugin) and `swift test` passes
+- [ ] XCTest/XCUITest coverage for critical flows

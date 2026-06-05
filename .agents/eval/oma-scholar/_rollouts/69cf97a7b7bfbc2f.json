@@ -1,0 +1,74 @@
+[
+  {
+    "taskId": "anti-fabrication-doi",
+    "arm": "baseline",
+    "output": "If the DOI is not visible in the source PDF, you should **omit the `doi` key entirely** from the sidecar file. \n\nAccording to the `oma-scholar` anti-fabrication guidelines:\n> If DOI/venue/year is not visible in source, omit the key entirely; never write `doi: TODO` or guess.\n",
+    "score": 1
+  },
+  {
+    "taskId": "anti-fabrication-doi",
+    "arm": "treatment",
+    "output": "According to the `oma-scholar` skill's anti-fabrication guardrail, if the DOI (or venue, or year) is not visible in the source document, you must **omit the key entirely**. \n\nDo not write `doi: TODO`, use a placeholder, or try to guess it. Just leave the `doi` field out of the sidecar YAML completely.\n",
+    "score": 1
+  },
+  {
+    "taskId": "claims-only-partial-fetch",
+    "arm": "baseline",
+    "output": "I've fetched the claims from the sidecar `knows:generated/reconvla/1.0.0` token-efficiently using the `oma-scholar` skill (using `oma scholar get --section statements`). \n\nHere are the extracted statements (claims, methods, and limitations) from the paper:\n\n1. **ReconVLA Framework**: ReconVLA establishes uncertainty quantification for continuous action generation in Vision-Language-Action (VLA) models without requiring model modification or finetuning. It operates alongside a frozen pretrained VLA policy.\n2. **Action Distribution Generation**: It uses multiple forward passes with stochastic dropout during inference to generate an action distribution, effectively capturing epistemic uncertainty in the model's spatial reasoning.\n3. **Spatial Mahalanobis Distance (SMD)**: The paper introduces SMD as an uncertainty metric. It represents spatial variance among predicted actions and shows a strong correlation with failure probability (exhibiting high correlation and AUC values across all tasks).\n4. **Failure of Token-based Metrics**: Token-based uncertainty metrics (TB-TP, TB-PCS, TB-E, TB-D) are ineffective for VLAs. They exhibit near-zero Spearman correlation and cannot reliably distinguish successful from failed executions.\n5. **Proactive Failure Prevention**: By calibrating an optimal SMD threshold, ReconVLA-SMD can proactively halt trajectories before hardware protective stops occur (demonstrated in workspace-edge trials).\n6. **Robustness Under Distribution Shift**: Tested on a UR5 robotic arm, ReconVLA-CQR (Conformalized Quantile Regression) consistently maintains higher success rates under distribution shifts (e.g., lighting changes, camera perturbations) compared to default baselines.\n7. **Limitation in Specific Tasks**: In certain tasks (e.g., a milk pouring task), CQR action selection led to a performance decrease, suggesting that the model's uncertainty estimates may sometimes assign higher uncertainty to actions required for success.\n8. **Contemporary VLAs' Core Issue**: The work addresses the problem that current VLAs provide no calibrated measure of confidence in their predictions, leaving robots unable to anticipate and avoid execution failures when facing out-of-distribution (OOD) inputs. \n\nIf you want to view the raw JSON output or explore other sections like evidence or relations, just let me know!\n",
+    "score": 1
+  },
+  {
+    "taskId": "claims-only-partial-fetch",
+    "arm": "treatment",
+    "output": "You can fetch just the statements (claims) of a sidecar token-efficiently by using the `--section` flag with the `oma scholar get` command. This reduces the payload significantly compared to fetching the entire paper or full sidecar.\n\nHere is the exact command you can run:\n```bash\noma scholar get --section statements \"knows:generated/reconvla/1.0.0\"\n```\n\nI've run this command for you. Here are the key claims and statements extracted from the `ReconVLA` sidecar:\n\n1. **VLA Limitation (`stmt:vla-lacks-uncertainty-reporting`)**: Contemporary VLAs provide no calibrated measure of confidence in their action predictions, leaving robots unable to anticipate and avoid execution failures when facing out-of-distribution (OOD) or uncertain inputs.\n2. **ReconVLA Architecture (`stmt:no-retraining-required`)**: ReconVLA operates alongside a frozen pretrained VLA policy without altering its parameters, requiring no retraining or architectural modification to enable uncertainty-aware control.\n3. **Execution Method (`stmt:action-chunk-execution`)**: It employs a receding-horizon execution where only the first action of each predicted chunk is executed before obtaining a new observation.\n4. **Ineffectiveness of Token Metrics (`stmt:token-metrics-ineffective`)**: Token-based uncertainty metrics (TB-TP, TB-PCS, TB-E, TB-D) exhibit near-zero Spearman correlation and cannot reliably distinguish successful from failed VLA executions.\n5. **CQR Target (`stmt:cqr-90-percent-coverage`)**: Conformal Quantile Regression (CQR) targets approximately 90% coverage of expert actions by learning an upper-bound estimate for error.\n6. **Robustness (`stmt:real-robot-robustness-under-shift`)**: On a UR5 robotic arm under distribution shifts (lighting, camera perturbations, clutter), ReconVLA-CQR consistently maintains higher success rates compared to default baselines.\n7. **Failure Anticipation (`stmt:smd-proactive-failure-prevention`)**: In workspace-edge trials, ReconVLA-SMD proactively halted 16 out of 20 trajectories before protective stops occurred, demonstrating early failure anticipation.\n8. **Optimal Thresholding (`stmt:smd-threshold-calibration`)**: The optimal SMD threshold was determined via Youden's J statistic, successfully identifying all failure segments while reducing the overall task success rate by only 0.006.\n9. **Known Limitations (`stmt:milk-task-cqr-decrease`)**: In a specific \"milk task\", CQR action selection led to a performance decrease (60% to 47%), suggesting the model's uncertainty estimates may occasionally assign higher uncertainty to actions that are actually required for success.\n",
+    "score": 1
+  },
+  {
+    "taskId": "lint-before-share",
+    "arm": "baseline",
+    "output": "Before sharing a generated `.knows.yaml` sidecar, you should **validate it** using the `oma-scholar` linter to ensure it complies with the Knows spec (v0.9.0 / `paper@1` profile) and doesn't contain any structural errors or dangling references. \n\nYou can run the following command in your terminal:\n\n```bash\noma scholar lint paper.knows.yaml\n```\n\n*(Replace `paper.knows.yaml` with the path to your actual sidecar file).*\n\n### What the linter checks for:\n1. **Dangling References:** It ensures that every `subject_ref` and `object_ref` points to an existing ID within the document.\n2. **Relation Density:** It warns you if the average relations-per-statement ratio is below `1.5` or if you have \"orphan\" statements without any relations (e.g., a claim without a `supported_by` relation).\n3. **ID Formats & Enums:** It checks that your IDs use the proper prefixes (`stmt:`, `ev:`, `rel:`, `art:`, `rep:`) and that your fields use the correct, closed enums (e.g. `statement_type`, `modality`, `status`, etc.).\n4. **Data Types & Spec:** It checks that numbers are unquoted (`value: 22` instead of `value: '22'`) and that top-level metadata matches the exact structure required.\n\n### CI/Strict Mode\nIf you want to be extra thorough and treat warnings as failures (useful if you are integrating this into a CI/CD pipeline or pre-commit hook), you can run:\n\n```bash\noma scholar lint --fail-on-warning paper.knows.yaml\n```\n\nOnce `oma scholar lint` returns 0 errors and any warnings are acceptable, your sidecar is ready to be shared!\n",
+    "score": 1
+  },
+  {
+    "taskId": "lint-before-share",
+    "arm": "treatment",
+    "output": "Before sharing your generated `paper.knows.yaml` sidecar, you should validate it to ensure it strictly conforms to the v0.9.0 / `paper@1` profile spec. \n\nYou can do this by running the built-in linter in strict mode (which is the default for newly generated sidecars):\n\n```bash\noma scholar lint paper.knows.yaml\n```\n\nIf you are using this in a CI environment and want to block sharing if there are any warnings, you can run:\n```bash\noma scholar lint --fail-on-warning paper.knows.yaml\n```\n\n### What to check for based on the lint report:\n1. **Errors**: Address any structural issues the linter catches. Common pitfalls include:\n   - Wrapping top-level metadata (`title`, `authors`, `venue`, `year`) inside a `metadata` key (they should be at the root level).\n   - Quoting numbers (e.g., `value: '22'` should be `value: 22`).\n   - Using plural arrays for `provenance.actor` instead of a single object.\n   - Using invalid field names (make sure to use `statement_type`, `evidence_type`, `predicate`, and `artifact_type`).\n2. **Warnings**: \n   - **Relation Density**: The linter expects an average of ≥1.5 relations per statement. Every claim should ideally have `supported_by` evidence. If the ratio is too low, or if you have orphan statements, you should add more relations.\n   - **Dangling References**: Ensure that all IDs referenced in `subject_ref` and `object_ref` actually exist in the file.\n   - **Tense**: Predicates should be in the present tense (e.g., use `evaluates_on` instead of `evaluated_on`).\n\nOnce the lint passes without major warnings, your sidecar is ready to be shared!\n",
+    "score": 1
+  },
+  {
+    "taskId": "openalex-fallback-old-paper",
+    "arm": "baseline",
+    "output": "I've looked up the paper using the `oma-scholar` tool. \n\nHere are the results:\n1. **Does `knows.academy` have it?** \n   No, it does not. The `knows.academy` database currently primarily indexes papers from 2026 (about 50K papers, mostly from arXiv). Its top hit for your query was actually a 2026 paper titled *\"Attention Once Is All You Need: Efficient Streaming Inference with Stateful Transformers\"*. \n\n2. **Finding the 2017 paper:**\n   The `oma-scholar` skill automatically fell back to **OpenAlex**, which successfully found the original \"Attention Is All You Need\" paper by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, and Illia Polosukhin.\n\nAlthough `knows.academy` doesn't have a pre-generated sidecar for it, we can still generate a local `.knows.yaml` sidecar for you using the abstract retrieved from OpenAlex! Would you like me to generate that sidecar for you?\n",
+    "score": 1
+  },
+  {
+    "taskId": "openalex-fallback-old-paper",
+    "arm": "treatment",
+    "output": "I found the paper! Here is the information you requested:\n\n1. **Found via OpenAlex:** The 2017 \"Attention Is All You Need\" paper by Ashish Vaswani et al. was successfully resolved using the OpenAlex scholarly database fallback.\n2. **Availability on knows.academy:** `knows.academy` does **not** currently have this paper. When searched, it surfaced a different 2026 paper titled *\"Attention Once Is All You Need: Efficient Streaming Inference with Stateful Transformers\"*. This aligns with the fact that `knows.academy` currently primarily indexes ~50K papers from 2026.\n\nFollowing the `oma-scholar` protocol for when `knows.academy` lacks a paper, I have fetched the abstract from OpenAlex and locally generated a token-efficient sidecar for you:\n[attention-is-all-you-need.knows.yaml](file:///Users/gracefullight/workspace/oh-my-agent/attention-is-all-you-need.knows.yaml)\n\nThe sidecar passed the structural linting with 0 errors (with a few expected warnings due to being generated from just the abstract rather than the full PDF). Let me know if you'd like to further query or expand upon these claims!\n",
+    "score": 1
+  },
+  {
+    "taskId": "provenance-single-actor",
+    "arm": "baseline",
+    "output": "In a **v0.9.0** sidecar, the provenance actor is represented as a **single `actor` object** (`provenance.actor: {...}`), rather than a list or array of actors (`provenance.actors: [...]`). \n\nAdditionally, according to the v0.9.0 spec rules, the `actor.type` must be restricted to `tool`, `person`, or `org` (and never `ai`, `llm`, or `model`).\n",
+    "score": 1
+  },
+  {
+    "taskId": "provenance-single-actor",
+    "arm": "treatment",
+    "output": "In a v0.9.0 sidecar, the provenance actor is represented as a **single object** (`provenance.actor`), not as a list or array. \n\nFor example, it should look like this:\n```yaml\nprovenance:\n  actor:\n    type: person\n    # ...\n```\n\nUsing an array like `provenance.actors: [{...}]` will cause a validation error in the v0.9.0 spec.\n",
+    "score": 1
+  },
+  {
+    "taskId": "spec-version-profile",
+    "arm": "baseline",
+    "output": "A brand-new `.knows.yaml` sidecar should target spec **v0.9.0** and use the **`paper@1`** profile. \n\nThis conforms to the current production sidecars verified from `knows.academy` (as defined in the `oma-scholar` skill's guardrails).\n",
+    "score": 1
+  },
+  {
+    "taskId": "spec-version-profile",
+    "arm": "treatment",
+    "output": "According to the Guardrails section of the `oma-scholar` skill specification, a brand-new `.knows.yaml` sidecar should target spec version **v0.9.0** and the **`paper@1`** profile.\n",
+    "score": 1
+  }
+]

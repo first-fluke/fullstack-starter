@@ -1,0 +1,8 @@
+id: lint-before-share
+skill: oma-scholar
+domain: research
+prompt: "I generated a paper.knows.yaml sidecar. What should I do before sharing it?"
+checker:
+  type: judge
+  rubric: "The answer recommends validating with `oma scholar lint` (and ideally notes --lenient for third-party sidecars). FAIL if it only says 'check the YAML' generically without the oma scholar lint step."
+weight: 1

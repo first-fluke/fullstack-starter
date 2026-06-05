@@ -106,7 +106,16 @@ export function updateIndex(
     atomicWriteJson(path, next);
     return next;
   }
-  throw new Error(`CAS update failed for ${path}`);
+  // D69: CAS retries exhausted. Do NOT throw or corrupt _index.json — leave it
+  // stale and emit a diagnostic. The next hook fire or `oma state repair`
+  // re-derives active pointers from events.jsonl.
+  process.stderr.write(
+    `[oma] _index.json CAS retries exhausted (${maxRetries}); leaving it stale.\n`,
+  );
+  process.stderr.write(
+    "[oma]   hint: run 'oma state repair' to re-derive active pointers\n",
+  );
+  return readIndex(projectDir);
 }
 
 export function getActiveSid(

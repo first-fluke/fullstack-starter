@@ -22,7 +22,7 @@
     ],
     "PreToolUse": {
       "hook": "test-filter.ts",
-      "matcher": "Bash",
+      "matcher": "run_command",
       "timeout": 5
     },
     "Stop": {

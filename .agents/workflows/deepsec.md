@@ -1,5 +1,7 @@
 ---
+name: deepsec
 description: Drive the `oma-deepsec` skill end-to-end. Installs `.deepsec/`, calibrates cost, runs the right scan/process/triage/revalidate/export pass, gates PRs with `process --diff`, writes custom matchers, and routes findings to follow-up specialists.
+disable-model-invocation: true
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -14,6 +16,12 @@ description: Drive the `oma-deepsec` skill end-to-end. Installs `.deepsec/`, cal
 ---
 
 > **Vendor note:** This workflow executes inline (no subagent spawning). All vendors invoke the deepsec CLI directly; the skill body and resource files contain the canonical commands.
+
+---
+
+## L1 Decision Events
+
+Use the `oma_emit` helper documented in `.agents/skills/_shared/runtime/event-spec.md` before required L1 decision checkpoints. The helper wraps `oma state:emit`.
 
 ---
 
@@ -168,6 +176,11 @@ Pipeline per `resources/triage.md`:
 2. `bunx deepsec revalidate --min-severity HIGH` to attach `true-positive` / `false-positive` / `fixed` / `uncertain` verdicts (cuts FP rate by 50%+).
 3. Filter the export to verdict `true-positive` (and `uncertain` for human review). Suppress `false-positive` and matched-`fixed`.
 4. Note recurring FP shapes for the next `INFO.md` revision; bias matchers toward `precise` if the FP is regex-level.
+5. For each triaged finding, emit and verify the required triage decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"deepsec.triage-outcome","decision":"Use the triage verdict for the current deepsec finding.","rationale":"The finding has a true-positive, false-positive, fixed, or uncertain verdict with a recorded reason."}'
+   oma state:verify --workflow deepsec --checkpoint triage-outcome
+   ```
 
 ### Step 4F: `config` / `troubleshoot`
 

@@ -45,3 +45,34 @@ Clean Architecture with Riverpod:
 - Material Design 3 for Android
 - iOS Human Interface Guidelines for iOS
 - Use `Platform.isIOS` for platform-specific code
+
+## Swift (iOS Native)
+
+- **Language**: Swift 5.9+ (Swift 6 compatible)
+- **UI Framework**: SwiftUI
+- **State Management**: Observation framework (`@Observable`, iOS 17+)
+- **API Client**: `swift-openapi-generator` (SwiftPM build plugin) + `swift-openapi-runtime` + `swift-openapi-urlsession`
+- **Concurrency**: async/await, structured concurrency
+- **Local Storage**: SwiftData, UserDefaults, Keychain
+- **Testing**: XCTest, XCUITest
+
+Full reference: `../variants/swift-ios/tech-stack.md`
+
+### Project Layout (App / Core / Features / Shared)
+
+```
+Sources/
+  App/          # @main entry, composition root, DI wiring
+  Core/
+    Networking/ # openapi.yaml, generated Client, transport, auth middleware
+    Services/   # AuthService, TokenStore, etc.
+  Features/     # Vertical slices — one folder per feature (View + @Observable ViewModel)
+  Shared/       # Reusable UI components, extensions, utilities
+Tests/
+```
+
+### Architecture Pattern
+
+```
+View (SwiftUI)  ->  @Observable ViewModel  ->  Core Service  ->  Generated Client  ->  Backend
+```

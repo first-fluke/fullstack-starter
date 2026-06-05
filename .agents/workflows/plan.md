@@ -1,5 +1,7 @@
 ---
+name: plan
 description: PM planning workflow that gathers requirements, decomposes them into prioritized tasks, defines API contracts, and produces both a machine-readable plan and a human-readable tracker in docs/plans/
+disable-model-invocation: true
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -16,6 +18,12 @@ description: PM planning workflow that gathers requirements, decomposes them int
 ---
 
 > **Vendor note:** This workflow executes inline (no subagent spawning). All vendors use their native code analysis tools. Plan artifacts (`.agents/results/plan-{sessionId}.json` and `docs/plans/work/{NNN}-{name}.md`) are consumed by `/orchestrate` or `/work`, which handle their own vendor detection.
+
+---
+
+## L1 Decision Events
+
+Use the `oma_emit` helper documented in `.agents/skills/_shared/runtime/event-spec.md` before required L1 decision checkpoints. The helper wraps `oma state:emit`.
 
 ---
 
@@ -89,6 +97,11 @@ If the plan involves cross-boundary work (frontend ↔ backend, service ↔ serv
    - Auth requirements, error responses
 2. Save to `.agents/skills/_shared/core/api-contracts/{contract-name}.md`.
 3. Reference from the markdown tracker generated in Step 6.
+4. Emit and verify the required API contract decision:
+   ```bash
+   oma_emit "decision.made" '{"subject":"plan.api-contract","decision":"Use the approved endpoint and contract shape for this plan.","rationale":"The cross-boundary API contract has been reviewed and accepted before task decomposition."}'
+   oma state:verify --workflow plan --checkpoint api-contract
+   ```
 
 ---
 

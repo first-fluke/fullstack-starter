@@ -1,5 +1,7 @@
 ---
+name: architecture
 description: Software architecture workflow that diagnoses architecture problems, selects the right analysis method, compares options, synthesizes stakeholder input, and produces a recommendation, review, or ADR
+disable-model-invocation: true
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -17,6 +19,12 @@ description: Software architecture workflow that diagnoses architecture problems
 ---
 
 > **Vendor note:** This workflow executes inline. Use `.agents/skills/oma-architecture/SKILL.md` and its resources as the primary reference for method selection, stakeholder synthesis, and output format.
+
+---
+
+## L1 Decision Events
+
+Use the `oma_emit` helper documented in `.agents/skills/_shared/runtime/event-spec.md` before required L1 decision checkpoints. The helper wraps `oma state:emit`.
 
 ---
 
@@ -128,6 +136,13 @@ Suggested filenames:
 - `architecture-review-<topic>.md`
 - `adr-<topic>.md`
 - `cbam-<topic>.md`
+
+Emit and verify the required ADR/architecture completion decision:
+
+```bash
+oma_emit "decision.made" '{"subject":"architecture.adr-complete","decision":"Use the completed architecture recommendation or ADR as the handoff basis.","rationale":"The architecture artifact captures the selected option, tradeoffs, risks, and validation steps."}'
+oma state:verify --workflow architecture --checkpoint adr-complete
+```
 
 Then guide the next step:
 - if approved and implementation is next: suggest `/plan`

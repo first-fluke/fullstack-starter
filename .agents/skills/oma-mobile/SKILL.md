@@ -1,6 +1,6 @@
 ---
 name: oma-mobile
-description: Mobile specialist for Flutter, React Native, and cross-platform mobile development. Use for mobile app, Flutter, Dart, iOS, Android, Riverpod, and widget work.
+description: Mobile specialist for Flutter, React Native, and Swift native iOS development. Use for mobile app, Flutter, Dart, React Native, Swift, SwiftUI, iOS, Android, Riverpod, swift-openapi-generator, and widget work.
 ---
 
 # Mobile Agent - Cross-Platform Mobile Specialist
@@ -122,6 +122,11 @@ Then run the project's mobile verification commands, typically unit/widget tests
 5. Dio with interceptors for API calls; handle offline gracefully
 6. 60fps target; test on both platforms
 7. Use Maestro for E2E testing of critical user flows
+8. Swift native: SwiftUI + `@Observable` (Observation framework, iOS 17+) for state management
+9. Swift native: use the generated `Client` from `swift-openapi-generator` — never hand-roll `URLRequest`/`JSONDecoder` for API calls
+10. Swift native: follow `App/Core/Features/Shared` project layout
+11. Swift native: iOS Human Interface Guidelines for all UI decisions
+12. Swift native: XCTest/XCUITest for critical flows; cancel `Task` in `deinit` to prevent leaks
 
 ## References
 Follow `resources/execution-protocol.md` step by step.
@@ -131,11 +136,16 @@ Vendor-specific execution protocols are injected automatically by `oma agent:spa
 Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Execution steps: `resources/execution-protocol.md`
 - Code examples: `resources/examples.md`
-- Code snippets: `resources/snippets.md`
+- Code snippets (Flutter/RN): `resources/snippets.md`
+- Code snippets (Swift): `variants/swift-ios/snippets.md`
 - Checklist: `resources/checklist.md`
 - Error recovery: `resources/error-playbook.md`
-- Tech stack: `resources/tech-stack.md`
-- Screen template: `resources/screen-template.dart`
+- Tech stack (Flutter/RN): `resources/tech-stack.md`
+- Tech stack (Swift): `variants/swift-ios/tech-stack.md`
+- Screen template (Flutter): `resources/screen-template.dart`
+- Screen template (Swift): `resources/screen-template.swift`
+- API service template (Swift): `variants/swift-ios/api-template.swift`
+- Variant registry: `variants/README.md`
 - Context loading: `../_shared/core/context-loading.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`
 - Clarification: `../_shared/core/clarification-protocol.md`

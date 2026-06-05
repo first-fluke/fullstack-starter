@@ -98,11 +98,22 @@
         "--context",
         "ide",
         "--project",
-        "."
+        ".",
+        "--open-web-dashboard",
+        "false"
       ],
       "env": {
         "SERENA_LOG_LEVEL": "info"
       }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--no-usage-statistics",
+        "--isolated"
+      ]
     }
   },
   "privacy": {
