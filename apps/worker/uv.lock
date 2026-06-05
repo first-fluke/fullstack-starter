@@ -1739,20 +1739,20 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.0" },
-    { name = "google-cloud-pubsub", specifier = ">=2.25.0" },
-    { name = "google-cloud-tasks", specifier = ">=2.16.0" },
-    { name = "httpx", specifier = ">=0.28.0" },
-    { name = "pydantic-settings", specifier = ">=2.7.0" },
-    { name = "tenacity", specifier = ">=9.0.0" },
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
+    { name = "google-cloud-pubsub", specifier = ">=2.39.0" },
+    { name = "google-cloud-tasks", specifier = ">=2.22.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pydantic-settings", specifier = ">=2.14.1" },
+    { name = "tenacity", specifier = ">=9.1.4" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mypy", specifier = ">=1.14.0" },
-    { name = "poethepoet", specifier = ">=0.32.0" },
-    { name = "pytest", specifier = ">=8.3.0" },
-    { name = "pytest-asyncio", specifier = ">=0.25.0" },
+    { name = "mypy", specifier = ">=2.1.0" },
+    { name = "poethepoet", specifier = ">=0.46.0" },
+    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "pytest-asyncio", specifier = ">=1.4.0" },
     { name = "pytest-custom-exit-code", specifier = ">=0.3.0" },
-    { name = "ruff", specifier = ">=0.9.0" },
+    { name = "ruff", specifier = ">=0.15.16" },
 ]
