@@ -4,22 +4,10 @@
       {
         "hooks": [
           {
-            "name": "keyword-detector",
+            "name": "oma-hook-BeforeAgent",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/keyword-detector.ts\"",
-            "timeout": 5000
-          },
-          {
-            "name": "state-boundary",
-            "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/state-boundary.ts\"",
-            "timeout": 5000
-          },
-          {
-            "name": "skill-injector",
-            "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/skill-injector.ts\"",
-            "timeout": 3000
+            "command": "\"$GEMINI_PROJECT_DIR/.gemini/hooks/oma-hook.sh\" --vendor 'gemini' --event 'BeforeAgent' --matcher '*'",
+            "timeout": 13005
           }
         ],
         "matcher": "*"
@@ -29,16 +17,10 @@
       {
         "hooks": [
           {
-            "name": "persistent-mode",
+            "name": "oma-hook-AfterAgent",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/persistent-mode.ts\"",
-            "timeout": 5000
-          },
-          {
-            "name": "hud",
-            "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
-            "timeout": 3000
+            "command": "\"$GEMINI_PROJECT_DIR/.gemini/hooks/oma-hook.sh\" --vendor 'gemini' --event 'AfterAgent' --matcher '*'",
+            "timeout": 5005
           }
         ],
         "matcher": "*"
@@ -48,10 +30,10 @@
       {
         "hooks": [
           {
-            "name": "test-filter",
+            "name": "oma-hook-BeforeTool",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/test-filter.ts\"",
-            "timeout": 5000
+            "command": "\"$GEMINI_PROJECT_DIR/.gemini/hooks/oma-hook.sh\" --vendor 'gemini' --event 'BeforeTool' --matcher 'run_shell_command'",
+            "timeout": 5005
           }
         ],
         "matcher": "run_shell_command"
@@ -63,7 +45,7 @@
           {
             "name": "hud",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
+            "command": "'bun' \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
             "timeout": 3000
           }
         ],
@@ -76,7 +58,7 @@
           {
             "name": "hud",
             "type": "command",
-            "command": "bun \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
+            "command": "'bun' \"$GEMINI_PROJECT_DIR/.gemini/hooks/hud.ts\"",
             "timeout": 3000
           }
         ],

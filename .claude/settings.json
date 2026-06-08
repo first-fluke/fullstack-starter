@@ -4,22 +4,10 @@
       {
         "hooks": [
           {
-            "name": "keyword-detector",
+            "name": "oma-hook-UserPromptSubmit",
             "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/keyword-detector.ts\"",
-            "timeout": 5
-          },
-          {
-            "name": "state-boundary",
-            "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/state-boundary.ts\"",
-            "timeout": 5
-          },
-          {
-            "name": "skill-injector",
-            "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-injector.ts\"",
-            "timeout": 3
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'UserPromptSubmit'",
+            "timeout": 18
           }
         ]
       }
@@ -28,10 +16,10 @@
       {
         "hooks": [
           {
-            "name": "persistent-mode",
+            "name": "oma-hook-Stop",
             "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/persistent-mode.ts\"",
-            "timeout": 5
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'Stop'",
+            "timeout": 10
           }
         ]
       }
@@ -40,10 +28,10 @@
       {
         "hooks": [
           {
-            "name": "test-filter",
+            "name": "oma-hook-PreToolUse",
             "type": "command",
-            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/test-filter.ts\"",
-            "timeout": 5
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'PreToolUse' --matcher 'Bash'",
+            "timeout": 10
           }
         ],
         "matcher": "Bash"
@@ -52,7 +40,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
+    "command": "'bun' \"$CLAUDE_PROJECT_DIR/.claude/hooks/hud.ts\""
   },
   "permissions": {
     "allow": [

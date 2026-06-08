@@ -4,22 +4,10 @@
       {
         "hooks": [
           {
-            "name": "keyword-detector",
+            "name": "oma-hook-UserPromptSubmit",
             "type": "command",
-            "command": "bun .cursor/hooks/keyword-detector.ts",
-            "timeout": 5
-          },
-          {
-            "name": "state-boundary",
-            "type": "command",
-            "command": "bun .cursor/hooks/state-boundary.ts",
-            "timeout": 5
-          },
-          {
-            "name": "skill-injector",
-            "type": "command",
-            "command": "bun .cursor/hooks/skill-injector.ts",
-            "timeout": 3
+            "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'UserPromptSubmit'",
+            "timeout": 18
           }
         ]
       }
@@ -28,22 +16,10 @@
       {
         "hooks": [
           {
-            "name": "keyword-detector",
+            "name": "oma-hook-beforeSubmitPrompt",
             "type": "command",
-            "command": "bun .cursor/hooks/keyword-detector.ts",
-            "timeout": 5
-          },
-          {
-            "name": "state-boundary",
-            "type": "command",
-            "command": "bun .cursor/hooks/state-boundary.ts",
-            "timeout": 5
-          },
-          {
-            "name": "skill-injector",
-            "type": "command",
-            "command": "bun .cursor/hooks/skill-injector.ts",
-            "timeout": 3
+            "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'beforeSubmitPrompt'",
+            "timeout": 18
           }
         ]
       }

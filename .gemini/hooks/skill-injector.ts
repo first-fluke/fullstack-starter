@@ -29,7 +29,10 @@ import {
 } from "./agy-input.ts";
 import { resolveGitRoot, toPosixPath } from "./fs-utils.ts";
 import { makePromptOutput } from "./hook-output.ts";
-import type { Vendor } from "./types.ts";
+// triggers.json is imported statically: bundler inlines it into the oma binary;
+// standalone bun runs resolve the sibling file (pi / direct run).
+import embeddedTriggers from "./triggers.json" with { type: "json" };
+import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
 
 const MAX_SKILLS = 3;
 const SESSION_TTL_MS = 60 * 60 * 1000;
@@ -140,11 +143,13 @@ interface SkillsTriggerConfig {
   cjkScripts?: string[];
 }
 
+/**
+ * Load the skills-trigger config from the embedded (bundler-inlined /
+ * sibling-resolved) triggers.json. Returns {} on any shape error.
+ */
 function loadTriggersConfig(): SkillsTriggerConfig {
-  const configPath = join(import.meta.dirname, "triggers.json");
-  if (!existsSync(configPath)) return {};
   try {
-    return JSON.parse(readFileSync(configPath, "utf-8"));
+    return structuredClone(embeddedTriggers) as SkillsTriggerConfig;
   } catch {
     return {};
   }
@@ -500,7 +505,63 @@ export function formatContext(matches: SkillMatch[]): string {
   return lines.join("\n");
 }
 
-// ── Main ──────────────────────────────────────────────────────
+// ── Pure handler (canonical ABI) ─────────────────────────────
+
+/**
+ * Pure decision function — the single logic source for skill injection.
+ *
+ * Returns a `context` HandlerResult when skills match, or `null` otherwise.
+ * `ctx.cwd` must be the resolved git-root project directory.
+ */
+export async function run(
+  input: HookInput,
+  ctx: HandlerCtx,
+): Promise<HandlerResult | null> {
+  if (input.kind !== "prompt") return null;
+
+  const { prompt } = input;
+  const { vendor, cwd: projectDir, sid: sessionId = "unknown" } = ctx;
+
+  if (!prompt.trim()) return null;
+
+  // Claude-specific: slash-skill resolution must run BEFORE the slash early-exit
+  // and persistent-workflow guard (same order as the original standalone path).
+  if (vendor === "claude") {
+    const slashName = parseExplicitSlash(prompt);
+    if (slashName) {
+      const slashSkill = findClaudeSlashSkill(slashName, projectDir);
+      if (slashSkill) {
+        return {
+          type: "context",
+          additionalContext: formatClaudeSlashSkillContext(slashSkill),
+        };
+      }
+    }
+  }
+
+  if (startsWithSlashCommand(prompt)) return null;
+  if (isPersistentWorkflowActive(projectDir, sessionId)) return null;
+
+  const lang = detectLanguage(projectDir);
+  const config = loadTriggersConfig();
+  const cleaned = stripCodeBlocks(prompt);
+  const skills = discoverSkills(projectDir);
+
+  const matches = matchSkills(cleaned, lang, skills, config);
+  if (matches.length === 0) return null;
+
+  const { fresh, nextState } = filterFreshMatches(
+    matches,
+    projectDir,
+    sessionId,
+  );
+  if (fresh.length === 0) return null;
+
+  writeState(projectDir, nextState);
+  return { type: "context", additionalContext: formatContext(fresh) };
+}
+
+// ── Standalone entry (pi subprocess / direct bun invocation) ──
 
 async function main() {
   const raw = readFileSync(0, "utf-8");
@@ -524,46 +585,14 @@ async function main() {
     prompt = readAgyPrompt(input.transcriptPath);
   }
 
-  if (!prompt.trim()) process.exit(0);
+  // Build canonical inputs and delegate to run() — single logic source.
+  const hookInput: HookInput = { kind: "prompt", prompt, cwd: projectDir };
+  const ctx: HandlerCtx = { vendor, cwd: projectDir, sid: sessionId };
 
-  // Claude-specific: when the user types /<name>, surface the
-  // SKILL.md body for slash-only skills (disable-model-invocation: true).
-  // The model otherwise has no signal these skills exist — they are
-  // intentionally hidden from the available-skills list. Must run BEFORE
-  // the slash early-exit and persistent-workflow guard.
-  if (vendor === "claude") {
-    const slashName = parseExplicitSlash(prompt);
-    if (slashName) {
-      const slashSkill = findClaudeSlashSkill(slashName, projectDir);
-      if (slashSkill) {
-        process.stdout.write(
-          makePromptOutput(vendor, formatClaudeSlashSkillContext(slashSkill)),
-        );
-        process.exit(0);
-      }
-    }
+  const result = await run(hookInput, ctx);
+  if (result && result.type === "context") {
+    process.stdout.write(makePromptOutput(vendor, result.additionalContext));
   }
-
-  if (startsWithSlashCommand(prompt)) process.exit(0);
-  if (isPersistentWorkflowActive(projectDir, sessionId)) process.exit(0);
-
-  const lang = detectLanguage(projectDir);
-  const config = loadTriggersConfig();
-  const cleaned = stripCodeBlocks(prompt);
-  const skills = discoverSkills(projectDir);
-
-  const matches = matchSkills(cleaned, lang, skills, config);
-  if (matches.length === 0) process.exit(0);
-
-  const { fresh, nextState } = filterFreshMatches(
-    matches,
-    projectDir,
-    sessionId,
-  );
-  if (fresh.length === 0) process.exit(0);
-
-  writeState(projectDir, nextState);
-  process.stdout.write(makePromptOutput(vendor, formatContext(fresh)));
   process.exit(0);
 }
 

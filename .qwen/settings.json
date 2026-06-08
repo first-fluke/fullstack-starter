@@ -4,22 +4,10 @@
       {
         "hooks": [
           {
-            "name": "keyword-detector",
+            "name": "oma-hook-UserPromptSubmit",
             "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/keyword-detector.ts\"",
-            "timeout": 5
-          },
-          {
-            "name": "state-boundary",
-            "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/state-boundary.ts\"",
-            "timeout": 5
-          },
-          {
-            "name": "skill-injector",
-            "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/skill-injector.ts\"",
-            "timeout": 3
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'UserPromptSubmit'",
+            "timeout": 18
           }
         ]
       }
@@ -28,10 +16,10 @@
       {
         "hooks": [
           {
-            "name": "persistent-mode",
+            "name": "oma-hook-Stop",
             "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/persistent-mode.ts\"",
-            "timeout": 5
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'Stop'",
+            "timeout": 10
           }
         ]
       }
@@ -40,10 +28,10 @@
       {
         "hooks": [
           {
-            "name": "test-filter",
+            "name": "oma-hook-PreToolUse",
             "type": "command",
-            "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/test-filter.ts\"",
-            "timeout": 5
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PreToolUse' --matcher 'Bash'",
+            "timeout": 10
           }
         ],
         "matcher": "Bash"
@@ -82,7 +70,7 @@
   "ui": {
     "statusLine": {
       "type": "command",
-      "command": "bun \"$QWEN_PROJECT_DIR/.qwen/hooks/hud.ts\""
+      "command": "'bun' \"$QWEN_PROJECT_DIR/.qwen/hooks/hud.ts\""
     }
   }
 }
