@@ -83,3 +83,6 @@ apps/mobile/.packages
 # oh-my-agent runtime (local artifacts — do not commit)
 .antigravitycli/
 .agents/results/
+
+# Migration backup (local only — do not commit)
+.migration-backup/
