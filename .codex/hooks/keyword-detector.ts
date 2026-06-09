@@ -31,7 +31,17 @@ import { VENDORS } from "./constants.ts";
 import { resolveGitRoot } from "./fs-utils.ts";
 import { clearGrokContext } from "./grok-context.ts";
 import { makePromptOutput } from "./hook-output.ts";
-import type { ModeState, Vendor } from "./types.ts";
+// triggers.json is imported statically: the bundler inlines it into the oma
+// binary (bundled `oma hook` path needs no file on disk), while a standalone
+// bun run resolves the sibling file next to this module (pi / direct run).
+import embeddedTriggers from "./triggers.json" with { type: "json" };
+import type {
+  HandlerCtx,
+  HandlerResult,
+  HookInput,
+  ModeState,
+  Vendor,
+} from "./types.ts";
 
 // ── Unicode normalization ─────────────────────────────────────
 
@@ -377,9 +387,9 @@ interface TriggerConfig {
   extensionRouting?: Record<string, string[]>;
 }
 
+/** Load the triggers config from the embedded (bundler-inlined / sibling-resolved) JSON. */
 function loadConfig(): TriggerConfig {
-  const configPath = join(import.meta.dirname, "triggers.json");
-  return JSON.parse(readFileSync(configPath, "utf-8"));
+  return structuredClone(embeddedTriggers) as TriggerConfig;
 }
 
 function detectLanguage(projectDir: string): string {
@@ -742,7 +752,114 @@ export function deactivateAllPersistentModes(
   }
 }
 
-// ── Main ──────────────────────────────────────────────────────
+// ── Pure handler (canonical ABI) ─────────────────────────────
+
+/**
+ * Pure decision function — the single logic source for keyword detection.
+ *
+ * Called in-process by `oma hook` dispatch (Task 3+) and by the standalone
+ * `main()` entry below (pi subprocess path). Both paths share exactly this
+ * code; no business logic is duplicated.
+ *
+ * Returns a `context` HandlerResult when a workflow keyword matches, or
+ * `null` when no match / early-exit condition (no stdout side-effect here).
+ *
+ * NOTE: `ctx.cwd` is expected to be the resolved git-root project directory,
+ * as computed by `getProjectDir()` in the standalone path.
+ */
+export async function run(
+  input: HookInput,
+  ctx: HandlerCtx,
+): Promise<HandlerResult | null> {
+  if (input.kind !== "prompt") return null;
+
+  const { prompt } = input;
+  const { vendor, cwd: projectDir, sid: sessionId = "unknown" } = ctx;
+
+  if (!prompt.trim()) return null;
+  if (startsWithSlashCommand(prompt)) return null;
+
+  const config = loadConfig();
+  const lang = detectLanguage(projectDir);
+
+  // Check for deactivation request before workflow detection
+  if (isDeactivationRequest(prompt, lang)) {
+    deactivateAllPersistentModes(projectDir, sessionId);
+    // Grok's resume context lives in a session-start file, not L1 stdout — clear it.
+    if (vendor === "grok") clearGrokContext(projectDir);
+    return null;
+  }
+
+  const infoPatterns = buildInformationalPatterns(config, lang);
+  // Guard 2: Strip code blocks, inline code, and pasted system-echo blocks
+  // before scanning for keywords. NFKC normalization collapses fullwidth Latin.
+  const cleaned = normalizeForMatching(
+    stripSystemEchoes(stripCodeBlocks(prompt)),
+  );
+  const excluded = new Set(config.excludedWorkflows);
+
+  // Guard 3: Load reinforcement suppression state
+  const kwState = loadKwState(projectDir);
+
+  // Skip persistent workflows entirely if the prompt is an analytical question
+  const analytical = isAnalyticalQuestion(cleaned);
+
+  for (const [workflow, def] of Object.entries(config.workflows)) {
+    if (excluded.has(workflow)) continue;
+    if (shouldSkipAllWorkflows(cleaned)) continue;
+
+    const workflowPredicate = KEYWORD_SKIP_PREDICATES[workflow];
+    if (workflowPredicate?.(cleaned)) continue;
+
+    if (analytical && def.persistent) continue;
+
+    const patterns = [
+      ...buildPatterns(def.keywords, lang, config.cjkScripts),
+      ...buildRawPatterns(def.patterns, lang),
+    ];
+
+    for (const pattern of patterns) {
+      const match = pattern.exec(cleaned);
+      if (!match) continue;
+      if (isInformationalContext(cleaned, match.index, infoPatterns)) continue;
+      if (isPastedContent(match.index, def.persistent, cleaned.length))
+        continue;
+      if (isReinforcementSuppressed(kwState, workflow)) continue;
+
+      if (def.persistent) {
+        activateMode(projectDir, workflow, sessionId);
+      }
+      await activateL1WorkflowSession(projectDir, workflow, vendor, sessionId);
+      const updatedState = recordKwTrigger(kwState, workflow);
+      saveKwState(projectDir, updatedState);
+
+      const contextLines = [
+        `[OMA WORKFLOW: ${workflow.toUpperCase()}]`,
+        `User intent matches the /${workflow} workflow.`,
+        `Read and follow \`.agents/workflows/${workflow}.md\` step by step.`,
+        `User request: ${prompt}`,
+        `IMPORTANT: Start the workflow IMMEDIATELY. Do not ask for confirmation.`,
+      ];
+
+      if (config.extensionRouting) {
+        const extensions = detectExtensions(prompt);
+        const agent = resolveAgentFromExtensions(
+          extensions,
+          config.extensionRouting,
+        );
+        if (agent) {
+          contextLines.push(`[OMA AGENT HINT: ${agent}]`);
+        }
+      }
+
+      return { type: "context", additionalContext: contextLines.join("\n") };
+    }
+  }
+
+  return null;
+}
+
+// ── Standalone entry (pi subprocess / direct bun invocation) ──
 
 async function main() {
   const raw = readFileSync(0, "utf-8");
@@ -771,102 +888,14 @@ async function main() {
     prompt = readAgyPrompt(input.transcriptPath);
   }
 
-  if (!prompt.trim()) process.exit(0);
-  if (startsWithSlashCommand(prompt)) process.exit(0);
+  // Build canonical inputs and delegate to run() — single logic source.
+  const hookInput: HookInput = { kind: "prompt", prompt, cwd: projectDir };
+  const ctx: HandlerCtx = { vendor, cwd: projectDir, sid: sessionId };
 
-  const config = loadConfig();
-  const lang = detectLanguage(projectDir);
-
-  // Check for deactivation request before workflow detection
-  if (isDeactivationRequest(prompt, lang)) {
-    deactivateAllPersistentModes(projectDir, sessionId);
-    // Grok's resume context lives in a session-start file, not L1 stdout — clear it.
-    if (vendor === "grok") clearGrokContext(projectDir);
-    process.exit(0);
+  const result = await run(hookInput, ctx);
+  if (result && result.type === "context") {
+    process.stdout.write(makePromptOutput(vendor, result.additionalContext));
   }
-  const infoPatterns = buildInformationalPatterns(config, lang);
-  // Guard 2: Strip code blocks, inline code, and pasted system-echo blocks
-  // before scanning for keywords. System echo stripping prevents oma's own
-  // hook outputs (when pasted back into the prompt) from re-triggering.
-  // NFKC normalization collapses fullwidth Latin from CJK IMEs onto ASCII
-  // so keyword regexes cannot be silently bypassed by ｐａｒａｌｌｅｌ-style input.
-  const cleaned = normalizeForMatching(
-    stripSystemEchoes(stripCodeBlocks(prompt)),
-  );
-  const excluded = new Set(config.excludedWorkflows);
-
-  // Guard 3: Load reinforcement suppression state
-  const kwState = loadKwState(projectDir);
-
-  // Skip persistent workflows entirely if the prompt is an analytical question
-  const analytical = isAnalyticalQuestion(cleaned);
-
-  for (const [workflow, def] of Object.entries(config.workflows)) {
-    if (excluded.has(workflow)) continue;
-
-    // Global CLI-invocation guard: prompts that start with a CLI invocation
-    // of `oma` or a `VENDORS` entry are tool invocations, not natural-language
-    // workflow requests. Skip silently to avoid false-positive matches.
-    if (shouldSkipAllWorkflows(cleaned)) continue;
-
-    // Per-workflow override: if a predicate is registered for this specific
-    // workflow, evaluate it and skip just this workflow when it returns true.
-    const workflowPredicate = KEYWORD_SKIP_PREDICATES[workflow];
-    if (workflowPredicate?.(cleaned)) continue;
-
-    // Analytical questions should never trigger persistent workflows
-    if (analytical && def.persistent) continue;
-
-    const patterns = [
-      ...buildPatterns(def.keywords, lang, config.cjkScripts),
-      ...buildRawPatterns(def.patterns, lang),
-    ];
-
-    for (const pattern of patterns) {
-      const match = pattern.exec(cleaned);
-      if (!match) continue;
-      if (isInformationalContext(cleaned, match.index, infoPatterns)) continue;
-      // Keywords deep in long prompts are likely pasted content, not user intent
-      if (isPastedContent(match.index, def.persistent, cleaned.length))
-        continue;
-
-      // Guard 3: Suppress if same workflow triggered too many times in 60s
-      if (isReinforcementSuppressed(kwState, workflow)) continue;
-
-      if (def.persistent) {
-        activateMode(projectDir, workflow, sessionId);
-      }
-      await activateL1WorkflowSession(projectDir, workflow, vendor, sessionId);
-      // Record this trigger for reinforcement tracking
-      const updatedState = recordKwTrigger(kwState, workflow);
-      saveKwState(projectDir, updatedState);
-
-      const contextLines = [
-        `[OMA WORKFLOW: ${workflow.toUpperCase()}]`,
-        `User intent matches the /${workflow} workflow.`,
-        `Read and follow \`.agents/workflows/${workflow}.md\` step by step.`,
-        `User request: ${prompt}`,
-        `IMPORTANT: Start the workflow IMMEDIATELY. Do not ask for confirmation.`,
-      ];
-
-      if (config.extensionRouting) {
-        const extensions = detectExtensions(prompt);
-        const agent = resolveAgentFromExtensions(
-          extensions,
-          config.extensionRouting,
-        );
-        if (agent) {
-          contextLines.push(`[OMA AGENT HINT: ${agent}]`);
-        }
-      }
-
-      const context = contextLines.join("\n");
-
-      process.stdout.write(makePromptOutput(vendor, context));
-      process.exit(0);
-    }
-  }
-
   process.exit(0);
 }
 

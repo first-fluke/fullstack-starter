@@ -134,6 +134,88 @@ export async function isAgentMemoryReachable(): Promise<boolean> {
   }
 }
 
+export interface RecalledFact {
+  text: string;
+  source?: string;
+  score?: number;
+}
+
+interface SearchResult {
+  score?: number;
+  observation?: {
+    narrative?: unknown;
+    facts?: unknown;
+    title?: unknown;
+    type?: unknown;
+  };
+}
+
+function parseSearchResults(body: string, k: number): RecalledFact[] {
+  let parsed: { results?: unknown };
+  try {
+    parsed = JSON.parse(body) as { results?: unknown };
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed.results)) return [];
+
+  const minScore = (() => {
+    const raw = Number(process.env.OMA_RECALL_MIN_SCORE);
+    return Number.isFinite(raw) ? raw : 1;
+  })();
+
+  const facts: RecalledFact[] = [];
+  for (const entry of parsed.results as SearchResult[]) {
+    const score = typeof entry.score === "number" ? entry.score : 0;
+    // Raw `/observe` envelopes score near-zero (~0.006); enriched facts score
+    // in the single digits. Drop the noise floor so the snapshot stays useful.
+    if (score < minScore) continue;
+    const obs = entry.observation ?? {};
+    const narrative =
+      typeof obs.narrative === "string" && obs.narrative.trim()
+        ? obs.narrative.trim()
+        : "";
+    const factsText = Array.isArray(obs.facts)
+      ? obs.facts.filter((f): f is string => typeof f === "string").join("; ")
+      : "";
+    const title = typeof obs.title === "string" ? obs.title.trim() : "";
+    const text = narrative || factsText || title;
+    if (!text) continue;
+    const source = typeof obs.type === "string" ? obs.type : undefined;
+    facts.push({ text, source, score });
+    if (facts.length >= k) break;
+  }
+  return facts;
+}
+
+/**
+ * Recall enriched facts from AgentMemory for boundary rehydration. Best-effort:
+ * returns [] when the daemon is unreachable, on timeout (recall budget 2s per
+ * design D34), or on any parse/transport error — never throws, never blocks L1.
+ */
+export async function recallFacts(
+  query: string,
+  k = 5,
+): Promise<RecalledFact[]> {
+  if (!query.trim()) return [];
+  if (!(await isAgentMemoryReachable())) return [];
+  const url = endpointUrl();
+  if (!url) return [];
+
+  try {
+    const response = await requestAgentMemory(url, "/agentmemory/search", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query, limit: k }),
+      timeoutMs: 2000,
+    });
+    if (response.statusCode < 200 || response.statusCode >= 300) return [];
+    return parseSearchResults(response.body, k);
+  } catch {
+    return [];
+  }
+}
+
 export async function observeWithTimeout(payload: {
   sessionId: string;
   content: string;

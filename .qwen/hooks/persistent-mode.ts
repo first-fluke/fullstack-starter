@@ -25,7 +25,16 @@ import { agyConversationId, agyProjectDir, isAgyInput } from "./agy-input.ts";
 import { resolveGitRoot } from "./fs-utils.ts";
 import { makeBlockOutput } from "./hook-output.ts";
 import { isDeactivationRequest } from "./keyword-detector.ts";
-import type { ModeState, Vendor } from "./types.ts";
+// triggers.json is imported statically: bundler inlines it into the oma binary;
+// standalone bun runs resolve the sibling file (pi / direct run).
+import embeddedTriggers from "./triggers.json" with { type: "json" };
+import type {
+  HandlerCtx,
+  HandlerResult,
+  HookInput,
+  ModeState,
+  Vendor,
+} from "./types.ts";
 
 const MAX_REINFORCEMENTS = 5;
 const STALE_HOURS = 2;
@@ -49,9 +58,8 @@ interface TriggerConfig {
 }
 
 function loadPersistentWorkflows(): string[] {
-  const configPath = join(import.meta.dirname, "triggers.json");
   try {
-    const config: TriggerConfig = JSON.parse(readFileSync(configPath, "utf-8"));
+    const config = embeddedTriggers as TriggerConfig;
     return Object.entries(config.workflows)
       .filter(([, def]) => def.persistent)
       .map(([name]) => name);
@@ -177,6 +185,23 @@ export function deactivate(
   if (existsSync(path)) unlinkSync(path);
 }
 
+/** Delete all persistent-workflow state files for a session (full deactivation). */
+export function deactivateAllForSession(
+  projectDir: string,
+  sessionId: string,
+): void {
+  const stateDir = getStateDir(projectDir);
+  if (!existsSync(stateDir)) return;
+  const suffix = `-state-${sessionId}.json`;
+  try {
+    for (const file of readdirSync(stateDir)) {
+      if (file.endsWith(suffix)) unlinkSync(join(stateDir, file));
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 function incrementReinforcement(
   projectDir: string,
   workflow: string,
@@ -190,51 +215,42 @@ function incrementReinforcement(
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────
+// ── Pure handler (canonical ABI) ─────────────────────────────
 
-async function main() {
-  const raw = readFileSync(0, "utf-8");
-  let input: Record<string, unknown>;
-  try {
-    input = JSON.parse(raw);
-  } catch {
-    process.exit(0);
-  }
+/**
+ * Pure decision function — the single logic source for persistent-mode blocking.
+ *
+ * Returns a `block` HandlerResult when a persistent workflow is still active and
+ * the stop should be blocked, or `null` when no workflow is active / all are
+ * stale/exhausted.
+ *
+ * NOTE: The deactivation-via-response-text check (reading `prompt_response`,
+ * `response`, `content` etc. from raw stdin) is not representable in the
+ * canonical `HookInput { kind: "stop"; cwd }` shape — those fields are absent.
+ * That check stays in the standalone `main()` path. When dispatched via
+ * `oma hook`, the dispatch layer is responsible for passing a pre-checked input
+ * (or extending HookInput in a future revision).
+ *
+ * `ctx.cwd` must be the resolved git-root project directory;
+ * `ctx.sid` is the vendor session id.
+ */
+export async function run(
+  input: HookInput,
+  ctx: HandlerCtx,
+): Promise<HandlerResult | null> {
+  if (input.kind !== "stop") return null;
 
-  const vendor = detectVendor(input);
-  const projectDir = getProjectDir(vendor, input);
-  const sessionId = getSessionId(input);
-  const lang = detectLanguage(projectDir);
+  const { cwd: projectDir, sid: sessionId = "unknown" } = ctx;
 
-  // Check all text fields in stdin for deactivation phrases.
-  // The assistant may have included "workflow done" in its response,
-  // or it may appear in transcript/content fields depending on vendor.
-  const textToCheck = [
-    input.prompt_response, // Gemini AfterAgent
-    input.response,
-    input.content,
-    input.message,
-    input.transcript,
-  ]
-    .filter((v): v is string => typeof v === "string")
-    .join(" ");
-
-  if (textToCheck && isDeactivationRequest(textToCheck, lang)) {
-    // Deactivate all persistent workflows for this session
-    const stateDir = join(projectDir, ".agents", "state");
-    if (existsSync(stateDir)) {
-      try {
-        const suffix = `-state-${sessionId}.json`;
-        for (const file of readdirSync(stateDir)) {
-          if (file.endsWith(suffix)) {
-            unlinkSync(join(stateDir, file));
-          }
-        }
-      } catch {
-        /* ignore */
-      }
+  // Honor "workflow done" deactivation carried in the stop payload's response
+  // text (parity with the standalone main() path). Without this, persistent
+  // mode could not be deactivated via the central `oma hook` dispatch.
+  if (input.responseText) {
+    const lang = detectLanguage(projectDir);
+    if (isDeactivationRequest(input.responseText, lang)) {
+      deactivateAllForSession(projectDir, sessionId);
+      return null;
     }
-    process.exit(0);
   }
 
   const persistentWorkflows = loadPersistentWorkflows();
@@ -259,7 +275,56 @@ async function main() {
       `  2. Or ask the user to say "워크플로우 완료" / "workflow done"`,
     ].join("\n");
 
-    writeBlockAndExit(vendor, reason);
+    return { type: "block", reason };
+  }
+
+  return null;
+}
+
+// ── Standalone entry (pi subprocess / direct bun invocation) ──
+
+async function main() {
+  const raw = readFileSync(0, "utf-8");
+  let input: Record<string, unknown>;
+  try {
+    input = JSON.parse(raw);
+  } catch {
+    process.exit(0);
+  }
+
+  const vendor = detectVendor(input);
+  const projectDir = getProjectDir(vendor, input);
+  const sessionId = getSessionId(input);
+  const lang = detectLanguage(projectDir);
+
+  // Check all text fields in stdin for deactivation phrases.
+  // The assistant may have included "workflow done" in its response,
+  // or it may appear in transcript/content fields depending on vendor.
+  // This raw-stdin check is standalone-path-only; the canonical HookInput
+  // { kind: "stop" } does not carry these text fields.
+  const textToCheck = [
+    input.prompt_response, // Gemini AfterAgent
+    input.response,
+    input.content,
+    input.message,
+    input.transcript,
+  ]
+    .filter((v): v is string => typeof v === "string")
+    .join(" ");
+
+  if (textToCheck && isDeactivationRequest(textToCheck, lang)) {
+    // Deactivate all persistent workflows for this session (shared helper).
+    deactivateAllForSession(projectDir, sessionId);
+    process.exit(0);
+  }
+
+  // Delegate to run() for the block decision — single logic source.
+  const hookInput: HookInput = { kind: "stop", cwd: projectDir };
+  const ctxVal: HandlerCtx = { vendor, cwd: projectDir, sid: sessionId };
+
+  const result = await run(hookInput, ctxVal);
+  if (result && result.type === "block") {
+    writeBlockAndExit(vendor, result.reason);
   }
 
   process.exit(0);
