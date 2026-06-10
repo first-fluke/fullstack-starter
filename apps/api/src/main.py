@@ -11,6 +11,7 @@ from opentelemetry import trace
 from pydantic import BaseModel
 from sqlalchemy import text
 
+from src.lib.body_limit import BodySizeLimitMiddleware
 from src.lib.config import settings
 from src.lib.database import async_session_factory
 from src.lib.logging import configure_logging, get_logger
@@ -120,6 +121,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Body size limit (edge WAFs inspect only the first 8 KB and cannot
+# enforce payload size, so the real limit lives here)
+app.add_middleware(BodySizeLimitMiddleware, max_body_size=settings.MAX_BODY_SIZE)
 
 
 class ServiceStatus(BaseModel):

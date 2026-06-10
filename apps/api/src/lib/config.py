@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
+    # Request limits (edge WAFs cannot enforce body size; the app does)
+    MAX_BODY_SIZE: int = 1_048_576  # 1 MiB
+
     # Auth (better-auth)
     BETTER_AUTH_URL: str = "http://localhost:3000"
 
