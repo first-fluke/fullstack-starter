@@ -1,0 +1,69 @@
+# Required
+github_repository = "your-org/your-repo"
+
+# Optional - customize as needed
+aws_region  = "ap-northeast-2"
+environment = "dev"
+app_name    = "fullstack-starter"
+
+# Network
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["ap-northeast-2a", "ap-northeast-2c"]
+
+# ECS - API
+api_cpu           = 256
+api_memory        = 512
+api_desired_count = 1
+
+# ECS - Web
+web_cpu           = 256
+web_memory        = 512
+web_desired_count = 1
+
+# ECS - Worker
+worker_cpu           = 256
+worker_memory        = 512
+worker_desired_count = 1
+
+# Database
+db_instance_class           = "db.t4g.medium"
+db_name                     = "app"
+db_user                     = "app"
+rds_multi_az                = false
+rds_deletion_protection     = false
+rds_backup_retention_period = 7
+
+# Redis
+redis_node_type = "cache.t4g.micro"
+
+# Autoscaling
+enable_autoscaling = false
+
+# Domain (leave empty to use ALB DNS over HTTP)
+domain              = ""
+api_subdomain       = "api"
+acm_certificate_arn = ""
+
+# SES (leave empty to skip email setup)
+ses_domain = ""
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = ""
+
+# Scheduled jobs (EventBridge Scheduler -> SNS -> SQS -> worker)
+# Define cron jobs here instead of in-worker cron loops.
+# schedules = {
+#   daily-report = {
+#     schedule_expression = "cron(0 3 * * ? *)"
+#     payload             = "{\"task\":\"daily_report\"}"
+#   }
+# }
+
+# Secrets (injected via Infisical - do not commit real values)
+# DATABASE_PASSWORD    = ""
+# JWT_SECRET           = ""
+# BETTER_AUTH_SECRET   = ""
+# GOOGLE_CLIENT_ID     = ""
+# GOOGLE_CLIENT_SECRET = ""
+# OPENAI_API_KEY       = ""

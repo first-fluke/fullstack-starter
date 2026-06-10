@@ -1,0 +1,56 @@
+# Required
+github_repository = "your-org/your-repo"
+
+aws_region  = "ap-northeast-2"
+environment = "prod"
+
+# ECS - production sizing
+api_cpu              = 512
+api_memory           = 1024
+api_desired_count    = 2
+web_cpu              = 256
+web_memory           = 512
+web_desired_count    = 2
+worker_cpu           = 512
+worker_memory        = 1024
+worker_desired_count = 2
+
+# Database - production
+db_instance_class           = "db.r6g.large"
+rds_multi_az                = true
+rds_deletion_protection     = true
+rds_backup_retention_period = 30
+
+# Redis - production
+redis_node_type = "cache.r6g.large"
+
+# Autoscaling
+enable_autoscaling        = true
+api_autoscale_min         = 2
+api_autoscale_max         = 10
+worker_autoscale_min      = 1
+worker_autoscale_max      = 2
+worker_queue_depth_target = 100
+
+# WAF
+enable_waf = true
+
+# Domain
+domain              = "example.com"
+api_subdomain       = "api"
+acm_certificate_arn = "arn:aws:acm:ap-northeast-2:123456789012:certificate/xxxx"
+
+# SES
+ses_domain = "example.com"
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = "ops@example.com"
+
+# Scheduled jobs (EventBridge Scheduler -> SNS -> SQS -> worker)
+# schedules = {
+#   daily-report = {
+#     schedule_expression = "cron(0 3 * * ? *)"
+#     payload             = "{\"task\":\"daily_report\"}"
+#   }
+# }
