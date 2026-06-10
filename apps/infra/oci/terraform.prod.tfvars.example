@@ -1,0 +1,54 @@
+# Required
+github_repository       = "your-org/your-repo"
+tenancy_ocid            = "ocid1.tenancy.oc1..xxxx"
+parent_compartment_ocid = "ocid1.tenancy.oc1..xxxx"
+
+region      = "ap-seoul-1"
+environment = "prod"
+
+# Container Instances - production sizing
+# No autoscaling on OCI Container Instances — capacity is fixed counts
+# (see README Notes). Size counts for peak traffic.
+container_shape      = "CI.Standard.E4.Flex"
+api_ocpus            = 2
+api_memory_in_gbs    = 4
+api_count            = 2
+web_ocpus            = 1
+web_memory_in_gbs    = 2
+web_count            = 2
+worker_ocpus         = 2
+worker_memory_in_gbs = 4
+worker_count         = 2
+
+# Database - production (2 nodes = HA standby + reader endpoint)
+db_shape                 = "PostgreSQL.VM.Standard.E4.Flex"
+db_ocpus                 = 4
+db_memory_in_gbs         = 64
+db_instance_count        = 2
+db_backup_retention_days = 30
+
+# Redis - production (2 nodes = replica + automatic failover)
+redis_node_count    = 2
+redis_memory_in_gbs = 8
+
+# Load Balancer
+lb_min_bandwidth_mbps = 10
+lb_max_bandwidth_mbps = 100
+
+# WAF
+enable_waf = true
+
+# Domain
+domain           = "example.com"
+api_subdomain    = "api"
+certificate_ocid = "ocid1.certificate.oc1..xxxx"
+
+# CI/CD - GitHub Actions OIDC
+identity_domain_ocid = "ocid1.domain.oc1..xxxx"
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = "ops@example.com"
+
+# Scheduled jobs: NOT supported on OCI (no cron->queue service, see
+# scheduler.tf and README Notes) — the schedules variable is a no-op.

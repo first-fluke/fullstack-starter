@@ -1,0 +1,82 @@
+# Required
+github_repository       = "your-org/your-repo"
+tenancy_ocid            = "ocid1.tenancy.oc1..xxxx"
+parent_compartment_ocid = "ocid1.tenancy.oc1..xxxx" # or a parent compartment OCID
+
+# Optional - customize as needed
+region      = "ap-seoul-1"
+environment = "dev"
+app_name    = "fullstack-starter"
+
+# Provider auth (leave commented to use ~/.oci/config DEFAULT profile)
+# user_ocid           = "ocid1.user.oc1..xxxx"
+# fingerprint         = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+# private_key_path    = "~/.oci/oci_api_key.pem"
+# config_file_profile = "DEFAULT"
+
+# Network
+vcn_cidr = "10.0.0.0/16"
+
+# Container Instances - API
+# Dev tip: CI.Standard.A1.Flex (Arm) is the cheapest shape — OCI's free tier
+# is generous for A1 compute, but Container Instances themselves are not
+# Always Free; only the 10 Mbps flexible LB below is.
+container_shape   = "CI.Standard.E4.Flex"
+api_ocpus         = 1
+api_memory_in_gbs = 2
+api_count         = 1
+
+# Container Instances - Web
+web_ocpus         = 1
+web_memory_in_gbs = 2
+web_count         = 1
+
+# Container Instances - Worker
+worker_ocpus         = 1
+worker_memory_in_gbs = 2
+worker_count         = 1
+
+# Database (OCI Database with PostgreSQL)
+db_shape                 = "PostgreSQL.VM.Standard.E4.Flex"
+db_ocpus                 = 2
+db_memory_in_gbs         = 32
+db_instance_count        = 1
+db_version               = "16"
+db_name                  = "app"
+db_user                  = "app"
+db_backup_retention_days = 7
+
+# Redis (OCI Cache)
+redis_node_count       = 1
+redis_memory_in_gbs    = 2
+redis_software_version = "REDIS_7_0"
+
+# Load Balancer (10/10 Mbps flexible LB is Always Free eligible)
+lb_min_bandwidth_mbps = 10
+lb_max_bandwidth_mbps = 10
+
+# WAF
+enable_waf = true
+
+# Domain (leave empty to use the LB public IP over HTTP)
+domain           = ""
+api_subdomain    = "api"
+certificate_ocid = ""
+
+# CI/CD - GitHub Actions OIDC (leave empty to skip CI identity provisioning)
+identity_domain_ocid = ""
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = ""
+
+# Scheduled jobs: NOT supported on OCI (no cron->queue service, see
+# scheduler.tf and README Notes) — the schedules variable is a no-op.
+
+# Secrets (injected via Infisical - do not commit real values)
+# DATABASE_PASSWORD    = ""
+# JWT_SECRET           = ""
+# BETTER_AUTH_SECRET   = ""
+# GOOGLE_CLIENT_ID     = ""
+# GOOGLE_CLIENT_SECRET = ""
+# OPENAI_API_KEY       = ""
