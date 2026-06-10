@@ -55,7 +55,7 @@ docs/
 │   ├── index.md
 │   ├── core-beliefs.md             ← agent-first operating principles
 │   └── {decision-name}.md
-├── plans/                          ← plan artifacts (local working notes; gitignored)
+├── plans/                          ← plan artifacts (local working notes; add to the target repo's .gitignore)
 │   ├── designs/                    ← permanent design references (Status: Approved/Draft)
 │   │   └── {NNN}-{name}.md
 │   └── work/                       ← execution plans (Status: Active/Completed)
@@ -84,8 +84,7 @@ Not all files are required. Generate only what is **discoverable and relevant** 
 
 ## Step 0: Preparation
 
-1. Read `.agents/skills/oma-coordination/SKILL.md` and confirm Core Rules.
-2. Check if `AGENTS.md`, `ARCHITECTURE.md`, or `docs/` already exists. If so, this is an **update run** (see Step 6).
+1. Check if `AGENTS.md`, `ARCHITECTURE.md`, or `docs/` already exists. If so, this is an **update run** (see Step 6).
 
 ---
 
@@ -164,7 +163,7 @@ Generate only the files that are **relevant and discoverable** from the codebase
 
 ### `docs/plans/`
 
-**Structured plan artifacts (local working notes; `docs/plans/` is gitignored).**
+**Structured plan artifacts (local working notes; add `docs/plans/` to the target repo's `.gitignore` if not already ignored).**
 
 Folder = type. Status field = lifecycle. Filenames use a 3-digit zero-padded sequential prefix per folder.
 

@@ -122,7 +122,7 @@ Answer natural-language questions over an existing sidecar.
 
 ### Steps
 
-1. Locate sidecar: local path or `oma-scholar fetch {record_id}` from knows.academy
+1. Locate sidecar: local path or `oma scholar get "{record_id}"` from knows.academy
 2. For token efficiency, prefer **partial fetch** when only a subset is needed.
    The query param is **`section` (singular)**; allowed values are `statements|evidence|relations|artifacts|citation`:
    - "What claims does this paper make?" -> `?section=statements`

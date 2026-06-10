@@ -7,7 +7,7 @@
             "name": "oma-hook-UserPromptSubmit",
             "type": "command",
             "command": "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'UserPromptSubmit'",
-            "timeout": 18
+            "timeout": 21
           }
         ]
       }

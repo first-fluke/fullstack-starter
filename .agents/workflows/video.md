@@ -1,5 +1,7 @@
 ---
+name: video
 description: Agent-native, key-optional video generation workflow that turns a brief into a finished MP4 — script → parallel asset generation (voice/visual/caption) → render-spec → Remotion compositor (MPT fallback) → QA loop → output + manifest
+disable-model-invocation: true
 ---
 
 # MANDATORY RULES: VIOLATION IS FORBIDDEN
@@ -12,8 +14,8 @@ description: Agent-native, key-optional video generation workflow that turns a b
 - **The `oma video` CLI owns the pipeline. This workflow owns the brief, the agent-authored script, the QA loop, and decision checkpoints.** Do NOT reimplement orchestration, provider selection, or rendering in the workflow.
 - **You MUST use MCP tools where the project provides them.**
   - Use memory tools (read/write/edit) for run tracking. Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`).
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`.
-- **Read the oma-video skill BEFORE starting.** Read `.agents/skills/oma-video/SKILL.md` and follow its Core Rules and execution protocol. If the skill is not yet installed, fall back to the design SSOT `docs/plans/designs/013-oma-video.md`.
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`.
+- **Read the oma-video skill BEFORE starting.** Read `.agents/skills/oma-video/SKILL.md` and follow its Core Rules and execution protocol, including `resources/execution-protocol.md`. If the skill is not installed, stop and ask the user to run `oma install` first.
 
 ---
 
@@ -55,7 +57,7 @@ For `demo`, also resolve the **source**: a recorded file or Cap → `--source fi
 
 ## Cost Guardrail & Key-Optional Notes (read before Step 4)
 
-- **Guardrail**: default `cost.guardrailUsd: 0.20` (reused from oma-image). Any provider whose estimated cost meets or exceeds the guardrail requires explicit confirmation (`-y` / `--yes` or the Step 5 checkpoint). `--max-usd <n>` overrides the threshold.
+- **Guardrail**: default `cost.guardrail_usd: 0.20` in `.agents/skills/oma-video/config/video-config.yaml` (reused from oma-image). Any provider whose estimated cost meets or exceeds the guardrail requires explicit confirmation (`-y` / `--yes` or the Step 5 checkpoint). `--max-usd <n>` overrides the threshold.
 - **Key-optional pairs** (real path is gated; fallback is always wired):
 
   | capability | real (key/resource) | key-free fallback | deferred marker |
@@ -107,7 +109,7 @@ For `demo`, also resolve the **source**: a recorded file or Cap → `--source fi
 The agent writes the script — this is the start of the determinism boundary. Do NOT call an external LLM; you are the script provider.
 
 1. Produce a script honoring the `script.json` schema (`mode, aspect, locale, title, scenes[{id, durationSec, narration, onScreenText, visual{kind,prompt,ref,source}, transition}], music, brand`).
-2. Respect limits from `config/video-config.yaml` (`maxDurationSec: 180`, `maxScenes: 40`). Keep narration tight and per-scene so scene boundaries map cleanly to TTS timing.
+2. Respect limits from `.agents/skills/oma-video/config/video-config.yaml` (`max_duration_sec: 180`, `max_scenes: 40`). Keep narration tight and per-scene so scene boundaries map cleanly to TTS timing.
 3. Mode-specific sourcing:
    - `shorts`: a hook-first synthetic script from the topic; each scene gets a `visual.prompt` for oma-image.
    - `explainer`: ground scenes in the README / code / data the user pointed to; mark scenes that should become oma-slide frames vs oma-image diagrams.
@@ -133,7 +135,7 @@ The CLI orchestrator fans out the asset tracks per the asset bus. Trigger the fu
 oma video generate "<brief>" --mode <mode> [same flags as Step 3, without --dry-run] --format json
 ```
 
-The three tracks (mirroring `docs/plans/designs/013-oma-video.md` §3.4):
+The three tracks (per `.agents/skills/oma-video/SKILL.md` and its execution protocol):
 
 - **Voice** (oma-voice / Voicebox MCP) → `audio/narration-*.wav` + `timing.json`. Timing source preference: TTS-native → `voicebox-stt` (transcribe the generated wav) → `whisper.cpp` → `estimated`. If oma-voice is down, the run falls back to silent + estimated timing and warns — it does not hard-fail.
 - **Visual** (per-scene, fallback chain `oma-image → pexels → pixelle`) → `visuals/scene-NN.*`. Default is key-free oma-image stills (aspect snapped to the nearest 16-multiple; Remotion crops to exact frame). `--visual stock` engages Pexels only when `PEXELS_API_KEY` is set; `--visual aigc` engages Pixelle only after consent + cost gate. Each scene that falls back is recorded with `pathTaken: fallback`.

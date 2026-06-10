@@ -14,6 +14,17 @@ The verifier MUST be independent from the implementer; evaluate only evidence, n
 
 ---
 
+## Judge Execution Mode
+
+The judge runs as a **spawned subagent with fresh context** (see ralph.md Step 2.1). It receives only the criteria table, the verification cache records, and this protocol — never the implementer's narration or claims about what was fixed. Independence is structural, not a prompt-level role-play.
+
+- **Input**: judge brief (criteria + cache records + output format)
+- **Output**: write the JUDGE result (format below) to memory as `result-judge-{sessionId}-iter{N}.md`
+- **Model**: verification is mechanical (run command, check exit code/output); a lower-cost model tier is acceptable where the runtime supports per-agent model selection
+- **Inline fallback**: when subagent spawning is unavailable, ralph runs this protocol inline and records the independence downgrade (`ralph.judge-inline-fallback` event). The protocol applies identically in both modes.
+
+---
+
 ## Verification Methods
 
 For each criterion, execute the defined verification method:
@@ -68,6 +79,8 @@ remaining:
     reason: "<specific failure evidence>"
     suggested_action: "<concrete next step>"
     fail_count: {N}
+    regression: {true|false}            # true when a previously passing criterion now fails
+    previous_pass_iteration: {N|null}   # iteration where it last passed (null if never)
 ```
 
 ### Suggested Action Guidelines
@@ -86,6 +99,8 @@ A criterion is marked BLOCKED when:
 
 1. It has `fail_count >= 3` (failed in 3 consecutive iterations)
 2. The same root cause persists despite different approaches
+
+`fail_count` counts **consecutive** failures only: it resets to 0 whenever the criterion passes. An intermittently flaky verification therefore cannot accumulate to BLOCKED across non-consecutive failures — recurring flakiness surfaces as repeated REGRESSED signals instead, which is the correct signal for REPLAN to investigate.
 
 When marking BLOCKED:
 - Record the 3 failure evidences for reference
@@ -124,6 +139,7 @@ For each criterion in current iteration:
     status := BLOCKED if fail_count >= 3 else FAIL
   else:
     status := PASS
+    fail_count := 0                 # consecutive semantics: a pass breaks the failure streak
     regressed_at_iteration := null
 ```
 
@@ -162,7 +178,7 @@ The cache for criterion C is invalidated when ANY of:
 
 ### Cache record format
 
-Maintain in `session-ralph.md`:
+Maintain in `session-ralph-{sessionId}.md`:
 
 ```markdown
 verification_cache:
@@ -183,7 +199,7 @@ Always re-execute (never cache) when:
 
 - Verification type is `file exists` (always fast, no point caching)
 - The criterion is REGRESSED or FAIL in the current snapshot (must re-verify after the fix attempt)
-- The user passes `--no-cache` to ralph (TODO: pending CLI flag; treat as default OFF until added)
+- Caching is disabled for the session: the user's request explicitly asks for full re-verification (e.g., "no cache", "always re-verify"). (A `ralph.judge_cache: false` config key in `.agents/oma-config.yaml` is planned but not yet implemented.) Record the disable reason in `session-ralph-{sessionId}.md`.
 
 ### Cost-benefit guideline
 

@@ -72,7 +72,6 @@ queries (default 0.4 is too strict for n-gram tokens).
 ```bash
 oma market render --format md --intent $INTENT --frameworks auto \
   --topic "<user-facing title>" \
-  --output-dir .agents/results/market-research \
   [--vs <competitor>]
 ```
 
@@ -102,8 +101,8 @@ If a framework axis genuinely has no signal in the Cluster Bank, write
 
 1. Run mental checks from `checklist.md`.
 2. Save the synthesized brief at
-   `.agents/results/market/{slug}-{YYYY-MM-DD}.md` (overwrite the
-   skeleton from Step 5).
+   `.agents/results/market/{slug}-{YYYYMMDD}.md` (render's default
+   output path — overwrite the skeleton from Step 5).
 3. Return the first 20 lines + file path to the user.
 
 ## Responsibility split

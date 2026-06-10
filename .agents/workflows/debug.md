@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation, NOT raw file reads or grep.
   - Use memory write tool to record debugging results.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - MCP tools are the primary interface for all code exploration.
 
 ---
@@ -47,6 +47,8 @@ Request subagent execution via model-mediated subagent request.
 Include diagnosis results and scan scope. Results returned as JSON output.
 
 #### If Gemini CLI
+
+Use the native `.gemini/agents/{name}.md` subagent when available (per `_shared/core/vendor-detection.md`); otherwise fall back to:
 
 ```bash
 oma agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
@@ -126,7 +128,7 @@ Report any other locations that may have the same vulnerability. Fix them if con
 
 ## Step 7: Document the Bug
 
-Use memory write tool to record a bug report:
+Use memory write tool to record a bug report (for durable artifacts, also save it under `.agents/results/bugs/` per the oma-debug skill's expected outputs):
 - Symptom, root cause
 - Fix applied, files changed
 - Regression test location

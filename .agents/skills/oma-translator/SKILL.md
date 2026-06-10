@@ -213,7 +213,7 @@ This stage is mandatory. Skipping any item is a bug, not a shortcut. Before prod
 
 **A. Mechanical checks (run before rubric, must all pass):**
 
-- **CJK em dash scan**: For Korean, Japanese, or Chinese targets, search the draft output for `—`. Every occurrence must be **structurally restructured**, never simply substituted with `:` / `(` / `,`. Em dash usually signals a definitional `X — Y` pattern that maps to coordinated noun phrases, relative clauses, or separate sentences in CJK. Zero em dashes AND zero mechanical-substitution survivors in the emitted output. (See anti-AI rule 17.)
+- **CJK em dash scan**: For Korean, Japanese, or Chinese targets, search the draft output for `—`. Every occurrence must be **structurally restructured**, never simply substituted with `:` / `(` / `,`. Em dash usually signals a definitional `X — Y` pattern that maps to coordinated noun phrases, relative clauses, or separate sentences in CJK. Zero em dashes AND zero mechanical-substitution survivors in the emitted output. (See anti-AI rules 14 and 14a.)
 - **Curly quote scan**: Search the draft output for `“`, `”`, `‘`, `’`. Replace with straight quotes (`"`, `'`) unless the source explicitly uses curly quotes, the target language convention requires them (e.g., Japanese 「」/『』, French «»), or the surrounding file format mandates them.
 - **Placeholder integrity**: Every `{name}`, `{{count}}`, `%s`, `<tag>`, and `` `code` `` from the source appears unchanged in the target.
 - **Structure parity**: Headings, list bullets, table rows, code blocks, and links match the source count and nesting.
@@ -507,7 +507,7 @@ rg "<source-key-or-term>" .
 13. Never change the meaning to "sound better"
 14. Never skip verification stage for batches > 10 strings
 15. Never modify source file structure (keys, nesting, comments)
-16. Never preserve source-language formatting artifacts that are unnatural in the target language. For CJK targets (Korean, Japanese, Chinese), em dashes (—), title case in headings, and trailing "-ing" participle clauses must be restructured, even when the source uses them. See `resources/anti-ai-patterns.md` rules 13–16.
+16. Never preserve source-language formatting artifacts that are unnatural in the target language. For CJK targets (Korean, Japanese, Chinese), em dashes (—), title case in headings, and trailing "-ing" participle clauses must be restructured, even when the source uses them. See `resources/anti-ai-patterns.md` rules 2 (-ing phrases), 14–15 (em dash, title case), and 25 (CJK typography & fragments).
 17. Never "humanize" by inventing personality. Do not add first person, jokes, opinions, examples, facts, citations, stronger emotion, or messiness unless the source or user explicitly calls for adaptation.
 18. When a voice sample is provided, match observable style traits only: rhythm, diction level, punctuation habits, transitions, and paragraph shape. Preserve source meaning and target-language naturalness above mimicry.
 

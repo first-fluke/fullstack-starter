@@ -7,7 +7,7 @@
             "name": "oma-hook-UserPromptSubmit",
             "type": "command",
             "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'UserPromptSubmit'",
-            "timeout": 18
+            "timeout": 21
           }
         ]
       }
@@ -72,5 +72,6 @@
       "type": "command",
       "command": "'bun' \"$QWEN_PROJECT_DIR/.qwen/hooks/hud.ts\""
     }
-  }
+  },
+  "$version": 3
 }

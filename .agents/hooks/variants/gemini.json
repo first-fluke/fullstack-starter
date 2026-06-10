@@ -21,6 +21,11 @@
         "hook": "skill-injector.ts",
         "matcher": "*",
         "timeout": 3000
+      },
+      {
+        "hook": "serena-primer.ts",
+        "matcher": "*",
+        "timeout": 3000
       }
     ],
     "BeforeTool": {

@@ -36,7 +36,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 - Review history and retry/remediation status when loops fail
 
 ### Dependencies
-- `.agents/oma-config.yaml`, `.codex/agents/*.toml`, `.gemini/agents/*.md`, or fallback `oh-my-ag agent:spawn`
+- `.agents/oma-config.yaml`, `.codex/agents/*.toml`, `.gemini/agents/*.md`, or fallback `oma agent:spawn`
 - Memory provider config, subagent prompt template, scripts, task templates, verify script, and session metrics
 
 ### Control-flow features
@@ -86,7 +86,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 | Compute exposed skill set | `SELECT` | intersection of domain tags and installed skills |
 | Select dispatch path | `SELECT` | Native vs fallback |
 | Write session state | `WRITE` | task board and memory files |
-| Spawn agents | `CALL_TOOL` | native CLI or `oh-my-ag agent:spawn` |
+| Spawn agents | `CALL_TOOL` | native CLI or `oma agent:spawn` |
 | Poll progress | `READ` | progress/result files |
 | Run verification | `CALL_TOOL` | `oma verify`, tests, QA |
 | Update retry state | `UPDATE_STATE` | loop counters and CD metrics |
@@ -124,7 +124,7 @@ When native runtime dispatch is available, prefer the runtime-specific native pa
 ### Guardrails
 1. Orchestrate per-agent dispatch from the project configuration before spawning any agent.
 2. If `target_vendor === current_runtime_vendor` and the runtime has a verified native path, use native dispatch.
-3. Otherwise fall back to `oh-my-ag agent:spawn`.
+3. Otherwise fall back to `oma agent:spawn`.
 4. Never exceed the configured parallelism or retry limits.
 5. Keep session state, task-board state, progress files, and result files aligned throughout the run.
 6. Domain gating must be soft: prefer a narrower `exposed_skill_set`, but fall back to flat exposure when classification confidence is low rather than starving a task of a required specialist.

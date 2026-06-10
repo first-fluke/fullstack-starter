@@ -115,9 +115,9 @@ Output: /path/to/document.md
 If standard conversion produces empty or garbled output:
 
 1. Inform the user the PDF appears to be scanned
-2. Guide them to start the hybrid server:
+2. Guide them to start the hybrid server (it is a console script of the `[hybrid]` extra — the bare package name does not exist on PyPI; first run downloads a large OCR stack):
    ```bash
-   uvx opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "en"
+   uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "en"
    ```
 3. Re-run conversion with hybrid:
    ```bash

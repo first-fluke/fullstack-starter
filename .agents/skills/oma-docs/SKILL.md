@@ -40,7 +40,7 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 - Exit code 0 if clean, 1 if any broken refs found.
 
 **sync mode**:
-- Interactive per-doc patch proposals with `[y] apply [n] skip [d] diff [s] full proposal` prompts.
+- Per-doc patch proposals drafted by the host LLM from the CLI's candidate-doc list, confirmed per doc (`[y] apply [n] skip [d] diff [s] full proposal` style).
 - Docs modified only on explicit user approval; `doc-refs.json` regenerated after applies.
 
 ### Dependencies
@@ -55,8 +55,8 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 
 ### Control-flow features
 - Mode is selected from the first argument: `verify` or `sync`.
-- verify: extract → resolve → report (deterministic; LLM used only in reporter summary, gracefully skipped when unavailable).
-- sync: git diff → reverse lookup → LLM proposals → interactive accept/reject.
+- verify: extract → resolve → report (fully deterministic CLI; host LLM adds narrative summary on top of the JSON/markdown output).
+- sync: git diff → reverse lookup → candidate list (CLI) → host-LLM patch proposals → interactive accept/reject.
 - Branches on `--json`, `--report-file`, LLM availability, and network reachability.
 - Never blocks workflow completion in v1 (warn-only hook policy).
 
@@ -84,8 +84,8 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 
 ### Failure and recovery
 - Extractor parse error on a single doc: skip doc + warn, continue with remaining docs.
-- Resolver network timeout on URL refs: mark as `verify-skipped: unreachable`, continue.
-- LLM token limit exceeded: fall back to per-doc batching; if still exceeded, fall back to raw JSON.
+- lychee unavailable or URL check incomplete: print install hint, skip URL checking, continue (core check is unaffected).
+- Host-LLM context limit exceeded while drafting patches: process candidate docs in smaller batches.
 - `oma docs` CLI not found: skip with installation hint (workflow hook: skip silently).
 - `doc-refs.json` write failure: abort and report the write error; do not emit partial index.
 
@@ -105,7 +105,7 @@ Detect broken references in `docs/**/*.md` (verify mode) and propose LLM-generat
 | Build reverse index | `INFER` | `sync-propose.ts`: in-memory map from `doc-refs.json` |
 | Match diff to candidate docs | `RESOLVE` | `sync-propose.ts`: git diff + reverse lookup |
 | Redact secrets from diff | `VALIDATE` | Exclude `.env*`, `*.pem`, `*.key`, `id_rsa*`; sanitize content |
-| Generate patch proposals | `CALL_TOOL` | `sync-propose.ts` + `llm.ts`: per-doc LLM calls |
+| Generate patch proposals | `INFER` | Host LLM drafts patches from `sync-propose.ts` candidate output (no CLI LLM call) |
 | Render drift report | `RENDER` | `reporter.ts`: markdown (default), JSON (`--json`), file (`--report-file`) |
 | Apply approved patches | `WRITE` | `git apply` on user-confirmed patches only |
 | Notify hook summary | `NOTIFY` | 1-3 line stdout summary for workflow hooks |
@@ -175,7 +175,8 @@ oma docs sync
 oma docs sync HEAD~5..HEAD
 oma docs sync main..feature-branch
 
-# Per-doc prompt: [y] apply  [n] skip  [d] show diff  [s] show full proposal
+# The CLI emits the candidate-doc list; the host LLM drafts patches and
+# confirms per doc ([y] apply / [n] skip / [d] diff / [s] full proposal).
 # Sync regenerates docs/generated/doc-refs.json after applying any patches.
 ```
 
@@ -193,8 +194,8 @@ oma docs verify --json
 | `LOCAL_FS` read | `docs/**/*.md` (extractor input), `docs/generated/doc-refs.json` (index), `.env.example`, `package.json`, `.agents/oma-config.yaml` |
 | `LOCAL_FS` write | `docs/generated/doc-refs.json` (regenerated each verify run), approved sync patches |
 | `CODEBASE` read-only | Existence checks for file/cli/script/env/config refs; git diff intake |
-| `PROCESS` | `git diff`, `git apply`, `which`, HTTP HEAD requests |
-| `NETWORK` | URL ref HEAD requests (external hosts only; internal hosts skipped) |
+| `PROCESS` | `git diff`, `git apply`, `which`, background `lychee` spawn |
+| `NETWORK` | URL checking delegated to `lychee` (no internal HEAD fallback; see Guardrail 6) |
 
 ### Preconditions
 - `docs/` directory exists at repo root.
@@ -216,8 +217,8 @@ oma docs verify --json
 5. **Secret-bearing files excluded from sync output**: `.env*`, `*.pem`, `*.key`, `id_rsa*`, and gitignored files never appear in candidate `changedFiles` lists. Host LLM never sees secret file paths.
 6. **URL link checking delegated to lychee**: when `docs.check_urls=true` (default), URL refs are checked by `lychee` running in the background; results land in `docs/generated/url-drift.json`. If `lychee` is missing, an install hint is printed and URL checking is skipped (no internal HEAD fallback).
 7. **No direct LLM API calls from the CLI**: the CLI never imports vendor SDKs, never reads API keys, never makes outbound LLM requests. All synthesis, patch drafting, and natural-language framing is the host LLM's responsibility (mirrors `oma-scholar`'s pattern). This makes `oma-docs` vendor-agnostic: works identically under Claude Code / Codex / Gemini / Qwen / Antigravity.
-7. **Hook is warn-only in v1**: broken refs never block workflow completion; `docs.auto_verify: false` by default (explicit opt-in required).
-8. **Escape hatch respected**: `<!-- oma-docs:ignore-start -->` / `<!-- oma-docs:ignore-end -->` blocks and frontmatter `oma-docs: skip` are honored; no ref extraction from ignored regions.
+8. **Hook is warn-only in v1**: broken refs never block workflow completion; `docs.auto_verify: false` by default (explicit opt-in required).
+9. **Escape hatch respected**: `<!-- oma-docs:ignore-start -->` / `<!-- oma-docs:ignore-end -->` blocks and frontmatter `oma-docs: skip` are honored; no ref extraction from ignored regions.
 
 ### v1 scope note
 v1 covers `verify` and `sync` (broken-only classification, L2 ref extraction). The following are explicitly deferred to v2: `create` mode (generate missing docs), multilingual sync (deeper `oma-translator` integration), L3 symbol-level extraction (Tree-sitter/LSP), GitHub Action wrapper, `block` hook mode.

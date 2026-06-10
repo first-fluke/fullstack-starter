@@ -135,6 +135,13 @@ test: {test_framework}
 source: detected
 detected_from:
   - {manifest_file}
+verify:                          # consumed by `oma verify backend` (see _shared/core/stack-verify.schema.json)
+  detect: {manifest_file}        # e.g. package.json, pyproject.toml
+  syntax:
+    cmd: "{syntax_check_cmd}"    # e.g. bunx tsc --noEmit
+  tests:
+    cmd: "{test_cmd}"            # e.g. bun test
+    skip_if_missing: "{optional_binary}"
 ```
 
 #### tech-stack.md
@@ -185,6 +192,14 @@ test: XCTest
 source: detected
 detected_from:
   - {manifest_file}          # e.g. Package.swift
+verify:                      # consumed by `oma verify mobile` (see _shared/core/stack-verify.schema.json)
+  detect: Package.swift
+  syntax:
+    cmd: "swift build"
+    skip_if_missing: "swift"
+  tests:
+    cmd: "swift test"
+    skip_if_missing: "swift"
 ```
 
 #### tech-stack.md
@@ -221,6 +236,7 @@ Confirm generated files meet requirements.
 
 ### Backend checks
 - [ ] `stack.yaml` has `language`, `framework`, `orm`, `validation` fields
+- [ ] `stack.yaml` has a `verify:` block with runnable `syntax.cmd` and `tests.cmd` (otherwise `oma verify backend` cannot dispatch)
 - [ ] `snippets.md` contains all 8 mandatory patterns
 - [ ] `tech-stack.md` contains all 6 mandatory sections
 - [ ] `api-template` file uses the correct language extension
@@ -228,6 +244,7 @@ Confirm generated files meet requirements.
 
 ### Mobile (Swift) checks
 - [ ] `stack.yaml` has `language`, `api_generator`, `api_spec`, and `structure` fields populated with project-specific values (not variant defaults)
+- [ ] `stack.yaml` has a `verify:` block with runnable `syntax.cmd` and `tests.cmd` (otherwise `oma verify mobile` cannot dispatch)
 - [ ] `snippets.md` includes the generator configuration snippet (`openapi-generator-config.yaml`) and at least one snippet that uses the generated `Client` via `Operations.*`
 - [ ] `api-template.swift` uses the generated client — not hand-rolled `URLSession` request construction
 - [ ] `tech-stack.md` documents where `api_spec` originates and how it syncs from the backend producer

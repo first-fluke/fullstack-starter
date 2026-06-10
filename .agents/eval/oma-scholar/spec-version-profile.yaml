@@ -1,8 +1,0 @@
-id: spec-version-profile
-skill: oma-scholar
-domain: research
-prompt: "Which sidecar spec version and profile should a brand-new .knows.yaml target?"
-checker:
-  type: judge
-  rubric: "The answer states spec v0.9.0 and profile paper@1 (subject_ref art:paper is a plus). FAIL if it gives a different version/profile or is vague."
-weight: 1

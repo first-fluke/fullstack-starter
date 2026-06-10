@@ -1,0 +1,14 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "commandcode",
+  "hookDir": ".commandcode/hooks",
+  "settingsFile": ".commandcode/settings.json",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "events": {
+    "Stop": {
+      "hook": "persistent-mode.ts",
+      "timeout": 5
+    }
+  }
+}

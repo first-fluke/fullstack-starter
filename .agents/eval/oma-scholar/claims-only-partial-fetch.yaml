@@ -1,8 +1,0 @@
-id: claims-only-partial-fetch
-skill: oma-scholar
-domain: research
-prompt: "I only need the claims of the sidecar knows:generated/reconvla/1.0.0, token-efficiently. How?"
-checker:
-  type: judge
-  rubric: "The answer uses oma-scholar's PARTIAL fetch with the SINGULAR section param (section=statements) to retrieve only the claims (e.g. `oma scholar get --section statements ...`), rather than fetching the full sidecar. Mentioning the ~700-token / claims-only efficiency is a plus. FAIL if it suggests fetching the whole PDF/sidecar or uses a wrong/plural param."
-weight: 1

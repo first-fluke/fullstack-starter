@@ -33,7 +33,7 @@ poe format:check   # Ruff format check
 # Flutter (in apps/mobile)
 flutter analyze
 
-# Terraform (in apps/infra)
+# Terraform (in apps/infra/gcp or apps/infra/aws)
 terraform fmt -check -recursive
 ```
 
@@ -220,7 +220,7 @@ GitHub Actions runs linting on every PR:
 
 - name: Check Terraform format
   run: |
-    cd apps/infra
+    cd apps/infra/gcp
     terraform fmt -check -recursive
 ```
 

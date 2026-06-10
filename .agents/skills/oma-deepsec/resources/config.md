@@ -121,9 +121,9 @@ A single plugin can fill any subset. For details see https://github.com/vercel-l
 
 | Backend | Default | Used by |
 |---|---|---|
-| `claude` (default) | `claude-opus-4-7` | `process`, `revalidate` |
+| `codex` (default unless `defaultAgent` pins `claude`) | `gpt-5.5` | `process`, `revalidate` |
+| `claude` | `claude-opus-4-8` | `process`, `revalidate` |
 | `claude` (triage) | `claude-sonnet-4-6` | `triage` |
-| `codex` | `gpt-5.5` | `process`, `revalidate` |
 
 CLI selection:
 

@@ -21,7 +21,7 @@ output:
 # kordoc supports more formats, but this skill only covers the Korean word
 # processor family. Route other inputs to the appropriate skill:
 # - .pdf  -> oma-pdf
-# - .xlsx / .docx -> future oma-docs (currently: manual `bunx kordoc ...`)
+# - .xlsx / .docx -> out of scope (run `bunx kordoc ...` manually; oma-docs is the doc-drift skill, not a converter)
 supported_formats:
   - hwp
   - hwpx

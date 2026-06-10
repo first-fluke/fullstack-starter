@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
   - Use memory tools (write/edit) to record planning results.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - Do NOT use raw file reads or grep as substitutes.
 
 ---
@@ -77,7 +77,7 @@ Also search `docs/plans/work/` for related past or in-progress plans, and `docs/
 
 ## Step 3: Assess Complexity
 
-Use `_shared/core/difficulty-guide.md` to classify:
+Use `.agents/skills/_shared/core/difficulty-guide.md` to classify:
 
 - **Simple** → no plan artifact needed; execute directly via `/work`.
 - **Medium** → produce both JSON and a lightweight markdown tracker (skip Step 4 API contracts if not cross-boundary).
@@ -92,7 +92,7 @@ Report scope assessment to the user. Get confirmation before proceeding.
 // turbo
 If the plan involves cross-boundary work (frontend ↔ backend, service ↔ service):
 
-1. Design API contracts using `_shared/core/api-contracts/template.md`. Per endpoint:
+1. Design API contracts using `.agents/skills/_shared/core/api-contracts/template.md`. Per endpoint:
    - Method, path, request/response schemas
    - Auth requirements, error responses
 2. Save to `.agents/skills/_shared/core/api-contracts/{contract-name}.md`.

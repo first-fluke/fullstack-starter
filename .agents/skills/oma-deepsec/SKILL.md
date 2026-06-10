@@ -50,7 +50,7 @@ Operate Vercel's `deepsec` security scanner inside a target repository safely an
 - `target_repo_root`: absolute path of the codebase to scan (parent of `.deepsec/`).
 - `intent`: one of `setup` | `scan` | `pr-review` | `matchers` | `triage` | `config` | `troubleshoot`.
 - `credential_mode`: `ai-gateway-key` | `vercel-oidc` | `direct-anthropic` | `direct-openai` | `subscription`.
-- `agent_choice`: `claude` (default `claude-opus-4-7`) or `codex` (default `gpt-5.5`). Asked once before the first paid call if not already provided.
+- `agent_choice`: `codex` (upstream default; model `gpt-5.5`) or `claude` (model `claude-opus-4-8`). Asked once before the first paid call if not already provided.
 - `severity_floor`: lowest severity worth surfacing (typically `HIGH`).
 - Optional: existing `.deepsec/data/<id>/`, `deepsec.config.ts`, custom matchers, CI provider.
 
@@ -85,7 +85,7 @@ Operate Vercel's `deepsec` security scanner inside a target repository safely an
 2. Resolve `intent` from the user prompt; if ambiguous (e.g. "scan this repo"), default to `setup` then `scan` (calibration mode).
 3. Estimate scale: count source files (rough `rg --files | wc -l` excluding `node_modules`, `.git`, `dist`) to forecast cost before any AI pass.
 4. Check for an AI credential in `.env.local` or shell env; if none, route to credential setup before any `process` / `revalidate` / `triage` call.
-5. **Confirm agent choice with the user before the first paid call.** If `agent_choice` is not already in the prompt and `deepsec.config.ts` does not pin a `defaultAgent`, ask whether to run `claude` (`claude-opus-4-7`, the default; strongest reasoning, most expensive) or `codex` (`gpt-5.5`; runs in a strict sandbox, cheaper, grep-heavy). The two backends can be mixed via `--reinvestigate` and findings dedupe across agents. Skip the question if the user has already named an agent or has explicitly delegated the decision ("just pick reasonable defaults").
+5. **Confirm agent choice with the user before the first paid call.** If `agent_choice` is not already in the prompt and `deepsec.config.ts` does not pin a `defaultAgent`, ask whether to run `codex` (`gpt-5.5`, the upstream default; runs in a strict sandbox, cheaper, grep-heavy) or `claude` (`claude-opus-4-8`; strongest reasoning, most expensive). The two backends can be mixed via `--reinvestigate` and findings dedupe across agents. Skip the question if the user has already named an agent or has explicitly delegated the decision ("just pick reasonable defaults").
 
 ### Scenes
 1. **PREPARE**: Resolve intent, repo root, credential, budget cap, severity floor, agent choice. Refuse to run blind on a repo of unknown scale.

@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
   - Use memory tools (read/write/edit) for progress tracking.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
 - **Read the oma-coordination skill BEFORE starting.** Read `.agents/skills/oma-coordination/SKILL.md` and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
@@ -189,6 +189,7 @@ oma agent:spawn qa-agent "Execute Phase 3 Verification. Step 6: Alignment Review
 
 1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
 2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
+   - **Claude-native path**: the Agent tool returns synchronously and the `qa-reviewer` subagent writes `result-qa[-{sessionId}].md` under `.agents/results/` — check that file instead of polling.
 3. Use memory edit tool to record QA results in `session-ultrawork.md`
 
 **Continue polling until QA Agent reports completion.**
@@ -222,7 +223,7 @@ If baseline was measured at Step 5.2:
 
 > **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Gate failure count has reached the configured maximum iterations (default: 5 total VERIFY + REFINE cycles). Do not start another cycle.
-> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
+> 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
 >
 > If neither condition is met, return to Step 5 and continue.
 
@@ -266,6 +267,7 @@ oma agent:spawn debug-agent "Execute Phase 4 Refine. Step 9: Split large files. 
 
 1. Use memory read tool to poll `progress-debug-agent[-{sessionId}].md`
 2. Check for `result-debug-agent[-{sessionId}].md` to confirm completion
+   - **Claude-native path**: the Agent tool returns synchronously and the `debug-investigator` subagent writes `result-debug[-{sessionId}].md` under `.agents/results/` — check that file instead of polling.
 3. Use memory edit tool to record refinement results in `session-ultrawork.md`
 
 **Continue polling until Debug Agent reports completion.**
@@ -312,7 +314,7 @@ If baseline was measured at Step 5.2:
 
 > **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Total REFINE failure count has reached the configured maximum iterations (default: 5 cycles across all phases). Do not start another cycle.
-> 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop. Save current step results before stopping, then report early termination due to quota.
+> 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop. Save current step results before stopping, then report early termination due to quota.
 >
 > If neither condition is met, re-spawn the Debug Agent with specific issues and repeat until GATE passes.
 
@@ -347,6 +349,7 @@ oma agent:spawn qa-agent "Execute Phase 5 Ship. Step 14: Quality Review (lint/co
 
 1. Use memory read tool to poll `progress-qa-agent[-{sessionId}].md`
 2. Check for `result-qa-agent[-{sessionId}].md` to confirm completion
+   - **Claude-native path**: the Agent tool returns synchronously and the `qa-reviewer` subagent writes `result-qa[-{sessionId}].md` under `.agents/results/` — check that file instead of polling.
 3. Use memory edit tool to record final QA results in `session-ultrawork.md`
 
 **Continue polling until QA Agent reports completion.**
@@ -395,7 +398,7 @@ If Quality Score was measured during this session:
 
 ---
 
-## Step 18: Optional Doc Verify Hook
+## Step 18: Optional Doc Verify Hook (post-SHIP; outside the 17-step model)
 
 If `oma-config.yaml` has `docs.auto_verify: true`:
 

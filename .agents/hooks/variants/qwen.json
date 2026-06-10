@@ -18,6 +18,10 @@
       {
         "hook": "skill-injector.ts",
         "timeout": 3
+      },
+      {
+        "hook": "serena-primer.ts",
+        "timeout": 3
       }
     ],
     "PreToolUse": {

@@ -1,6 +1,6 @@
 ---
 name: docs
-description: Documentation drift detection and sync via `oma-docs`. Verify mode finds broken refs in docs/**/*.md, sync mode proposes patches for docs affected by a git diff.
+description: Documentation drift detection and sync via `oma-docs`. Verify mode finds broken refs in all repo markdown (default glob `**/*.md`), sync mode proposes patches for docs affected by a git diff.
 disable-model-invocation: true
 ---
 
@@ -163,7 +163,7 @@ Tell the user:
 
 ```markdown
 ## Docs Verify Report
-- Scope: docs/**/*.md (N docs scanned)
+- Scope: **/*.md repo-wide, or the requested glob (N docs scanned)
 - Broken: file=A cli=B script=C env=D config=E
 - Top fixes:
   1. <file:line> — <description> → <fix>

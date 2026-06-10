@@ -89,3 +89,5 @@ apps/mobile/.packages
 
 # oma docs generated artifacts
 docs/generated/
+
+.agents/backup/

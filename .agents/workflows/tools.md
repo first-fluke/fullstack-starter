@@ -177,11 +177,11 @@ Are you sure you want to continue? (Y/N)
 
 ## Runtime Override Protocol
 
-How other workflows check tool restrictions:
+How other workflows SHOULD check tool restrictions (advisory — no workflow currently automates this check; apply it manually when tool discipline matters):
 
 1. **At workflow start:** Check `read_memory("tool-overrides.md")`
 2. **If override exists:** Apply that setting with priority
-3. **If not present or expired:** Use `mcp.json` settings
+3. **If not present or expired:** Use `.agents/mcp.json` settings
 
 **Note:** If IDE/CLI doesn't directly support `available_tools`,
 tool usage must be self-restricted at the workflow level.

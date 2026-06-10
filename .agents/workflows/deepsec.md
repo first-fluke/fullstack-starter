@@ -72,8 +72,8 @@ Skip this step if **any** of these is true:
 Otherwise ask exactly one question with the trade-off stated:
 
 > deepsec supports two agent backends. Which would you like to use?
-> - **`claude`** (`claude-opus-4-7`): strongest reasoning on auth shapes and cross-file flows. Most expensive.
-> - **`codex`** (`gpt-5.5`): runs in a strict read-only sandbox, fast at grep-heavy investigations. Cheaper.
+> - **`codex`** (`gpt-5.5`, the upstream default): runs in a strict read-only sandbox, fast at grep-heavy investigations. Cheaper.
+> - **`claude`** (`claude-opus-4-8`): strongest reasoning on auth shapes and cross-file flows. Most expensive.
 > Both can be mixed later via `--reinvestigate`; findings dedupe across agents.
 
 Do not also bargain over `--limit`, `--concurrency`, or severity floor; those are handled by the calibration rule in Step 4 and the user-stated severity floor.

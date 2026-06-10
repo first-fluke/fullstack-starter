@@ -38,15 +38,22 @@ Execute by naming the workflow in your prompt. Keywords are auto-detected via ho
 | orchestrate | `orchestrate.md` | Parallel subagents + Review Loop |
 | work | `work.md` | Step-by-step with remediation loop |
 | ultrawork | `ultrawork.md` | 5-Phase Gate Loop (11 reviews) |
+| ralph | `ralph.md` | Persistent loop wrapping ultrawork with an independent judge |
 | plan | `plan.md` | PM task breakdown |
 | brainstorm | `brainstorm.md` | Design-first ideation |
+| architecture | `architecture.md` | Architecture diagnosis, comparison, ADR |
+| design | `design.md` | Design system + DESIGN.md with anti-pattern enforcement |
 | review | `review.md` | QA audit |
 | debug | `debug.md` | Root cause + minimal fix |
 | deepsec | `deepsec.md` | Drive `oma-deepsec` end-to-end (setup / scan / pr-review / matchers / triage) |
 | scm | `scm.md` | SCM + Git operations + Conventional Commits |
 | docs | `docs.md` | Documentation drift verify + sync |
 | recap | `recap.md` | Daily / period AI conversation recap |
+| deepinit | `deepinit.md` | Project harness init (AGENTS.md / ARCHITECTURE.md / docs/) |
+| pdf | `pdf.md` | PDF → Markdown via opendataloader-pdf |
 | video | `video.md` | Brief → script → assets → render-spec → Remotion (oma-video) |
+
+(`tools` and `stack-set` are slash-invoked utilities, intentionally excluded from keyword detection.)
 
 To execute: read and follow `.agents/workflows/{name}.md` step by step.
 
@@ -54,7 +61,7 @@ To execute: read and follow `.agents/workflows/{name}.md` step by step.
 
 Hooks: `UserPromptSubmit` (keyword detection), `PreToolUse`, `Stop` (persistent mode)
 Keywords defined in `.agents/hooks/core/triggers.json` (multi-language).
-Persistent workflows (orchestrate, ultrawork, work) block termination until complete.
+Persistent workflows (orchestrate, ultrawork, work, ralph) block termination until complete.
 Deactivate: say "workflow done".
 
 ## Rules

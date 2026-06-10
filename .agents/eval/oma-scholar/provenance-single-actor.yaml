@@ -1,8 +1,0 @@
-id: provenance-single-actor
-skill: oma-scholar
-domain: research
-prompt: "How is the provenance actor represented in a v0.9.0 sidecar — one actor or a list?"
-checker:
-  type: judge
-  rubric: "The answer states provenance.actor is a SINGLE object (not a provenance.actors array), and its type is one of tool|person|org (never ai/llm/model). FAIL if it says an array of actors or allows an 'ai'/'llm' type."
-weight: 1

@@ -67,7 +67,7 @@ For SCM operations, additionally summarize branch/ahead-behind/conflict state as
 ### Step 2.5: Conflict-risk triage (required for large-scope merges)
 
 Trigger this step when merge scope is large by change footprint, not PR count.
-Read thresholds from `config/cm-config.yaml` `large_merge_thresholds.*` first.
+Read thresholds from `.agents/skills/oma-scm/config/cm-config.yaml` `large_merge_thresholds.*` first.
 If config values are missing, use these defaults:
 - combined changed files >= 150
 - combined additions+deletions >= 3000 lines

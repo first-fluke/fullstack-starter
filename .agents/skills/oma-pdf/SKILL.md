@@ -44,7 +44,7 @@ Convert PDF files into structured Markdown or another requested extraction forma
 
 ### Dependencies
 - `uvx opendataloader-pdf` for standard conversion
-- `uvx opendataloader-pdf-hybrid` for OCR or hybrid conversion
+- `uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid` for OCR or hybrid conversion (the hybrid server is a console script of the `[hybrid]` extra, not a standalone package)
 - `uvx mdformat` for Markdown normalization
 - Local filesystem access to input and output paths
 - Optional OCR runtime via the hybrid server
@@ -80,6 +80,7 @@ Convert PDF files into structured Markdown or another requested extraction forma
 | Failure | Recovery |
 |---------|----------|
 | `uvx` unavailable | Ask user to install `uv` before conversion |
+| `opendataloader-pdf-hybrid` not found | Invoke via `uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid`; the bare package name does not exist on PyPI |
 | Password-protected PDF | Ask for password or unlocked PDF |
 | Garbled output | Retry with tagged structure or hybrid mode |
 | Missing tables | Retry with hybrid mode for complex or borderless tables |
@@ -100,7 +101,7 @@ Convert PDF files into structured Markdown or another requested extraction forma
 | Probe text layer | `READ` | Text preview extraction |
 | Choose conversion strategy | `SELECT` | Standard, tagged, or hybrid mode decision |
 | Run converter | `CALL_TOOL` | `uvx opendataloader-pdf` |
-| Start OCR server | `CALL_TOOL` | `uvx opendataloader-pdf-hybrid` |
+| Start OCR server | `CALL_TOOL` | `uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid` |
 | Write output artifact | `WRITE` | Markdown, text, JSON, or HTML output |
 | Normalize Markdown | `CALL_TOOL` | `uvx mdformat` |
 | Inspect extraction quality | `VALIDATE` | Structure/readability verification |
@@ -120,7 +121,7 @@ uvx mdformat "{output_path}"
 
 For scanned/image-based PDFs, start OCR first and then convert through hybrid mode:
 ```bash
-uvx opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "{languages}"
+uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "{languages}"
 uvx opendataloader-pdf --hybrid docling-fast "{input_path}" --format markdown --output-dir "{output_dir}"
 ```
 

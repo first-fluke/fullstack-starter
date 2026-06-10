@@ -14,14 +14,8 @@
     ],
     "beforeSubmitPrompt": [
       {
-        "hooks": [
-          {
-            "name": "oma-hook-beforeSubmitPrompt",
-            "type": "command",
-            "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'beforeSubmitPrompt'",
-            "timeout": 18
-          }
-        ]
+        "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'beforeSubmitPrompt'",
+        "timeout": 21
       }
     ]
   },

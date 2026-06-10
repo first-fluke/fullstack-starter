@@ -5,7 +5,7 @@
 Cause: Every configured source returned 429, 403, or auth failure.
 
 Recovery steps:
-1. Check that required env keys are set (REDDIT_KEY, X_BEARER_TOKEN, HN_KEY, etc.).
+1. Check paid-source env keys if those sources were requested (X_BEARER_TOKEN, SCRAPECREATORS_API_KEY, PERPLEXITY_API_KEY; GITHUB_TOKEN raises github-issues rate limits). reddit, hn, bluesky, mastodon, and grounding are keyless.
 2. Retry with `--window 90d` to widen the harvest window (more cache-eligible content).
 3. Try `--sources reddit` to isolate a single known-working source.
 4. If all sources are blocked, the run cannot proceed. Report to user:
@@ -20,7 +20,7 @@ Use --sources to restrict to a source you know is accessible.
 Cause: One or more source adapters exceeded the per-request time limit.
 
 Recovery steps:
-1. Reduce result set with `--per-source-limit 50` (default is 200).
+1. Reduce result set with `--per-source-limit 6` (default is 12).
 2. Add `--no-cache` to bypass a stale cache that may be causing retry loops.
 3. Try `--sources hn` or `--sources reddit` to exclude slow sources.
 4. If timeout persists on a single source, open an issue against the source adapter.
@@ -30,9 +30,9 @@ Recovery steps:
 Cause: score + fuse + cluster pipeline produced 0 clusters above the trust threshold.
 
 Recovery steps:
-1. Widen window: `--window 90d`.
-2. Drop operator pack: `--no-operators` (removes topic-narrowing clauses that may exclude all signals).
-3. Lower trust threshold: `--min-trust 0.4` (default is 0.6).
+1. Widen window: re-harvest with `--window 90d`.
+2. Drop operator pack: re-harvest with `--operator-pack none` (removes topic-narrowing clauses that may exclude all signals).
+3. Loosen trust filter on render: `--min-trust external` (levels: `verified` > `community` > `external`).
 4. If zero clusters persist after all three steps, report to user:
 
 ```

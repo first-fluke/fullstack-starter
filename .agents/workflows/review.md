@@ -1,6 +1,6 @@
 ---
 name: review
-description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.1 AA), and code quality review
+description: Full QA review pipeline covering security audit (OWASP Top 10), performance analysis, accessibility check (WCAG 2.2 AA), and code quality review
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code analysis and review.
   - Use memory write tool to record review results.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - Do NOT use raw file reads or grep as substitutes.
 
 ---
@@ -66,7 +66,7 @@ Use MCP tools to check for:
 
 ---
 
-## Step 5: Accessibility Review (WCAG 2.1 AA)
+## Step 5: Accessibility Review (WCAG 2.2 AA)
 
 Check for:
 - Semantic HTML, ARIA labels

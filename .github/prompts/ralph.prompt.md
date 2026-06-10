@@ -1,5 +1,5 @@
 ---
-description: Ralph - persistent self-referential execution loop wrapping ultrawork with independent verifier verification
+description: Ralph - persistent self-referential execution loop wrapping ultrawork with a spawned independent judge
 mode: agent
 ---
 <!-- oma:generated -->

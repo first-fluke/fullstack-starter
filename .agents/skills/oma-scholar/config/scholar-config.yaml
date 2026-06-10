@@ -13,17 +13,18 @@ api:
   timeout_seconds: 30
 
 # Partial-fetch defaults: fields you can request individually
+# (must match `oma scholar get --section` enum; methods/provenance are NOT
+# available via partial fetch — fetch the full sidecar for those)
 partial_fields:
   available:
     - statements
     - evidence
     - relations
     - artifacts
-    - methods
-    - provenance
+    - citation
   default_for_summary:
     - statements
-    - provenance
+    - citation
 
 # OpenAlex metadata enrichment (optional)
 # Used during Generate mode to backfill DOI/venue/year when missing

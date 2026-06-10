@@ -35,8 +35,10 @@ uvx opendataloader-pdf "{input_path}" --format markdown --output-dir "{output_di
 
 ### If scanned/image-based PDF (requires hybrid server)
 ```bash
-# Start hybrid server (if not already running)
-uvx opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "{languages}"
+# Start hybrid server (if not already running).
+# The server is a console script of the [hybrid] extra — bare `uvx opendataloader-pdf-hybrid` fails (no such PyPI package).
+# First run downloads a large OCR stack (torch, easyocr, docling); warn the user before starting.
+uvx --from "opendataloader-pdf[hybrid]" opendataloader-pdf-hybrid --port 5002 --force-ocr --ocr-lang "{languages}"
 
 # Convert
 uvx opendataloader-pdf --hybrid docling-fast "{input_path}" --format markdown --output-dir "{output_dir}"
@@ -80,7 +82,7 @@ Tell the user:
 | Error | Recovery |
 |-------|----------|
 | `uvx` not found | Ask user to install `uv`: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| PDF password protected | Ask user for password; opendataloader-pdf does not support encrypted PDFs |
+| PDF password protected | Ask user for the password, then retry with `-p "{password}"` (`opendataloader-pdf --password`) |
 | Hybrid server not running | Guide user to start it, or fall back to standard mode with quality warning |
 | Out of memory on large PDF | Process in smaller page ranges |
 | Network error (hybrid mode) | Check server port, retry, or fall back to standard mode |

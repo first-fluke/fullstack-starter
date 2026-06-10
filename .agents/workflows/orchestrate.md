@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Automated CLI-based parallel agent execution that spawns subagents via Gemini CLI, coordinates through MCP Memory, monitors progress, and runs verification
+description: Automated parallel agent execution that spawns CLI subagents via native dispatch or `oma agent:spawn`, coordinates through MCP Memory, monitors progress, and runs verification
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ disable-model-invocation: true
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
   - Use memory tools (read/write/edit) for progress tracking.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `mcp.json`
+  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface.
 - **Read required documents BEFORE starting.**
 
@@ -50,20 +50,20 @@ Look for a plan file:
 
 // turbo
 
-1. 설정 파일 로드:
-   - `.agents/oma-config.yaml` (언어, CLI 매핑)
-2. CLI 매핑 현황 표시:
+1. Load configuration:
+   - `.agents/oma-config.yaml` (`language`, `model_preset`, and per-agent `agents:` overrides)
+2. Display the resolved agent-to-model mapping:
 
    ```
-   CLI 에이전트 매핑
-   ┌──────────┬─────────┐
-   │ Agent    │ CLI     │
-   ├──────────┼─────────┤
-   │ frontend │ codex   │
-   │ backend  │ codex   │
-   │ mobile   │ claude  │
-   │ pm       │ claude  │
-   └──────────┴─────────┘
+   Resolved agent models (model_preset + overrides)
+   ┌──────────┬───────────────────┐
+   │ Agent    │ Vendor / Model    │
+   ├──────────┼───────────────────┤
+   │ frontend │ (resolved value)  │
+   │ backend  │ (resolved value)  │
+   │ mobile   │ (resolved value)  │
+   │ pm       │ (resolved value)  │
+   └──────────┴───────────────────┘
    ```
 
 3. Generate session ID (format: `session-YYYYMMDD-HHMMSS`).
@@ -180,7 +180,7 @@ bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
 
   > **Review Loop termination conditions** (OR, whichever fires first wins):
   > 1. Retry count for this agent has reached the configured maximum (default: 2 retries). Do not start another retry cycle.
-  > 2. Session cost cap exceeded: call `checkCap(sessionId, loadQuotaCap())` from `cli/io/session-cost.ts`. If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
+  > 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
   >
   > If neither condition is met, re-spawn the agent with error context and increment the retry counter.
 

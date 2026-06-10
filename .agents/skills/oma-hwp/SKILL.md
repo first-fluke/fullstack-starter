@@ -26,7 +26,7 @@ Convert Korean HWP-family documents into readable Markdown or structured JSON wh
 
 ### When NOT to use
 - PDF files -> use `oma-pdf` (OCR + Tagged PDF specialization)
-- XLSX / DOCX files -> currently out of scope (may be covered by a future `oma-docs`)
+- XLSX / DOCX files -> out of scope; run `bunx kordoc` directly if needed (note: `oma-docs` is the documentation-drift skill, not a converter)
 - Generating or editing HWP documents -> out of scope
 - Already-text files -> use Read tool directly
 
@@ -86,6 +86,7 @@ Convert Korean HWP-family documents into readable Markdown or structured JSON wh
 | Empty Markdown output | Treat as possible scanned-image content and recommend OCR outside this skill |
 | Complex merged tables | Accept flattened Markdown or HTML fallback as best effort |
 | Stale kordoc cache | Use `bunx kordoc@latest` or configured pinned version |
+| `Cannot find module "turndown"` from `flatten-tables.ts` | Run `bun install` in `.agents/skills/oma-hwp/resources/` (its `node_modules` is gitignored and absent on fresh clones) |
 
 ### Exit
 - Success: output file exists and structure is readable after post-processing.
@@ -114,7 +115,8 @@ Convert Korean HWP-family documents into readable Markdown or structured JSON wh
 ### Canonical command path
 ```bash
 bunx kordoc@latest "{input_path}" -o "{output_path}"
-node ".agents/skills/oma-hwp/resources/flatten-tables.ts" "{output_path}"
+# fresh clone: run `bun install` in .agents/skills/oma-hwp/resources/ first (node_modules is gitignored)
+bun ".agents/skills/oma-hwp/resources/flatten-tables.ts" "{output_path}"
 ```
 
 For batch conversion, use an explicit output directory:

@@ -27,20 +27,32 @@ Korean and other-locale intent routing is handled by the LLM reading the user's 
 
 ## Flag Override Examples
 
-```
+Intent is forced by passing `--intent` to `score` and `render` (there is no single
+`research` wrapper command — the pipeline is `harvest | score | fuse | cluster | render`).
+
+```bash
 # Force pain intent regardless of topic wording
-oma market research "Slack notifications" --intent pain
+oma market harvest "slack notifications (broken OR slow OR painful)" --operator-pack pain \
+  | oma market score --intent pain \
+  | oma market fuse | oma market cluster \
+  | oma market render --intent pain --topic "Slack notifications"
 
-# Force competitor intent; vs-entity triggers fan-out harvest
-oma market research "project management tools" --vs Notion --vs Asana
+# Force competitor intent; --vs entity triggers fan-out harvest
+oma market harvest "project management tools" --operator-pack competitor --vs Notion \
+  | oma market score --intent competitor \
+  | oma market fuse | oma market cluster \
+  | oma market render --intent competitor --vs Notion --topic "project management tools"
 
-# Discovery scan without operators
-oma market research "async comms" --intent discovery --no-operators
+# Discovery scan without query operators
+oma market harvest "async comms" --operator-pack none \
+  | oma market score --intent discovery \
+  | oma market fuse | oma market cluster \
+  | oma market render --intent discovery --topic "async comms"
 ```
 
 ## Notes
 
 - Keyword matching is case-insensitive.
 - Stemming is NOT applied; add both `migrate` and `migrating` explicitly.
-- Domain-specific overrides can be added to `oma-config.yaml` under `market_research.intent_overrides`.
+- Domain-specific overrides via `oma-config.yaml` (`market_research.intent_overrides`) are planned but not yet implemented; use the explicit `--intent` flag instead.
 - Discovery and competitor intents are NOT triggered by keyword scan alone when confidence < 2 points; require explicit flag or `--vs` in that case.

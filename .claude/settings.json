@@ -7,7 +7,7 @@
             "name": "oma-hook-UserPromptSubmit",
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'UserPromptSubmit'",
-            "timeout": 18
+            "timeout": 21
           }
         ]
       }

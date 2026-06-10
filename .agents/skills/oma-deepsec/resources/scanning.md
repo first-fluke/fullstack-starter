@@ -28,7 +28,7 @@ bunx deepsec process --limit 50 --concurrency 5       # upstream-recommended cal
 
 The calibration `process` is a budget-capped AI pass. Read the per-batch cost the CLI prints, multiply by `(total_files / 50)` to extrapolate. **Get the user's explicit go-ahead before launching the unbounded `process`.**
 
-## Cost guide (Claude Opus, default settings)
+## Cost guide (`--agent claude`, Claude Opus — the most expensive backend)
 
 | Files | Approx cost | Approx wall time |
 |---|---|---|
@@ -44,15 +44,15 @@ Costs swing 2–3× based on file complexity. Codex is cheaper per call; Opus is
 bunx deepsec process --concurrency 5
 ```
 
-Defaults: `--agent claude` (`claude-opus-4-7`), `--batch-size 5`, `--concurrency 5` ⇒ 25 files in flight at peak. Files are claimed atomically via `lockedByRunId`; multiple workers can run in parallel without stepping on each other.
+Defaults: `--agent codex` (`gpt-5.5`) unless `defaultAgent` in `deepsec.config.ts` pins otherwise; `--agent claude` uses `claude-opus-4-8`. `--batch-size 5`; `--concurrency` defaults to cores−1 (the cost guide above assumes `--concurrency 5` ⇒ 25 files in flight at peak). Files are claimed atomically via `lockedByRunId`; multiple workers can run in parallel without stepping on each other.
 
-For a cheaper backend:
+For the precision (most expensive) backend:
 
 ```bash
-bunx deepsec process --agent codex --model gpt-5.5
+bunx deepsec process --agent claude
 ```
 
-Codex runs in a strict read-only sandbox and is fast at grep-heavy investigations. Backends mix freely within a project: re-process unconvincing findings with the other agent, and findings dedupe across agents.
+Codex (the default) runs in a strict read-only sandbox and is fast at grep-heavy investigations. Backends mix freely within a project: re-process unconvincing findings with the other agent, and findings dedupe across agents.
 
 ### Resume after interruption
 

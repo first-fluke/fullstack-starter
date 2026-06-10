@@ -7,7 +7,7 @@
             "name": "oma-hook-BeforeAgent",
             "type": "command",
             "command": "\"$GEMINI_PROJECT_DIR/.gemini/hooks/oma-hook.sh\" --vendor 'gemini' --event 'BeforeAgent' --matcher '*'",
-            "timeout": 13005
+            "timeout": 16005
           }
         ],
         "matcher": "*"

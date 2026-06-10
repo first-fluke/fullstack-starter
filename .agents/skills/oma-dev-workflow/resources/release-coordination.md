@@ -31,11 +31,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
+      - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
-          package-name: oh-my-agent
 ```
 
 ## Mise Tasks for Release Management
@@ -53,10 +52,10 @@ run = '''
 echo "Checking release status..."
 echo ""
 echo "Open release PRs:"
-bunx gh pr list --label "autorelease: pending" --state open
+gh pr list --label "autorelease: pending" --state open
 echo ""
 echo "Latest releases:"
-bunx gh release list --limit 5
+gh release list --limit 5
 '''
 
 [tasks.release:manifest]
@@ -134,7 +133,7 @@ Automatically creates a PR like:
 ### 4. Review and Merge
 ```bash
 # Check the release PR
-bunx gh pr list --label "autorelease: pending"
+gh pr list --label "autorelease: pending"
 
 # Review changes
 git fetch origin
@@ -150,11 +149,11 @@ description = "Verify latest release"
 run = '''
 #!/usr/bin/env bash
 echo "Latest release:"
-bunx gh release view --json tagName,name,createdAt
+gh release view --json tagName,name,createdAt
 
 echo ""
 echo "Assets:"
-bunx gh release view --json assets
+gh release view --json assets
 '''
 ```
 
@@ -220,11 +219,11 @@ ls -la .release-please*.json 2>/dev/null || echo "  Config files not found"
 
 echo ""
 echo "3. GitHub Actions status:"
-bunx gh run list --workflow=release-please.yml --limit 5 2>/dev/null || echo "  No runs found"
+gh run list --workflow=release-please.yml --limit 5 2>/dev/null || echo "  No runs found"
 
 echo ""
 echo "4. Open release PRs:"
-bunx gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release PRs"
+gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release PRs"
 '''
 ```
 
@@ -234,6 +233,7 @@ bunx gh pr list --label "autorelease: pending" 2>/dev/null || echo "  No release
 2. **Release Please config** (`.release-please-config.json`)
 3. **Release Please manifest** (`.release-please-manifest.json`)
 4. **Conventional commits** (already configured via commitlint)
+5. **GitHub CLI** (`gh`) installed for the release tasks — `brew install gh` or `mise use gh` (it is a Go binary, not an npm package; `bunx gh` resolves an unrelated deprecated package)
 
 ## Benefits
 
