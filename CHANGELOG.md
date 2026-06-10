@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.20.0](https://github.com/first-fluke/fullstack-starter/compare/v2.19.0...v2.20.0) (2026-06-10)
+
+
+### Features
+
+* **infra:** add oracle cloud terraform stack ([e5d7cc1](https://github.com/first-fluke/fullstack-starter/commit/e5d7cc1a3530d525c9c990c08fe6cb2966f778e7))
+
 ## [2.19.0](https://github.com/first-fluke/fullstack-starter/compare/v2.18.0...v2.19.0) (2026-06-10)
 
 
