@@ -86,3 +86,6 @@ apps/mobile/.packages
 
 # Migration backup (local only — do not commit)
 .migration-backup/
+
+# oma docs generated artifacts
+docs/generated/

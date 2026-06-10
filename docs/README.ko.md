@@ -310,15 +310,15 @@ mise tasks --all
 </details>
 
 <details>
-<summary>Infrastructure (apps/infra)</summary>
+<summary>Infrastructure (apps/infra/gcp, apps/infra/aws)</summary>
 
 | 명령어 | 설명 |
 |--------|------|
-| `mise //apps/infra:init` | Terraform 초기화 |
-| `mise //apps/infra:plan` | 변경사항 미리보기 |
-| `mise //apps/infra:apply` | 변경사항 적용 |
-| `mise //apps/infra:plan:prod` | 프로덕션 미리보기 |
-| `mise //apps/infra:apply:prod` | 프로덕션 적용 |
+| `mise //apps/infra/gcp:init` | Terraform 초기화 |
+| `mise //apps/infra/gcp:plan` | 변경사항 미리보기 |
+| `mise //apps/infra/gcp:apply` | 변경사항 적용 |
+| `mise //apps/infra/gcp:plan:prod` | 프로덕션 미리보기 |
+| `mise //apps/infra/gcp:apply:prod` | 프로덕션 적용 |
 
 </details>
 
@@ -392,7 +392,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # Infra
-cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
+cp apps/infra/gcp/terraform.tfvars.example apps/infra/gcp/terraform.tfvars
 ```
 
 ### GitHub Actions 시크릿

@@ -310,15 +310,15 @@ mise tasks --all
 </details>
 
 <details>
-<summary>基础设施 (apps/infra)</summary>
+<summary>基础设施 (apps/infra/gcp, apps/infra/aws)</summary>
 
 | 命令 | 说明 |
 |---------|-------------|
-| `mise //apps/infra:init` | 初始化 Terraform |
-| `mise //apps/infra:plan` | 预览变更 |
-| `mise //apps/infra:apply` | 应用变更 |
-| `mise //apps/infra:plan:prod` | 预览生产环境 |
-| `mise //apps/infra:apply:prod` | 应用生产环境 |
+| `mise //apps/infra/gcp:init` | 初始化 Terraform |
+| `mise //apps/infra/gcp:plan` | 预览变更 |
+| `mise //apps/infra/gcp:apply` | 应用变更 |
+| `mise //apps/infra/gcp:plan:prod` | 预览生产环境 |
+| `mise //apps/infra/gcp:apply:prod` | 应用生产环境 |
 
 </details>
 
@@ -392,7 +392,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # Infra
-cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
+cp apps/infra/gcp/terraform.tfvars.example apps/infra/gcp/terraform.tfvars
 ```
 
 ### GitHub Actions Secrets

@@ -310,15 +310,15 @@ mise tasks --all
 </details>
 
 <details>
-<summary>インフラストラクチャ (apps/infra)</summary>
+<summary>インフラストラクチャ (apps/infra/gcp, apps/infra/aws)</summary>
 
 | コマンド | 説明 |
 |---------|-------------|
-| `mise //apps/infra:init` | Terraform を初期化 |
-| `mise //apps/infra:plan` | 変更をプレビュー |
-| `mise //apps/infra:apply` | 変更を適用 |
-| `mise //apps/infra:plan:prod` | プロダクションをプレビュー |
-| `mise //apps/infra:apply:prod` | プロダクションを適用 |
+| `mise //apps/infra/gcp:init` | Terraform を初期化 |
+| `mise //apps/infra/gcp:plan` | 変更をプレビュー |
+| `mise //apps/infra/gcp:apply` | 変更を適用 |
+| `mise //apps/infra/gcp:plan:prod` | プロダクションをプレビュー |
+| `mise //apps/infra/gcp:apply:prod` | プロダクションを適用 |
 
 </details>
 
@@ -392,7 +392,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # Infra
-cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
+cp apps/infra/gcp/terraform.tfvars.example apps/infra/gcp/terraform.tfvars
 ```
 
 ### GitHub Actions Secrets

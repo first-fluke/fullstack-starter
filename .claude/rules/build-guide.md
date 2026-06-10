@@ -177,23 +177,23 @@ bundle exec fastlane ios build           # Build iOS (no codesign)
 bundle exec fastlane ios testflight_deploy  # Deploy to TestFlight
 ```
 
-### Infrastructure (apps/infra)
+### Infrastructure (apps/infra/gcp, apps/infra/aws)
 
 ```bash
 # Initialize Terraform
-mise //apps/infra:init
+mise //apps/infra/gcp:init
 
 # Preview changes
-mise //apps/infra:plan
+mise //apps/infra/gcp:plan
 
 # Apply changes
-mise //apps/infra:apply
+mise //apps/infra/gcp:apply
 
 # Preview production changes
-mise //apps/infra:plan:prod
+mise //apps/infra/gcp:plan:prod
 
 # Apply production changes
-mise //apps/infra:apply:prod
+mise //apps/infra/gcp:apply:prod
 ```
 
 ### i18n (packages/i18n)
@@ -286,7 +286,7 @@ dart run build_runner build --delete-conflicting-outputs
 ### Terraform State Issues
 
 ```bash
-cd apps/infra
+cd apps/infra/gcp  # or apps/infra/aws
 
 # Refresh state from cloud
 terraform refresh -var-file="terraform.tfvars"

@@ -39,9 +39,9 @@ Modern fullstack monorepo template with Next.js 16, FastAPI, Flutter, and GCP in
 - **CI/CD**: Fastlane
 - **Lint**: very_good_analysis
 
-### Infrastructure (apps/infra)
+### Infrastructure (apps/infra/gcp, apps/infra/aws)
 - **IaC**: Terraform
-- **Cloud**: GCP (Cloud Run, Cloud SQL, Memorystore, GCS, Cloud Tasks, Pub/Sub, CDN)
+- **Cloud**: GCP (Cloud Run, Cloud SQL, Memorystore, GCS, Cloud Tasks, Pub/Sub, CDN) or AWS (ECS Fargate, Aurora, ElastiCache, S3, SQS/SNS, CloudFront)
 - **CI/CD**: GitHub Actions with Workload Identity Federation
 - **Security**: CodeQL SAST
 
@@ -170,5 +170,6 @@ apps/mobile/lib/core/theme/generated_theme.dart (Flutter Theme - auto-generated)
 - `apps/mobile/lib/firebase_options.dart` - Firebase config
 
 ### Infrastructure
-- `apps/infra/variables.tf` - Infrastructure configuration
+- `apps/infra/gcp/variables.tf` - GCP infrastructure configuration
+- `apps/infra/aws/variables.tf` - AWS infrastructure configuration
 - `.github/workflows/codeql.yml` - Security scanning

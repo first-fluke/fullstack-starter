@@ -310,15 +310,15 @@ mise tasks --all
 </details>
 
 <details>
-<summary>Infrastructure (apps/infra)</summary>
+<summary>Infrastructure (apps/infra/gcp, apps/infra/aws)</summary>
 
 | Command | Description |
 |---------|-------------|
-| `mise //apps/infra:init` | Initialize Terraform |
-| `mise //apps/infra:plan` | Preview changes |
-| `mise //apps/infra:apply` | Apply changes |
-| `mise //apps/infra:plan:prod` | Preview production |
-| `mise //apps/infra:apply:prod` | Apply production |
+| `mise //apps/infra/gcp:init` | Initialize Terraform |
+| `mise //apps/infra/gcp:plan` | Preview changes |
+| `mise //apps/infra/gcp:apply` | Apply changes |
+| `mise //apps/infra/gcp:plan:prod` | Preview production |
+| `mise //apps/infra/gcp:apply:prod` | Apply production |
 
 </details>
 
@@ -392,7 +392,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # Infra
-cp apps/infra/terraform.tfvars.example apps/infra/terraform.tfvars
+cp apps/infra/gcp/terraform.tfvars.example apps/infra/gcp/terraform.tfvars
 ```
 
 ### GitHub Actions Secrets
