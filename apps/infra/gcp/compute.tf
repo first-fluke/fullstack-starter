@@ -13,8 +13,11 @@ resource "google_cloud_run_v2_service" "api" {
     }
 
     vpc_access {
-      connector = google_vpc_access_connector.main.id
-      egress    = "PRIVATE_RANGES_ONLY"
+      network_interfaces {
+        network    = google_compute_network.main.id
+        subnetwork = google_compute_subnetwork.main.id
+      }
+      egress = "PRIVATE_RANGES_ONLY"
     }
 
     containers {
@@ -50,13 +53,8 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       env {
-        name = "DATABASE_PASSWORD"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.db_password.secret_id
-            version = "latest"
-          }
-        }
+        name  = "DATABASE_PASSWORD"
+        value = var.DATABASE_PASSWORD
       }
 
       env {
@@ -94,10 +92,6 @@ resource "google_cloud_run_v2_service" "api" {
   }
 
   labels = local.labels
-
-  depends_on = [
-    google_secret_manager_secret_iam_member.api_db_password,
-  ]
 }
 
 # Cloud Run Service - Web
@@ -168,8 +162,11 @@ resource "google_cloud_run_v2_service" "worker" {
     }
 
     vpc_access {
-      connector = google_vpc_access_connector.main.id
-      egress    = "PRIVATE_RANGES_ONLY"
+      network_interfaces {
+        network    = google_compute_network.main.id
+        subnetwork = google_compute_subnetwork.main.id
+      }
+      egress = "PRIVATE_RANGES_ONLY"
     }
 
     containers {
@@ -205,13 +202,8 @@ resource "google_cloud_run_v2_service" "worker" {
       }
 
       env {
-        name = "DATABASE_PASSWORD"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.db_password.secret_id
-            version = "latest"
-          }
-        }
+        name  = "DATABASE_PASSWORD"
+        value = var.DATABASE_PASSWORD
       }
 
       env {
@@ -241,10 +233,6 @@ resource "google_cloud_run_v2_service" "worker" {
   }
 
   labels = local.labels
-
-  depends_on = [
-    google_secret_manager_secret_iam_member.worker_db_password,
-  ]
 }
 
 # Allow public access to API

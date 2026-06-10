@@ -68,9 +68,14 @@ variable "api_memory" {
 }
 
 variable "api_min_instances" {
-  description = "API minimum instances"
+  description = "API minimum instances (keep at least 1 to avoid cold starts)"
   type        = number
-  default     = 0
+  default     = 1
+
+  validation {
+    condition     = var.api_min_instances >= 1
+    error_message = "api_min_instances must be at least 1."
+  }
 }
 
 variable "api_max_instances" {
@@ -146,6 +151,16 @@ variable "github_repository" {
   type        = string
 }
 
+# Scheduler
+variable "schedules" {
+  description = "Cloud Scheduler jobs that publish to the Pub/Sub tasks topic. Use this instead of in-worker cron so each tick runs exactly once across worker instances"
+  type = map(object({
+    schedule_expression = string # unix-cron, e.g. "0 3 * * *"
+    payload             = string # Pub/Sub message body consumed by the worker
+  }))
+  default = {}
+}
+
 # CI/CD
 variable "git_sha" {
   description = "Git commit SHA for release tracking (passed from CI/CD)"
@@ -154,6 +169,12 @@ variable "git_sha" {
 }
 
 # Secrets (passed via Infisical)
+variable "DATABASE_PASSWORD" {
+  description = "Database user password"
+  type        = string
+  sensitive   = true
+}
+
 variable "DATABASE_URL" {
   description = "Full database connection URL"
   type        = string

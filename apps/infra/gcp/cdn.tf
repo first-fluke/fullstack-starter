@@ -30,10 +30,11 @@ resource "google_compute_region_network_endpoint_group" "web" {
 }
 
 resource "google_compute_backend_service" "web" {
-  count       = var.domain != "" ? 1 : 0
-  name        = "${local.name_prefix}-web-backend"
-  protocol    = "HTTPS"
-  timeout_sec = 30
+  count           = var.domain != "" ? 1 : 0
+  name            = "${local.name_prefix}-web-backend"
+  protocol        = "HTTPS"
+  timeout_sec     = 30
+  security_policy = google_compute_security_policy.main[0].id
 
   backend {
     group = google_compute_region_network_endpoint_group.web[0].id
@@ -76,10 +77,11 @@ resource "google_compute_region_network_endpoint_group" "api" {
 }
 
 resource "google_compute_backend_service" "api" {
-  count       = var.domain != "" ? 1 : 0
-  name        = "${local.name_prefix}-api-backend"
-  protocol    = "HTTPS"
-  timeout_sec = 60
+  count           = var.domain != "" ? 1 : 0
+  name            = "${local.name_prefix}-api-backend"
+  protocol        = "HTTPS"
+  timeout_sec     = 60
+  security_policy = google_compute_security_policy.main[0].id
 
   backend {
     group = google_compute_region_network_endpoint_group.api[0].id

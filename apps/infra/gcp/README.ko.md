@@ -1,6 +1,6 @@
-# 인프라
+# GCP 인프라
 
-GCP 인프라 프로비저닝을 위한 Terraform 설정입니다.
+GCP 인프라 프로비저닝을 위한 Terraform 설정입니다. 스택 전체 개요는 [`../README.md`](../README.md), AWS 버전은 [`../aws/`](../aws/)를 참고하세요.
 
 ## 사전 요구사항
 

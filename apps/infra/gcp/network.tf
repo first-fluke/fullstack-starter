@@ -42,16 +42,8 @@ resource "google_compute_router_nat" "main" {
   }
 }
 
-# VPC Access Connector for Cloud Run
-resource "google_vpc_access_connector" "main" {
-  name          = "${local.name_prefix}-connector"
-  region        = var.region
-  network       = google_compute_network.main.name
-  ip_cidr_range = "10.8.0.0/28"
-
-  min_instances = 2
-  max_instances = 3
-}
+# Cloud Run reaches the VPC via Direct VPC egress (network_interfaces in
+# compute.tf) — no throughput-capped VPC Access Connector in the path.
 
 # Private Service Connection for Cloud SQL
 resource "google_compute_global_address" "private_ip_range" {

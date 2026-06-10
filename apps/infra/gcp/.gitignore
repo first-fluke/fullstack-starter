@@ -22,3 +22,6 @@ override.tf.json
 # CLI config
 .terraformrc
 terraform.rc
+
+# oma docs generated artifacts
+docs/generated/

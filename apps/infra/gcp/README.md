@@ -1,6 +1,6 @@
-# Infrastructure
+# GCP Infrastructure
 
-Terraform configuration for GCP infrastructure provisioning.
+Terraform configuration for GCP infrastructure provisioning. See [`../README.md`](../README.md) for the stack overview and the AWS counterpart at [`../aws/`](../aws/).
 
 ## Prerequisites
 

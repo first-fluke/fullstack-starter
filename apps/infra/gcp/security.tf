@@ -9,6 +9,7 @@ resource "google_project_service" "apis" {
     "vpcaccess.googleapis.com",
     "servicenetworking.googleapis.com",
     "cloudtasks.googleapis.com",
+    "cloudscheduler.googleapis.com",
     "pubsub.googleapis.com",
     "compute.googleapis.com",
     "iamcredentials.googleapis.com",
@@ -112,15 +113,5 @@ resource "google_compute_security_policy" "main" {
   }
 }
 
-# Attach security policy to backend services
-resource "google_compute_backend_service_security_policy" "web" {
-  count           = var.domain != "" ? 1 : 0
-  backend_service = google_compute_backend_service.web[0].id
-  security_policy = google_compute_security_policy.main[0].id
-}
-
-resource "google_compute_backend_service_security_policy" "api" {
-  count           = var.domain != "" ? 1 : 0
-  backend_service = google_compute_backend_service.api[0].id
-  security_policy = google_compute_security_policy.main[0].id
-}
+# Security policy is attached via the security_policy argument on
+# google_compute_backend_service.web / .api in cdn.tf

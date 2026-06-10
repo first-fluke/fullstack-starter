@@ -64,12 +64,6 @@ resource "google_project_iam_member" "api_tasks" {
   member  = "serviceAccount:${google_service_account.api.email}"
 }
 
-resource "google_secret_manager_secret_iam_member" "api_db_password" {
-  secret_id = google_secret_manager_secret.db_password.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${google_service_account.api.email}"
-}
-
 # Worker Service Account Permissions
 resource "google_project_iam_member" "worker_storage" {
   project = var.project_id
@@ -81,12 +75,6 @@ resource "google_project_iam_member" "worker_pubsub" {
   project = var.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${google_service_account.worker.email}"
-}
-
-resource "google_secret_manager_secret_iam_member" "worker_db_password" {
-  secret_id = google_secret_manager_secret.db_password.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${google_service_account.worker.email}"
 }
 
 # GitHub Actions Permissions

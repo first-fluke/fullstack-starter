@@ -55,39 +55,32 @@ resource "google_sql_database_instance" "main" {
   deletion_protection = var.environment == "prod"
 }
 
+# Read scaling guide: REGIONAL availability_type above is failover-only.
+# To offload reads at high traffic, add a replica and wire it to the apps:
+#
+#   resource "google_sql_database_instance" "read_replica" {
+#     name                 = "${local.name_prefix}-postgres-replica"
+#     master_instance_name = google_sql_database_instance.main.name
+#     database_version     = "POSTGRES_16"
+#     region               = var.region
+#     settings { tier = var.db_tier }
+#   }
+#
+# then expose it as DATABASE_READ_HOST env in compute.tf
+# (google_sql_database_instance.read_replica.private_ip_address) and route
+# read-only queries to it in the application layer.
+
 # Database
 resource "google_sql_database" "main" {
   name     = var.db_name
   instance = google_sql_database_instance.main.name
 }
 
-# Database User
+# Database User (password injected via Infisical as TF_VAR_DATABASE_PASSWORD)
 resource "google_sql_user" "main" {
   name     = var.db_user
   instance = google_sql_database_instance.main.name
-  password = random_password.db_password.result
-}
-
-# Random password for database
-resource "random_password" "db_password" {
-  length  = 32
-  special = true
-}
-
-# Store password in Secret Manager
-resource "google_secret_manager_secret" "db_password" {
-  secret_id = "${local.name_prefix}-db-password"
-
-  replication {
-    auto {}
-  }
-
-  labels = local.labels
-}
-
-resource "google_secret_manager_secret_version" "db_password" {
-  secret      = google_secret_manager_secret.db_password.id
-  secret_data = random_password.db_password.result
+  password = var.DATABASE_PASSWORD
 }
 
 # Redis (Memorystore)
