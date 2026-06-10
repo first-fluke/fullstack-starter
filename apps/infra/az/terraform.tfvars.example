@@ -1,0 +1,74 @@
+# Required
+github_repository = "your-org/your-repo"
+
+# Optional - customize as needed
+location    = "koreacentral"
+environment = "dev"
+app_name    = "fullstack-starter"
+
+# Network
+vnet_cidr = "10.0.0.0/16"
+
+# Container Apps - API
+api_cpu          = 0.25
+api_memory       = "0.5Gi"
+api_min_replicas = 1
+api_max_replicas = 10
+
+# Container Apps - Web
+web_cpu          = 0.25
+web_memory       = "0.5Gi"
+web_min_replicas = 1
+web_max_replicas = 10
+
+# Container Apps - Worker
+worker_cpu          = 0.25
+worker_memory       = "0.5Gi"
+worker_min_replicas = 1
+worker_max_replicas = 2
+
+# Container Registry
+acr_sku = "Basic"
+
+# Database
+db_sku_name              = "B_Standard_B1ms"
+db_storage_mb            = 32768
+db_name                  = "app"
+db_user                  = "app"
+db_high_availability     = false
+db_backup_retention_days = 7
+db_geo_redundant_backup  = false
+
+# Redis
+redis_sku_name = "Basic"
+redis_family   = "C"
+redis_capacity = 0
+
+# Service Bus
+servicebus_sku = "Standard"
+
+# Domain (leave empty to use the Container Apps default domain)
+domain        = ""
+api_subdomain = "api"
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = ""
+
+# Scheduled jobs (Container Apps Jobs cron -> worker image with TASK_PAYLOAD)
+# Define cron jobs here instead of in-worker cron loops.
+# Note: job names (app_name-environment-key) are capped at 32 characters.
+# schedules = {
+#   report = {
+#     schedule_expression = "0 3 * * *"
+#     payload             = "{\"task\":\"daily_report\"}"
+#   }
+# }
+
+# Secrets (injected via Infisical - do not commit real values)
+# DATABASE_PASSWORD    = ""
+# JWT_SECRET           = ""
+# BETTER_AUTH_SECRET   = ""
+# GOOGLE_CLIENT_ID     = ""
+# GOOGLE_CLIENT_SECRET = ""
+# OPENAI_API_KEY       = ""

@@ -1,0 +1,58 @@
+# Required
+github_repository = "your-org/your-repo"
+
+location    = "koreacentral"
+environment = "prod"
+
+# Container Apps - production sizing
+api_cpu             = 0.5
+api_memory          = "1Gi"
+api_min_replicas    = 2
+api_max_replicas    = 10
+web_cpu             = 0.25
+web_memory          = "0.5Gi"
+web_min_replicas    = 2
+web_max_replicas    = 10
+worker_cpu          = 0.5
+worker_memory       = "1Gi"
+worker_min_replicas = 1
+worker_max_replicas = 2
+
+worker_queue_depth_target = 100
+
+# Container Registry
+acr_sku = "Standard"
+
+# Database - production
+db_sku_name              = "GP_Standard_D2ds_v5"
+db_storage_mb            = 131072
+db_high_availability     = true
+db_backup_retention_days = 30
+db_geo_redundant_backup  = true
+
+# Redis - production
+redis_sku_name = "Standard"
+redis_family   = "C"
+redis_capacity = 1
+
+# Service Bus
+servicebus_sku = "Standard"
+
+# WAF
+enable_waf = true
+
+# Domain
+domain        = "example.com"
+api_subdomain = "api"
+
+# Monitoring
+enable_monitoring = true
+alarm_email       = "ops@example.com"
+
+# Scheduled jobs (Container Apps Jobs cron -> worker image with TASK_PAYLOAD)
+# schedules = {
+#   report = {
+#     schedule_expression = "0 3 * * *"
+#     payload             = "{\"task\":\"daily_report\"}"
+#   }
+# }
