@@ -1,25 +1,25 @@
 # OCI Infrastructure
 
-Terraform configuration for deploying the fullstack-starter stack to Oracle Cloud Infrastructure. This is the OCI counterpart of the GCP configuration in [`../gcp/`](../gcp/), the AWS configuration in [`../aws/`](../aws/), and the Azure configuration in [`../az/`](../az/).
+Terraform configuration for deploying the fullstack-starter stack to Oracle Cloud Infrastructure. See [`../README.md`](../README.md) for the cross-cloud stack comparison.
 
 ## Architecture
 
-| Component | OCI Service | GCP (`../gcp/`) | AWS (`../aws/`) | Azure (`../az/`) |
-|-----------|-------------|-----------------|-----------------|------------------|
-| Isolation boundary | Child compartment under `parent_compartment_ocid` | Project | Account + tags | Resource group |
-| API / Web / Worker | Container Instances (fixed counts, no autoscaling) | Cloud Run | ECS Fargate | Container Apps |
-| Container registry | OCIR (`oci_artifacts_container_repository`) | Artifact Registry | ECR | ACR |
-| Load balancing | Flexible LB + routing policies (host/path) | Global LB + Cloud Run | ALB | Container Apps ingress |
-| Database | OCI Database with PostgreSQL 16 | Cloud SQL | Aurora PostgreSQL 16 | PostgreSQL Flexible Server |
-| Cache | OCI Cache (Redis 7, TLS-only) | Memorystore | ElastiCache Redis 7 | Azure Cache for Redis |
-| Queues | OCI Queue ×3 (built-in DLQ, delivery count 5) | Cloud Tasks | SQS + DLQ | Service Bus subscriptions |
-| Scheduled jobs | — (documented gap, `schedules` is a no-op) | Cloud Scheduler → Pub/Sub | EventBridge Scheduler → SNS | Container Apps Jobs cron |
-| Uploads storage | Object Storage `uploads` bucket | GCS | S3 | Storage container |
-| Static assets / CDN | Object Storage `static` bucket (no first-party CDN) | GCS + Cloud CDN | S3 + CloudFront | Front Door |
-| WAF | WAF policy on LB (rate limit ~1000 req/min/IP) | Cloud Armor | WAFv2 on ALB | Front Door WAF |
-| CI/CD auth | Identity propagation trust (GitHub OIDC → UPST) | Workload Identity Federation | GitHub OIDC role | Entra ID federated credential |
-| Runtime auth | Dynamic group + resource principal | Service accounts | ECS task role | Managed identity |
-| Monitoring | ONS topic + Monitoring alarms (LB 5xx, PG CPU) | — | CloudWatch + SNS | Monitor + action group |
+| Component | OCI Service |
+|-----------|-------------|
+| Isolation boundary | Child compartment under `parent_compartment_ocid` |
+| API / Web / Worker | Container Instances (fixed counts, no autoscaling) |
+| Container registry | OCIR (`oci_artifacts_container_repository`) |
+| Load balancing | Flexible LB + routing policies (host/path) |
+| Database | OCI Database with PostgreSQL 16 |
+| Cache | OCI Cache (Redis 7, TLS-only) |
+| Queues | OCI Queue ×3 (built-in DLQ, delivery count 5) |
+| Scheduled jobs | — (documented gap, `schedules` is a no-op) |
+| Uploads storage | Object Storage `uploads` bucket |
+| Static assets / CDN | Object Storage `static` bucket (no first-party CDN) |
+| WAF | WAF policy on LB (rate limit ~1000 req/min/IP) |
+| CI/CD auth | Identity propagation trust (GitHub OIDC → UPST) |
+| Runtime auth | Dynamic group + resource principal |
+| Monitoring | ONS topic + Monitoring alarms (LB 5xx, PG CPU) |
 
 ## Prerequisites
 

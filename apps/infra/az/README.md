@@ -1,23 +1,23 @@
 # Azure Infrastructure
 
-Terraform configuration for deploying the fullstack-starter stack to Azure. This is the Azure counterpart of the GCP configuration in [`../gcp/`](../gcp/) and the AWS configuration in [`../aws/`](../aws/).
+Terraform configuration for deploying the fullstack-starter stack to Azure. See [`../README.md`](../README.md) for the cross-cloud stack comparison.
 
 ## Architecture
 
-| Component | Azure Service | GCP Equivalent (`../gcp/`) | AWS Equivalent (`../aws/`) |
-|-----------|---------------|----------------------------|----------------------------|
-| API / Web / Worker | Container Apps (one environment, three apps) | Cloud Run | ECS Fargate |
-| Container registry | Azure Container Registry (shared, api/web/worker repos) | Artifact Registry | ECR |
-| Ingress / routing | Container Apps built-in ingress (api:8000, web:3000 external; worker internal) | Global LB + Cloud Run | ALB |
-| Database | PostgreSQL Flexible Server 16 (private, delegated subnet + private DNS) | Cloud SQL | Aurora PostgreSQL 16 |
-| Cache | Azure Cache for Redis (TLS only) | Memorystore | ElastiCache Redis 7 |
-| Queues + events | Service Bus topic `tasks` + priority-filtered subscriptions (built-in DLQ) | Cloud Tasks + Pub/Sub | SNS tasks topic → SQS fan-out |
-| Scheduled jobs | Container Apps Jobs cron (`schedules` var) | Cloud Scheduler → Pub/Sub | EventBridge Scheduler → SNS |
-| Uploads storage | Storage account `uploads` container | GCS | S3 |
-| Static assets / CDN | `static` container + Front Door Standard | GCS + Cloud CDN | S3 + CloudFront (OAC) |
-| WAF | Front Door WAF policy (rate-limit custom rule) | Cloud Armor | WAFv2 on ALB |
-| CI/CD auth | Entra ID app + federated credential (GitHub OIDC) | Workload Identity Federation | GitHub Actions OIDC role |
-| Monitoring | Log Analytics + action group + metric alerts | — | CloudWatch dashboard + alarms |
+| Component | Azure Service |
+|-----------|---------------|
+| API / Web / Worker | Container Apps (one environment, three apps) |
+| Container registry | Azure Container Registry (shared, api/web/worker repos) |
+| Ingress / routing | Container Apps built-in ingress (api:8000, web:3000 external; worker internal) |
+| Database | PostgreSQL Flexible Server 16 (private, delegated subnet + private DNS) |
+| Cache | Azure Cache for Redis (TLS only) |
+| Queues + events | Service Bus topic `tasks` + priority-filtered subscriptions (built-in DLQ) |
+| Scheduled jobs | Container Apps Jobs cron (`schedules` var) |
+| Uploads storage | Storage account `uploads` container |
+| Static assets / CDN | `static` container + Front Door Standard |
+| WAF | Front Door WAF policy (rate-limit custom rule) |
+| CI/CD auth | Entra ID app + federated credential (GitHub OIDC) |
+| Monitoring | Log Analytics + action group + metric alerts |
 
 ## Prerequisites
 

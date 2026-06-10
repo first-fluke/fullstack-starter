@@ -1,25 +1,25 @@
 # AWS Infrastructure
 
-Terraform configuration for deploying the fullstack-starter stack to AWS. This is the AWS counterpart of the GCP configuration in [`../gcp/`](../gcp/) (ported from [first-fluke/agogeo](https://github.com/first-fluke/agogeo)).
+Terraform configuration for deploying the fullstack-starter stack to AWS (ported from [first-fluke/agogeo](https://github.com/first-fluke/agogeo)). See [`../README.md`](../README.md) for the cross-cloud stack comparison.
 
 ## Architecture
 
-| Component | AWS Service | GCP Equivalent (`../gcp/`) |
-|-----------|-------------|----------------------------|
-| API / Web / Worker | ECS Fargate | Cloud Run |
-| Container registry | ECR | Artifact Registry |
-| Load balancing | ALB (host/path routing) | Global LB + Cloud Run |
-| Database | Aurora PostgreSQL 16 | Cloud SQL |
-| Cache | ElastiCache Redis 7 | Memorystore |
-| Queues | SQS (default / high-priority / low-priority + DLQ) | Cloud Tasks |
-| Events | SNS tasks topic → SQS fan-out | Pub/Sub |
-| Scheduled jobs | EventBridge Scheduler → SNS (`schedules` var) | Cloud Scheduler → Pub/Sub |
-| Uploads storage | S3 | GCS |
-| Static assets / CDN | S3 + CloudFront (OAC) | GCS + Cloud CDN |
-| WAF | WAFv2 on ALB (rate limit + managed rules) | Cloud Armor |
-| Email | SES (optional, `ses_domain`) | — |
-| CI/CD auth | GitHub Actions OIDC role | Workload Identity Federation |
-| Monitoring | CloudWatch dashboard + alarms + SNS | — |
+| Component | AWS Service |
+|-----------|-------------|
+| API / Web / Worker | ECS Fargate |
+| Container registry | ECR |
+| Load balancing | ALB (host/path routing) |
+| Database | Aurora PostgreSQL 16 |
+| Cache | ElastiCache Redis 7 |
+| Queues | SQS (default / high-priority / low-priority + DLQ) |
+| Events | SNS tasks topic → SQS fan-out |
+| Scheduled jobs | EventBridge Scheduler → SNS (`schedules` var) |
+| Uploads storage | S3 |
+| Static assets / CDN | S3 + CloudFront (OAC) |
+| WAF | WAFv2 on ALB (rate limit + managed rules) |
+| Email | SES (optional, `ses_domain`) |
+| CI/CD auth | GitHub Actions OIDC role |
+| Monitoring | CloudWatch dashboard + alarms + SNS |
 
 ## Prerequisites
 
