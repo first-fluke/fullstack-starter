@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.19.0](https://github.com/first-fluke/fullstack-starter/compare/v2.18.0...v2.19.0) (2026-06-10)
+
+
+### Features
+
+* **api:** enforce request body size limit ([d2d8c21](https://github.com/first-fluke/fullstack-starter/commit/d2d8c21b167b722d6bf2e339e7b6332ad68b862d))
+* **infra:** add aws terraform stack ([5c0a79f](https://github.com/first-fluke/fullstack-starter/commit/5c0a79fa55fd9a18a6f13877ce5ef294bce151c6))
+* **infra:** add azure terraform stack ([de80f9a](https://github.com/first-fluke/fullstack-starter/commit/de80f9ad7a9dcc6a2d8402ad2a93649d0478d55f))
+
 ## [2.18.0](https://github.com/first-fluke/fullstack-starter/compare/v2.17.1...v2.18.0) (2026-04-16)
 
 
