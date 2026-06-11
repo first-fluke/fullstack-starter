@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
+        .package(name: "flutter_secure_storage_darwin", path: "../.packages/flutter_secure_storage_darwin-0.3.2"),
         .package(name: "firebase_crashlytics", path: "../.packages/firebase_crashlytics-5.2.3"),
         .package(name: "firebase_core", path: "../.packages/firebase_core-4.10.0"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
@@ -23,6 +24,7 @@ let package = Package(
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
+                .product(name: "flutter-secure-storage-darwin", package: "flutter_secure_storage_darwin"),
                 .product(name: "firebase-crashlytics", package: "firebase_crashlytics"),
                 .product(name: "firebase-core", package: "firebase_core"),
                 .product(name: "FlutterFramework", package: "FlutterFramework")

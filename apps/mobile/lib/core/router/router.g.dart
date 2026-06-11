@@ -11,7 +11,7 @@ part of 'router.dart';
 /// The main router for the application.
 
 @ProviderFor(router)
-const routerProvider = RouterProvider._();
+final routerProvider = RouterProvider._();
 
 /// The main router for the application.
 
@@ -19,7 +19,7 @@ final class RouterProvider
     extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
     with $Provider<GoRouter> {
   /// The main router for the application.
-  const RouterProvider._()
+  RouterProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,4 +52,4 @@ final class RouterProvider
   }
 }
 
-String _$routerHash() => r'9cae4a61d9c5b4187d43ddd7e365b0dc3f41eb77';
+String _$routerHash() => r'4f0a5c4e58f02aa2a7acb720b70638f4a43da153';
