@@ -11,6 +11,8 @@ dependencies = [
     "tenacity>=9.1.4",
     "google-cloud-tasks>=2.22.0",
     "google-cloud-pubsub>=2.39.0",
+    "structlog>=26.1.0",
+    "google-auth>=2.53.0",
 ]
 
 [dependency-groups]
@@ -21,6 +23,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
     "pytest-custom-exit-code>=0.3.0",
+    "httpx>=0.28.1",
 ]
 
 [tool.uv]
