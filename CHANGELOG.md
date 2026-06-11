@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.21.0](https://github.com/first-fluke/fullstack-starter/compare/v2.20.0...v2.21.0) (2026-06-11)
+
+
+### Features
+
+* **api:** add auth rate limiting, token revocation, and refresh rotation ([6fd4e46](https://github.com/first-fluke/fullstack-starter/commit/6fd4e46eb9a5c0b439d21d35ed37422dbf2c4ba5))
+* **mobile:** add auth skeleton with secure storage and env config ([0d90c20](https://github.com/first-fluke/fullstack-starter/commit/0d90c20545fd70b7d1d299ad8a9f40a7b76a7bb6))
+* **worker:** add oidc verification, structured logging, and typed tasks ([35ac3dd](https://github.com/first-fluke/fullstack-starter/commit/35ac3dd8a51ee9ec9653a68f08b90c6d7b3aff07))
+
+
+### Bug Fixes
+
+* **mobile:** generate forui theme with valid fthemedata api ([47a4505](https://github.com/first-fluke/fullstack-starter/commit/47a4505017416c82e380ab4589e3a648b6d8c7f7))
+
 ## [2.20.0](https://github.com/first-fluke/fullstack-starter/compare/v2.19.0...v2.20.0) (2026-06-10)
 
 
