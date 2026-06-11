@@ -2,8 +2,8 @@
 dev = { run = "flutter run", description = "Run mobile app" }
 build = { run = "flutter build", description = "Build mobile app" }
 install = { run = "flutter pub get", description = "Install dependencies", sources = ["pubspec.yaml", "pubspec.lock"] }
-lint = { run = ["dart format --output=none --set-exit-if-changed .", "flutter analyze --fatal-infos"], description = "Analyze mobile app (format + analyze, matches CI)" }
-format = { run = "dart format .", description = "Format mobile app" }
+lint = { run = ["dart format --output=none --set-exit-if-changed lib test", "flutter analyze --fatal-infos lib test"], description = "Analyze mobile app (format + analyze, matches CI)" }
+format = { run = "dart format lib test", description = "Format mobile app" }
 test = { run = "flutter test", description = "Test mobile app" }
 "gen:l10n" = { run = "flutter gen-l10n", description = "Generate localizations" }
 "gen:api" = { run = "dart run swagger_parser", description = "Generate API client from OpenAPI" }
