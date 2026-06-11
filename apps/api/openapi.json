@@ -132,7 +132,7 @@
                     "$ref": "#/components/schemas/EmailLoginRequest"
                   }
                 ],
-                "title": "Request"
+                "title": "Body"
               }
             }
           },
@@ -210,7 +210,7 @@
           "authentication"
         ],
         "summary": "Refresh Token",
-        "description": "Refresh access token using refresh token.",
+        "description": "Refresh access token using refresh token (with rotation).",
         "operationId": "refresh_token_api_auth_refresh_post",
         "requestBody": {
           "content": {
@@ -252,11 +252,31 @@
           "authentication"
         ],
         "summary": "Logout",
-        "description": "Logout endpoint.\n\nClient should remove tokens from localStorage.",
+        "description": "Logout: revoke both the access token and the refresh token.",
         "operationId": "logout_api_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         }
       }
@@ -593,6 +613,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",

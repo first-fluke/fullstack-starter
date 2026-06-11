@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     # Redis (optional)
     REDIS_URL: str | None = None
 
+    # Trusted reverse-proxy CIDRs whose X-Forwarded-For header is honoured.
+    # Example: ["10.0.0.0/8", "172.16.0.0/12"]
+    TRUSTED_PROXY_IPS: list[str] = []
+
     # OpenTelemetry (optional)
     OTEL_EXPORTER_OTLP_ENDPOINT: str | None = None
     OTEL_SERVICE_NAME: str | None = None

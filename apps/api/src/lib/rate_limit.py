@@ -1,9 +1,11 @@
 """Rate limiting middleware with Redis or in-memory backend."""
 
+import ipaddress
 import time
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from functools import wraps
 from typing import TYPE_CHECKING, cast
 
 from fastapi import HTTPException, Request, status
@@ -27,13 +29,36 @@ class RateLimitConfig:
     key_func: Callable[[Request], str] | None = None  # Custom key function
 
 
+def _is_trusted_proxy(host: str) -> bool:
+    """Return True if host falls within one of the configured trusted proxy CIDRs."""
+    try:
+        client_addr = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    for cidr in settings.TRUSTED_PROXY_IPS:
+        try:
+            if client_addr in ipaddress.ip_network(cidr, strict=False):
+                return True
+        except ValueError:
+            continue
+    return False
+
+
 def default_key_func(request: Request) -> str:
-    """Default rate limit key: IP address + path."""
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        ip = forwarded.split(",")[0].strip()
+    """Default rate limit key: IP address + path.
+
+    X-Forwarded-For is only honoured when the direct upstream client
+    (request.client.host) is within a trusted CIDR (settings.TRUSTED_PROXY_IPS).
+    Otherwise the direct connection IP is used to prevent header spoofing.
+    """
+    client_host = request.client.host if request.client else "unknown"
+
+    if _is_trusted_proxy(client_host):
+        forwarded = request.headers.get("X-Forwarded-For")
+        ip = forwarded.split(",")[0].strip() if forwarded else client_host
     else:
-        ip = request.client.host if request.client else "unknown"
+        ip = client_host
+
     return f"{ip}:{request.url.path}"
 
 
@@ -73,13 +98,42 @@ class InMemoryRateLimiter:
         return True, remaining, reset_after
 
 
+# Lua script for atomic sliding-window rate limiting.
+# Returns: 1 (allowed) or 0 (denied), followed by remaining count and reset TTL.
+# KEYS[1] = rate_limit key
+# ARGV[1] = now (unix timestamp as float string)
+# ARGV[2] = window_start (unix timestamp as float string)
+# ARGV[3] = limit (int)
+# ARGV[4] = window (int seconds)
+_SLIDING_WINDOW_LUA = """
+local key = KEYS[1]
+local now = tonumber(ARGV[1])
+local window_start = tonumber(ARGV[2])
+local limit = tonumber(ARGV[3])
+local window = tonumber(ARGV[4])
+
+redis.call('ZREMRANGEBYSCORE', key, 0, window_start)
+local count = redis.call('ZCARD', key)
+
+if count >= limit then
+    return {0, 0, window}
+end
+
+redis.call('ZADD', key, now, tostring(now))
+redis.call('EXPIRE', key, window)
+local remaining = limit - count - 1
+return {1, remaining, window}
+"""
+
+
 class RedisRateLimiter:
-    """Redis-based rate limiter using sliding window."""
+    """Redis-based rate limiter using sliding window (atomic Lua script)."""
 
     def __init__(self, requests: int, window: int):
         self.requests = requests
         self.window = window
         self._redis: redis_module.Redis | None = None
+        self._script_sha: str | None = None
 
     async def _get_redis(self) -> "redis_module.Redis":
         """Lazy Redis connection."""
@@ -89,9 +143,17 @@ class RedisRateLimiter:
             self._redis = redis.from_url(settings.REDIS_URL or "")
         return self._redis
 
+    async def _get_script_sha(self, redis: "redis_module.Redis") -> str:
+        """Load the Lua script via SCRIPT LOAD and cache the SHA."""
+        if self._script_sha is None:
+            self._script_sha = await redis.script_load(_SLIDING_WINDOW_LUA)
+        return self._script_sha
+
     async def is_allowed(self, key: str) -> tuple[bool, int, int]:
         """
-        Check if request is allowed using Redis sorted sets.
+        Check if request is allowed using an atomic Redis Lua sliding window.
+
+        The entire check-and-set is a single EVALSHA call, eliminating TOCTOU races.
 
         Returns:
             tuple: (allowed, remaining, reset_after)
@@ -101,23 +163,22 @@ class RedisRateLimiter:
         window_start = now - self.window
         rate_key = f"rate_limit:{key}"
 
-        pipe = redis.pipeline()
-        pipe.zremrangebyscore(rate_key, 0, window_start)
-        pipe.zcard(rate_key)
-        pipe.zadd(rate_key, {str(now): now})
-        pipe.expire(rate_key, self.window)
-        results = await pipe.execute()
+        sha = await self._get_script_sha(redis)
+        result = await redis.evalsha(
+            sha,
+            1,
+            rate_key,
+            str(now),
+            str(window_start),
+            str(self.requests),
+            str(self.window),
+        )
 
-        current_count = results[1]
-        remaining = max(0, self.requests - current_count - 1)
-        reset_after = self.window
+        allowed_flag = int(result[0])
+        remaining = int(result[1])
+        reset_after = int(result[2])
 
-        if current_count >= self.requests:
-            # Remove the just-added entry
-            await redis.zrem(rate_key, str(now))
-            return False, 0, reset_after
-
-        return True, remaining, reset_after
+        return bool(allowed_flag), remaining, reset_after
 
     async def close(self) -> None:
         """Close Redis connection."""
@@ -126,23 +187,37 @@ class RedisRateLimiter:
             self._redis = None
 
 
-# Global rate limiter instance
-_rate_limiter: InMemoryRateLimiter | RedisRateLimiter | None = None
+# Registry of limiter instances keyed by (requests, window) so each unique
+# config gets its own limiter rather than sharing a single global singleton.
+_rate_limiter_registry: dict[
+    tuple[int, int], InMemoryRateLimiter | RedisRateLimiter
+] = {}
 
 
 def get_rate_limiter(config: RateLimitConfig) -> InMemoryRateLimiter | RedisRateLimiter:
-    """Get or create rate limiter instance."""
-    global _rate_limiter
-
-    if _rate_limiter is None:
+    """Get or create a rate limiter instance for the given (requests, window) config."""
+    key = (config.requests, config.window)
+    if key not in _rate_limiter_registry:
         if settings.REDIS_URL:
-            logger.info("Using Redis rate limiter")
-            _rate_limiter = RedisRateLimiter(config.requests, config.window)
+            logger.info(
+                "Using Redis rate limiter",
+                requests=config.requests,
+                window=config.window,
+            )
+            _rate_limiter_registry[key] = RedisRateLimiter(
+                config.requests, config.window
+            )
         else:
-            logger.info("Using in-memory rate limiter")
-            _rate_limiter = InMemoryRateLimiter(config.requests, config.window)
-
-    return _rate_limiter
+            logger.warning(
+                "Using in-memory rate limiter — limits are not shared across "
+                "replicas. Set REDIS_URL in production.",
+                requests=config.requests,
+                window=config.window,
+            )
+            _rate_limiter_registry[key] = InMemoryRateLimiter(
+                config.requests, config.window
+            )
+    return _rate_limiter_registry[key]
 
 
 def rate_limit(
@@ -170,6 +245,7 @@ def rate_limit(
     def decorator(
         func: Callable[..., Awaitable[Response]],
     ) -> Callable[..., Awaitable[Response]]:
+        @wraps(func)
         async def wrapper(*args: object, **kwargs: object) -> Response:
             # Find request in args/kwargs
             request: Request | None = None
@@ -207,8 +283,6 @@ def rate_limit(
             response = await func(*args, **kwargs)
             return response
 
-        wrapper.__name__ = func.__name__
-        wrapper.__doc__ = func.__doc__
         return wrapper
 
     return decorator

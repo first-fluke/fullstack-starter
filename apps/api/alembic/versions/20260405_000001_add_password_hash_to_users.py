@@ -19,7 +19,9 @@ depends_on: Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column("users", sa.Column("password_hash", sa.String(length=255), nullable=True))
+    op.add_column(
+        "users", sa.Column("password_hash", sa.String(length=255), nullable=True)
+    )
 
 
 def downgrade() -> None:

@@ -1,6 +1,7 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from src.lib.auth import (
     CurrentUser,
@@ -18,6 +19,8 @@ from src.lib.auth import (
     verify_session_token,
 )
 from src.lib.dependencies import DBSession
+from src.lib.rate_limit import rate_limit
+from src.lib.token_store import revoke, revoke_if_not_revoked
 from src.users.model import User, UserResponse
 
 router = APIRouter()
@@ -71,12 +74,14 @@ def _issue_tokens(user: User) -> TokenResponse:
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
 )
+@rate_limit(requests=5, window=60)
 async def register(
-    request: RegisterRequest,
+    request: Request,
+    body: RegisterRequest,
     db: DBSession,
 ) -> TokenResponse:
     """Register with email/password and issue backend tokens."""
-    existing_user = await _get_user_by_email(db, request.email)
+    existing_user = await _get_user_by_email(db, body.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -85,40 +90,42 @@ async def register(
 
     user = await _create_user(
         db,
-        email=request.email,
-        name=request.name,
+        email=body.email,
+        name=body.name,
         email_verified=False,
-        password_hash=hash_password(request.password),
+        password_hash=hash_password(body.password),
     )
 
     return _issue_tokens(user)
 
 
 @router.post("/login", response_model=TokenResponse)
+@rate_limit(requests=5, window=60)
 async def login(
-    request: OAuthLoginRequest | EmailLoginRequest,
+    request: Request,
+    body: OAuthLoginRequest | EmailLoginRequest,
     db: DBSession,
 ) -> TokenResponse:
     """Login with OAuth or email/password and issue backend tokens.
 
     Verify OAuth token, create/update user, and issue JWE tokens.
     """
-    if isinstance(request, EmailLoginRequest):
-        user = await _get_user_by_email(db, request.email)
-        if not user or not verify_password(request.password, user.password_hash):
+    if isinstance(body, EmailLoginRequest):
+        user = await _get_user_by_email(db, body.email)
+        if not user or not verify_password(body.password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
             )
         return _issue_tokens(user)
 
-    user_info = await verify_oauth_token(request.provider, request.access_token)
-    user = await _get_user_by_email(db, user_info.email or request.email)
+    user_info = await verify_oauth_token(body.provider, body.access_token)
+    user = await _get_user_by_email(db, user_info.email or body.email)
 
     if not user:
         user = await _create_user(
             db,
-            email=user_info.email or request.email,
+            email=user_info.email or body.email,
             name=user_info.name,
             image=user_info.image,
             email_verified=user_info.email_verified,
@@ -128,8 +135,10 @@ async def login(
 
 
 @router.post("/session-exchange", response_model=TokenResponse)
+@rate_limit(requests=5, window=60)
 async def session_exchange(
-    request: SessionExchangeRequest,
+    request: Request,
+    body: SessionExchangeRequest,
     db: DBSession,
 ) -> TokenResponse:
     """Exchange better-auth session token for backend JWE tokens.
@@ -137,7 +146,7 @@ async def session_exchange(
     Used by email/password auth users who have no OAuth provider token.
     Verifies session with better-auth server, then issues backend tokens.
     """
-    user_info = await verify_session_token(request.session_token)
+    user_info = await verify_session_token(body.session_token)
     user = await _get_user_by_email(db, user_info.email or "")
 
     if not user:
@@ -153,17 +162,30 @@ async def session_exchange(
 
 
 @router.post("/refresh", response_model=TokenResponse)
+@rate_limit(requests=5, window=60)
 async def refresh_token(
-    request: RefreshTokenRequest,
+    request: Request,
+    body: RefreshTokenRequest,
     db: DBSession,
 ) -> TokenResponse:
-    """Refresh access token using refresh token."""
-    payload = decode_token(request.refresh_token)
+    """Refresh access token using refresh token (with rotation)."""
+    payload = decode_token(body.refresh_token)
 
     if payload.token_type != "refresh":  # noqa: S105
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",
+        )
+
+    # Atomically claim the refresh token — first caller wins, replays are rejected.
+    now_ts = int(datetime.now(UTC).timestamp())
+    remaining_ttl = max(0, payload.exp - now_ts)
+    claimed = await revoke_if_not_revoked(payload.jti, remaining_ttl)
+    if not claimed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     from sqlalchemy import select
@@ -177,22 +199,46 @@ async def refresh_token(
             detail="User not found",
         )
 
-    from src.lib.auth import create_access_token
+    # Issue brand-new access + refresh tokens (rotation)
+    from src.lib.auth import create_access_token, create_refresh_token
 
-    access_token = create_access_token(str(user.id))
+    new_access_token = create_access_token(str(user.id))
+    new_refresh_token = create_refresh_token(str(user.id))
 
     return TokenResponse(
-        access_token=access_token,
-        refresh_token=request.refresh_token,
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
     )
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout() -> None:
-    """Logout endpoint.
+async def logout(
+    current_user: CurrentUser,
+    request: Request,
+    body: RefreshTokenRequest,
+) -> None:
+    """Logout: revoke both the access token and the refresh token."""
+    # Revoke access token — extract jti from the Bearer header
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        access_token_str = auth_header.removeprefix("Bearer ")
+        try:
+            access_payload = decode_token(access_token_str)
+            now_ts = int(datetime.now(UTC).timestamp())
+            access_ttl = max(0, access_payload.exp - now_ts)
+            await revoke(access_payload.jti, access_ttl)
+        except HTTPException:
+            pass  # Token already invalid — nothing to revoke
 
-    Client should remove tokens from localStorage.
-    """
+    # Revoke refresh token from body
+    try:
+        refresh_payload = decode_token(body.refresh_token)
+        now_ts = int(datetime.now(UTC).timestamp())
+        refresh_ttl = max(0, refresh_payload.exp - now_ts)
+        await revoke(refresh_payload.jti, refresh_ttl)
+    except HTTPException:
+        pass  # Token already invalid — nothing to revoke
+
     return None
 
 

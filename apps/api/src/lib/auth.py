@@ -3,6 +3,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from functools import wraps
 from typing import Annotated, Any, Literal
+from uuid import uuid4
 
 import bcrypt
 import httpx
@@ -21,6 +22,7 @@ class TokenPayload(BaseModel):
     token_type: Literal["access", "refresh"]
     exp: int
     iat: int
+    jti: str
 
 
 class TokenResponse(BaseModel):
@@ -135,6 +137,7 @@ def create_access_token(user_id: str) -> str:
         "token_type": "access",
         "exp": int((now + timedelta(hours=1)).timestamp()),
         "iat": int(now.timestamp()),
+        "jti": str(uuid4()),
     }
 
     key = _get_jwe_key()
@@ -154,6 +157,7 @@ def create_refresh_token(user_id: str) -> str:
         "token_type": "refresh",
         "exp": int((now + timedelta(days=7)).timestamp()),
         "iat": int(now.timestamp()),
+        "jti": str(uuid4()),
     }
 
     key = _get_jwe_key()
@@ -324,6 +328,15 @@ async def get_current_user(request: Request) -> CurrentUserInfo:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    from src.lib.token_store import is_revoked
+
+    if await is_revoked(payload.jti):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
