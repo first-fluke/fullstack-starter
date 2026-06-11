@@ -11,9 +11,9 @@ part 'session_exchange_request.g.dart';
 @Freezed()
 abstract class SessionExchangeRequest with _$SessionExchangeRequest {
   const factory SessionExchangeRequest({
-    @JsonKey(name: 'session_token')
-    required String sessionToken,
+    @JsonKey(name: 'session_token') required String sessionToken,
   }) = _SessionExchangeRequest;
-  
-  factory SessionExchangeRequest.fromJson(Map<String, Object?> json) => _$SessionExchangeRequestFromJson(json);
+
+  factory SessionExchangeRequest.fromJson(Map<String, Object?> json) =>
+      _$SessionExchangeRequestFromJson(json);
 }

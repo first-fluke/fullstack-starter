@@ -14,6 +14,7 @@ abstract class HttpValidationError with _$HttpValidationError {
   const factory HttpValidationError({
     List<ValidationError>? detail,
   }) = _HttpValidationError;
-  
-  factory HttpValidationError.fromJson(Map<String, Object?> json) => _$HttpValidationErrorFromJson(json);
+
+  factory HttpValidationError.fromJson(Map<String, Object?> json) =>
+      _$HttpValidationErrorFromJson(json);
 }

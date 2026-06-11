@@ -13,16 +13,13 @@ abstract class UserResponse with _$UserResponse {
   const factory UserResponse({
     required String id,
     required String email,
-    @JsonKey(name: 'created_at')
-    required DateTime createdAt,
-    @JsonKey(name: 'updated_at')
-    required DateTime updatedAt,
-    @JsonKey(name: 'email_verified')
-    @Default(false)
-    bool emailVerified,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'email_verified') @Default(false) bool emailVerified,
     String? name,
     String? image,
   }) = _UserResponse;
-  
-  factory UserResponse.fromJson(Map<String, Object?> json) => _$UserResponseFromJson(json);
+
+  factory UserResponse.fromJson(Map<String, Object?> json) =>
+      _$UserResponseFromJson(json);
 }

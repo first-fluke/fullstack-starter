@@ -15,18 +15,16 @@ sealed class ApiAuthLoginRequestBodyUnion with _$ApiAuthLoginRequestBodyUnion {
   @JsonSerializable()
   const factory ApiAuthLoginRequestBodyUnion.oAuthLoginRequest({
     required OAuthLoginRequestProvider provider,
-    @JsonKey(name: 'access_token')
-    required String accessToken,
+    @JsonKey(name: 'access_token') required String accessToken,
     required String email,
     String? name,
   }) = ApiAuthLoginRequestBodyUnionOAuthLoginRequest;
-  
+
   @JsonSerializable()
   const factory ApiAuthLoginRequestBodyUnion.emailLoginRequest({
     required String email,
     required String password,
   }) = ApiAuthLoginRequestBodyUnionEmailLoginRequest;
-  
 
   factory ApiAuthLoginRequestBodyUnion.fromJson(Map<String, Object?> json) =>
       // TODO: No discriminator in OpenAPI spec - you must implement this manually.
@@ -42,5 +40,4 @@ sealed class ApiAuthLoginRequestBodyUnion with _$ApiAuthLoginRequestBodyUnion {
       // IMPORTANT: Keep the => arrow syntax. Converting to a { } body will cause
       // freezed to skip generating toJson/fromJson for this class.
       throw UnimplementedError();
-
 }

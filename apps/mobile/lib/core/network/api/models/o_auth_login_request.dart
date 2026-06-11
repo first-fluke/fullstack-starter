@@ -14,11 +14,11 @@ part 'o_auth_login_request.g.dart';
 abstract class OAuthLoginRequest with _$OAuthLoginRequest {
   const factory OAuthLoginRequest({
     required OAuthLoginRequestProvider provider,
-    @JsonKey(name: 'access_token')
-    required String accessToken,
+    @JsonKey(name: 'access_token') required String accessToken,
     required String email,
     String? name,
   }) = _OAuthLoginRequest;
-  
-  factory OAuthLoginRequest.fromJson(Map<String, Object?> json) => _$OAuthLoginRequestFromJson(json);
+
+  factory OAuthLoginRequest.fromJson(Map<String, Object?> json) =>
+      _$OAuthLoginRequestFromJson(json);
 }

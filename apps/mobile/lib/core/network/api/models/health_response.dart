@@ -16,9 +16,9 @@ abstract class HealthResponse with _$HealthResponse {
   const factory HealthResponse({
     required HealthResponseStatus status,
     required Map<String, ServiceStatus> services,
-    @Default('0.1.0')
-    String version,
+    @Default('0.1.0') String version,
   }) = _HealthResponse;
-  
-  factory HealthResponse.fromJson(Map<String, Object?> json) => _$HealthResponseFromJson(json);
+
+  factory HealthResponse.fromJson(Map<String, Object?> json) =>
+      _$HealthResponseFromJson(json);
 }

@@ -14,6 +14,7 @@ abstract class EmailLoginRequest with _$EmailLoginRequest {
     required String email,
     required String password,
   }) = _EmailLoginRequest;
-  
-  factory EmailLoginRequest.fromJson(Map<String, Object?> json) => _$EmailLoginRequestFromJson(json);
+
+  factory EmailLoginRequest.fromJson(Map<String, Object?> json) =>
+      _$EmailLoginRequestFromJson(json);
 }
