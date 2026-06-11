@@ -5,8 +5,9 @@ import 'dart:ui' show Color, ColorSpace;
 
 import 'package:forui/forui.dart';
 
-final generatedLightTheme = FThemes.zinc.light.touch.copyWith(
-  colors: FThemes.zinc.light.touch.colors.copyWith(
+final generatedLightTheme = FThemeData(
+  touch: true,
+  colors: FColors.zincLight.copyWith(
     barrier: Color.from(
       alpha: 1.000,
       red: 0.8982,
@@ -111,8 +112,9 @@ final generatedLightTheme = FThemes.zinc.light.touch.copyWith(
   ),
 );
 
-final generatedDarkTheme = FThemes.zinc.dark.touch.copyWith(
-  colors: FThemes.zinc.dark.touch.colors.copyWith(
+final generatedDarkTheme = FThemeData(
+  touch: true,
+  colors: FColors.zincDark.copyWith(
     barrier: Color.from(
       alpha: 0.100,
       red: 1.0000,

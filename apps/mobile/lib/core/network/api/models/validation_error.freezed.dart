@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ValidationError {
 
- List<dynamic> get loc; String get msg; String get type;
+ List<dynamic> get loc; String get msg; String get type; dynamic get input; dynamic get ctx;
 /// Create a copy of ValidationError
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ValidationErrorCopyWith<ValidationError> get copyWith => _$ValidationErrorCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&const DeepCollectionEquality().equals(other.loc, loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&const DeepCollectionEquality().equals(other.loc, loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.input, input)&&const DeepCollectionEquality().equals(other.ctx, ctx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(loc),msg,type);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(loc),msg,type,const DeepCollectionEquality().hash(input),const DeepCollectionEquality().hash(ctx));
 
 @override
 String toString() {
-  return 'ValidationError(loc: $loc, msg: $msg, type: $type)';
+  return 'ValidationError(loc: $loc, msg: $msg, type: $type, input: $input, ctx: $ctx)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ValidationErrorCopyWith<$Res>  {
   factory $ValidationErrorCopyWith(ValidationError value, $Res Function(ValidationError) _then) = _$ValidationErrorCopyWithImpl;
 @useResult
 $Res call({
- List<dynamic> loc, String msg, String type
+ List<dynamic> loc, String msg, String type, dynamic input, dynamic ctx
 });
 
 
@@ -65,12 +65,14 @@ class _$ValidationErrorCopyWithImpl<$Res>
 
 /// Create a copy of ValidationError
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loc = null,Object? msg = null,Object? type = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loc = null,Object? msg = null,Object? type = null,Object? input = freezed,Object? ctx = freezed,}) {
   return _then(_self.copyWith(
 loc: null == loc ? _self.loc : loc // ignore: cast_nullable_to_non_nullable
 as List<dynamic>,msg: null == msg ? _self.msg : msg // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
+as String,input: freezed == input ? _self.input : input // ignore: cast_nullable_to_non_nullable
+as dynamic,ctx: freezed == ctx ? _self.ctx : ctx // ignore: cast_nullable_to_non_nullable
+as dynamic,
   ));
 }
 
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<dynamic> loc,  String msg,  String type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<dynamic> loc,  String msg,  String type,  dynamic input,  dynamic ctx)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ValidationError() when $default != null:
-return $default(_that.loc,_that.msg,_that.type);case _:
+return $default(_that.loc,_that.msg,_that.type,_that.input,_that.ctx);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.loc,_that.msg,_that.type);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<dynamic> loc,  String msg,  String type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<dynamic> loc,  String msg,  String type,  dynamic input,  dynamic ctx)  $default,) {final _that = this;
 switch (_that) {
 case _ValidationError():
-return $default(_that.loc,_that.msg,_that.type);case _:
+return $default(_that.loc,_that.msg,_that.type,_that.input,_that.ctx);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.loc,_that.msg,_that.type);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<dynamic> loc,  String msg,  String type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<dynamic> loc,  String msg,  String type,  dynamic input,  dynamic ctx)?  $default,) {final _that = this;
 switch (_that) {
 case _ValidationError() when $default != null:
-return $default(_that.loc,_that.msg,_that.type);case _:
+return $default(_that.loc,_that.msg,_that.type,_that.input,_that.ctx);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.loc,_that.msg,_that.type);case _:
 @JsonSerializable()
 
 class _ValidationError implements ValidationError {
-  const _ValidationError({required final  List<dynamic> loc, required this.msg, required this.type}): _loc = loc;
+  const _ValidationError({required final  List<dynamic> loc, required this.msg, required this.type, this.input, this.ctx}): _loc = loc;
   factory _ValidationError.fromJson(Map<String, dynamic> json) => _$ValidationErrorFromJson(json);
 
  final  List<dynamic> _loc;
@@ -223,6 +225,8 @@ class _ValidationError implements ValidationError {
 
 @override final  String msg;
 @override final  String type;
+@override final  dynamic input;
+@override final  dynamic ctx;
 
 /// Create a copy of ValidationError
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ValidationError&&const DeepCollectionEquality().equals(other._loc, _loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ValidationError&&const DeepCollectionEquality().equals(other._loc, _loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.input, input)&&const DeepCollectionEquality().equals(other.ctx, ctx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_loc),msg,type);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_loc),msg,type,const DeepCollectionEquality().hash(input),const DeepCollectionEquality().hash(ctx));
 
 @override
 String toString() {
-  return 'ValidationError(loc: $loc, msg: $msg, type: $type)';
+  return 'ValidationError(loc: $loc, msg: $msg, type: $type, input: $input, ctx: $ctx)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$ValidationErrorCopyWith<$Res> implements $ValidationError
   factory _$ValidationErrorCopyWith(_ValidationError value, $Res Function(_ValidationError) _then) = __$ValidationErrorCopyWithImpl;
 @override @useResult
 $Res call({
- List<dynamic> loc, String msg, String type
+ List<dynamic> loc, String msg, String type, dynamic input, dynamic ctx
 });
 
 
@@ -274,12 +278,14 @@ class __$ValidationErrorCopyWithImpl<$Res>
 
 /// Create a copy of ValidationError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? loc = null,Object? msg = null,Object? type = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? loc = null,Object? msg = null,Object? type = null,Object? input = freezed,Object? ctx = freezed,}) {
   return _then(_ValidationError(
 loc: null == loc ? _self._loc : loc // ignore: cast_nullable_to_non_nullable
 as List<dynamic>,msg: null == msg ? _self.msg : msg // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,
+as String,input: freezed == input ? _self.input : input // ignore: cast_nullable_to_non_nullable
+as dynamic,ctx: freezed == ctx ? _self.ctx : ctx // ignore: cast_nullable_to_non_nullable
+as dynamic,
   ));
 }
 

@@ -11,6 +11,8 @@ _ValidationError _$ValidationErrorFromJson(Map<String, dynamic> json) =>
       loc: json['loc'] as List<dynamic>,
       msg: json['msg'] as String,
       type: json['type'] as String,
+      input: json['input'],
+      ctx: json['ctx'],
     );
 
 Map<String, dynamic> _$ValidationErrorToJson(_ValidationError instance) =>
@@ -18,4 +20,6 @@ Map<String, dynamic> _$ValidationErrorToJson(_ValidationError instance) =>
       'loc': instance.loc,
       'msg': instance.msg,
       'type': instance.type,
+      'input': instance.input,
+      'ctx': instance.ctx,
     };

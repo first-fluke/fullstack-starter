@@ -49,11 +49,13 @@ function generateColorProperties(colors: Record<string, OklchColor>): string {
 
 function generateTheme(mode: "light" | "dark"): string {
   const colors = mode === "light" ? tokens.color.light : tokens.color.dark;
-  const baseTheme = mode === "light" ? "FThemes.zinc.light" : "FThemes.zinc.dark";
+  const baseColors = mode === "light" ? "FColors.zincLight" : "FColors.zincDark";
+  const touch = true;
   const themeName = mode === "light" ? "Light" : "Dark";
 
-  return `final generated${themeName}Theme = ${baseTheme}.copyWith(
-  colors: ${baseTheme}.colors.copyWith(
+  return `final generated${themeName}Theme = FThemeData(
+  touch: ${touch},
+  colors: ${baseColors}.copyWith(
 ${generateColorProperties(colors)}
     hoverLighten: ${tokens.style.hoverLighten},
     hoverDarken: ${tokens.style.hoverDarken},

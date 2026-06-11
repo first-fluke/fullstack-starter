@@ -5,4 +5,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type LivenessCheckHealthLiveGet200 = {[key: string]: string};
+export type ValidationErrorCtx = { [key: string]: unknown };
