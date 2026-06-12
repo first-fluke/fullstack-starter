@@ -90,7 +90,9 @@ export function getHookDir(vendor: Vendor): string {
     case "gemini":
       return ".gemini/hooks";
     case "antigravity":
-      return ".gemini/antigravity-cli/hooks";
+      // agy has no project hook dir — its `.agents/hooks.json` runs handlers
+      // straight from the SSOT core dir, where filter-test-output.sh lives.
+      return ".agents/hooks/core";
     case "qwen":
       return ".qwen/hooks";
     case "grok":

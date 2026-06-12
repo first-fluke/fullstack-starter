@@ -6,6 +6,7 @@ tools: []
 model: inherit
 skills:
   - oma-frontend
+  - oma-design
 is_background: true
 ---
 

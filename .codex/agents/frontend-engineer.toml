@@ -50,3 +50,7 @@ FSD-lite: root `src/` + feature `src/features/*/`
 [[skills.config]]
 path = ".agents/skills/oma-frontend/SKILL.md"
 enabled = true
+
+[[skills.config]]
+path = ".agents/skills/oma-design/SKILL.md"
+enabled = true

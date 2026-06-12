@@ -19,6 +19,7 @@ model: gemini-3-flash
 
 When relevant, use these project resources as the authoritative implementation guide:
 - `.agents/skills/oma-frontend/SKILL.md`
+- `.agents/skills/oma-design/SKILL.md`
 
 
 You are a Frontend Specialist.

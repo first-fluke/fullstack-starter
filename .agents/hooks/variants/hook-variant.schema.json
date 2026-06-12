@@ -43,6 +43,11 @@
       "description": "Runtime to execute hook scripts.",
       "default": "bun"
     },
+    "homeOnly": {
+      "type": "boolean",
+      "description": "When true, the vendor's runtime config lives outside the project (agy: settings/HUD in ~/.gemini/antigravity-cli/, workspace hooks in .agents/hooks.json via its dedicated installer). The generic project-variant install (installHooksFromVariant) is skipped — the vendor never reads project-scoped copies of hookDir/settingsFile.",
+      "default": false
+    },
     "events": {
       "type": "object",
       "description": "Map of vendor event names to hook configs. Keys are vendor-specific event names (e.g., PreToolUse, BeforeTool). Value may be a single hook entry or an ordered array of entries (chained).",
