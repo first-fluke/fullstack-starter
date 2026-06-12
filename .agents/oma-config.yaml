@@ -2,4 +2,12 @@
 language: ko
 date_format: ISO
 timezone: Asia/Seoul
-model_preset: gemini
+model_preset: antigravity
+
+# Added by oma update — new config keys (template defaults; edit freely)
+translation_voice: balanced
+auto_update_cli: true
+telemetry: false
+docs:
+  auto_verify: false
+  check_urls: true
