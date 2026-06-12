@@ -61,7 +61,7 @@ jobs:
     name: Biome (JS/TS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -96,9 +96,9 @@ jobs:
     name: Ruff (Python)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v8.2.0
         with:
           version: latest
 
@@ -153,7 +153,7 @@ jobs:
     name: Flutter Analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: subosito/flutter-action@v2
         with:

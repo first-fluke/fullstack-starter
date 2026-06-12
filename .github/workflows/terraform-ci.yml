@@ -26,10 +26,10 @@ jobs:
         working-directory: apps/infra/${{ matrix.stack }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
 
       - name: Terraform fmt check
         run: terraform fmt -check -recursive
