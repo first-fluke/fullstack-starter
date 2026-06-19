@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.0](https://github.com/first-fluke/fullstack-starter/compare/v2.21.0...v2.22.0) (2026-06-19)
+
+
+### Features
+
+* **web:** init shadcn base ui (base-vega) with core components ([db4d281](https://github.com/first-fluke/fullstack-starter/commit/db4d2812ee603d7b52b50d73004cc026c01246ac))
+
 ## [2.21.0](https://github.com/first-fluke/fullstack-starter/compare/v2.20.0...v2.21.0) (2026-06-11)
 
 
