@@ -2,7 +2,7 @@
 /**
  * oh-my-agent — Stop Hook (Persistent Mode)
  *
- * Works with: Claude Code (Stop), Codex CLI (Stop), Gemini CLI (AfterAgent)
+ * Works with: Claude Code (Stop), Codex CLI (Stop)
  *
  * Prevents the agent from stopping while a long-running workflow
  * (ultrawork, orchestrate, work) is active.
@@ -21,8 +21,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-import { agyConversationId, agyProjectDir, isAgyInput } from "./agy-input.ts";
-import { resolveGitRoot } from "./fs-utils.ts";
+import { agyConversationId, isAgyInput } from "./agy-input.ts";
+import { UNKNOWN_SESSION_ID } from "./constants.ts";
 import { makeBlockOutput } from "./hook-output.ts";
 import { isDeactivationRequest } from "./keyword-detector.ts";
 // triggers.json is imported statically: bundler inlines it into the oma binary;
@@ -35,6 +35,7 @@ import type {
   ModeState,
   Vendor,
 } from "./types.ts";
+import { getProjectDir } from "./vendor-detect.ts";
 
 const MAX_REINFORCEMENTS = 5;
 const STALE_HOURS = 2;
@@ -90,7 +91,6 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   if (isAgyInput(input)) return "antigravity";
   if (event === "Stop" && process.env.ANTIGRAVITY_PROJECT_DIR)
     return "antigravity";
-  if (event === "AfterAgent") return "gemini";
   if (event === "Stop") {
     if ("session_id" in input && !("sessionId" in input)) return "codex";
   }
@@ -98,50 +98,12 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   return "claude";
 }
 
-function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
-  let dir: string;
-  switch (vendor) {
-    case "codex":
-      dir = (input.cwd as string) || process.cwd();
-      break;
-    case "gemini":
-      dir = process.env.GEMINI_PROJECT_DIR || process.cwd();
-      break;
-    case "antigravity":
-      dir =
-        agyProjectDir(input) ||
-        (input.cwd as string) ||
-        process.env.ANTIGRAVITY_PROJECT_DIR ||
-        process.env.AGY_PROJECT_DIR ||
-        process.env.GEMINI_PROJECT_DIR ||
-        process.cwd();
-      break;
-    case "qwen":
-      dir = process.env.QWEN_PROJECT_DIR || process.cwd();
-      break;
-    case "grok":
-      dir =
-        process.env.GROK_WORKSPACE_ROOT ||
-        (input.cwd as string) ||
-        process.cwd();
-      break;
-    case "kiro":
-      dir =
-        process.env.KIRO_PROJECT_DIR || (input.cwd as string) || process.cwd();
-      break;
-    default:
-      dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-      break;
-  }
-  return resolveGitRoot(dir);
-}
-
 function getSessionId(input: Record<string, unknown>): string {
   return (
     (input.sessionId as string) ||
     (input.session_id as string) ||
     agyConversationId(input) ||
-    "unknown"
+    UNKNOWN_SESSION_ID
   );
 }
 
@@ -241,7 +203,16 @@ export async function run(
 ): Promise<HandlerResult | null> {
   if (input.kind !== "stop") return null;
 
-  const { cwd: projectDir, sid: sessionId = "unknown" } = ctx;
+  const { cwd: projectDir, sid: sessionId = UNKNOWN_SESSION_ID } = ctx;
+
+  // A stop event whose session id resolves to the fallback cannot be isolated:
+  // blocking on an `-unknown` state file would freeze unrelated sessions that
+  // also lack a resolvable id. Sweep any such orphan files (they should no
+  // longer be created — see activateMode) and never block under this id.
+  if (sessionId === UNKNOWN_SESSION_ID) {
+    deactivateAllForSession(projectDir, UNKNOWN_SESSION_ID);
+    return null;
+  }
 
   // Honor "workflow done" deactivation carried in the stop payload's response
   // text (parity with the standalone main() path). Without this, persistent
@@ -304,7 +275,7 @@ async function main() {
   // This raw-stdin check is standalone-path-only; the canonical HookInput
   // { kind: "stop" } does not carry these text fields.
   const textToCheck = [
-    input.prompt_response, // Gemini AfterAgent
+    input.prompt_response,
     input.response,
     input.content,
     input.message,

@@ -149,7 +149,7 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Error recovery: `resources/error-playbook.md`
 - Task schema: `resources/task-template.json`
 - Ultrawork PLAN phase protocol: `resources/plan-phase-protocol.md` (used when this skill runs inside the ultrawork workflow)
-- API contracts: `../_shared/core/api-contracts/`
+- API contract template (SSOT): `../_shared/core/api-contracts/template.md`; write generated contracts to `.agents/results/api-contracts/` (run artifact) or `docs/plans/contracts/` (durable spec)
 - Context loading: `../_shared/core/context-loading.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`
 - Clarification: `../_shared/core/clarification-protocol.md`

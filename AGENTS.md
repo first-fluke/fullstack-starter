@@ -50,10 +50,11 @@ Execute by naming the workflow in your prompt. Keywords are auto-detected via ho
 | docs | `docs.md` | Documentation drift verify + sync |
 | recap | `recap.md` | Daily / period AI conversation recap |
 | deepinit | `deepinit.md` | Project harness init (AGENTS.md / ARCHITECTURE.md / docs/) |
-| pdf | `pdf.md` | PDF → Markdown via opendataloader-pdf |
+| convert | `convert.md` | File format conversion by category: documents→Markdown (oma-pdf/oma-hwp), image/video/audio transcode (ffmpeg) |
 | video | `video.md` | Brief → script → assets → render-spec → Remotion (oma-video) |
+| schedule | `schedule.md` | Register & manage time-based agent jobs via `oma schedule:*` |
 
-(`tools` and `stack-set` are slash-invoked utilities, intentionally excluded from keyword detection.)
+(`tools` and `stack-set` are slash-invoked utilities, and `schedule` is a slash-invoked workflow (`oma schedule:*` time-based jobs); all are intentionally excluded from keyword detection.)
 
 To execute: read and follow `.agents/workflows/{name}.md` step by step.
 
@@ -87,6 +88,7 @@ Read the relevant file from `.agents/rules/` when working on matching code.
 | design | `.agents/rules/design.md` | on request |
 | dev-workflow | `.agents/rules/dev-workflow.md` | on request |
 | frontend | `.agents/rules/frontend.md` | **/*.{tsx,jsx,css,scss} |
+| i18n-arb | `.agents/rules/i18n-arb.md` | **/*.arb |
 | i18n-guide | `.agents/rules/i18n-guide.md` | always |
 | infrastructure | `.agents/rules/infrastructure.md` | **/*.{tf,tfvars,hcl} |
 | lint-format-guide | `.agents/rules/lint-format-guide.md` | on request |

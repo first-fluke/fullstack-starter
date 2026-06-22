@@ -32,6 +32,15 @@ function endpointUrl(): string | null {
 
 let reachable: boolean | null = null;
 
+/**
+ * Test-only: clear the memoized reachability probe so cases that point
+ * `AGENTMEMORY_URL` at different endpoints don't leak a cached verdict into each
+ * other (the probe is intentionally memoized once per process at runtime).
+ */
+export function _resetReachableCache(): void {
+  reachable = null;
+}
+
 function requestAgentMemory(
   baseUrl: string,
   path: string,
@@ -142,15 +151,63 @@ export interface RecalledFact {
 
 interface SearchResult {
   score?: number;
+  timestamp?: unknown;
+  created_at?: unknown;
   observation?: {
     narrative?: unknown;
     facts?: unknown;
     title?: unknown;
     type?: unknown;
+    timestamp?: unknown;
+    created_at?: unknown;
   };
 }
 
-function parseSearchResults(body: string, k: number): RecalledFact[] {
+/**
+ * Recall TTL: facts older than this many days are dropped from the snapshot so
+ * stale, long-resolved decisions stop rehydrating every boundary. Default 30
+ * days; set `OMA_RECALL_MAX_AGE_DAYS=0` (or a non-positive value) to disable.
+ * Returns the max age in ms, or null when disabled.
+ */
+function recallMaxAgeMs(): number | null {
+  const raw = process.env.OMA_RECALL_MAX_AGE_DAYS;
+  const days = raw === undefined ? 30 : Number(raw);
+  if (!Number.isFinite(days) || days <= 0) return null;
+  return days * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * Best-effort timestamp extraction from a search result. AgentMemory's response
+ * envelope is not contractually fixed across versions, so several candidate
+ * field names / locations are probed. Numeric epoch seconds are normalised to
+ * ms. Returns null when no parseable timestamp is present — callers then keep
+ * the fact (TTL filtering is fail-open, never dropping facts of unknown age).
+ */
+function extractTimestampMs(entry: SearchResult): number | null {
+  const obs = entry.observation ?? {};
+  const candidates: unknown[] = [
+    obs.timestamp,
+    obs.created_at,
+    entry.timestamp,
+    entry.created_at,
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return candidate < 1e12 ? candidate * 1000 : candidate;
+    }
+    if (typeof candidate === "string" && candidate.trim()) {
+      const parsed = Date.parse(candidate);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+export function parseSearchResults(
+  body: string,
+  k: number,
+  nowMs: number = Date.now(),
+): RecalledFact[] {
   let parsed: { results?: unknown };
   try {
     parsed = JSON.parse(body) as { results?: unknown };
@@ -164,12 +221,20 @@ function parseSearchResults(body: string, k: number): RecalledFact[] {
     return Number.isFinite(raw) ? raw : 1;
   })();
 
+  const maxAgeMs = recallMaxAgeMs();
+  const cutoffMs = maxAgeMs === null ? null : nowMs - maxAgeMs;
+
   const facts: RecalledFact[] = [];
   for (const entry of parsed.results as SearchResult[]) {
     const score = typeof entry.score === "number" ? entry.score : 0;
     // Raw `/observe` envelopes score near-zero (~0.006); enriched facts score
     // in the single digits. Drop the noise floor so the snapshot stays useful.
     if (score < minScore) continue;
+    // TTL: drop facts older than the cutoff (fail-open on unknown age).
+    if (cutoffMs !== null) {
+      const tsMs = extractTimestampMs(entry);
+      if (tsMs !== null && tsMs < cutoffMs) continue;
+    }
     const obs = entry.observation ?? {};
     const narrative =
       typeof obs.narrative === "string" && obs.narrative.trim()
@@ -198,11 +263,14 @@ export async function recallFacts(
   k = 5,
 ): Promise<RecalledFact[]> {
   if (!query.trim()) return [];
-  if (!(await isAgentMemoryReachable())) return [];
-  const url = endpointUrl();
-  if (!url) return [];
-
+  // The whole body is guarded so this honors its "never throws" contract: the
+  // reachability probe and endpoint resolution can throw under load (e.g. a
+  // socket error from the shared daemon), and an unguarded throw here blanks the
+  // boundary snapshot the hook would otherwise emit. Degrade to local-only.
   try {
+    if (!(await isAgentMemoryReachable())) return [];
+    const url = endpointUrl();
+    if (!url) return [];
     const response = await requestAgentMemory(url, "/agentmemory/search", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -222,11 +290,13 @@ export async function observeWithTimeout(payload: {
   source: string;
   projectDir?: string;
 }): Promise<boolean> {
-  if (!(await isAgentMemoryReachable())) return false;
-  const url = endpointUrl();
-  if (!url) return false;
-
+  // Fully guarded (best-effort, never throws): the reachability probe and
+  // endpoint resolution can throw under load, and a throw here must not abort
+  // the hook that fired the observe.
   try {
+    if (!(await isAgentMemoryReachable())) return false;
+    const url = endpointUrl();
+    if (!url) return false;
     // AgentMemory's /observe expects a hook-event envelope
     // (hookType, sessionId, project, cwd, timestamp) carrying the content.
     const cwd = payload.projectDir ?? process.cwd();

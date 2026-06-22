@@ -2,7 +2,6 @@
 name: mobile-engineer
 description: Flutter/React Native mobile implementation. Use for mobile app,
   widgets, platform feature work.
-tools: []
 model: inherit
 skills:
   - oma-mobile

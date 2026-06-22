@@ -30,6 +30,11 @@ let package = Package(
             url: "https://github.com/apple/swift-openapi-urlsession",
             from: "1.0.2"
         ),
+        // Repository-layer response cache (hybrid memory + disk)
+        .package(
+            url: "https://github.com/hyperoslo/Cache",
+            from: "7.4.0"
+        ),
     ],
     targets: [
         .target(
@@ -37,6 +42,7 @@ let package = Package(
             dependencies: [
                 .product(name: "OpenAPIRuntime",  package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
+                .product(name: "Cache",            package: "Cache"),
             ],
             // The generator discovers openapi.yaml + openapi-generator-config.yaml
             // inside this target's source directory and runs at every `swift build`.
@@ -89,10 +95,12 @@ final class TodosViewModel {
     var viewState: TodosViewState = .idle
 
     // MARK: - Private
-    private let service: TodoService
+    // Depend on the protocol seam, not the concrete service — enables protocol-based
+    // mocking in tests without a third-party mock lib (see §8).
+    private let service: any TodoProviding
     private var loadTask: Task<Void, Never>?
 
-    init(service: TodoService) {
+    init(service: any TodoProviding) {
         self.service = service
     }
 
@@ -106,9 +114,12 @@ final class TodosViewModel {
         loadTask = Task { [weak self] in
             guard let self else { return }
             do {
-                let todos = try await self.service.listTodos()
-                guard !Task.isCancelled else { return }
-                self.viewState = todos.isEmpty ? .empty : .loaded(todos)
+                // Stale-while-revalidate: the stream yields the cached list first
+                // (instant render), then the revalidated list. State updates per yield.
+                for try await todos in self.service.todosStream() {
+                    guard !Task.isCancelled else { return }
+                    self.viewState = todos.isEmpty ? .empty : .loaded(todos)
+                }
             } catch is CancellationError {
                 // Silently ignore — another load will follow.
             } catch {
@@ -136,7 +147,7 @@ struct TodosView: View {
     // @State owns the view model; the View is the allocation site.
     @State private var viewModel: TodosViewModel
 
-    init(service: TodoService) {
+    init(service: any TodoProviding) {
         _viewModel = State(wrappedValue: TodosViewModel(service: service))
     }
 
@@ -265,6 +276,10 @@ public struct BearerAuthMiddleware: ClientMiddleware {
 
 ## 6. Generated-Client Call Pattern
 
+> Isolates the raw generated-`Client` call + response mapping. The **production**
+> `TodoService` wraps this with a `ResponseCache` (read-through + invalidation) —
+> see §10. Use the cached form for real features; this excerpt is the inner call only.
+
 ```swift
 // Core/Networking/TodoService.swift  (excerpt showing call + response handling)
 import OpenAPIRuntime
@@ -334,7 +349,9 @@ final class AppDependencies {
             // TODO: replace with real keychain / token store lookup
             UserDefaults.standard.string(forKey: "accessToken")
         })
-        self.todoService = TodoService(client: apiClient.client)
+        // Repository-layer response cache (hyperoslo/Cache) — see snippets §10.
+        let todoCache = try! ResponseCache<[Components.Schemas.Todo]>(name: "Todos")
+        self.todoService = TodoService(client: apiClient.client, cache: todoCache)
     }
 }
 ```
@@ -348,15 +365,33 @@ final class AppDependencies {
 import XCTest
 @testable import MyApp
 
-// MARK: - Mock
+// MARK: - Mock (protocol-based — no subclassing, no third-party mock lib)
 
-final class MockTodoService: TodoService {
+final class MockTodoService: TodoProviding, @unchecked Sendable {
     var stubbedTodos: [Components.Schemas.Todo] = []
     var shouldThrow: Error?
 
-    override func listTodos() async throws -> [Components.Schemas.Todo] {
-        if let error = shouldThrow { throw error }
-        return stubbedTodos
+    func todosStream() -> AsyncThrowingStream<[Components.Schemas.Todo], Error> {
+        AsyncThrowingStream { continuation in
+            if let error = shouldThrow {
+                continuation.finish(throwing: error)
+            } else {
+                continuation.yield(stubbedTodos)
+                continuation.finish()
+            }
+        }
+    }
+
+    func createTodo(title: String) async throws -> Components.Schemas.Todo {
+        if let shouldThrow { throw shouldThrow }
+        return .init(id: "new", title: title, completed: false)
+    }
+    func toggleTodo(id: String) async throws -> Components.Schemas.Todo {
+        if let shouldThrow { throw shouldThrow }
+        return .init(id: id, title: "", completed: true)
+    }
+    func deleteTodo(id: String) async throws {
+        if let shouldThrow { throw shouldThrow }
     }
 }
 
@@ -365,7 +400,7 @@ final class MockTodoService: TodoService {
 final class TodosViewModelTests: XCTestCase {
     // Test that a successful response transitions to .loaded.
     func testLoad_success_transitionsToLoaded() async {
-        let mock = MockTodoService(client: .mock)
+        let mock = MockTodoService()
         mock.stubbedTodos = [
             .init(id: "1", title: "Buy milk", completed: false),
         ]
@@ -384,7 +419,7 @@ final class TodosViewModelTests: XCTestCase {
 
     // Test that an empty response transitions to .empty.
     func testLoad_emptyResponse_transitionsToEmpty() async {
-        let mock = MockTodoService(client: .mock)
+        let mock = MockTodoService()
         mock.stubbedTodos = []
         let sut = TodosViewModel(service: mock)
 
@@ -398,7 +433,7 @@ final class TodosViewModelTests: XCTestCase {
 
     // Test that a thrown error transitions to .error.
     func testLoad_networkError_transitionsToError() async {
-        let mock = MockTodoService(client: .mock)
+        let mock = MockTodoService()
         mock.shouldThrow = URLError(.notConnectedToInternet)
         let sut = TodosViewModel(service: mock)
 
@@ -411,3 +446,247 @@ final class TodosViewModelTests: XCTestCase {
     }
 }
 ```
+
+## 9. Navigation: interactive swipe-back on nav-bar-hidden routes
+
+**Root cause.** `NavigationStack` is backed by UIKit's `UINavigationController`, and
+the edge swipe-back is its `interactivePopGestureRecognizer`. UIKit ties that
+recognizer to the system back button, so any screen that hides the nav bar
+(`.toolbar(.hidden, for: .navigationBar)` — common with custom headers) loses the
+swipe gesture, and UIKit re-disables it every time such a screen becomes top.
+
+**Standard.** Swipe-back restoration is a navigation-layer concern, so restore it
+once at the **route-registration layer** (`navigationDestination`), not per screen.
+Pushed destinations always have something to pop to; tab roots aren't
+`navigationDestination`s, so they're correctly excluded for free.
+
+```swift
+// Shared/InteractiveSwipeBack.swift
+import SwiftUI
+import UIKit
+
+/// Reaches the enclosing UINavigationController, takes over the pop recognizer's
+/// delegate, and re-enables the edge swipe — scoped to the screen that asks for
+/// it (re-runs on every appear because UIKit re-disables it on nav-bar-hidden
+/// transitions). `canPop`/`onBlocked` guard the pop (e.g. confirm unsaved edits).
+private struct InteractiveSwipeBack: UIViewControllerRepresentable {
+    var canPop: () -> Bool
+    var onBlocked: () -> Void
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        Controller(canPop: canPop, onBlocked: onBlocked)
+    }
+    func updateUIViewController(_ vc: UIViewController, context: Context) {
+        guard let c = vc as? Controller else { return }
+        c.canPop = canPop; c.onBlocked = onBlocked
+    }
+
+    final class Controller: UIViewController, UIGestureRecognizerDelegate {
+        var canPop: () -> Bool
+        var onBlocked: () -> Void
+        init(canPop: @escaping () -> Bool, onBlocked: @escaping () -> Void) {
+            self.canPop = canPop; self.onBlocked = onBlocked
+            super.init(nibName: nil, bundle: nil)
+        }
+        @available(*, unavailable) required init?(coder: NSCoder) { fatalError() }
+
+        override func didMove(toParent parent: UIViewController?) {
+            super.didMove(toParent: parent)
+            guard let r = navigationController?.interactivePopGestureRecognizer else { return }
+            r.delegate = self
+            r.isEnabled = true
+        }
+        func gestureRecognizerShouldBegin(_ g: UIGestureRecognizer) -> Bool {
+            guard (navigationController?.viewControllers.count ?? 0) > 1 else { return false }
+            if canPop() { return true }
+            onBlocked(); return false
+        }
+    }
+}
+
+extension View {
+    /// Restore edge swipe-back on a nav-bar-hidden screen.
+    func enableInteractiveSwipeBack() -> some View {
+        background(InteractiveSwipeBack(canPop: { true }, onBlocked: {}).frame(width: 0, height: 0))
+    }
+    /// Guarded variant: swallow the swipe and run `onBlocked` when `canPop` is false.
+    func interactiveSwipeBack(
+        canPop: @escaping () -> Bool,
+        onBlocked: @escaping () -> Void
+    ) -> some View {
+        background(InteractiveSwipeBack(canPop: canPop, onBlocked: onBlocked).frame(width: 0, height: 0))
+    }
+
+    /// PREFERRED registration: every pushed route gets swipe-back automatically.
+    /// Use this instead of bare `navigationDestination(for:)` for push routes.
+    func swipeBackDestination<D: Hashable, C: View>(
+        for type: D.Type,
+        @ViewBuilder destination: @escaping (D) -> C
+    ) -> some View {
+        navigationDestination(for: type) { value in
+            destination(value).enableInteractiveSwipeBack()
+        }
+    }
+}
+```
+
+```swift
+// Usage — register routes through the wrapper, not bare navigationDestination:
+NavigationStack(path: $router.path) {
+    RootView()
+        .swipeBackDestination(for: ProgramID.self) { ProgramDetailView(id: $0) }
+        .swipeBackDestination(for: SettingsRoute.self) { _ in SettingsView() }
+}
+
+// Only screens with a custom pop policy override explicitly:
+NewPostView()
+    .interactiveSwipeBack(canPop: { viewModel.isSaved }, onBlocked: { showDiscardConfirm = true })
+```
+
+> Anti-pattern: sprinkling `.enableInteractiveSwipeBack()` on each `View` body. It
+> compiles even when forgotten, so nav-bar-hidden routes silently lose the gesture.
+> Enforce at the route layer; optionally add a SwiftLint rule that flags
+> `.toolbar(.hidden, for: .navigationBar)` without a swipe-back modifier.
+
+---
+
+## 10. Repository-layer response cache (hyperoslo/Cache)
+
+Read-through caching is **mandatory at the Repository (Service) layer**. Cache the
+**decoded** `Components.Schemas.*` models returned by the generated `Client` — never
+intercept `HTTPBody` in a middleware (it is a single-consumption stream). `hyperoslo/Cache`'s
+`Storage` is not `Sendable`, so it is always owned by an `actor`.
+
+```swift
+// Core/Cache/ResponseCache.swift
+import Foundation
+import Cache
+
+/// Actor wrapper over hyperoslo/Cache. One instance per cached value type.
+/// Owns a non-Sendable `Storage`, so all access is actor-isolated → Swift 6 clean.
+actor ResponseCache<Value: Codable & Sendable> {
+    private let storage: Storage<String, Value>
+
+    /// - Parameters:
+    ///   - name: disk namespace (one folder per cache, e.g. "Todos").
+    ///   - memoryExpiry: in-memory TTL — fast path, lost on app relaunch.
+    ///   - diskExpiry: on-disk TTL — survives relaunch. Never use `.never`.
+    init(
+        name: String,
+        memoryExpiry: Expiry = .seconds(120),
+        diskExpiry: Expiry = .seconds(60 * 60)
+    ) throws {
+        self.storage = try Storage<String, Value>(
+            diskConfig: DiskConfig(name: name, expiry: diskExpiry),
+            memoryConfig: MemoryConfig(expiry: memoryExpiry, countLimit: 200, totalCostLimit: 0),
+            transformer: TransformerFactory.forCodable(ofType: Value.self)
+        )
+    }
+
+    /// Non-expired cached value, or nil on miss/expiry. Read errors degrade to nil.
+    func value(forKey key: String) -> Value? {
+        try? storage.object(forKey: key)
+    }
+
+    func store(_ value: Value, forKey key: String) {
+        try? storage.setObject(value, forKey: key)
+    }
+
+    /// Drop affected keys after a write so the next read repopulates.
+    func invalidate(_ key: String) { try? storage.removeObject(forKey: key) }
+    func invalidateAll() { try? storage.removeAll() }
+}
+```
+
+```swift
+// Core/Networking/TodoProviding.swift
+import Foundation
+
+/// Protocol seam the view models depend on. Keeps the cached `TodoService`
+/// swappable for a protocol-based mock in tests (no third-party mock lib).
+public protocol TodoProviding: Sendable {
+    func todosStream() -> AsyncThrowingStream<[Components.Schemas.Todo], Error>
+    func createTodo(title: String) async throws -> Components.Schemas.Todo
+    func toggleTodo(id: String) async throws -> Components.Schemas.Todo
+    func deleteTodo(id: String) async throws
+}
+```
+
+```swift
+// Core/Networking/TodoService.swift  (cached repository)
+import Foundation
+
+public final class TodoService: TodoProviding {
+    private let client: Client
+    private let cache: ResponseCache<[Components.Schemas.Todo]>
+
+    public init(client: Client, cache: ResponseCache<[Components.Schemas.Todo]>) {
+        self.client = client
+        self.cache = cache
+    }
+
+    private static let listKey = "listTodos"
+
+    // MARK: - Read (stale-while-revalidate)
+
+    /// Yields the cached list first (if any), then the freshly-fetched list.
+    /// The View model iterates with `for try await` and updates state on each yield.
+    /// If the network fails but a cached value exists, the stale value stands and
+    /// the error is swallowed; with no cache, the error surfaces.
+    public func todosStream() -> AsyncThrowingStream<[Components.Schemas.Todo], Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                let cached = await cache.value(forKey: Self.listKey)
+                if let cached { continuation.yield(cached) }     // serve stale immediately
+                do {
+                    let fresh = try await fetchTodos()
+                    await cache.store(fresh, forKey: Self.listKey)
+                    continuation.yield(fresh)                     // then revalidate
+                    continuation.finish()
+                } catch {
+                    cached == nil ? continuation.finish(throwing: error)
+                                  : continuation.finish()
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    private func fetchTodos() async throws -> [Components.Schemas.Todo] {
+        let response = try await client.listTodos(.init())
+        switch response {
+        case .ok(let ok):
+            return try ok.body.json
+        case .undocumented(let statusCode, _):
+            throw TodoServiceError.undocumented(statusCode: statusCode)
+        }
+    }
+
+    // MARK: - Write (invalidate after success)
+
+    public func createTodo(title: String) async throws -> Components.Schemas.Todo {
+        let body = Components.Schemas.CreateTodoRequest(title: title)
+        let response = try await client.createTodo(.init(body: .json(body)))
+        switch response {
+        case .created(let created):
+            await cache.invalidate(Self.listKey)   // next read repopulates
+            return try created.body.json
+        case .conflict:
+            throw TodoServiceError.conflict
+        case .undocumented(let statusCode, _):
+            throw TodoServiceError.undocumented(statusCode: statusCode)
+        }
+    }
+}
+```
+
+The view model consumes the stream with `for try await` — see §3 `TodosViewModel.load()`
+for the cancellation-safe consumer.
+
+Wire the cache into the service at the composition root — see §7 `AppDependencies`:
+`TodoService(client: apiClient.client, cache: try! ResponseCache(name: "Todos"))`.
+
+> Rules recap: cache **decoded models** at the Repository layer (not `HTTPBody`);
+> key on `operationID` + params; explicit memory/disk TTLs (never `.never`);
+> invalidate affected keys after every write. Durable user-owned data → SwiftData;
+> secrets → Keychain. `hyperoslo/Cache` is never a system of record.

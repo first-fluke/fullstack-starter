@@ -2,7 +2,7 @@
 /**
  * oh-my-agent — Skill Injector Hook (UserPromptSubmit)
  *
- * Works with: Claude Code, Codex CLI, Gemini CLI, Cursor, Qwen Code.
+ * Works with: Claude Code, Codex CLI, Cursor, Qwen Code.
  *
  * Discovers `.agents/skills/<name>/` directories (requires `SKILL.md` to exist),
  * looks up multilingual triggers from `triggers.json` (`skills` section),
@@ -21,18 +21,14 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import {
-  agyConversationId,
-  agyProjectDir,
-  isAgyInput,
-  readAgyPrompt,
-} from "./agy-input.ts";
-import { resolveGitRoot, toPosixPath } from "./fs-utils.ts";
+import { agyConversationId, isAgyInput, readAgyPrompt } from "./agy-input.ts";
+import { toPosixPath } from "./fs-utils.ts";
 import { makePromptOutput } from "./hook-output.ts";
 // triggers.json is imported statically: bundler inlines it into the oma binary;
 // standalone bun runs resolve the sibling file (pi / direct run).
 import embeddedTriggers from "./triggers.json" with { type: "json" };
 import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
+import { getProjectDir, inferVendorFromScriptPath } from "./vendor-detect.ts";
 
 const MAX_SKILLS = 3;
 const SESSION_TTL_MS = 60 * 60 * 1000;
@@ -40,27 +36,10 @@ const DEFAULT_CJK_SCRIPTS = ["ko", "ja", "zh"];
 
 // ── Vendor Detection ──────────────────────────────────────────
 
-function inferVendorFromScriptPath(): Vendor | null {
-  const path = import.meta.filename;
-  if (path.includes(`${join(".gemini", "antigravity-cli", "hooks")}`))
-    return "antigravity";
-  if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
-  if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
-  if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
-  if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
-  if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
-  if (path.includes(`${join(".grok", "hooks")}`)) return "grok";
-  if (path.includes(`${join(".kiro", "hooks")}`)) return "kiro";
-  // pi auto-loads the bridge from `.pi/extensions/oma/`; the core scripts are
-  // copied alongside it and spawned as subprocesses from there.
-  if (path.includes(`${join(".pi", "extensions")}`)) return "pi";
-  return null;
-}
-
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
   const hookEventName = input.hookEventName as string | undefined;
-  const byScriptPath = inferVendorFromScriptPath();
+  const byScriptPath = inferVendorFromScriptPath(import.meta.filename);
   if (byScriptPath) return byScriptPath;
 
   // agy (Antigravity) sends no hook_event_name; detect by its stdin shape.
@@ -79,52 +58,12 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   }
 
   if (event === "PreInvocation") return "antigravity";
-  if (event === "BeforeAgent") return "gemini";
   if (event === "beforeSubmitPrompt") return "cursor";
   if (event === "UserPromptSubmit") {
     if ("session_id" in input && !("sessionId" in input)) return "codex";
   }
   if (process.env.QWEN_PROJECT_DIR) return "qwen";
   return "claude";
-}
-
-function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
-  let dir: string;
-  switch (vendor) {
-    case "codex":
-    case "cursor":
-      dir = (input.cwd as string) || process.cwd();
-      break;
-    case "gemini":
-      dir = process.env.GEMINI_PROJECT_DIR || process.cwd();
-      break;
-    case "antigravity":
-      dir =
-        agyProjectDir(input) ||
-        (input.cwd as string) ||
-        process.env.ANTIGRAVITY_PROJECT_DIR ||
-        process.env.AGY_PROJECT_DIR ||
-        process.env.GEMINI_PROJECT_DIR ||
-        process.cwd();
-      break;
-    case "qwen":
-      dir = process.env.QWEN_PROJECT_DIR || process.cwd();
-      break;
-    case "grok":
-      dir =
-        process.env.GROK_WORKSPACE_ROOT ||
-        (input.cwd as string) ||
-        process.cwd();
-      break;
-    case "kiro":
-      dir =
-        process.env.KIRO_PROJECT_DIR || (input.cwd as string) || process.cwd();
-      break;
-    default:
-      dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-      break;
-  }
-  return resolveGitRoot(dir);
 }
 
 function getSessionId(input: Record<string, unknown>): string {

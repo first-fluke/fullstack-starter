@@ -23,7 +23,7 @@ disable-model-invocation: true
 
 ## L1 Decision Events
 
-Use the `oma_emit` helper documented in `.agents/skills/_shared/runtime/event-spec.md` before required L1 decision checkpoints. The helper wraps `oma state:emit`.
+Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ---
 
@@ -92,14 +92,14 @@ Report scope assessment to the user. Get confirmation before proceeding.
 // turbo
 If the plan involves cross-boundary work (frontend ↔ backend, service ↔ service):
 
-1. Design API contracts using `.agents/skills/_shared/core/api-contracts/template.md`. Per endpoint:
+1. Design API contracts using `.agents/skills/_shared/core/api-contracts/template.md` (definition/template only — SSOT). Per endpoint:
    - Method, path, request/response schemas
    - Auth requirements, error responses
-2. Save to `.agents/skills/_shared/core/api-contracts/{contract-name}.md`.
+2. Save the generated contract to `.agents/results/api-contracts/{contract-name}.md` (run artifact; gitignored). If the contract must be versioned as a durable spec, promote it to `docs/plans/contracts/{contract-name}.md` when committing the feature.
 3. Reference from the markdown tracker generated in Step 6.
 4. Emit and verify the required API contract decision:
    ```bash
-   oma_emit "decision.made" '{"subject":"plan.api-contract","decision":"Use the approved endpoint and contract shape for this plan.","rationale":"The cross-boundary API contract has been reviewed and accepted before task decomposition."}'
+   oma state:emit "decision.made" '{"subject":"plan.api-contract","decision":"Use the approved endpoint and contract shape for this plan.","rationale":"The cross-boundary API contract has been reviewed and accepted before task decomposition."}'
    oma state:verify --workflow plan --checkpoint api-contract
    ```
 

@@ -1,7 +1,6 @@
 ---
 name: backend-engineer
 description: Backend implementation. Use for API, authentication, DB migration work.
-tools: []
 model: inherit
 skills:
   - oma-backend
