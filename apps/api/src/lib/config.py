@@ -46,6 +46,13 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_ENDPOINT: str | None = None
     OTEL_SERVICE_NAME: str | None = None
 
+    # OpenTelemetry GenAI (LLM observability via OTel GenAI semconv).
+    # Prompt/completion content is PII-sensitive; "off" records only metadata
+    # (model, token usage, durations). Other modes record message content.
+    OTEL_GENAI_CAPTURE_MESSAGE_CONTENT: Literal[
+        "off", "span_only", "event_only", "span_and_event"
+    ] = "off"
+
     # AI (optional)
     AI_PROVIDER: Literal["gemini", "openai"] = "gemini"
     GOOGLE_CLOUD_PROJECT: str | None = None

@@ -27,6 +27,15 @@ dependencies = [
     "bcrypt>=5.0.0",
 ]
 
+# Optional GenAI SDK auto-instrumentation (OTel GenAI semconv).
+# Install the one matching AI_PROVIDER, e.g. `uv sync --extra genai-openai`.
+# NOTE: as of 2026-Q2 these two cannot be installed together — openai-v2 pins
+# opentelemetry-util-genai>=0.4b0 while google-genai pins <0.4b0. The runtime
+# (src/lib/ai/telemetry.py) import-guards both, so absence is a safe no-op.
+[project.optional-dependencies]
+genai-openai = ["opentelemetry-instrumentation-openai-v2>=2.4b0"]
+genai-google = ["opentelemetry-instrumentation-google-genai>=0.7b1"]
+
 [dependency-groups]
 dev = [
     "ruff>=0.15.16",
@@ -41,6 +50,9 @@ dev = [
 
 [tool.uv]
 managed = true
+# openai-v2 and google-genai pin incompatible opentelemetry-util-genai ranges
+# (2026-Q2); declare them mutually exclusive so each resolves independently.
+conflicts = [[{ extra = "genai-openai" }, { extra = "genai-google" }]]
 
 [tool.poe.tasks]
 dev = "fastapi dev src/main.py --port 8000"
@@ -87,4 +99,12 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["jwcrypto.*"]
+ignore_missing_imports = true
+
+# Optional GenAI auto-instrumentation packages (installed via extras only).
+[[tool.mypy.overrides]]
+module = [
+    "opentelemetry.instrumentation.openai_v2.*",
+    "opentelemetry.instrumentation.google_genai.*",
+]
 ignore_missing_imports = true
