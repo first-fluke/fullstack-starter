@@ -2,7 +2,6 @@
 name: debug-investigator
 description: Bug diagnosis and fix specialist. Error analysis, root cause
   identification, regression test writing.
-tools: []
 model: inherit
 skills:
   - oma-debug

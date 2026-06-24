@@ -1,7 +1,6 @@
 ---
 name: qa-reviewer
 description: OWASP security, performance, accessibility, code quality review agent
-tools: []
 model: inherit
 skills:
   - oma-qa

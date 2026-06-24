@@ -1,27 +1,39 @@
 # API Contracts
 
-This directory contains API contracts created by PM Agent and referenced by backend/frontend/mobile agents.
+This directory is the **SSOT for the contract format only** — it holds `template.md`
+and this README. **Do not write generated contracts here** (that pollutes the skill
+SSOT tree with run artifacts).
+
+Generated contracts live in one of two places, by lifecycle:
+
+| Contract kind | Location | Tracked by git? |
+|---------------|----------|-----------------|
+| Run artifact (transient coordination state for a single plan/orchestrate run) | `.agents/results/api-contracts/{domain}.md` | No (gitignored) |
+| Durable spec (versioned module/API boundary shipped with a feature) | `docs/plans/contracts/{domain}.md` | Yes |
 
 ## Usage
 
 ### PM Agent (Author)
-Create API contracts here during the planning phase:
+Design the contract using `template.md`, then write the generated contract to the
+run-artifact location during the planning phase:
 ```
-[WRITE]("api-contracts/{domain}.md", contract content)
+[WRITE](".agents/results/api-contracts/{domain}.md", contract content)
 ```
+If the contract must be versioned as a durable spec, promote it to
+`docs/plans/contracts/{domain}.md` when committing the feature.
 
-If MCP memory tool is unavailable, create files directly in this directory.
+If MCP memory tool is unavailable, create files directly at the locations above.
 
 ### Backend Agent (Implementer)
 Read contract and implement exactly as specified:
 ```
-[READ]("api-contracts/{domain}.md")
+[READ](".agents/results/api-contracts/{domain}.md")   # or docs/plans/contracts/{domain}.md
 ```
 
 ### Frontend / Mobile Agent (Consumer)
 Read contract and integrate API client exactly as specified:
 ```
-[READ]("api-contracts/{domain}.md")
+[READ](".agents/results/api-contracts/{domain}.md")   # or docs/plans/contracts/{domain}.md
 ```
 
 ## Tool Reference

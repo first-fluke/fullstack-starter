@@ -3033,6 +3033,54 @@
           "会议转录"
         ]
       }
+    },
+    "oma-refactor": {
+      "keywords": {
+        "*": ["oma-refactor"],
+        "en": [
+          "refactor this",
+          "refactoring plan",
+          "extract class",
+          "extract method",
+          "reduce complexity",
+          "measure complexity",
+          "code smell",
+          "technical debt",
+          "characterization test",
+          "hotspot analysis",
+          "split this class",
+          "clean up this code"
+        ],
+        "ko": [
+          "리팩토링",
+          "리팩터링",
+          "복잡도 줄여",
+          "복잡도 측정",
+          "코드 스멜",
+          "기술 부채",
+          "클래스 분리",
+          "메서드 추출",
+          "코드 정리해줘"
+        ],
+        "ja": [
+          "リファクタリング",
+          "複雑度を下げ",
+          "複雑度を測定",
+          "コードスメル",
+          "技術的負債",
+          "クラスを分割",
+          "メソッド抽出"
+        ],
+        "zh": [
+          "重构",
+          "降低复杂度",
+          "测量复杂度",
+          "代码异味",
+          "技术债",
+          "拆分类",
+          "提取方法"
+        ]
+      }
     }
   },
   "informationalPatterns": {
@@ -3175,7 +3223,7 @@
       "wykryto"
     ]
   },
-  "excludedWorkflows": ["tools", "stack-set"],
+  "excludedWorkflows": ["tools", "stack-set", "schedule"],
   "cjkScripts": ["ko", "ja", "zh"],
   "extensionRouting": {
     "frontend-engineer": [

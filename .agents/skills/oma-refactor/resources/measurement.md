@@ -12,11 +12,12 @@
 | Duplication % | Token/AST clone ratio | Duplicate Code smell, quantified |
 
 ```bash
+# radon and lizard are PyPI packages — run via uvx (no install needed).
 # Python
-radon cc -s -a <path>          # cyclomatic
-lizard <path>                  # multi-language CC + NLOC + params
+uvx radon cc -s -a <path>      # cyclomatic
+uvx lizard <path>              # multi-language CC + NLOC + params
 # Any language with lizard support
-lizard -l <lang> --CCN 10 <path>
+uvx lizard -l <lang> --CCN 10 <path>
 ```
 
 ## Layer 2 - Git forensics: "where change actually happens"
@@ -56,7 +57,7 @@ rg -c 'TODO|FIXME|HACK|XXX' --type-add 'src:*.{ts,tsx,py,dart,go,java,kt}' -t sr
 # Recipe: top-churn files joined with complexity
 git log --format=format: --name-only --since="1 year ago" | grep -vE '(^$|lock)' \
   | sort | uniq -c | sort -nr | head -30 | awk '{print $2}' \
-  | xargs -I{} sh -c 'echo "$(lizard -C 999 {} 2>/dev/null | tail -1) {}"'
+  | xargs -I{} sh -c 'echo "$(uvx lizard -C 999 {} 2>/dev/null | tail -1) {}"'
 # Or use code-maat / CodeScene for the full join
 ```
 

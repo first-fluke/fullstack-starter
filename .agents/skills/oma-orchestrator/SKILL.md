@@ -301,7 +301,7 @@ At session end, if CD >= 50:
 - Skill-to-agent mapping: `../_shared/core/skill-routing.md`
 - Verification: `scripts/verify.sh <agent-type>`
 - Session metrics: `../_shared/core/session-metrics.md`
-- API contracts: `../_shared/core/api-contracts/`
+- API contract template (SSOT): `../_shared/core/api-contracts/template.md`; read generated contracts from `.agents/results/api-contracts/` (run artifact) or `docs/plans/contracts/` (durable spec)
 - Context loading: `../_shared/core/context-loading.md`
 - Difficulty guide: `../_shared/core/difficulty-guide.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`

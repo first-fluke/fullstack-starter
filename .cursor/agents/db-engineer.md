@@ -2,7 +2,6 @@
 name: db-engineer
 description: Database design and implementation specialist. Use for schema, ERD,
   migration, query tuning, vector DB work.
-tools: []
 model: inherit
 skills:
   - oma-db

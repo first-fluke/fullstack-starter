@@ -1,7 +1,6 @@
 ---
 name: pm-planner
 description: PM requirements analysis, task decomposition, API contract definition agent
-tools: []
 model: inherit
 skills:
   - oma-pm
@@ -43,7 +42,7 @@ CHARTER_CHECK:
 
 1. **Gather**: Requirements (users, features, constraints, deployment target)
 2. **Analyze**: Technical feasibility using codebase analysis
-3. **Contracts**: Define API contracts (save to `.agents/skills/_shared/core/api-contracts/`)
+3. **Contracts**: Define API contracts using template `.agents/skills/_shared/core/api-contracts/template.md`; save the generated contract to `.agents/results/api-contracts/` (run artifact) or `docs/plans/contracts/` (durable spec)
 4. **Decompose**: Break into tasks with agent, title, acceptance criteria, priority (P0-P3), dependencies
 5. **Output**: Save to `.agents/results/plan-{sessionId}.json`
 

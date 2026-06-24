@@ -2,7 +2,7 @@
 /**
  * oh-my-agent — Prompt Hook (keyword detection)
  *
- * Works with: Claude Code (UserPromptSubmit), Codex CLI (UserPromptSubmit), Gemini CLI (BeforeAgent)
+ * Works with: Claude Code (UserPromptSubmit), Codex CLI (UserPromptSubmit), and the other host CLIs in VENDORS
  *
  * Detects natural-language keywords in user prompts and injects
  * workflow instructions into the agent's context.
@@ -21,14 +21,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-import {
-  agyConversationId,
-  agyProjectDir,
-  isAgyInput,
-  readAgyPrompt,
-} from "./agy-input.ts";
-import { VENDORS } from "./constants.ts";
-import { resolveGitRoot } from "./fs-utils.ts";
+import { agyConversationId, isAgyInput, readAgyPrompt } from "./agy-input.ts";
+import { UNKNOWN_SESSION_ID, VENDORS } from "./constants.ts";
 import { clearGrokContext } from "./grok-context.ts";
 import { makePromptOutput } from "./hook-output.ts";
 // triggers.json is imported statically: the bundler inlines it into the oma
@@ -42,6 +36,7 @@ import type {
   ModeState,
   Vendor,
 } from "./types.ts";
+import { getProjectDir, inferVendorFromScriptPath } from "./vendor-detect.ts";
 
 // ── Unicode normalization ─────────────────────────────────────
 
@@ -62,7 +57,7 @@ export function normalizeForMatching(text: string): string {
 
 /**
  * Brands that count as CLI invocations: Oma plus the host LLM CLIs declared
- * in `VENDORS` (claude, codex, cursor, gemini, qwen). The vendor list is
+ * in `VENDORS` (claude, codex, cursor, qwen, …). The vendor list is
  * the single source of truth for hook-supported runtimes; pulling from it
  * here keeps the brand set in sync when a new vendor is added.
  *
@@ -103,8 +98,7 @@ const SIGNALS_RE_SOURCE = CLI_INVOCATION_SIGNALS.join("|");
  *      enumerated subcommand verbs (agent / auto / exec / run / spawn),
  *      a --flag, or a colon-namespaced subcommand ('agent:spawn').
  *      Examples: 'oma agent:spawn brainstorm', 'claude --help',
- *      'codex exec --workflow ralph', 'gemini agent', 'cursor agent',
- *      'qwen run'.
+ *      'codex exec --workflow ralph', 'cursor agent', 'qwen run'.
  */
 export const CLI_INVOCATION_AT_START = new RegExp(
   `^\\s*(?:\\/(?:${BRANDS_RE_SOURCE}):|(?:${BRANDS_RE_SOURCE})\\s+(?:${SIGNALS_RE_SOURCE}))`,
@@ -143,7 +137,6 @@ const VALID_USER_EVENTS = new Set([
   "user_prompt_submit", // Grok
   "userPromptSubmit", // Kiro
   "beforeSubmitPrompt", // Cursor
-  "BeforeAgent", // Gemini (fires before agent processes user prompt)
   "PreInvocation", // Antigravity CLI (agy)
 ]);
 
@@ -273,24 +266,10 @@ export function recordKwTrigger(
 
 // ── Vendor Detection ──────────────────────────────────────────
 
-function inferVendorFromScriptPath(): Vendor | null {
-  const path = import.meta.filename;
-  if (path.includes(`${join(".gemini", "antigravity-cli", "hooks")}`))
-    return "antigravity";
-  if (path.includes(`${join(".cursor", "hooks")}`)) return "cursor";
-  if (path.includes(`${join(".qwen", "hooks")}`)) return "qwen";
-  if (path.includes(`${join(".claude", "hooks")}`)) return "claude";
-  if (path.includes(`${join(".gemini", "hooks")}`)) return "gemini";
-  if (path.includes(`${join(".codex", "hooks")}`)) return "codex";
-  if (path.includes(`${join(".grok", "hooks")}`)) return "grok";
-  if (path.includes(`${join(".kiro", "hooks")}`)) return "kiro";
-  return null;
-}
-
 function detectVendor(input: Record<string, unknown>): Vendor {
   const event = input.hook_event_name as string | undefined;
   const hookEventName = input.hookEventName as string | undefined;
-  const byScriptPath = inferVendorFromScriptPath();
+  const byScriptPath = inferVendorFromScriptPath(import.meta.filename);
   if (byScriptPath) return byScriptPath;
 
   // agy (Antigravity) sends no hook_event_name; detect by its stdin shape.
@@ -311,7 +290,6 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   }
 
   if (event === "PreInvocation") return "antigravity";
-  if (event === "BeforeAgent") return "gemini";
   if (event === "beforeSubmitPrompt") return "cursor";
   if (event === "UserPromptSubmit") {
     // Codex uses snake_case session_id, Claude uses camelCase sessionId
@@ -322,51 +300,12 @@ function detectVendor(input: Record<string, unknown>): Vendor {
   return "claude";
 }
 
-function getProjectDir(vendor: Vendor, input: Record<string, unknown>): string {
-  let dir: string;
-  switch (vendor) {
-    case "codex":
-    case "cursor":
-      dir = (input.cwd as string) || process.cwd();
-      break;
-    case "gemini":
-      dir = process.env.GEMINI_PROJECT_DIR || process.cwd();
-      break;
-    case "antigravity":
-      dir =
-        agyProjectDir(input) ||
-        (input.cwd as string) ||
-        process.env.ANTIGRAVITY_PROJECT_DIR ||
-        process.env.AGY_PROJECT_DIR ||
-        process.env.GEMINI_PROJECT_DIR ||
-        process.cwd();
-      break;
-    case "qwen":
-      dir = process.env.QWEN_PROJECT_DIR || process.cwd();
-      break;
-    case "grok":
-      dir =
-        process.env.GROK_WORKSPACE_ROOT ||
-        (input.cwd as string) ||
-        process.cwd();
-      break;
-    case "kiro":
-      dir =
-        process.env.KIRO_PROJECT_DIR || (input.cwd as string) || process.cwd();
-      break;
-    default:
-      dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-      break;
-  }
-  return resolveGitRoot(dir);
-}
-
 function getSessionId(input: Record<string, unknown>): string {
   return (
     (input.sessionId as string) ||
     (input.session_id as string) ||
     agyConversationId(input) ||
-    "unknown"
+    UNKNOWN_SESSION_ID
   );
 }
 
@@ -717,6 +656,11 @@ function activateMode(
   workflow: string,
   sessionId: string,
 ): void {
+  // Never persist a workflow under the unresolved-session fallback id: such a
+  // file cannot be isolated per session and would cross-contaminate any later
+  // session that also resolves to UNKNOWN_SESSION_ID. The workflow context is
+  // still injected by the caller — it just won't be enforced across stops.
+  if (sessionId === UNKNOWN_SESSION_ID) return;
   const state: ModeState = {
     workflow,
     sessionId,

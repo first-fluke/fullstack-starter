@@ -91,7 +91,7 @@ Build, modify, and verify React/Next.js/TypeScript user interfaces that follow p
 
 ### Tools and instruments
 - React, Next.js, TypeScript, TailwindCSS v4, shadcn/ui
-- `ahooks`, `es-toolkit`, `nuqs`, TanStack Query, Jotai, TanStack React Form, `zod`
+- `ahooks`, `es-toolkit`, `nuqs`, TanStack Query, Jotai/Zustand, TanStack React Form, `zod`
 - Lint, typecheck, tests, and browser inspection when applicable
 
 ### Canonical workflow path
@@ -134,17 +134,22 @@ Then run the project's frontend verification commands, typically lint, typecheck
 |----------|---------|
 | Framework | `next@16+` (App Router) + `react@19+`; `next < 16` is BANNED |
 | Date | `luxon` |
-| Styling | `TailwindCSS v4` + `shadcn/ui` |
+| Styling | `TailwindCSS v4` + `shadcn/ui` (Base UI engine; see `resources/tech-stack.md`) |
 | Hooks | `ahooks` (pre-made hooks preferred) |
 | Utils | `es-toolkit` (first choice) |
+| Types | `type-fest` (TS type utilities not in the standard lib: `SetRequired`, `Merge`, `JsonValue`, `Promisable`, etc.; built-in `Partial`/`Pick`/`Omit` stay first choice) |
 | State (URL) | `nuqs` |
 | State (Server) | `TanStack Query` |
-| State (Client) | `Jotai` (minimize use) |
+| State (Client) | `Jotai` or `Zustand` (intent-based, no default; minimize use — see `resources/tech-stack.md`) |
 | Forms | `@tanstack/react-form` + `zod` |
 | Auth | `better-auth` (client SDK only; never import server library or database adapters) |
 | Animation | `motion`; import from `motion/react`. `framer-motion` (legacy package name) is BANNED. |
 
 ### Shadcn Workflow
+
+- **Engine default: Base UI** (`components.json` → `style: "base-*"`). Radix (`radix-*`) is a
+  reasoned fallback for existing Radix codebases only; no big-bang migration. Details in
+  `resources/tech-stack.md` §shadcn/ui Primitive Engine.
 
 1. Search: `shadcn_search_items_in_registries`
 2. Review: `shadcn_get_item_examples_from_registries`
