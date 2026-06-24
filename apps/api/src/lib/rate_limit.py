@@ -6,7 +6,7 @@ from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import Response
@@ -18,6 +18,10 @@ if TYPE_CHECKING:
     import redis.asyncio as redis_module
 
 logger = get_logger(__name__)
+
+# Return type of the decorated endpoint (e.g. a Pydantic response model),
+# preserved so the rate limiter does not narrow handler return types to Response.
+R = TypeVar("R")
 
 
 @dataclass
@@ -224,7 +228,7 @@ def rate_limit(
     requests: int = 100,
     window: int = 60,
     key_func: Callable[[Request], str] | None = None,
-) -> Callable[[Callable[..., Awaitable[Response]]], Callable[..., Awaitable[Response]]]:
+) -> Callable[[Callable[..., Awaitable[R]]], Callable[..., Awaitable[R]]]:
     """
     Rate limit decorator for FastAPI endpoints.
 
@@ -243,10 +247,10 @@ def rate_limit(
     actual_key_func = key_func or default_key_func
 
     def decorator(
-        func: Callable[..., Awaitable[Response]],
-    ) -> Callable[..., Awaitable[Response]]:
+        func: Callable[..., Awaitable[R]],
+    ) -> Callable[..., Awaitable[R]]:
         @wraps(func)
-        async def wrapper(*args: object, **kwargs: object) -> Response:
+        async def wrapper(*args: object, **kwargs: object) -> R:
             # Find request in args/kwargs
             request: Request | None = None
             for arg in args:

@@ -172,7 +172,7 @@ async def check_redis() -> ServiceStatus | None:
         import redis.asyncio as redis
 
         client = redis.from_url(settings.REDIS_URL)
-        await client.ping()  # type: ignore[misc]
+        await client.ping()
         await client.aclose()
         latency = (time.perf_counter() - start) * 1000
         return ServiceStatus(status="healthy", latency_ms=round(latency, 2))
