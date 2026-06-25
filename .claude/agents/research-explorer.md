@@ -5,7 +5,7 @@ description: Cross-source research specialist. Freely traverses web/docs/code
   questions with cited, trust-labeled, triangulated findings.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 20
+maxTurns: 30
 skills:
   - oma-search
   - oma-market

@@ -1,0 +1,1 @@
+../../../.agents/workflows/coordinate.md

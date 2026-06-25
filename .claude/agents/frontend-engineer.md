@@ -4,7 +4,7 @@ description: React/Next.js/TypeScript frontend implementation. Use for UI,
   components, styling work.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 20
+maxTurns: 40
 skills:
   - oma-frontend
   - oma-design

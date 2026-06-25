@@ -7,7 +7,7 @@
             "name": "oma-hook-UserPromptSubmit",
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'UserPromptSubmit'",
-            "timeout": 21
+            "timeout": 15
           }
         ]
       }
@@ -51,9 +51,8 @@
     ]
   },
   "env": {
-    "cleanupPeriodDays": 180,
-    "CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS": 100000,
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": 80,
+    "CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS": "100000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80",
     "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1",
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
@@ -68,5 +67,6 @@
   },
   "skipDangerousModePermissionPrompt": true,
   "effortLevel": "xhigh",
-  "skillListingBudgetFraction": 0.02
+  "skillListingBudgetFraction": 0.02,
+  "cleanupPeriodDays": 180
 }

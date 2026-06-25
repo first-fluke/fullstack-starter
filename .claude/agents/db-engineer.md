@@ -4,7 +4,7 @@ description: Database design and implementation specialist. Use for schema, ERD,
   migration, query tuning, vector DB work.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 15
+maxTurns: 25
 skills:
   - oma-db
 ---

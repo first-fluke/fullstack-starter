@@ -4,7 +4,7 @@ description: Terraform infrastructure implementation and review. Use for cloud
   provisioning, IAM/OIDC, networking, and terraform plan review.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 20
+maxTurns: 30
 skills:
   - oma-tf-infra
 ---

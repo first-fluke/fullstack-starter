@@ -4,7 +4,7 @@ description: Bug diagnosis and fix specialist. Error analysis, root cause
   identification, regression test writing.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 15
+maxTurns: 25
 skills:
   - oma-debug
 ---

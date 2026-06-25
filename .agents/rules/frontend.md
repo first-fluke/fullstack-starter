@@ -14,7 +14,7 @@ alwaysApply: false
 4. **Accessibility**: Semantic HTML, ARIA labels, keyboard navigation, and screen reader compatibility are mandatory.
 5. **Tool First**: Check for existing solutions and tools before coding.
 6. **Proxy over Middleware (BANNED)**: Next.js 16+ uses `proxy.ts` for request proxying. `middleware.ts` is NOT "deprecated" — it is forbidden in this project, touch it and you die. Do NOT create, recommend, suggest, or "restore" `middleware.ts`. Do NOT flag `proxy.ts` as dead code, unused, or not-wired. Do NOT demand a rename to `middleware.ts`. Any such finding is a fatal self-error — retract it immediately and write `proxy.ts`.
-7. **No Prop Drilling**: Avoid passing props beyond 3 levels. Use Jotai atoms instead. Avoid React Context.
+7. **No Prop Drilling**: Avoid passing props beyond 3 levels. Use the project's client-state library (Jotai atoms or a Zustand store — see oma-frontend `resources/tech-stack.md`) instead. Avoid React Context.
 8. **Auth Boundary**: Frontend handles auth UI and token storage only. Never import database adapters, ORMs, or server-side auth libraries.
 9. **Animation Library**: Use `motion` (import from `motion/react`). `framer-motion` is the legacy package name and is BANNED — never `import { motion } from 'framer-motion'`, never add `framer-motion` to `package.json`. Add the `motion` package via the project's package manager — detect from the lockfile (`bun.lock` → bun, `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `package-lock.json` → npm); default to `bun` when no lockfile exists. Import as `import { motion, AnimatePresence } from 'motion/react'`. Respect `prefers-reduced-motion` via `useReducedMotion` from `motion/react`.
 10. **Framework Version**: `next@16+` and `react@19+` are MANDATORY. When scaffolding or pinning `package.json`, set `"next": "^16"` (or higher) and `"react": "^19"`/`"react-dom": "^19"` — never pin `next` to `^15`, `~15`, or any range whose floor is below `16.0.0`. If `create-next-app` (or any scaffold tool) produces `next < 16`, immediately bump it before committing. This rule is paired with Core Rule #6 (`proxy.ts`), which assumes Next.js 16+.
@@ -55,6 +55,7 @@ All files are `kebab-case`. Components use `<domain>-<ui-role>.tsx`; non-compone
 | Hook | `use-<behavior>.ts` | `use-order-polling.ts` |
 | TanStack Query | `<domain>.queries.ts` / `<domain>.mutations.ts` | `orders.queries.ts` |
 | Jotai atoms | `<domain>.atoms.ts` | `cart.atoms.ts` |
+| Zustand store | `<domain>.store.ts` | `cart.store.ts` |
 | Zod schema | `<domain>.schema.ts` | `checkout.schema.ts` |
 | Types | `<domain>.types.ts` | `order.types.ts` |
 | Constants | `<domain>.constants.ts` | `payment.constants.ts` |

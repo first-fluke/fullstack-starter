@@ -3,7 +3,6 @@ name: refactor-engineer
 description: Behavior-preserving refactoring specialist. Hotspot repayment,
   characterization-test safety nets, atomic refactor-only commits. Never changes
   observable behavior.
-tools: []
 model: inherit
 skills:
   - oma-refactor

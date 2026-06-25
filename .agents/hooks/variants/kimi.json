@@ -1,0 +1,38 @@
+{
+  "$schema": "./hook-variant.schema.json",
+  "vendor": "kimi",
+  "hookDir": ".agents/hooks/core",
+  "settingsFile": ".kimi-code/config.toml",
+  "projectDirEnv": null,
+  "runtime": "bun",
+  "homeOnly": true,
+  "events": {
+    "UserPromptSubmit": [
+      {
+        "hook": "keyword-detector.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "skill-injector.ts",
+        "timeout": 3
+      },
+      {
+        "hook": "serena-primer.ts",
+        "timeout": 3
+      }
+    ],
+    "PreToolUse": {
+      "hook": "test-filter.ts",
+      "matcher": "Bash",
+      "timeout": 5
+    },
+    "Stop": {
+      "hook": "persistent-mode.ts",
+      "timeout": 5
+    }
+  }
+}

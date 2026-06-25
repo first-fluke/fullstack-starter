@@ -3,7 +3,7 @@ name: backend-engineer
 description: Backend implementation. Use for API, authentication, DB migration work.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 20
+maxTurns: 40
 skills:
   - oma-backend
 ---

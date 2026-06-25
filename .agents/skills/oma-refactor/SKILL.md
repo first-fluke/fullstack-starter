@@ -117,7 +117,7 @@ outputs:
 ### Tools and instruments
 - Serena MCP: `find_symbol`, `find_referencing_symbols`, `search_for_pattern` for impact analysis
 - Deterministic transformers: IDE refactoring actions, codemods (jscodeshift / OpenRewrite / ast-grep / comby)
-- Metrics: lizard / radon (complexity), per-language linters with `max-lines` gates
+- Metrics: lizard / radon (complexity) — both are PyPI packages, run via `uvx lizard` / `uvx radon` so no pre-install is required; per-language linters with `max-lines` gates
 - Test stack per registry: vitest + StrykerJS / pytest + mutmut / flutter_test (see `resources/governance.md`)
 - Git forensics one-liners (see `resources/measurement.md`)
 

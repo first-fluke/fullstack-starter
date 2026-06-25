@@ -2,7 +2,6 @@
 name: tf-infra-engineer
 description: Terraform infrastructure implementation and review. Use for cloud
   provisioning, IAM/OIDC, networking, and terraform plan review.
-tools: []
 model: inherit
 skills:
   - oma-tf-infra
