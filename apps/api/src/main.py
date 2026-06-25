@@ -15,6 +15,7 @@ from src.lib.body_limit import BodySizeLimitMiddleware
 from src.lib.config import settings
 from src.lib.database import async_session_factory
 from src.lib.logging import configure_logging, get_logger
+from src.lib.storage import aclose_storage_provider
 from src.lib.telemetry import configure_telemetry, instrument_app
 
 # Configure logging first
@@ -32,6 +33,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     # Shutdown
     logger.info("Shutting down application")
+    await aclose_storage_provider()
 
 
 app = FastAPI(

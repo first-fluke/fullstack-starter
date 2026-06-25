@@ -35,6 +35,14 @@ dependencies = [
 [project.optional-dependencies]
 genai-openai = ["opentelemetry-instrumentation-openai-v2>=2.4b0"]
 genai-google = ["opentelemetry-instrumentation-google-genai>=0.7b1"]
+# Object storage backend (STORAGE_BACKEND="azure"). azure-identity enables
+# managed/workload identity; connection-string and shared-key auth need only
+# azure-storage-blob. Install with `uv sync --extra storage-azure`.
+storage-azure = [
+    "azure-storage-blob>=12.24.0",
+    "azure-identity>=1.19.0",
+    "aiohttp>=3.10.0",
+]
 
 [dependency-groups]
 dev = [
@@ -107,4 +115,9 @@ module = [
     "opentelemetry.instrumentation.openai_v2.*",
     "opentelemetry.instrumentation.google_genai.*",
 ]
+ignore_missing_imports = true
+
+# Optional object storage SDKs (installed via the storage-azure extra only).
+[[tool.mypy.overrides]]
+module = ["azure.*"]
 ignore_missing_imports = true

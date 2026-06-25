@@ -25,3 +25,7 @@ class StorageProvider(ABC):
         self, bucket: str, key: str, expires_in: int = 3600
     ) -> str:
         pass
+
+    async def aclose(self) -> None:
+        """Release underlying resources. Default no-op; override if needed."""
+        return

@@ -60,11 +60,21 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
 
     # Storage (optional)
-    STORAGE_BACKEND: Literal["gcs", "s3", "minio"] = "minio"
+    STORAGE_BACKEND: Literal["gcs", "s3", "minio", "azure"] = "minio"
     GCS_BUCKET_NAME: str | None = None
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"  # noqa: S105
+
+    # Azure Blob Storage (used when STORAGE_BACKEND="azure").
+    # Auth resolves in order: connection string > account name + key (shared
+    # key) > account name + managed/workload identity (DefaultAzureCredential).
+    AZURE_STORAGE_CONNECTION_STRING: str | None = None
+    AZURE_STORAGE_ACCOUNT_NAME: str | None = None
+    AZURE_STORAGE_ACCOUNT_KEY: str | None = None
+    AZURE_STORAGE_CONTAINER: str | None = None
+    # Override for sovereign clouds (e.g. core.chinacloudapi.cn).
+    AZURE_STORAGE_ENDPOINT_SUFFIX: str = "core.windows.net"
 
 
 @lru_cache
