@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.23.0](https://github.com/first-fluke/fullstack-starter/compare/v2.22.0...v2.23.0) (2026-06-24)
+
+
+### Features
+
+* **api:** pre-wire otel genai instrumentation ([9b668a4](https://github.com/first-fluke/fullstack-starter/commit/9b668a4f8e2cf5de80e289c794839a93942f6866))
+
+
+### Bug Fixes
+
+* **api:** resolve mypy strict errors in rate limiter and health check ([7ee8dc9](https://github.com/first-fluke/fullstack-starter/commit/7ee8dc99c0e399be40ffa902b7d0811044882f66))
+
 ## [2.22.0](https://github.com/first-fluke/fullstack-starter/compare/v2.21.0...v2.22.0) (2026-06-19)
 
 
