@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.24.0](https://github.com/first-fluke/fullstack-starter/compare/v2.23.0...v2.24.0) (2026-06-28)
+
+
+### Features
+
+* **api:** add azure blob storage adapter and provider factory ([4499bfb](https://github.com/first-fluke/fullstack-starter/commit/4499bfbd1027fede69226c631d7aa871c956b569))
+
 ## [2.23.0](https://github.com/first-fluke/fullstack-starter/compare/v2.22.0...v2.23.0) (2026-06-24)
 
 
