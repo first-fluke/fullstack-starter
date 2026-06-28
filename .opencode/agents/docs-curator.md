@@ -3,7 +3,6 @@ name: docs-curator
 description: Documentation drift detection and sync specialist. Use to update
   docs/**/*.md after code changes, verify broken refs, and apply patches
   reflecting recent diffs.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

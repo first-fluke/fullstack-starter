@@ -2,7 +2,6 @@
 name: architecture-reviewer
 description: Architecture review and recommendation. Use for system design,
   module boundaries, ADRs, and tradeoff analysis.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

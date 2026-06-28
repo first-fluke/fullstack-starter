@@ -2,7 +2,6 @@
 name: debug-investigator
 description: Bug diagnosis and fix specialist. Error analysis, root cause
   identification, regression test writing.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

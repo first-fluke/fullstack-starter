@@ -5,7 +5,7 @@ hooks = true
 
 [mcp_servers.serena]
 command = "serena"
-args = [ "start-mcp-server", "--context", "codex", "--project", ".", "--open-web-dashboard", "false" ]
+args = [ "start-mcp-server", "--context", "codex", "--project-from-cwd", "--open-web-dashboard", "false" ]
 startup_timeout_sec = 90
 
 [mcp_servers.serena.env]

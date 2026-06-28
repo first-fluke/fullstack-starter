@@ -1,7 +1,6 @@
 ---
 name: backend-engineer
 description: Backend implementation. Use for API, authentication, DB migration work.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

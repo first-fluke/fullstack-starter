@@ -2,7 +2,6 @@
 name: frontend-engineer
 description: React/Next.js/TypeScript frontend implementation. Use for UI,
   components, styling work.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

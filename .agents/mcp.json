@@ -6,8 +6,7 @@
         "start-mcp-server",
         "--context",
         "claude-code",
-        "--project",
-        ".",
+        "--project-from-cwd",
         "--open-web-dashboard",
         "false"
       ],

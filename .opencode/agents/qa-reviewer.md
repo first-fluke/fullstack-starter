@@ -1,7 +1,6 @@
 ---
 name: qa-reviewer
 description: OWASP security, performance, accessibility, code quality review agent
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

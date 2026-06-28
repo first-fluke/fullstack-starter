@@ -2,7 +2,7 @@
   "$schema": "./agent-variant.schema.json",
   "vendor": "opencode",
   "destDir": ".opencode/agents",
-  "modelDefault": "opencode-go/deepseek-v4-flash",
+  "modelDefault": "inherit",
   "toolsDefault": [],
   "protocolPath": ".agents/skills/_shared/runtime/execution-protocols/opencode.md",
   "agents": {

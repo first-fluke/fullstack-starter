@@ -1,7 +1,6 @@
 ---
 name: pm-planner
 description: PM requirements analysis, task decomposition, API contract definition agent
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 

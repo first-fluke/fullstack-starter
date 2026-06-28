@@ -3,7 +3,6 @@ name: research-explorer
 description: Cross-source research specialist. Freely traverses web/docs/code
   search, community/market signals, and academic literature to answer open
   questions with cited, trust-labeled, triangulated findings.
-model: opencode-go/deepseek-v4-flash
 mode: subagent
 ---
 
