@@ -56,7 +56,7 @@ monodep = "https://github.com/gracefullight/mise-monodep-plugin"
 dev = { depends = ["//apps/api:dev", "//apps/web:dev", "//apps/worker:dev"], description = "Start all services" }
 format = { depends = ["//apps/api:format", "//apps/web:format", "//apps/worker:format"], description = "Format all apps" }
 "gen:api" = { depends = ["//apps/api:gen:openapi"], run = [{ tasks = ["//apps/web:gen:api", "//apps/mobile:gen:api"] }], description = "Generate OpenAPI schema and API clients" }
-"i18n:build" = { depends = ["//packages/i18n:build"], description = "Build i18n files" }
+"i18n:build" = { depends = ["//packages/i18n:build"], run = [{ tasks = ["//apps/mobile:gen:l10n"] }], description = "Build i18n files (web JSON + mobile ARB + dart l10n)" }
 "infra:down" = { depends = ["//apps/api:infra:down"], description = "Stop local infrastructure" }
 "infra:up" = { depends = ["//apps/api:infra:up"], description = "Start local infrastructure" }
 install = { run = "monodep install", description = "Install all dependencies and deduplicate" }
