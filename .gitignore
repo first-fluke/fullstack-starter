@@ -58,6 +58,11 @@ apps/mobile/build/
 apps/mobile/.flutter-plugins
 apps/mobile/.flutter-plugins-dependencies
 apps/mobile/.packages
+# Flutter machine-specific generated files (do not check into version control)
+apps/mobile/android/local.properties
+apps/mobile/ios/Flutter/Generated.xcconfig
+apps/mobile/ios/Flutter/flutter_export_environment.sh
+apps/mobile/ios/Flutter/ephemeral/
 
 # Misc
 *.bak
