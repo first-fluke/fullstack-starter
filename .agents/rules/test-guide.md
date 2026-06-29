@@ -46,7 +46,7 @@ cd apps/api && uv run ptw
 cd apps/web && bun test:coverage
 
 # API
-cd apps/api && uv run poe test-cov
+cd apps/api && uv run poe test:cov
 
 # Flutter
 cd apps/mobile && flutter test --coverage

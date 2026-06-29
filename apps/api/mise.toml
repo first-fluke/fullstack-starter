@@ -4,6 +4,7 @@ install = { run = "uv sync", description = "Install dependencies", sources = ["p
 lint = { run = "uv run poe lint", description = "Lint API" }
 format = { run = "uv run poe format", description = "Format API" }
 test = { run = "uv run poe test", description = "Test API" }
+"test:ci" = { run = "uv run poe test:ci", description = "Test API (CI, single process)" }
 typecheck = { run = "uv run poe typecheck", description = "Type check API" }
 migrate = { run = "uv run poe migrate", description = "Run DB migrations" }
 "migrate:create" = { run = "uv run poe migrate-create", description = "Create migration" }

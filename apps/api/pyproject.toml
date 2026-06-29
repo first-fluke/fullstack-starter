@@ -54,6 +54,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "factory-boy>=3.3.3",
     "aiosqlite>=0.22.1",
+    "pytest-xdist>=3.8.0",
 ]
 
 [tool.uv]
@@ -83,13 +84,13 @@ typecheck = "mypy src"
 "all-checks" = ["check", "typecheck"]
 
 # Testing
-test = "pytest tests/"
-"test-cov" = "pytest tests/ --cov=src --cov-report=html"
+test = "pytest tests/ -n 4"
+"test:ci" = "pytest tests/ -q"
+"test:cov" = "pytest tests/ --cov=src --cov-report=html"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-addopts = "-v"
 
 [tool.mypy]
 python_version = "3.12"
