@@ -6,4 +6,4 @@ lint = { run = ["dart format --output=none --set-exit-if-changed lib test", "flu
 format = { run = "dart format lib test", description = "Format mobile app" }
 test = { run = "flutter test", description = "Test mobile app" }
 "gen:l10n" = { run = "flutter gen-l10n", description = "Generate localizations" }
-"gen:api" = { run = "dart run swagger_parser", description = "Generate API client from OpenAPI" }
+"gen:api" = { run = ["dart run swagger_parser", "dart run build_runner build --delete-conflicting-outputs"], description = "Generate API client from OpenAPI" }
