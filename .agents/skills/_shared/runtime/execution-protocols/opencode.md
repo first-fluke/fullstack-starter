@@ -15,6 +15,25 @@ If Serena MCP is available, use `read_memory`/`write_memory`/`edit_memory` (its 
 base path is `.serena/memories`); otherwise write the same files there directly with
 opencode's file tools.
 
+### Serena MCP Timeout Recovery (OpenCode Desktop)
+
+OpenCode Desktop runs one long-lived sidecar server; new sessions reuse its MCP clients,
+so a stuck Serena MCP stays stuck until the Desktop app is fully relaunched (the TUI is
+rarely affected). When a Serena MCP call times out or the MCP queue is clearly stuck, do
+not keep retrying MCP — fall back narrowly:
+
+1. **Memory ops** — read/write the same files directly under `.serena/memories/` (as
+   above). If a recent Serena CLI is installed (≥ 1.5, check `serena --version`),
+   `serena memories read|write|list` is an equivalent alternative; older versions
+   (e.g. 1.3.x) do not have the `memories` command.
+2. **Code analysis** — fall back to native search/read tools. The Serena CLI cannot
+   execute analysis tools (`serena tools` only lists/describes them).
+3. **Diagnostics** — `serena project health-check` and `serena project index` work
+   without MCP.
+
+Keep the fallback scoped to the blocked call: this is a recovery path, not a license to
+abandon Serena-first. A full Desktop relaunch is what actually resets the stale MCP client.
+
 ### Path Resolution (CRITICAL)
 
 All result, progress, and state files MUST be written to the **project root** `.serena/memories/` directory, never to a subdirectory's `.serena/memories/`.

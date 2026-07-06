@@ -58,3 +58,41 @@
 - [ ] Dark/light theme tokens defined if applicable
 - [ ] CSS custom properties used for all design tokens
 - [ ] Tailwind config extends theme correctly (no arbitrary values in templates)
+
+## 6. Mechanical Checks (countable — verify by counting/grep, not judgment)
+
+These checks are deliberately mechanical so an agent can self-verify them
+deterministically. A failed count is a failed audit; fix before handoff.
+
+### Consistency locks
+- [ ] Accent lock: ONE accent color, used identically across all sections (no blue CTA appearing on a warm-grey page in section 7)
+- [ ] Radius lock: ONE corner-radius system (all-sharp / all-soft / all-pill), or a documented mixed rule applied everywhere
+- [ ] Theme lock: ONE theme (light, dark, or auto) for the whole page; no single section inverting mid-scroll
+
+### Layout counts
+- [ ] Eyebrow count: micro-labels (uppercase + letter-spacing above section headlines) <= ceil(sectionCount / 3); hero counts as one
+- [ ] Layout-family repetition: no layout family (3-col cards, image+text split, full-width quote, bento...) used for more than one section; a page of 8 sections uses >= 4 distinct families
+- [ ] Zigzag cap: max 2 consecutive image+text split sections; the 3rd consecutive one fails
+- [ ] Marquee: max 1 horizontal marquee per page
+- [ ] Bento cell count: N items → exactly N cells; no empty filler tiles
+- [ ] Long lists (> 5 items): grouped chunks / card grid / tabs / carousel — not a default `<ul>` with a hairline under every row
+
+### Hero discipline
+- [ ] Hero fits the initial viewport: headline <= 2 lines desktop, subtext <= 20 words, primary CTA visible without scroll
+- [ ] Hero stack: max 4 text elements (eyebrow OR brand strip, headline, subtext, CTAs); no trust micro-strip / pricing teaser / tagline-under-CTAs inside the hero
+- [ ] Logo wall lives in its own section BELOW the hero, never inside it
+
+### CTA and copy counts
+- [ ] ZERO em-dashes: `grep -rn '—' <output files>` returns nothing in visible strings; en-dash (`–`) not used as a separator either (hyphen only)
+- [ ] No CTA label wraps to 2+ lines at desktop (primary CTA <= 3 words)
+- [ ] One label per CTA intent: no "Get in touch" + "Let's talk" (same contact intent) coexisting on one page; same for signup and portfolio intents
+- [ ] Every CTA/button text passes WCAG AA contrast against its own background (no white-on-white, no ghost button vanishing over photos)
+
+### Navigation
+- [ ] Nav renders on a single line at desktop (condense labels or use hamburger if not)
+- [ ] Nav height <= 80px desktop
+
+### Typography & icons
+- [ ] Inter used only with an explicit justification (user asked for neutral/Linear-style, or public-sector/a11y-first brief) — never by reflex
+- [ ] ONE icon family per project: grep icon imports; all come from a single library, consistent strokeWidth
+- [ ] lucide-react present only if explicitly requested or already a project dependency

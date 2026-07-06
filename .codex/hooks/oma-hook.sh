@@ -11,8 +11,8 @@ if [ -f "$__oma_dedup_lock" ]; then
 fi
 echo "$$" > "$__oma_dedup_lock"
 __oma_bin=""
-if [ -x "/Users/gracefullight/.bun/bin/oma" ]; then
-  __oma_bin="/Users/gracefullight/.bun/bin/oma"
+if [ -x "/home/runner/.bun/bin/oma" ]; then
+  __oma_bin="/home/runner/.bun/bin/oma"
 elif command -v oma >/dev/null 2>&1; then
   __oma_bin="$(command -v oma)"
 fi

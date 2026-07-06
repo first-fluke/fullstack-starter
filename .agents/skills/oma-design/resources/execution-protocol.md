@@ -21,6 +21,15 @@ If it does not exist:
 
 **MUST complete before proceeding. Never skip context gathering.**
 
+### Redesign Mode Detection
+If the target is an existing site or app (not greenfield), load
+`resources/redesign-protocol.md` FIRST and classify the mode:
+Greenfield / Redesign-Preserve / Redesign-Overhaul. If ambiguous, ask
+once: "Preserve the existing brand, or start visually from scratch?"
+For Preserve mode, run the redesign audit (brand tokens, IA, SEO
+baseline, patterns to preserve/retire) and record it in
+`.design-context.md` before any proposal.
+
 ### Vendor Inspiration Detection
 After `.design-context.md` exists (either newly created or already present):
 1. Parse the `## Reference Sites` section (if any) and extract bare
@@ -106,6 +115,17 @@ If the request is already detailed: skip to Phase 4.
 
 ## Phase 4: PROPOSE (Multi-Concept)
 
+### Design Read (declare before proposing)
+Open Phase 4 with a one-line Design Read so the direction is inferred
+from the brief, not from a default aesthetic:
+
+> "Reading this as: \<page kind> for \<audience>, with a \<vibe>
+> language, leaning toward \<aesthetic family or design system>."
+
+If the read genuinely diverges into two directions, ask exactly ONE
+clarifying question (e.g. "closer to Linear-clean or Awwwards-
+experimental?"). If it can be inferred, declare it and proceed.
+
 ### Default: No vendor seed
 Present 2-3 distinct design directions. Each direction must include:
 
@@ -115,6 +135,11 @@ Present 2-3 distinct design directions. Each direction must include:
 4. **Motion strategy**: scroll-driven / hover-based / entrance-only / minimal
 5. **Component recommendations**: which libraries (shadcn base + Aceternity / React Bits accents)
 6. **Visual mood**: one-sentence description of the feel
+7. **Posture axes**: state each direction's position in plain words on
+   three axes — layout variance (symmetric ↔ asymmetric), motion
+   (static ↔ cinematic), density (airy ↔ packed). Trust-first /
+   public-sector / accessibility-critical briefs pull all three toward
+   the conservative end and OVERRIDE aesthetic preference.
 
 Present as a comparison table with pros/cons for each direction.
 
@@ -164,6 +189,10 @@ Based on the chosen direction:
    - Tailwind config extensions (`theme.extend.colors`)
    - shadcn/ui theme variables (if shadcn is in use)
 4. Generate component code if requested by the user
+5. For any page or component that needs imagery, logos, or product
+   previews, follow `resources/asset-strategy.md` (generation via
+   oma-image first → picsum seed → labeled placeholder + report).
+   Div-based fake screenshots are banned.
 
 ### Responsive-First Rule
 ALL generated designs MUST be responsive by default. Never produce desktop-only layouts.
@@ -219,6 +248,15 @@ Load `resources/checklist.md` and run all checks in order:
    - All colors from defined palette
    - All spacing from 8px grid scale
    - Typography uses defined scale
+
+6. **Mechanical Checks** (checklist.md section 6 — countable, not judgment)
+   - Consistency locks: one accent, one radius system, one theme per page
+   - Layout counts: eyebrow <= ceil(sections/3), no repeated layout
+     family, zigzag cap 2, marquee max 1, bento N items → N cells
+   - Hero discipline: fits viewport, max 4 text elements, logo wall below
+   - CTA: no label wrap, one label per intent, AA contrast on every button
+   - Copy self-audit: re-read every visible string (anti-patterns.md
+     "Content & Copy")
 
 Fix violations automatically where possible, or report to user with recommendations.
 
