@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.24.1](https://github.com/first-fluke/fullstack-starter/compare/v2.24.0...v2.24.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* **root:** clear leaked git hook env for flutter in worktrees ([d282ac7](https://github.com/first-fluke/fullstack-starter/commit/d282ac742a9ac2282eca8347100620a20256af11))
+
 ## [2.24.0](https://github.com/first-fluke/fullstack-starter/compare/v2.23.0...v2.24.0) (2026-06-29)
 
 
