@@ -92,7 +92,9 @@ fi
 
 if echo "$changed" | grep -q "^apps/mobile/"; then
     echo "[pre-commit] apps/mobile detected, running lint..."
-    mise //apps/mobile:lint || exit 1
+    # Clear leaked git hook env so flutter's internal git targets its own SDK,
+    # not this worktree (GIT_DIR is absolute in linked worktrees and hijacks it).
+    env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE mise //apps/mobile:lint || exit 1
 fi
 
 if echo "$changed" | grep -qE "Dockerfile$"; then
@@ -127,6 +129,8 @@ fi
 
 if echo "$changed" | grep -q "^apps/mobile/"; then
     echo "[pre-push] apps/mobile detected, running test..."
-    mise //apps/mobile:test || exit 1
+    # Clear leaked git hook env so flutter's internal git targets its own SDK,
+    # not this worktree (GIT_DIR is absolute in linked worktrees and hijacks it).
+    env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE mise //apps/mobile:test || exit 1
 fi
 '''
