@@ -1,16 +1,26 @@
 name: Mobile CI
 
+# Cost controls (Actions minutes):
+# - path filters so non-mobile monorepo edits skip this workflow
+# - concurrency cancel-in-progress (macos is 10x billable — cancel stale)
+# - PR runs analyze/test only; build-android/ios/deploy stay main-push only
+# - prefer ubuntu for analyze; never matrix macos on every PR
+
 on:
   push:
     branches: [main]
     paths:
       - "apps/mobile/**"
-      - ".github/workflows/mobile-ci.yml"
+      - ".github/workflows/deploy-mobile.yml"
   pull_request:
     branches: [main]
     paths:
       - "apps/mobile/**"
   workflow_dispatch:
+
+concurrency:
+  group: mobile-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: "3.38.5"
