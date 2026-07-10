@@ -1,17 +1,33 @@
 name: release-please
 
+# Cost controls: skip docs-only / config noise so release-please does not
+# burn a runner minute on every docs commit. Conventional-commit product
+# changes still re-run it via the remaining paths (or lack of paths-ignore match).
+
 on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".agents/**"
+      - ".serena/**"
+      - "LICENSE"
+      - ".gitignore"
 
 permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-please
+  cancel-in-progress: true
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: googleapis/release-please-action@v5
         with:
