@@ -116,6 +116,7 @@ export function primerContext(): string {
     "- Code discovery / reading: `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`.",
     "- Code edits: `replace_symbol_body`, `insert_after_symbol`, `insert_before_symbol`, `replace_content`.",
     "- Native grep/glob: only for initial filename/path discovery. Do not fall back to grep + Read for code navigation just because Serena's tools aren't loaded yet — load them.",
+    "- Exception — MCP timeout: if a Serena MCP call times out or hangs (seen mainly in OpenCode Desktop's long-lived sidecar), stop retrying MCP for this session: use native search/read for code, and access `.serena/memories/` files directly (or `serena memories read|write` when Serena CLI ≥ 1.5 is installed) for memory work. A full app relaunch restores Serena MCP.",
   ].join("\n");
 }
 

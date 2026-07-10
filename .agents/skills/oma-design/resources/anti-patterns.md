@@ -5,7 +5,7 @@
 
 ## Typography
 - DON'T: Default to custom Google Fonts when system fonts suffice
-- DON'T: Use Inter or Geist alone without considering project context
+- DON'T: Reach for Inter as the default custom sans. When a custom font is justified (brand identity), pick deliberately from alternatives first (Geist, Outfit, Cabinet Grotesk, Satoshi, or a brand-appropriate face). Inter-by-reflex is the LLM signature. OVERRIDE: Inter is acceptable when the user explicitly asks for a neutral / standard / Linear-style feel, or the brief is public-sector / accessibility-first. CJK rules always win (Pretendard Variable / Noto Sans CJK)
 - DON'T: Load 3+ font families without clear justification
 - DON'T: Set body text below 16px on mobile
 - DON'T: Use light font-weight (300) for body on dark backgrounds without testing contrast
@@ -62,6 +62,47 @@
 - DO: Always honor prefers-reduced-motion media query
 - DO: Use Intersection Observer to trigger animations only when visible
 - DO: Pause off-screen Canvas/WebGL renderers
+
+## Content & Copy
+- DON'T: Generic persona names ("John Doe", "Jane Smith") or slop brand names ("Acme", "Nexus", "SmartFlow", "Cloudly")
+- DON'T: Fake-perfect numbers (99.99%, 50%, 1234567); use organic data (47.2%) or label mocks explicitly
+- DON'T: Fake-precise specs the brand never claimed (invented "5.8mm", "4.1x" for spec aesthetics)
+- DON'T: Filler verbs — "Elevate", "Seamless", "Unleash", "Next-Gen", "Revolutionize", "Game-changer"
+- DON'T: Lorem Ipsum; write real draft copy
+- DON'T: Poetic/performative section labels ("From the field", "Quietly trusted by", "On our desks"); use plain functional labels ("Testimonials", "Latest writing") or none
+- DON'T: Section-number eyebrows ("001 · Capabilities", "06 · how it works") or version labels in the hero (BETA, V0.6) unless the brief is a launch
+- DON'T: Scroll cues ("Scroll to explore", animated mouse icons) or decorative locale/time/weather strips
+- DON'T: Mix copy registers (technical mono + editorial prose + marketing punch) in one page without brand justification
+- DON'T: Quotes longer than 3 lines; attribution is name + role, never name only ("- Sarah")
+- DON'T: Em-dash (`—`) ANYWHERE in visible output — the #1 LLM stylistic tell. Zero tolerance: banned in headlines, eyebrows, pills, body copy, quotes, attribution, captions, button text, and alt text. No "sparingly" allowance — the model ignores soft limits. Restructure instead: two sentences, a comma, parentheses, or a colon
+- DON'T: En-dash (`–`) as a separator; date ranges (2018-2026) and number ranges use a plain hyphen. The only permitted dashes are the hyphen (`-`) and the math minus sign
+- DO: Copy self-audit before handoff — re-read every visible string; rewrite anything grammatically broken, unclear-referent, or AI-cute. Plain functional copy beats clever broken copy
+- DO: One label per CTA intent across the page
+- DO: Apply register rules per content language (CJK copy follows i18n-guide)
+
+## Consistency Locks
+- DON'T: Introduce a second accent color mid-page (a rose-accented site does not get a teal badge in the footer)
+- DON'T: Mix corner-radius systems without a documented rule (round buttons in a square layout is broken design)
+- DON'T: Invert theme for a single section mid-page (one light warm-paper section inside a dark page reads as a paste accident)
+- DO: Pick accent, radius scale, and theme ONCE per page; lock them; audit every component against the locks before handoff
+- DO: If a deliberate full theme switch is a composition device, use it at most once per page with a strong transition
+
+## Assets & Imagery
+- DON'T: Div-based fake screenshots (fake dashboards, task lists, terminal windows built from styled divs) — the #1 AI-design tell
+- DON'T: Text-only pages passing as "minimalism"; even restrained pages need 2-3 real images
+- DON'T: Plain text wordmarks in "Trusted by" logo walls; use real SVG logos or generated monogram marks
+- DON'T: Hand-rolled SVG icons or decorative illustrations by default
+- DON'T: Pills/labels overlaid on images, photo-credit captions as decoration, guessed Unsplash URLs
+- DO: Source priority: image generation (oma-image) → picsum seed → labeled placeholder slot + tell the user
+- DO: See `resources/asset-strategy.md` for full rules
+
+## Iconography
+- DON'T: Default to `lucide-react`. It ships with shadcn/ui, so every AI-generated site carries the same icon set. OVERRIDE: acceptable when the user explicitly asks for it, or the project already depends on it (including shadcn base components — never mix families to escape it)
+- DON'T: Hand-roll SVG icon paths. If a glyph is missing, install a second allowed library or compose from primitives
+- DON'T: Mix icon families in one component tree (no Phosphor + Lucide together)
+- DON'T: Inconsistent stroke widths; standardize strokeWidth globally (e.g. 1.5 or 2.0)
+- DO: Pick deliberately, priority order: `@phosphor-icons/react` > `hugeicons-react` > `@radix-ui/react-icons` > `@tabler/icons-react`
+- DO: One icon family per project, declared in DESIGN.md
 
 ## Components
 - DON'T: Glassmorphism on every element; reserve for badges, nav pills, accent cards

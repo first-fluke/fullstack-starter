@@ -24,6 +24,7 @@ DESIGN.md is the central artifact; all design work revolves around it.
 - Creating or auditing `DESIGN.md`
 - Selecting typography, color, layout, motion, or component direction
 - Reviewing UI work for responsive behavior, accessibility, and visual quality
+- Redesigning an existing site or app (preserve vs overhaul modes)
 - Using optional vendor inspiration from Stitch MCP or getdesign
 
 ### When NOT to use
@@ -81,6 +82,7 @@ outputs:
 
 ### Transitions
 - If `.design-context.md` is missing, create it before continuing.
+- If the target is an existing site/app, load `resources/redesign-protocol.md` and classify Preserve vs Overhaul before proposing.
 - If CJK support is needed, prioritize CJK-ready fonts.
 - If vendor seed fetch fails, choose retry, continue without seed, or abort.
 - If anti-patterns appear, surface alternatives before finalizing.
@@ -151,12 +153,16 @@ bunx getdesign@latest list
 8. WCAG AA minimum for all designs. Respect `prefers-reduced-motion`.
 9. Stitch MCP is optional; all phases work without it.
 10. Present 2-3 design directions and get user confirmation before generating.
+11. Declare a one-line Design Read before proposing: "Reading this as: \<page kind> for \<audience>, with a \<vibe> language." If genuinely ambiguous, ask exactly ONE clarifying question — never guess, never a question dump.
+12. Redesigns follow `resources/redesign-protocol.md`: detect Preserve vs Overhaul, audit before touching, never silently change URLs, nav labels, form field names, or brand marks.
+13. Visual assets follow `resources/asset-strategy.md`: image generation (oma-image) first, picsum seed second, labeled placeholder last. Div-based fake screenshots are banned.
+14. Consistency locks: one accent color, one corner-radius system, one theme per page. Lock them early, audit against them in Phase 6 (checklist section 6 mechanical checks).
 
 ### Anti-Pattern Quick Reference
 
 ### Typography
 - DON'T: Default to custom Google Fonts when system fonts suffice
-- DON'T: Use Inter/Geist alone without considering project context
+- DON'T: Reach for Inter as the default custom sans (LLM signature); override only on explicit neutral/Linear-style ask or public-sector/a11y-first brief
 - DON'T: Load 3+ font families without justification
 - DON'T: Body text below 16px on mobile
 - DO: System font stack first, custom fonts for brand identity only
@@ -190,8 +196,20 @@ bunx getdesign@latest list
 ### Components
 - DON'T: Glassmorphism everywhere; use sparingly
 - DON'T: Hover-only interactions without touch/keyboard alternatives
+- DON'T: Default to lucide-react or hand-rolled SVG icons; pick one family deliberately (Phosphor > HugeIcons > Radix > Tabler; lucide on explicit ask or existing dependency)
 - DO: shadcn/ui for base, Aceternity UI / React Bits for accent effects
 - DO: All interactive elements must have visible focus states
+
+### Content & Copy
+- DON'T: "John Doe" personas, "Acme/Nexus" brand names, Lorem Ipsum, fake-perfect numbers (99.99%)
+- DON'T: Filler verbs ("Elevate", "Seamless", "Unleash") or performative labels ("Quietly trusted by")
+- DON'T: Em-dash (`—`) anywhere in visible output — zero tolerance, no "sparingly" allowance; en-dash as separator also banned (hyphen only)
+- DO: Copy self-audit before handoff — re-read every visible string, rewrite anything broken or AI-cute
+- DO: One label per CTA intent per page
+
+### Assets
+- DON'T: Div-based fake screenshots; text wordmark logo walls; hand-rolled SVG icons
+- DO: oma-image generation first → picsum seed → labeled placeholder + report
 
 ### Workflow Summary
 7 phases: Setup → Extract → Enhance → Propose → Generate → Audit → Handoff.
@@ -235,12 +253,14 @@ injection defenses, and multi-vendor merge policy live in
 ### Resources
 - `resources/execution-protocol.md`: 7-phase workflow
 - `resources/anti-patterns.md`: Full DO/DON'T catalog
-- `resources/checklist.md`: Audit checklist (Responsive + WCAG + Nielsen + Slop)
+- `resources/checklist.md`: Audit checklist (Responsive + WCAG + Nielsen + Slop + Mechanical counts)
 - `resources/design-md-spec.md`: DESIGN.md generation guide (9 sections)
 - `resources/design-tokens.md`: CSS/Tailwind/shadcn export templates
 - `resources/prompt-enhancement.md`: Vague request to detailed spec
 - `resources/stitch-integration.md`: Stitch MCP tool mapping (optional)
 - `resources/getdesign-fetcher.md`: Vendor seed fetch, hash verify, seed rules
+- `resources/redesign-protocol.md`: Preserve/Overhaul modes, audit-first, modernization levers
+- `resources/asset-strategy.md`: Image sourcing priority, logo walls, fake-screenshot ban
 - `resources/error-playbook.md`: Design error recovery
 
 ## References
