@@ -67,7 +67,14 @@ typecheck = { depends = ["//apps/api:typecheck", "//apps/web:typecheck"], descri
 
 [tasks."git:commit-msg"]
 description = "Validate commit message using commitlint"
-run = "bunx @commitlint/cli@20 --edit $1"
+# Pin bunx's extract cache to a persistent dir so macOS's periodic $TMPDIR
+# (/var/folders) reaper can't partially prune it and corrupt commitlint.
+# Cross-platform: the run line has no shell-specific syntax, so it works under
+# both `sh -c` (unix) and `cmd /c` (windows); mise appends the commit-msg path.
+# TMPDIR is inert on Windows (bun resolves temp via %TEMP%), and bunx auto-
+# creates the dir, so no mkdir/export is needed.
+env = { TMPDIR = "{{env.HOME}}/.bun/bunx-tmp" }
+run = "bunx @commitlint/cli@20 --edit"
 
 [tasks."git:pre-commit"]
 description = "Run conditional checks for staging files"
