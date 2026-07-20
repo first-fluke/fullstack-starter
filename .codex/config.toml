@@ -1,6 +1,5 @@
 [features]
 goals = true
-child_agents_md = true
 hooks = true
 
 [mcp_servers.serena]

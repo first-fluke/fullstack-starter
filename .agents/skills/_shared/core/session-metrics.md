@@ -46,7 +46,7 @@ Agents that frequently require re-direction consume more tokens and user time th
 
 ## Session Log Format
 
-Orchestrator maintains this log in `.serena/memories/session-metrics.md` during execution.
+Orchestrator maintains this log in `.agents/state/memories/session-metrics.md` during execution.
 
 ```markdown
 ## Session: {SESSION_ID}
@@ -172,8 +172,8 @@ This data is sourced from the Experiment Ledger at session end (see `experiment-
 
 ## Metrics Retention
 
-- **Active session**: `.serena/memories/session-metrics.md`
-- **Completed sessions**: Archived to `.serena/memories/archive/metrics-{date}.md`
+- **Active session**: `.agents/state/memories/session-metrics.md`
+- **Completed sessions**: Archived to `.agents/state/memories/archive/metrics-{date}.md`
 - **Retention**: 30 days (configurable)
 - **Aggregation**: `oma stats` command summarizes trends
 

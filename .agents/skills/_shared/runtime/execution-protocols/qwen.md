@@ -2,14 +2,15 @@
 
 When running as a CLI subagent, follow this protocol for shared state coordination.
 
-## MCP Memory Tools
+## Memory Tools
 
-Tool names are configurable via `mcp.json → memoryConfig.tools`:
-- `[READ]` → default: `read_memory`
-- `[WRITE]` → default: `write_memory`
-- `[EDIT]` → default: `edit_memory`
+Coordination artifacts are read and written as plain files with your native file tools.
+Tool names remain configurable via `mcp.json → memoryConfig.tools`:
+- `[READ]` → default: `Read`
+- `[WRITE]` → default: `Write`
+- `[EDIT]` → default: `Edit`
 
-Memory base path is configurable via `memoryConfig.basePath` (default: `.serena/memories`).
+Memory base path is configurable via `memoryConfig.basePath` (default: `.agents/state/memories`). Create the directory if it does not yet exist.
 
 ### Path Resolution (CRITICAL)
 

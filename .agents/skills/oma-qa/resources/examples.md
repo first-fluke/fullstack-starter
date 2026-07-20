@@ -21,7 +21,7 @@ Status: FAIL
    - Fix: Add @limiter.limit("5/minute")
 
 ### Passed
-- [x] Passwords hashed with bcrypt (cost 12)
+- [x] Passwords hashed with Argon2id
 - [x] JWT properly signed with RS256
 - [x] Refresh token rotation implemented
 - [x] CORS configured (not wildcard)
@@ -73,7 +73,7 @@ Status: WARNING
 **Output**:
 ```
 # QA Report: Pre-Launch Audit
-Status: WARNING
+Status: FAIL
 
 ## Summary
 - Security: 0 CRITICAL, 1 HIGH, 2 MEDIUM

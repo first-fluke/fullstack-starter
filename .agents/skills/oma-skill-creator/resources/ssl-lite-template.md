@@ -152,6 +152,18 @@ Use `### Canonical workflow path` instead when the skill is decision-heavy rathe
 | `resource_scope`, `resource_target` | `Logical Operations / Resource scope` |
 | Source-adjacent evidence | `References` |
 
+## Utility Content Rubric (SkillLens)
+
+Three content dimensions predict whether a skill measurably improves task outcomes
+(SkillLens, arXiv:2605.23899). Section structure and formatting alone do not — apply these
+while filling the template:
+
+| Dimension | Where in the template | What "good" looks like |
+|-----------|----------------------|------------------------|
+| Failure mechanism encoding | `Failure and recovery`, `Guardrails` | States *why* the agent fails in this domain with an executable remedy — not generic advice |
+| Actionable specificity | Canonical path, `Scenes` | Step-level procedure referencing concrete domain objects, tools, flags, and paths |
+| High-risk action blacklist | `Guardrails` | Explicitly forbids the domain's specific harmful action patterns, not only positive instructions |
+
 ## Inline vs Resource Rule
 
 Keep inline:

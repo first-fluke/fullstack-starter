@@ -25,11 +25,6 @@
         "timeout": 3
       }
     ],
-    "PreToolUse": {
-      "hook": "test-filter.ts",
-      "matcher": "run_command",
-      "timeout": 5
-    },
     "Stop": {
       "hook": "persistent-mode.ts",
       "timeout": 5

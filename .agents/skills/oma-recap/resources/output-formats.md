@@ -40,7 +40,7 @@ For any multi-day window, use a **project-driven structure** like a sprint repor
 Focus on what was accomplished per project, not day-by-day chronology.
 
 ```markdown
-## {start} ~ {end} Monthly Recap
+## {start} ~ {end} Recap
 
 > **TL;DR**
 > - {What I accomplished 1: project name + outcome}
@@ -48,7 +48,7 @@ Focus on what was accomplished per project, not day-by-day chronology.
 > - {What I accomplished 3}
 
 ### Overview
-3-5 sentence narrative of the month. Major focus shifts week-by-week,
+3-5 sentence narrative of the period. Major focus shifts across the window,
 key milestones achieved, and overall direction. Written from "I did X" perspective.
 
 ### {Project A}
@@ -67,8 +67,8 @@ Projects with <30 prompts, summarized briefly.
 - {project}: one-line summary
 
 ### Tool Usage Patterns
-- Tool usage ratios and how they evolved over the month
-- Notable shifts (e.g., "started using Codex mid-month")
+- Tool usage ratios and how they evolved over the period
+- Notable shifts (e.g., "started using Codex midway through the period")
 ```
 
 ## Multi-day grouping rules

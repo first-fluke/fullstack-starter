@@ -26,6 +26,13 @@ partial_fields:
     - statements
     - citation
 
+# Semantic Scholar fallback (optional key)
+# Tier-3 search fallback + `get arXiv:<id>` / `CorpusId:<n>` direct fetch.
+# Anonymous use shares a global pool (429s under load; CLI retries once).
+semanticscholar:
+  env_var: S2_API_KEY          # sent as x-api-key header
+  key_request_url: https://www.semanticscholar.org/product/api
+
 # OpenAlex metadata enrichment (optional)
 # Used during Generate mode to backfill DOI/venue/year when missing
 openalex:
@@ -44,13 +51,13 @@ generation:
   # Average relations per statement (relation wiring quality threshold)
   min_relations_per_statement: 1.5
   # ID format
+  # Methods are statements (statement_type: method) and use "stmt:"; actors have no ids
   id_prefixes:
     statement: "stmt:"
     evidence: "ev:"
     relation: "rel:"
-    method: "method:"
     artifact: "art:"
-    actor: "actor:"
+    representation: "rep:"
 
 # Output behavior
 output:

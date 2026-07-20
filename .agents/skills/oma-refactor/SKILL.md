@@ -49,8 +49,10 @@ outputs:
     required: false
 ```
 
+Standalone runs write plan / before-after reports under `.agents/results/refactor/`; orchestrated runs (via the `refactor-engineer` agent) write `.agents/results/result-refactor[-{sessionId}].md` per the agent execution protocol.
+
 ### Dependencies
-- `resources/definition.md` (invariant definition: 5 properties, boundaries, destination principle, inline evidence)
+- `resources/definition.md` (invariant definition: 5 properties, boundaries, destination principle, naming roles, inline evidence)
 - `resources/measurement.md` (4-layer measurement + git forensics commands)
 - `resources/governance.md` (org parameters: budget floor, 500-line gate, tool registry)
 - Serena MCP symbol/reference tools; project test runners per registry (vitest / pytest / flutter_test)
@@ -115,7 +117,7 @@ outputs:
 | Report delta | `NOTIFY` | Metric + readability before/after |
 
 ### Tools and instruments
-- Serena MCP: `find_symbol`, `find_referencing_symbols`, `search_for_pattern` for impact analysis
+- Serena MCP: `find_symbol`, `find_referencing_symbols`, `search_for_pattern` for impact analysis; `rename_symbol` for engine-executed renames
 - Deterministic transformers: IDE refactoring actions, codemods (jscodeshift / OpenRewrite / ast-grep / comby)
 - Metrics: lizard / radon (complexity) — both are PyPI packages, run via `uvx lizard` / `uvx radon` so no pre-install is required; per-language linters with `max-lines` gates
 - Test stack per registry: vitest + StrykerJS / pytest + mutmut / flutter_test (see `resources/governance.md`)
@@ -159,7 +161,7 @@ outputs:
 8. All metrics are proxies (Goodhart): a 499-line mechanical split, assertion-free coverage, or pattern-count gains are failures, not wins.
 
 ## References
-- Invariant definition (5 properties, boundaries, destination, contexts, D&C, inline evidence): `resources/definition.md`
+- Invariant definition (5 properties, boundaries, destination, naming roles, contexts, D&C, inline evidence): `resources/definition.md`
 - Measurement: 4 layers + git forensics commands: `resources/measurement.md`
 - Org parameters: budget floor, 500-line gate, tool registry: `resources/governance.md`
 - Context loading: `../_shared/core/context-loading.md`

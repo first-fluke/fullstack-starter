@@ -68,9 +68,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Rate Limit / Quota Error (Gemini API)
+## Rate Limit / Quota Error (LLM runtime)
 
-**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
+**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded` (any vendor runtime — Gemini, Claude, Codex, etc.)
 
 1. **Stop immediately**; do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`

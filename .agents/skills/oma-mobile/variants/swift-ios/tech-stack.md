@@ -2,12 +2,12 @@
 
 ## Framework: SwiftUI + Observation
 
-- **Language**: Swift 5.9+ (Swift 6 compatible)
+- **Language**: Swift 6.0+ floor, strict-concurrency clean (current stable is Swift 6.3, July 2026)
 - **UI Framework**: SwiftUI
 - **State Management**: Observation framework (`@Observable`, iOS 17+)
 - **Concurrency**: Swift async/await + structured concurrency (`Task`, `TaskGroup`, `AsyncStream`)
 - **Minimum Deployment**: iOS 17.0
-- **Tooling**: Xcode 15+, Swift Package Manager (SwiftPM)
+- **Tooling**: Xcode 16+ floor (current stable is Xcode 26, July 2026), Swift Package Manager (SwiftPM)
 
 `@Observable` replaces `ObservableObject`/`@Published` for SwiftUI view models. The macro synthesizes observation tracking at compile time with zero boilerplate and no Combine dependency.
 
@@ -27,12 +27,14 @@ generated sources.
 
 `swift-openapi-generator` runs in one of two modes — **both build a real app**; the choice is
 a workflow trade-off, not a capability one. This variant is the baseline default; the
+<!-- oma-docs:ignore-start -->
 per-project `stack/stack.yaml` (seeded by `/stack-set`) pins which mode the repo uses.
 
 | Mode | Mechanics | Trade-off |
 |------|-----------|-----------|
 | **Build plugin** (Apple-recommended default) | Generator runs during the build; output is ephemeral (not committed). Declared in `Package.swift` `plugins:` for SwiftPM targets, **and works in Xcode app targets too** — Xcode requires "trust & enable" for the plugin (Xcode Cloud needs a post-clone script to bypass fingerprint validation). Spec vendored at `Core/Networking/openapi.yaml`. | Zero commit noise, always in sync; but extra Xcode/CI setup, generated diffs invisible in review, regen on every clean build. |
 | **Committed (command plugin / CLI)** | Apple's documented fallback "if the build plugin cannot be used". Run `swift package generate-code-from-openapi` (or a task: `mise` / `make` / script) → write `Core/Networking/Generated/` → **commit** it; the build sees plain checked-in source. | Generated code is reviewable and CI is simpler; but a human must remember to regenerate + commit on spec changes. |
+<!-- oma-docs:ignore-end -->
 
 ### Where the API contract comes from
 
@@ -79,7 +81,7 @@ See `snippets.md` §10 for the canonical `ResponseCache` actor and cached `TodoS
 ## Local Storage
 
 - **hyperoslo/Cache** — hybrid memory+disk cache for **API response memoization** at the Repository layer (see above). Transient, server-owned data only.
-- **SwiftData** (iOS 17+) — Swift-native ORM built on Core Data; preferred for **durable, user-owned** structured persistence (system of record).
+- **SwiftData** (iOS 17+) — Swift-native ORM built on Core Data; preferred for **durable, user-owned** structured persistence (system of record). See `snippets.md` §11 for a compact `@Model` + `ModelContainer` + repository-fetch example.
 - **UserDefaults / `@AppStorage`** — lightweight key-value preferences.
 - **Keychain** (`Security` framework) — tokens and credentials.
 
@@ -96,7 +98,7 @@ Run tests with `swift test` (SwiftPM projects) or via Xcode's test runner. Targe
 ## Project Layout: App / Core / Features / Shared
 
 This is **not a Swift-specific standard** — it is the idiomatic Swift expression of
-the same *feature-first* principle the Frontend Agent applies (`../../rules/frontend.md`
+the same *feature-first* principle the Frontend Agent applies (`../../../../rules/frontend.md`
 §Architecture). Apple's own SwiftUI samples and the 2025+ community consensus both say
 **group by feature, not by type** (no flat `Views/` `Models/` `ViewModels/`). The shared
 rules across platforms are: feature slices own their UI + state, **no cross-feature

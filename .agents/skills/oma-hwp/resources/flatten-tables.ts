@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
+/// <reference path="./turndown-plugin-gfm.d.ts" />
 /**
  * flatten-tables.ts: post-process kordoc output:
  *   1. convert HTML <table> blocks to GFM pipe tables
@@ -12,13 +13,17 @@
  *     the Hancom font these render as blanks or tofu squares; stripping is
  *     the pragmatic default for AI / plain-MD consumption.
  *
- * Usage: node flatten-tables.ts <file.md> [<file.md>...]
+ * Usage: bun flatten-tables.ts <file.md> [<file.md>...]
+ * (also runs under node >= 22.6 via type stripping)
  */
 
 import { constants } from "node:fs";
 import { access, readFile, writeFile } from "node:fs/promises";
 import TurndownService from "turndown";
 import { tables } from "turndown-plugin-gfm";
+import { replaceBalancedTables } from "./balanced-tables.js";
+
+export { replaceBalancedTables } from "./balanced-tables.js";
 
 const td = new TurndownService({
   headingStyle: "atx",
@@ -29,12 +34,11 @@ const td = new TurndownService({
 td.use(tables);
 
 const files = process.argv.slice(2);
-if (files.length === 0) {
-  console.error("Usage: node flatten-tables.ts <file.md> [<file.md>...]");
+if (import.meta.main && files.length === 0) {
+  console.error("Usage: bun flatten-tables.ts <file.md> [<file.md>...]");
   process.exit(1);
 }
 
-const TABLE_BLOCK = /<table[\s\S]*?<\/table>/g;
 const PUA = /[\uE000-\uF8FF\u{F0000}-\u{FFFFD}\u{100000}-\u{10FFFD}]/gu;
 
 async function main(): Promise<void> {
@@ -50,9 +54,23 @@ async function main(): Promise<void> {
     const src = await readFile(path, "utf8");
 
     let tableCount = 0;
-    let out = src.replace(TABLE_BLOCK, (match: string) => {
+    let keptCount = 0;
+    let out = replaceBalancedTables(src, (match: string) => {
+      const nestedTableCount = (match.match(/<table\b/gi) ?? []).length;
+      if (nestedTableCount > 1) {
+        keptCount += 1;
+        return match;
+      }
+      const converted = td.turndown(match).trim();
+      // turndown-plugin-gfm only converts tables whose first row is <th>
+      // (kordoc always emits one); anything else is kept as HTML — do not
+      // count it as flattened.
+      if (converted.startsWith("<table")) {
+        keptCount += 1;
+        return match;
+      }
       tableCount += 1;
-      return `\n\n${td.turndown(match).trim()}\n\n`;
+      return `\n\n${converted}\n\n`;
     });
 
     let puaCount = 0;
@@ -62,19 +80,23 @@ async function main(): Promise<void> {
     });
 
     if (tableCount === 0 && puaCount === 0) {
-      console.log(`[flatten-tables] ${path}: nothing to change`);
+      const kept = keptCount ? ` (${keptCount} table(s) kept as HTML: no <th> heading row)` : "";
+      console.log(`[flatten-tables] ${path}: nothing to change${kept}`);
       continue;
     }
 
     await writeFile(path, out, "utf8");
     const parts: string[] = [];
     if (tableCount) parts.push(`${tableCount} table(s) flattened`);
+    if (keptCount) parts.push(`${keptCount} table(s) kept as HTML (no <th> heading row)`);
     if (puaCount) parts.push(`${puaCount} PUA char(s) stripped`);
     console.log(`[flatten-tables] ${path}: ${parts.join(", ")}`);
   }
 }
 
-main().catch((err: unknown) => {
-  console.error("[flatten-tables]", err);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().catch((err: unknown) => {
+    console.error("[flatten-tables]", err);
+    process.exit(1);
+  });
+}

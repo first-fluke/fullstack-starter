@@ -16,6 +16,12 @@ You have been assigned a specific task and must complete it autonomously.
 
 {AGENT_SKILL_CONTENT}
 
+## Available Specialist Skills
+
+The following specialist skills are exposed to you for this task (the task's `exposed_skill_set` from the task board). Consult only these; do not pull in other specialists:
+
+{EXPOSED_SKILL_SET}
+
 ## Assigned Task
 
 **Task ID**: {TASK_ID}
@@ -33,7 +39,7 @@ You have been assigned a specific task and must complete it autonomously.
 
 ## Turn Limit
 You have a maximum of {MAX_TURNS} turns to complete this task.
-If you are running low on turns, prioritize:
+From turn {MAX_TURNS_WARNING} onward, prioritize:
 1. Save your current progress to the result file
 2. Document what remains incomplete
 3. Ensure created files are in a usable state
@@ -91,8 +97,8 @@ If you discover a necessary change outside your domain:
 | Placeholder | Source | Example |
 |-------------|--------|---------|
 | `{AGENT_ROLE}` | Agent SKILL.md title | "Backend Specialist" |
-| `{AGENT_ID}` | Task assignment | "backend" |
 | `{AGENT_SKILL_CONTENT}` | Agent SKILL.md (tech stack, architecture, checklist sections) | Full markdown content |
+| `{EXPOSED_SKILL_SET}` | task-board.md (`Exposed Skills` field) | "oma-backend, oma-db" |
 | `{TASK_ID}` | task-board.md | "task-1" |
 | `{TASK_TITLE}` | task-board.md | "JWT authentication API" |
 | `{TASK_PRIORITY}` | task-board.md | "1" |

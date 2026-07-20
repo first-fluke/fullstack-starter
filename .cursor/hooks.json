@@ -17,6 +17,26 @@
         "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'beforeSubmitPrompt'",
         "timeout": 21
       }
+    ],
+    "preToolUse": [
+      {
+        "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'preToolUse' --matcher 'Shell'",
+        "timeout": 13,
+        "matcher": "Shell"
+      }
+    ],
+    "stop": [
+      {
+        "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'stop'",
+        "timeout": 10,
+        "loop_limit": null
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'sessionStart'",
+        "timeout": 13
+      }
     ]
   },
   "version": 1

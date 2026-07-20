@@ -7,19 +7,18 @@ OPA policies, Sentinel rules, and infrastructure testing patterns.
 ### Required Tags Policy
 ```rego
 # required_tags.rego
+# OPA >= 1.0 syntax: `contains`/`if` are mandatory for partial set rules.
+# On OPA < 1.0, add `import rego.v1` (do not use the deprecated future.keywords).
 package terraform.tags
 
-import future.keywords.if
-import future.keywords.in
-
-deny[msg] if {
+deny contains msg if {
   resource := input.resource_changes[_]
   resource.mode == "managed"
   not resource.change.after.tags
   msg := sprintf("Resource %s missing required tags", [resource.address])
 }
 
-deny[msg] if {
+deny contains msg if {
   resource := input.resource_changes[_]
   required_tags := {"Environment", "Project", "Owner"}
   missing := required_tags - object.keys(resource.change.after.tags)
@@ -33,7 +32,7 @@ deny[msg] if {
 # encryption_required.rego
 package terraform.encryption
 
-deny[msg] if {
+deny contains msg if {
   resource := input.resource_changes[_]
   resource.type == "aws_s3_bucket"
   not resource.change.after.server_side_encryption_configuration
@@ -46,7 +45,7 @@ deny[msg] if {
 # cost_control.rego
 package terraform.cost
 
-deny[msg] if {
+deny contains msg if {
   resource := input.resource_changes[_]
   resource.type == "aws_instance"
   instance_type := resource.change.after.instance_type
@@ -86,6 +85,38 @@ main = rule {
   }
 }
 ```
+
+## Native `terraform test` (Terraform >= 1.6)
+
+Prefer the built-in HCL test framework for module tests before reaching for Terratest.
+
+```hcl
+# tests/vpc.tftest.hcl
+variables {
+  name       = "test-vpc"
+  cidr_block = "10.0.0.0/16"
+}
+
+run "creates_vpc_with_expected_cidr" {
+  command = plan
+
+  assert {
+    condition     = google_compute_network.main.name == "test-vpc"
+    error_message = "VPC name does not match input"
+  }
+}
+
+run "apply_and_verify_outputs" {
+  command = apply
+
+  assert {
+    condition     = length(output.private_subnet_ids) == 2
+    error_message = "Expected 2 private subnets"
+  }
+}
+```
+
+Run with `terraform test`. `command = plan` runs assertion-only checks without creating resources; `command = apply` provisions real (or mocked, via `mock_provider`) resources and destroys them afterward.
 
 ## Terratest (Go)
 

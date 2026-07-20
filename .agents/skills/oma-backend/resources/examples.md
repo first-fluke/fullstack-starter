@@ -47,7 +47,7 @@
 - POST /api/auth/refresh (refresh token rotation)
 
 ### Security
-- [x] Password hashed with bcrypt (cost 12)
+- [x] Password hashed with Argon2id
 - [x] Access token: 15min expiry
 - [x] Refresh token: 7 day expiry, single-use rotation
 - [x] Rate limiting: 5 attempts/min on login

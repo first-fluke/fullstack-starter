@@ -1,6 +1,8 @@
 {
   "project_name": "",
   "description": "",
+  "session_id": "{YYYYMMDD}-{HHMMSS}",
+  "created": "",
   "tech_stack": {
     "frontend": "",
     "backend": "",
@@ -18,7 +20,7 @@
   "tasks": [
     {
       "id": "task-1",
-      "agent": "backend|frontend|mobile|qa",
+      "agent": "backend|frontend|mobile|db|qa|debug|pm|architecture|refactor|tf-infra|docs",
       "title": "",
       "description": "",
       "priority": 1,
@@ -54,5 +56,20 @@
     "integration_tests": "",
     "e2e_tests": "",
     "performance_tests": ""
+  },
+  "project_controls": {
+    "iso_21500": {
+      "scope_defined": false,
+      "stakeholders_identified": [],
+      "dependencies_mapped": false
+    },
+    "iso_31000": {
+      "top_risks": [],
+      "treatments": []
+    },
+    "iso_38500": {
+      "decision_owner": "",
+      "approval_required_for": []
+    }
   }
 }

@@ -25,13 +25,13 @@ Follow these steps in order (adjust depth by difficulty).
 - Decide on component structure (which are new, which extend existing)
 - Define props interfaces with TypeScript
 - Plan state management approach (Jotai or Zustand for client, nuqs for URL, TanStack Query for server)
-- Identify API integration points (TanStack Query hooks)
+- Identify API integration points (orval-generated TanStack Query hooks when an OpenAPI spec exists; regenerate via the project's `gen:api` task after contract changes)
 - Plan responsive breakpoints and accessibility requirements
 
 ## Step 3: Implement
 - Create/modify files in this order:
   1. TypeScript types/interfaces
-  2. API client hooks (TanStack Query)
+  2. API client hooks (orval-generated from OpenAPI when available; hand-written TanStack Query otherwise)
   3. Reusable UI components (shadcn/ui based)
   4. Feature components (compose UI + logic)
   5. Page components (route-level)

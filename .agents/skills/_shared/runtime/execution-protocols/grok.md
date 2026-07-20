@@ -5,7 +5,7 @@ When running as a Grok subagent or custom agent, follow this protocol for shared
 ## State Management
 
 Use file-based I/O for coordination. Coordination/state files (task-board, progress,
-result hand-offs) MUST be written to the **project-root memory store** `.serena/memories/`
+result hand-offs) MUST be written to the **project-root memory store** `.agents/state/memories/`
 — that is the only location the orchestrator (`oma agent:status`), `oma verify`, and the
 memory/retro tooling read. Writing them anywhere else (e.g. `.agents/results/`) leaves them
 orphaned and your run is reported as `crashed`. Human-facing deliverables (plans, bug
@@ -15,7 +15,7 @@ Grok has good native support for project files and can use terminal commands for
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** `.serena/memories/` directory.
+All result, progress, and state files MUST be written to the **project root** `.agents/state/memories/` directory.
 
 - **Project root** = the git repository root (where `.git` exists)
 - **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
@@ -24,8 +24,8 @@ All result, progress, and state files MUST be written to the **project root** `.
 
 ## On Start
 
-1. Read the assigned task context (from orchestration or user prompt; see `.serena/memories/task-board.md` if present).
-2. Create progress tracking if needed under `.serena/memories/`.
+1. Read the assigned task context (from orchestration or user prompt; see `.agents/state/memories/task-board.md` if present).
+2. Create progress tracking if needed under `.agents/state/memories/`.
 
 ## During Execution
 

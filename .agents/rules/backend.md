@@ -12,7 +12,7 @@ alwaysApply: false
 2. **No business logic in route handlers**
 3. **All inputs validated** with your stack's validation library
 4. **Parameterized queries only** (never string interpolation)
-5. **JWT + bcrypt for auth**; rate limit auth endpoints
+5. **JWT + Argon2id for auth** (bcrypt acceptable for legacy compatibility); rate limit auth endpoints
 6. **Async where supported**; type annotations on all signatures
 7. **Custom exceptions** via centralized error module (not raw HTTP exceptions)
 8. **Explicit ORM loading strategy**: do not rely on default relation loading when query shape matters

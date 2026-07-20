@@ -28,8 +28,8 @@ Call direction is one-way: **skill calls CLI. CLI never calls skill.**
    - If neither exists, create a timestamped id such as `session-YYYYMMDD-HHmmss`.
    - Store the deck title in `meta.json.title`; do not use the title as the directory name.
 
-3. For `import-pptx`: run `oma slide import-pptx <file> --dir <deck-dir>` and skip to Phase 3
-   (use the extracted fragments as the generation base; apply the chosen style on top).
+3. For `import-pptx`: run `oma slide import-pptx <file> --dir <deck-dir>`, skip Phase 1, and continue at Phase 2
+   so the user can choose the style applied to the extracted fragments in Phase 3.
 
 4. For `import-canva`: probe Canva MCP with `list_designs`.
    - If Canva MCP is not configured: offer auto-provisioning (see `resources/canva-integration.md`
@@ -37,7 +37,7 @@ Call direction is one-way: **skill calls CLI. CLI never calls skill.**
      the agy CLI global config (`~/.gemini/antigravity-cli/mcp_config.json`) with user approval.
      Notify that a session restart may be needed, then retry the probe.
    - If configured and authed: `export_design` (PPTX), then `oma slide import-pptx` on the
-     downloaded file. Skip to Phase 3.
+     downloaded file. Skip Phase 1 and continue at Phase 2 for style selection.
    - If configured but unauthed: notify user about OAuth; skip to local import path.
    See `resources/canva-integration.md` for full pipeline details.
 
@@ -59,9 +59,10 @@ Required dimensions:
 - **Purpose** — What is the deck for? (Pitch / report / talk / explainer / internal / external)
 - **Length** — Roughly how many slides? (Or let the skill decide from content scope.)
 - **Content** — What topics, data, or story should the deck cover? Any must-include points?
-- **Density** — How will the deck be used?
-  - `speaker-led` (sparse): large statements, minimal text — speaker fills in detail verbally.
-  - `reading-first` (dense): deck is read standalone; more text and detail per slide.
+- **Density** — How will the deck be used? (`meta.json.density` takes `sparse | balanced | dense`)
+  - speaker-led deck → `sparse`: large statements, minimal text — speaker fills in detail verbally.
+  - reading-first deck → `dense`: deck is read standalone; more text and detail per slide.
+  - in between → `balanced` (the default).
 
 Example combined question:
 > "To get started: what is this deck for (pitch, internal report, talk)? Roughly how many slides? What key topics or story should it cover? And will someone be presenting it live (sparse slides) or will it be read standalone (dense slides)?"
@@ -105,7 +106,7 @@ Write three self-contained `preview-*.html` files (cover slide only, 1920×1080,
 
 Each preview must:
 - Follow the canonical structure: `<div class="deck-viewport"><div class="deck-stage"><section class="slide" …></section></div></div><script src="./deck-stage.js"></script>`
-- Include a link to `./viewport-base.css`
+- Include a link to `./assets/viewport-base.css`
 - Represent the deck's actual tone and content (use the real deck title + first key message)
 - Be readable side-by-side in a browser
 
@@ -153,17 +154,19 @@ Every slide fragment must follow this exact structure:
   </style>
 </head>
 <body>
-  <div class="deck-viewport">
-    <div class="deck-stage">
-      <section
-        class="slide"
-        id="slide-NN"
-        data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text"
-      >
-        <!-- 1920×1080 content -->
-      </section>
+  <deck-stage>
+    <div class="deck-viewport">
+      <div class="deck-stage">
+        <section
+          class="slide"
+          id="slide-NN"
+          data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text"
+        >
+          <!-- 1920×1080 content -->
+        </section>
+      </div>
     </div>
-  </div>
+  </deck-stage>
   <script src="./deck-stage.js"></script>
 </body>
 </html>
@@ -196,7 +199,7 @@ After writing all slides, update `meta.json` in the workdir:
   "title": "<deck title>",
   "order": ["slide-01.html", "slide-02.html", "..."],
   "style": "<preset-slug or bold-template-slug>",
-  "density": "speaker-led | reading-first",
+  "density": "sparse | balanced | dense",
   "speakerNotes": {
     "0": "Notes for slide 1",
     "1": "Notes for slide 2"
@@ -205,6 +208,8 @@ After writing all slides, update `meta.json` in the workdir:
 ```
 
 `order[]` is the **source of truth** for slide sequence. Update it if slides are added/reordered.
+
+Density mapping (see `design-doctrine.md` §5): a speaker-led deck → `sparse`, a reading-first deck → `dense`; `balanced` sits in between and is the default.
 
 ---
 
@@ -220,6 +225,11 @@ oma slide validate --dir <deck-dir> --format json
 
 The CLI renders each slide at 1920×1080 with puppeteer-core (awaits `document.fonts.ready`), checks geometry, and outputs structured findings.
 
+> **Font CDN note:** validate and export render contexts block all network requests **except** the
+> allowlisted font CDNs (`fonts.googleapis.com`, `fonts.gstatic.com`, `cdn.jsdelivr.net`,
+> `fonts.bunny.net`, `use.typekit.net`), so geometry is measured with the real typeface. On an
+> offline machine, run `oma slide bundle --inline-fonts` first or accept fallback-font rendering.
+
 ### 4b. Interpret Findings
 
 The JSON output includes: `{ generatedAt, frame, summary, slides:[{ file, status, issues:[{ code, message, slide, selector?, rect? }] }] }`.
@@ -230,7 +240,7 @@ Failure codes and typical fixes:
 |---|---|---|
 | `no_overflowing_text` | Text overflows the slide boundary | Reduce font size, truncate, split to a new slide, or add `overflow: hidden` to a container |
 | `no_overlapping_text` | Two text elements overlap | Adjust `top/left` positions; increase z-index separation |
-| `slide_sized_text` | Text is too small to read at 1920×1080 | Increase font size to ≥ 28 px |
+| `slide_sized_text` | Text is too small to read at 1920×1080 | Raise font size to ≥ 28 px per doctrine (the validator hard-fails only below 18 px) |
 
 ### 4c. Auto-Fix Rewrite
 
@@ -258,7 +268,7 @@ Re-run `oma slide validate --dir <deck-dir> --format json` after each fix.
 oma slide viewer --dir <deck-dir>
 ```
 
-This generates `viewer.html` with navigation controls, a slide counter, and presenter view. Open it in the browser to review the full deck.
+This generates `viewer.html` with navigation controls, a slide counter, and embedded speaker notes: press `n` to toggle an on-screen notes panel that follows the current slide (there is no separate presenter window). Open it in the browser to review the full deck.
 
 ### 5b. Optional: Aesthetic Review
 
@@ -295,7 +305,7 @@ Inlines `viewport-base.css` and `deck-stage.js`; embeds all `./assets/` images a
 oma slide pdf --dir <deck-dir> [--mode capture|print]
 
 # PNG per slide
-oma slide png --dir <deck-dir> [--resolution 2x]
+oma slide png --dir <deck-dir> [--resolution 2160p]
 
 # PPTX (experimental — raster-backed, gradients rasterized to PNG)
 oma slide pptx --dir <deck-dir>
@@ -310,7 +320,9 @@ PDF and PNG use poster frames in place of video elements (video cannot be includ
 After bundle/export, report:
 - Working directory path
 - List of `slide-NN.html` files created
+<!-- oma-docs:ignore-start -->
 - Path to `out/deck.html` (and any exports)
+<!-- oma-docs:ignore-end -->
 - Canva design URL (if Canva export was performed)
 - Validate status (pass / surfaced diff)
 - Any deferred items (`TODO(oma-deferred)`) such as unresolved image generation
@@ -326,7 +338,7 @@ If the user requests Canva export ("export to Canva", "캔바로 내보내기", 
    - On auth failure: notify user ("Canva MCP is not authenticated.
      Run local exports instead.") and skip.
 
-2. **Render PNGs**: Run `oma slide png --dir <deck-dir> --resolution 2x`
+2. **Render PNGs**: Run `oma slide png --dir <deck-dir> --resolution 2160p`
    to get high-resolution per-slide images.
 
 3. **Upload assets**: For each PNG, call `upload_asset` via Canva MCP.
@@ -350,20 +362,27 @@ error handling, and security considerations.
 
 ```bash
 DECK_DIR=".agents/results/slides/<session-id>"
-oma slide new --dir "$DECK_DIR"                    # scaffold workdir
+oma slide new --dir "$DECK_DIR" [--force]          # scaffold workdir (--force: overwrite non-empty dir)
 oma slide validate --dir "$DECK_DIR" --format json # geometric gate
+oma slide validate --dir "$DECK_DIR" --slide slide-04.html  # single-slide gate (enhance-mode targeted loop)
+oma slide validate --dir "$DECK_DIR" --format json --out report.json  # write JSON report to out/
 oma slide viewer --dir "$DECK_DIR"                 # build viewer.html
-oma slide bundle --dir "$DECK_DIR"
-oma slide pdf   --dir "$DECK_DIR"
-oma slide png   --dir "$DECK_DIR"
-oma slide pptx  --dir "$DECK_DIR"                  # experimental
+oma slide bundle --dir "$DECK_DIR" [--out <file>] [--inline-fonts]  # --inline-fonts: embed CDN @font-face CSS
+oma slide pdf   --dir "$DECK_DIR" [--out <file>] [--mode capture|print]
+oma slide png   --dir "$DECK_DIR" [--out-dir <dir>] [--resolution 720p|1080p|1440p|2160p|4k]
+oma slide pptx  --dir "$DECK_DIR" [--out <file>]   # experimental
+oma slide import-pptx <file.pptx> --dir "$DECK_DIR"
+oma slide fetch-video <url> --dir "$DECK_DIR" [--output-name <name>]
 oma slide styles list                              # browse style index
-oma slide styles get <slug>                        # fetch bold template design.md
-oma slide edit  --dir "$DECK_DIR"                  # bbox visual editor
-oma slide doctor                                   # check deps (Chrome, python, yt-dlp)
+oma slide styles preview <slug>                    # preview a preset in the terminal
+oma slide styles get <slug> [--refresh]            # fetch bold template design.md (--refresh: skip cache)
+oma slide edit  --dir "$DECK_DIR" [--port <n>]     # bbox visual editor (default: auto-probe from 3737)
+oma slide doctor                                   # check deps (chrome, puppeteer-core; optional: yt-dlp, pptxgenjs)
 ```
 
-Exit codes: `0 ok · 4 invalid-input · 6 timeout · 1 error`.
+Env-var overrides: `OMA_CHROME_PATH` (Chrome binary for validate/export), `OMA_YTDLP` (yt-dlp binary for fetch-video), `OMA_HOME` (root for canonical stage assets).
+
+Exit codes: `0 ok · 4 invalid-input · 1 error` (timeouts surface as `1`).
 
 ---
 

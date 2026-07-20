@@ -39,8 +39,8 @@ Read contract and integrate API client exactly as specified:
 ## Tool Reference
 
 Tool names are configured in `mcp.json → memoryConfig.tools`:
-- `[READ]` → default: `read_memory`
-- `[WRITE]` → default: `write_memory`
+- `[READ]` → default: `Read` (direct file read)
+- `[WRITE]` → default: `Write` (direct file write)
 
 ## Contract Format
 

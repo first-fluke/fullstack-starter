@@ -6,6 +6,16 @@
   "projectDirEnv": "CLAUDE_PROJECT_DIR",
   "runtime": "bun",
   "events": {
+    "SessionStart": [
+      {
+        "hook": "serena-primer.ts",
+        "timeout": 3
+      },
+      {
+        "hook": "state-boundary.ts",
+        "timeout": 5
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hook": "keyword-detector.ts",
@@ -24,11 +34,18 @@
         "timeout": 2
       }
     ],
-    "PreToolUse": {
-      "hook": "test-filter.ts",
-      "matcher": "Bash",
-      "timeout": 5
-    },
+    "PreToolUse": [
+      {
+        "hook": "scm-guard.ts",
+        "matcher": "Bash",
+        "timeout": 3
+      },
+      {
+        "hook": "test-filter.ts",
+        "matcher": "Bash",
+        "timeout": 5
+      }
+    ],
     "Stop": {
       "hook": "persistent-mode.ts",
       "timeout": 5

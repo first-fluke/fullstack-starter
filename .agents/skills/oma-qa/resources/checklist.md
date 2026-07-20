@@ -3,7 +3,7 @@
 ## Security Checklist
 
 ### Authentication & Authorization
-- [ ] Passwords hashed with bcrypt/argon2 (not MD5/SHA1)
+- [ ] Passwords hashed with Argon2id (scrypt/bcrypt acceptable; never MD5/SHA1)
 - [ ] Password strength requirements enforced (min 8 chars)
 - [ ] JWT tokens properly signed and validated
 - [ ] Refresh tokens implemented (if long sessions needed)

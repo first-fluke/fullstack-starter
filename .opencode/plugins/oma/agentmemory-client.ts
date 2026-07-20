@@ -6,10 +6,6 @@ import https from "node:https";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 
-// AgentMemory's published version line moved from 0.11/0.12 (original design
-// target) to 0.9.x service builds; accept 0.9.x and the 0.1x.x range.
-const SUPPORTED = /^0\.(9|1\d)\./;
-
 function endpointUrl(): string | null {
   if (process.env.OMA_NO_AGENTMEMORY === "1") return null;
   if (process.env.AGENTMEMORY_URL) return process.env.AGENTMEMORY_URL;
@@ -106,36 +102,12 @@ export async function isAgentMemoryReachable(): Promise<boolean> {
 
   try {
     const response = await requestAgentMemory(url, "/agentmemory/health");
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      reachable = false;
-      return reachable;
-    }
-    const headerVersion = response.headers["x-agentmemory-version"];
-    const version = Array.isArray(headerVersion)
-      ? headerVersion[0]
-      : headerVersion;
-    // Recent AgentMemory releases expose the version only in the health body,
-    // not the `x-agentmemory-version` header.
-    let isAgentMemory = false;
-    let bodyVersion: string | undefined;
-    try {
-      const parsed = JSON.parse(response.body) as {
-        service?: unknown;
-        status?: unknown;
-        version?: unknown;
-      };
-      isAgentMemory =
-        parsed.service === "agentmemory" ||
-        parsed.status === "healthy" ||
-        parsed.status === "ok";
-      if (typeof parsed.version === "string") bodyVersion = parsed.version;
-    } catch {
-      // Non-JSON body — fall back to the header check below.
-    }
-    const resolvedVersion = version ?? bodyVersion;
-    reachable =
-      isAgentMemory ||
-      (resolvedVersion !== undefined && SUPPORTED.test(resolvedVersion));
+    // Capability-based acceptance: any 2xx health response from the
+    // explicitly configured endpoint counts as reachable. Version pinning
+    // proved brittle (the published line already jumped from 0.11/0.12
+    // design targets to 0.9.x service builds), so payload shape and version
+    // are no longer gating.
+    reachable = response.statusCode >= 200 && response.statusCode < 300;
     return reachable;
   } catch {
     reachable = false;

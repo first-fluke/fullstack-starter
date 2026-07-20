@@ -1,6 +1,6 @@
 # SSL-lite Skill Validation Checklist
 
-Use this checklist after creating or updating a skill.
+Use this checklist after creating or updating a skill. `oma skills lint --skill {skill-name}` automates the Required Structure checks plus broken-reference and boundary detection — run it first and use this checklist to interpret findings and cover what lint cannot judge (content quality, routing wording, utility dimensions).
 
 ## Required Structure
 
@@ -32,6 +32,25 @@ Use this checklist after creating or updating a skill.
 - Resolve any `FAIL` (≥ 75% similarity) pair by rewriting one description to highlight distinct triggers, domains, or boundaries.
 - `WARN` (≥ 60%) pairs are acceptable when descriptions cover genuinely related domains; document the distinction in `When NOT to use` cross-routes.
 
+## Utility Content Checks (SkillLens rubric)
+
+Three content dimensions predict whether a skill measurably improves task outcomes
+(SkillLens, arXiv:2605.23899). Section structure, formatting, and prose fluency alone do
+not — a well-written skill can still fail `oma skills eval`.
+
+- **Failure mechanism encoding**: `Failure and recovery` (and guardrails) explain *why* the
+  agent fails in this domain and give an executable remedy. Reject generic advice
+  ("be careful", "edit minimally"); encode domain-specific failure modes
+  (e.g. "formulas don't evaluate in headless runs, so precompute static values").
+- **Actionable specificity**: the canonical path is a step-level procedure referencing
+  concrete domain objects, tools, flags, and file paths. An agent should be able to act
+  without re-deriving the procedure from scratch.
+- **High-risk action blacklist**: guardrails name and forbid the domain's specific harmful
+  action patterns (e.g. "never run `terraform apply` without a reviewed plan"), not only
+  positive instructions.
+- When in doubt, verify with `oma skills eval` fixtures instead of judging by prose quality —
+  textual plausibility does not predict utility.
+
 ## Structural Checks
 
 - `Entry` states what to verify before acting.
@@ -58,7 +77,15 @@ Use this checklist after creating or updating a skill.
 
 ## Suggested Commands
 
-Check top-level headings and canonical path:
+Primary — automated smell detection (frontmatter, top-level headings, canonical path, broken references, boundaries, empty failure/recovery):
+
+```bash
+oma skills lint --skill {skill-name}
+```
+
+Resolve every `fail`-severity smell before finishing; `warn` smells need either a fix or a stated reason.
+
+Fallback when the `oma` CLI is unavailable — check top-level headings and canonical path manually:
 
 ```bash
 f=".agents/skills/{skill-name}/SKILL.md"
@@ -66,7 +93,7 @@ awk 'BEGIN{c=0} /^```/{c=!c; next} !c && /^## /{print $0}' "$f"
 rg -n '^### Canonical (command|workflow) path$' "$f"
 ```
 
-Check formatting whitespace:
+Check formatting whitespace (not covered by `oma skills lint`):
 
 ```bash
 git diff --check -- ".agents/skills/{skill-name}"

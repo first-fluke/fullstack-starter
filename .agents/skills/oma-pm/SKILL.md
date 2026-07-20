@@ -123,7 +123,7 @@ outputs:
 
 ### Guardrails
 1. API-first design: define contracts before implementation tasks
-2. Every task has: agent, title, acceptance criteria, priority, dependencies
+2. Every task has: agent, title, acceptance criteria, priority tier (1 = independent, lower runs first), dependencies, scope
 3. Minimize dependencies for maximum parallel execution
 4. Security and testing are part of every task (not separate phases)
 5. Tasks should be completable by a single agent
@@ -149,6 +149,8 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Error recovery: `resources/error-playbook.md`
 - Task schema: `resources/task-template.json`
 - Ultrawork PLAN phase protocol: `resources/plan-phase-protocol.md` (used when this skill runs inside the ultrawork workflow)
+- Task board spec (orchestrator-consumed format): `../oma-orchestrator/resources/memory-schema.md`
+- Human-readable tracker: when running inside the `/plan` workflow, also generate `docs/plans/work/{NNN}-{name}.md` per `.agents/workflows/plan.md`
 - API contract template (SSOT): `../_shared/core/api-contracts/template.md`; write generated contracts to `.agents/results/api-contracts/` (run artifact) or `docs/plans/contracts/` (durable spec)
 - Context loading: `../_shared/core/context-loading.md`
 - Reasoning templates: `../_shared/core/reasoning-templates.md`

@@ -130,7 +130,8 @@ When native runtime dispatch is available, prefer the runtime-specific native pa
 6. Domain gating must be soft: prefer a narrower `exposed_skill_set`, but fall back to flat exposure when classification confidence is low rather than starving a task of a required specialist.
 
 Current native executor paths:
-- Claude Code: `claude --agent <agent>`
+- Claude Code: Agent tool with `.claude/agents/{agent}.md` definitions (multiple Agent tool calls in one message run in parallel; results return synchronously — no polling)
+- OpenCode: native `task` tool with `subagent_type: {agent-id}`; do not use `oma agent:spawn` for same-session OpenCode work because it will not appear as a native child task
 - Codex CLI: `codex exec "@agent ..."` using `.codex/agents/*.toml`
 - Gemini CLI: `gemini -p "@agent ..."` using `.gemini/agents/*.md`
 
@@ -147,18 +148,20 @@ Vendor-specific execution protocols are injected automatically for fallback CLI 
 | MAX_TURNS (review) | 15 | Turn limit for qa/debug |
 | MAX_TURNS (plan) | 10 | Turn limit for pm |
 
+These are skill-level defaults applied by the orchestrating agent; they are not read from `config/cli-config.yaml` (which carries only vendor CLI and execution settings such as `results_dir` and `timeout`).
+
 ### Memory Configuration
 
-Memory provider and tool names are configurable via `mcp.json`:
+Memory provider and tool names are configurable via `.agents/mcp.json` (not the repo-root `.mcp.json`, which is the Claude Code MCP server config):
 ```json
 {
   "memoryConfig": {
-    "provider": "serena",
-    "basePath": ".serena/memories",
+    "provider": "file",
+    "basePath": ".agents/state/memories",
     "tools": {
-      "read": "read_memory",
-      "write": "write_memory",
-      "edit": "edit_memory"
+      "read": "Read",
+      "write": "Write",
+      "edit": "Edit"
     }
   }
 }
@@ -171,7 +174,7 @@ Memory provider and tool names are configurable via `mcp.json`:
 **PHASE 2 - Setup**: Use memory write tool to create `orchestrator-session.md` + `task-board.md` (include `exposed_skill_set` per task)
 **PHASE 3 - Execute**: Spawn agents by priority tier (never exceed MAX_PARALLEL); inject only `exposed_skill_set` into each subagent's available specialist list
 **PHASE 4 - Monitor**: Poll every POLL_INTERVAL; handle completed/failed/crashed agents
-**PHASE 4.5 - Verify**: Run `oma verify {agent-type}` per completed agent
+**PHASE 4.5 - Verify**: Run mechanical checks for every completed agent; run `oma verify {agent-type}` only for `backend`, `frontend`, `mobile`, `qa`, `debug`, and `pm`; then run QA cross-review for every completed implementation
 **PHASE 5 - Collect**: Read all `result-{agent}-{sessionId}.md`, compile summary, cleanup progress files
 
 See `resources/subagent-prompt-template.md` for prompt construction.
@@ -197,7 +200,8 @@ Agent completes work
     ↓
 [1] Mechanical Self-Check: lint, type-check, tests, diff scope
     ↓
-[2] Verify: Run `oma verify {agent-type} --workspace {workspace}`
+[2] Verify: For supported types, run `oma verify {agent-type} --workspace {workspace}`
+    Unsupported (`db`, `refactor`, `architecture`, `tf-infra`, `docs`) → record SKIP and continue
     ↓ FAIL → Agent receives feedback, fixes, back to [1]
     ↓ PASS
 [3] Cross-Review: QA agent reviews the changes
@@ -224,12 +228,16 @@ Reason: Self-evaluation bias causes agents to consistently overrate their own ou
 ```bash
 oma verify {agent-type} --workspace {workspace} --json
 ```
+- Run only for `backend`, `frontend`, `mobile`, `qa`, `debug`, and `pm`.
+- For `db`, `refactor`, `architecture`, `tf-infra`, and `docs`, record that automated verify is unsupported and continue to QA cross-review after the mechanical checks.
 - **PASS (exit 0)**: Proceed to cross-review
 - **FAIL (exit 1)**: Feed verify output back to the agent as correction context
 
 **[3] Cross-Review**: Spawn QA agent to review the changes:
 - QA agent reads the diff, runs checks, evaluates against acceptance criteria
+<!-- oma-docs:ignore-start -->
 - If `docs/CODE-REVIEW.md` exists, QA agent uses it as the review checklist
+<!-- oma-docs:ignore-end -->
 - QA agent outputs: PASS (with optional nits) or FAIL (with specific issues)
 - On FAIL: issues are fed back to the implementation agent for fixing
 
@@ -258,8 +266,15 @@ This replaces single-pass verification. Most "nitpicking" should happen agent-to
 Human review is reserved for final approval, not catching lint errors.
 
 ### Retry Logic (after review loop exhaustion)
+
+Before starting any retry, check the termination conditions (OR, whichever fires first wins):
+1. **Retry cap**: retry count for this agent has reached MAX_RETRIES — do not start another cycle.
+2. **Session cost cap**: if a quota cap is configured (`loadQuotaCap()` from `cli/io/session-cost.ts`; no cap → skip), call `checkCap(sessionId, cap)`. On `exceeded === true`, save the agent's partial results, report early termination due to quota, and do not spawn the next retry or any remaining agents in the tier.
+
+If neither condition fires:
 - 1st retry: Re-spawn agent with full review history as context
 - 2nd retry: Re-spawn with "Try a different approach" + review history
+- After MAX_RETRIES exhausted (cost cap not exceeded): activate the **Exploration Loop** (see `orchestrate.md` Step 5): generate 2-3 alternative hypotheses, spawn the same agent type with different hypothesis prompts in parallel separate workspaces, score with Quality Score when available, keep the highest-scoring approach, and record all experiments in the Experiment Ledger.
 - Final failure: Report to user with complete review trail, ask whether to continue or abort
 
 ### Clarification Debt (CD) Monitoring

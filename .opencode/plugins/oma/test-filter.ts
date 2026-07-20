@@ -103,11 +103,29 @@ export async function run(
   const { toolName, toolInput, cwd: projectDir } = input;
   const { vendor } = ctx;
 
-  // Claude-family uses Bash; some CLIs use run_shell_command.
-  if (toolName !== "Bash" && toolName !== "run_shell_command") return null;
+  // Claude-family uses Bash; some CLIs use run_shell_command; Cursor names its
+  // terminal tool "Shell" (matches cursor.json's preToolUse matcher); Kiro's
+  // canonical shell tool is execute_bash (the agent-JSON matcher name).
+  if (
+    toolName !== "Bash" &&
+    toolName !== "run_shell_command" &&
+    toolName !== "Shell" &&
+    toolName !== "execute_bash"
+  )
+    return null;
 
   const command = toolInput.command as string | undefined;
   if (!command) return null;
+
+  // The rewrite below is Bash-only (`set -o pipefail`, subshell, pipe to
+  // bash). On Windows the host shell is PowerShell/cmd, which fails to parse
+  // it before the test runner even starts (#618). Losing the failure filter
+  // is acceptable; breaking `npm test` is not.
+  if (process.platform === "win32") return null;
+
+  // Hook re-entry guard: a command already piping through the filter script
+  // must pass through unchanged, not get wrapped a second time (#618).
+  if (command.includes("filter-test-output.sh")) return null;
 
   const isTestCommand = TEST_PATTERNS.some((p) => p.test(command));
   if (!isTestCommand) return null;
@@ -115,12 +133,18 @@ export async function run(
   const isExcluded = EXCLUDE_PATTERNS.some((p) => p.test(command));
   if (isExcluded) return null;
 
-  const filterScript = join(
-    projectDir,
+  // Resolve the filter script: vendor hook dir first, then the opencode
+  // bridge dir (opencode has no core Vendor identity — its subprocess payload
+  // detects as claude, whose hook dir is absent in opencode-only installs),
+  // then the SSOT core dir as the last resort.
+  const filterScript = [
     getHookDir(vendor),
-    "filter-test-output.sh",
-  );
-  if (!existsSync(filterScript)) return null;
+    join(".opencode", "plugins", "oma"),
+    join(".agents", "hooks", "core"),
+  ]
+    .map((dir) => join(projectDir, dir, "filter-test-output.sh"))
+    .find((p) => existsSync(p));
+  if (!filterScript) return null;
 
   const filteredCmd = `set -o pipefail; (${command}) 2>&1 | bash "${filterScript}"`;
   const updatedInput: Record<string, unknown> = {

@@ -5,15 +5,14 @@ When running as a CLI subagent (`opencode` headless mode), follow this protocol 
 ## State Management
 
 Use file-based I/O for coordination. Coordination/state files (task-board, progress,
-result hand-offs) MUST be written to the **project-root memory store** `.serena/memories/`
+result hand-offs) MUST be written to the **project-root memory store** `.agents/state/memories/`
 — that is the only location the orchestrator (`oma agent:status`), `oma verify`, and the
 memory/retro tooling read. Writing them anywhere else (e.g. `.agents/results/`) leaves them
 orphaned and your run is reported as `crashed`. Human-facing deliverables (plans, bug
 reports, design docs) belong under `.agents/results/` instead.
 
-If Serena MCP is available, use `read_memory`/`write_memory`/`edit_memory` (its default
-base path is `.serena/memories`); otherwise write the same files there directly with
-opencode's file tools.
+Write and read these files directly at `.agents/state/memories/` using opencode's native
+file tools; create the directory if it does not yet exist.
 
 ### Serena MCP Timeout Recovery (OpenCode Desktop)
 
@@ -22,10 +21,9 @@ so a stuck Serena MCP stays stuck until the Desktop app is fully relaunched (the
 rarely affected). When a Serena MCP call times out or the MCP queue is clearly stuck, do
 not keep retrying MCP — fall back narrowly:
 
-1. **Memory ops** — read/write the same files directly under `.serena/memories/` (as
-   above). If a recent Serena CLI is installed (≥ 1.5, check `serena --version`),
-   `serena memories read|write|list` is an equivalent alternative; older versions
-   (e.g. 1.3.x) do not have the `memories` command.
+1. **Memory ops** — coordination artifacts are already plain files under
+   `.agents/state/memories/` written with your native file tools, so a stuck MCP does not
+   block them.
 2. **Code analysis** — fall back to native search/read tools. The Serena CLI cannot
    execute analysis tools (`serena tools` only lists/describes them).
 3. **Diagnostics** — `serena project health-check` and `serena project index` work
@@ -36,7 +34,7 @@ abandon Serena-first. A full Desktop relaunch is what actually resets the stale 
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** `.serena/memories/` directory, never to a subdirectory's `.serena/memories/`.
+All result, progress, and state files MUST be written to the **project root** `.agents/state/memories/` directory, never to a subdirectory's `.agents/state/memories/`.
 
 - **Project root** = the git repository root (where `.git` exists)
 - **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
@@ -46,8 +44,8 @@ All result, progress, and state files MUST be written to the **project root** `.
 
 ## On Start
 
-1. Read `.serena/memories/task-board.md` (or `read_memory("task-board.md")`) to confirm your assigned task when it exists.
-2. Create `.serena/memories/progress-{agent-id}[-{sessionId}].md` with initial status.
+1. Read `.agents/state/memories/task-board.md` to confirm your assigned task when it exists.
+2. Create `.agents/state/memories/progress-{agent-id}[-{sessionId}].md` with initial status.
 
 ## During Execution
 
@@ -56,7 +54,7 @@ All result, progress, and state files MUST be written to the **project root** `.
 
 ## On Completion
 
-- Create `.serena/memories/result-{agent-id}[-{sessionId}].md` with final result including:
+- Create `.agents/state/memories/result-{agent-id}[-{sessionId}].md` with final result including:
   - A status line — see **Status line format** below (REQUIRED)
   - Summary of work done
   - Files created/modified

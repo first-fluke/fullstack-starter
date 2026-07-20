@@ -10,7 +10,7 @@ LAWs apply to every QUERY_TYPE except where an explicit COMPARISON exception is 
 
 Do not append `Sources:`, `References:`, `Further reading:`, `Citations:`, or any bulleted list of publication names / handles / URLs after the closing line of the brief. The engine footer is the only visible citation list. The saved raw JSON sidecar (when emitted) is the durable record.
 
-**Self-check**: scan the last 15 lines for `^Sources:`, `^References:`, `^Further reading:`, `^Citations:` (case-insensitive) followed by a bulleted list. If found, strip.
+**Self-check**: scan the last 30 lines for `^Sources:`, `^References:`, `^Further reading:`, `^Citations:` (case-insensitive) followed by a bulleted list. If found, strip.
 
 ---
 
@@ -36,7 +36,7 @@ Use ` - ` (hyphen with spaces) instead of `—` or `–`. Em-dashes are the stro
 
 ## LAW 4 — No `##` headers in body
 
-For QUERY_TYPE pain/trend/discovery, body has no `##` or `###` headers. Structure: bold-lead-in paragraphs + a prose label `KEY PATTERNS from the research:` + numbered list. Framework sections (`## SWOT`, `## Porter's 5 Forces`, `## PESTEL`) are allowed when frameworks are active.
+For QUERY_TYPE pain/trend/discovery, body has no `##` or `###` headers except the renderer-owned `## Cluster Bank` section and its `### C{n}` cluster anchors. Structure: bold-lead-in paragraphs + a prose label `KEY PATTERNS from the research:` + numbered list. Framework sections (`## SWOT`, `## Porter's 5 Forces`, `## PESTEL`) are allowed when frameworks are active.
 
 For QUERY_TYPE competitor (COMPARISON): the following `##` headers are required and allowed:
 - `## Quick Verdict`
@@ -46,13 +46,13 @@ For QUERY_TYPE competitor (COMPARISON): the following `##` headers are required 
 
 Any other `##` is forbidden.
 
-**Self-check**: scan body lines for `^#{2,3}\s`. If header text is not in the allowed framework or COMPARISON list, flag for regenerate.
+**Self-check**: scan body lines for `^#{2,3}\s`. Allow the framework and COMPARISON lists plus `## Cluster Bank` and `### C{n}`; flag anything else for regenerate.
 
 ---
 
 ## LAW 5 — Engine footer pass-through
 
-The render command emits a footer block bounded by `<!-- ENGINE FOOTER -->` and `<!-- END ENGINE FOOTER -->`. It contains: sources_used, sources_failed coverage, cluster count, item count, p50/p95 latency, cache hit/miss, total cost (if paid sources used).
+The render command emits a footer block bounded by `<!-- ENGINE FOOTER -->` and `<!-- END ENGINE FOOTER -->`. It contains: sources used (N/M requested), sources failed, coverage (`coverage: N/M sources`, with a low-coverage warning when only 1 source returned signals), cluster count, item count, cache hit/miss, and a single latency value in ms.
 
 Render must emit this verbatim. Do not paraphrase, recompute, reorder, or replace with a synthesized `## Notable Stats`.
 
@@ -91,7 +91,7 @@ Line 1 of every brief is the badge, exactly:
 
 Where `{ver}` is the cli package version (read from `cli/package.json` `version`) and `{YYYY-MM-DD}` is today's UTC date. Line 2 is blank. Line 3 begins the body.
 
-**Self-check**: line 1 must match `/^🔎 oma-market v[\d.]+ · synced \d{4}-\d{2}-\d{2}$/`. If missing, prepend.
+**Self-check**: line 1 must match `/^🔎 oma-market v[\w.-]+ · synced \d{4}-\d{2}-\d{2}$/`. If missing, prepend.
 
 ---
 

@@ -5,19 +5,18 @@ shared state coordination. **In headless mode your stdout is discarded by the sp
 the only durable hand-off to the orchestrator is the result artifact written below. If you
 do not write it, the orchestrator reports your run as `crashed` even on success.
 
-## MCP Memory Tools
+## Memory Tools
 
-Kimi Code CLI supports MCP servers; when Serena MCP is configured, use its memory tools:
-- `[READ]` → `read_memory`
-- `[WRITE]` → `write_memory`
-- `[EDIT]` → `edit_memory`
-- `[LIST]` → `list_memories`
-- `[DELETE]` → `delete_memory`
+Coordination artifacts are read and written as plain files with your native file tools.
+Tool names remain configurable via `memoryConfig.tools`:
+- `[READ]` → default: `Read`
+- `[WRITE]` → default: `Write`
+- `[EDIT]` → default: `Edit`
+- `[LIST]` → default: directory listing (e.g. `ls`)
+- `[DELETE]` → default: file delete (e.g. `rm`)
 
-Memory base path defaults to `.serena/memories`.
-
-If Serena MCP memory tools are unavailable, fall back to writing the same files directly to
-`.serena/memories/` using your native file-write tool.
+Memory base path defaults to `.agents/state/memories`. Create the directory if it does not
+yet exist.
 
 ### Path Resolution (CRITICAL)
 

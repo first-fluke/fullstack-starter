@@ -71,7 +71,7 @@ All config files use the same `{ "url": "https://mcp.canva.com/mcp" }` shape
 
 ```
 1. PROBE        → list_designs (verify Canva MCP is connected + authenticated)
-2. RENDER       → oma slide png --dir <slug> --out-dir <slug>/out/png/ --resolution 2x
+2. RENDER       → oma slide png --dir <slug> --out-dir <slug>/out/png/ --resolution 2160p
 3. UPLOAD       → upload_asset for each slide PNG → collect asset_ids[]
 4. CREATE       → create_design (type: "Presentation", assets: asset_ids[])
 5. REPORT       → include Canva design URL in delivery summary
@@ -86,7 +86,7 @@ Call `list_designs` with a minimal query. If it errors (401/403/timeout), notify
 Do NOT retry or prompt for credentials — the OAuth flow is handled externally.
 
 **Step 2 — Render PNGs:**
-Use `oma slide png --resolution 2x` to produce high-resolution per-slide images (3840×2160).
+Use `oma slide png --resolution 2160p` to produce high-resolution per-slide images (3840×2160).
 These become the raster backing for each Canva presentation page.
 
 **Step 3 — Upload Assets:**

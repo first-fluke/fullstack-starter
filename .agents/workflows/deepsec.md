@@ -115,7 +115,7 @@ Then write `data/<id>/INFO.md` per `resources/setup.md` § 4: 50–100 lines, pr
    ```bash
    bunx deepsec process --limit 50 --concurrency 5
    ```
-3. **Report cost extrapolation**: read the per-batch cost the CLI prints, multiply by `(total_files / 50)`, present to the user with the cost-band table from `resources/scanning.md`. **You MUST get explicit user go-ahead before launching the unbounded `process`.**
+3. **Report cost extrapolation**: read the calibration run's total cost, multiply by `(total_files / 50)`, present to the user with the cost-band table from `resources/scanning.md`. If the CLI reports only a per-batch cost, multiply by `(total_files / batch_size)` instead (`--batch-size` defaults to 5, so the `--limit 50` calibration runs 10 batches). Cross-check against the cost-band table before reporting. **You MUST get explicit user go-ahead before launching the unbounded `process`.**
 4. **Full investigation**:
    ```bash
    bunx deepsec process --concurrency 5
@@ -250,5 +250,5 @@ Do not loop back to Step 1 unless the user re-invokes the workflow with a new in
 - Do NOT echo or commit credentials (`vck_…`, `sk-ant-…`, `sk-…`, OIDC tokens). `.env.local` is gitignored.
 - Do NOT grant `pull-requests: write` to any CI job that runs PR-controlled code.
 - Do NOT silently drop a refusal (`refused: true`). Log it, retry with the other backend, or add the path to `data/<id>/config.json:ignorePaths` only when the refusal reproduces.
-- Do NOT invent CLI flags. Anything beyond `resources/scanning.md`'s flag list must be checked against `--help` first.
+- Do NOT invent CLI flags. Anything beyond `resources/scanning.md`'s flag list must be checked against `--help` first. When the CLI's printed models, defaults, or costs disagree with the skill's notes, trust the CLI.
 - Do NOT modify `.agents/` files unless the user is editing the OMA source repo itself.

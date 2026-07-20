@@ -6,6 +6,7 @@ import { agyConversationId, isAgyInput } from "./agy-input.ts";
 import { syncGrokContext } from "./grok-context.ts";
 import { makePromptOutput } from "./hook-output.ts";
 import { writeInjectLog } from "./inject-log.ts";
+import { normalizePromptInput } from "./prompt-input.ts";
 import { emitEvent, type OmaEvent, readEvents } from "./state-emit.ts";
 import { getActiveSid, readIndex, setLastSession } from "./state-marker.ts";
 import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
@@ -98,6 +99,7 @@ export async function onBoundary(
   vendor: Vendor,
   vendorSid: string,
   promptText?: string,
+  forced = false,
 ): Promise<string | null> {
   const idx = readIndex(projectDir);
   const previous = idx.lastSession;
@@ -105,7 +107,9 @@ export async function onBoundary(
     !previous || previous.vendor !== vendor || previous.vendorSid !== vendorSid;
   const statelessTurnFlush = vendor === "kiro" && vendorSid === "unknown";
 
-  if (!boundary && !statelessTurnFlush) {
+  // `forced` = post-compaction SessionStart: the session id is unchanged (no
+  // boundary), but the snapshot was just compacted out of context — re-emit.
+  if (!boundary && !statelessTurnFlush && !forced) {
     setLastSession(projectDir, vendor, vendorSid);
     return null;
   }
@@ -122,7 +126,9 @@ export async function onBoundary(
     vendorSid,
     payload: {
       reason: !boundary
-        ? "stateless-vendor-turn"
+        ? statelessTurnFlush
+          ? "stateless-vendor-turn"
+          : "post-compact-rehydration"
         : previous
           ? "vendor-session-transition"
           : "session-created",
@@ -189,12 +195,15 @@ export async function run(
 
   const { vendor, cwd: projectDir, sid: vendorSid = "unknown" } = ctx;
   // input.kind === "prompt" is guaranteed by the guard above; the user prompt is
-  // the primary recall signal for boundary rehydration.
+  // the primary recall signal for boundary rehydration. A post-compaction
+  // SessionStart (source === "compact") forces re-emission: the session id is
+  // unchanged, but the snapshot was just compacted out of the context window.
   const rendered = await onBoundary(
     projectDir,
     vendor,
     vendorSid,
     input.prompt,
+    input.source === "compact",
   );
   if (!rendered) return null;
   return { type: "context", additionalContext: rendered };
@@ -218,7 +227,7 @@ async function main() {
   // Delegate to run() — single logic source.
   const hookInput: HookInput = {
     kind: "prompt",
-    prompt: (input.prompt as string) ?? "",
+    prompt: normalizePromptInput(input.prompt),
     cwd: projectDir,
   };
   const ctxVal: HandlerCtx = { vendor, cwd: projectDir, sid: vendorSid };

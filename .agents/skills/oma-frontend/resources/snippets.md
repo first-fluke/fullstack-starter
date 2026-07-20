@@ -34,6 +34,8 @@ the resulting contrast ratio against the actual `--card` / `--foreground` /
 designer / token system has to make them so).
 
 ```tsx
+import { cn } from "@/lib/utils";
+
 interface CardProps {
   title: string;
   description?: string;
@@ -45,12 +47,12 @@ export function Card({ title, description, onClick }: CardProps) {
     <button
       type="button"
       onClick={onClick}
-      className={[
+      className={cn(
         "rounded-lg border bg-card p-4 text-left shadow-sm transition-colors",
         "hover:bg-accent",
         // visible focus indicator (WCAG 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured)
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      ].join(" ")}
+      )}
     >
       {/* Visible text inside the button is the accessible name —
           do NOT add aria-label here, that would override and hide the
@@ -104,11 +106,19 @@ function Selectable({ targetRef }: { targetRef: React.RefObject<THREE.Object3D> 
 // return ref.current ? <Child target={ref.current} /> : null;
 ```
 
-## TanStack Query Hook
+## TanStack Query Hook (fallback: no OpenAPI spec)
+
+**Default path is orval-generated hooks** when the project has an OpenAPI spec: run the
+project's `gen:api` task and import the generated `useQuery`/`useMutation` hooks instead of
+writing this by hand (see `tech-stack.md` §Server State). Auth headers belong in the orval
+`mutator` instance, not per-hook. The pattern below is for spec-less endpoints only
+(third-party APIs, endpoints outside the contract).
 
 ```tsx
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+// getToken(): placeholder for the project's auth helper
+// (e.g. better-auth client session); wire to the real token source.
 interface Todo {
   id: string;
   title: string;
@@ -152,22 +162,25 @@ export function useCreateTodo() {
 
 ## Form with TanStack Form + Zod
 
+Pass the zod schema directly to `validators` (Standard Schema, v1+). `validatorAdapter` /
+`@tanstack/zod-form-adapter` are dead v0 APIs; never reintroduce them. Errors are issue
+**objects**, not strings: render `errors[0]?.message`.
+
 ```tsx
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 
+// zod v4: z.email() replaces the deprecated z.string().email()
 const schema = z.object({
-  email: z.string().email("Invalid email"),
+  email: z.email("Invalid email"),
   password: z.string().min(8, "At least 8 characters"),
 });
 
 export function LoginForm({ onSubmit }: { onSubmit: (data: z.infer<typeof schema>) => void }) {
   const form = useForm({
     defaultValues: { email: "", password: "" },
-    validatorAdapter: zodValidator(),
     validators: { onChange: schema },
     onSubmit: async ({ value }) => onSubmit(value),
   });
@@ -194,10 +207,11 @@ export function LoginForm({ onSubmit }: { onSubmit: (data: z.infer<typeof schema
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               className="mt-1 w-full rounded-md border px-3 py-2"
-              aria-invalid={field.state.meta.errors.length > 0}
+              aria-invalid={!field.state.meta.isValid}
             />
-            {field.state.meta.errors.length > 0 && (
-              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]}</p>
+            {/* Standard Schema errors are issue objects; render .message, never the object */}
+            {!field.state.meta.isValid && (
+              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]?.message}</p>
             )}
           </div>
         )}
@@ -215,10 +229,10 @@ export function LoginForm({ onSubmit }: { onSubmit: (data: z.infer<typeof schema
               onChange={(e) => field.handleChange(e.target.value)}
               onBlur={field.handleBlur}
               className="mt-1 w-full rounded-md border px-3 py-2"
-              aria-invalid={field.state.meta.errors.length > 0}
+              aria-invalid={!field.state.meta.isValid}
             />
-            {field.state.meta.errors.length > 0 && (
-              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]}</p>
+            {!field.state.meta.isValid && (
+              <p className="mt-1 text-sm text-destructive">{field.state.meta.errors[0]?.message}</p>
             )}
           </div>
         )}
@@ -238,6 +252,40 @@ export function LoginForm({ onSubmit }: { onSubmit: (data: z.infer<typeof schema
   );
 }
 ```
+
+---
+
+## i18n: never hardcode UI text
+
+UI strings come from the project's i18n source of truth (`packages/i18n` or equivalent).
+Adapt the accessor to the project's library (next-intl, react-i18next, lingui, etc.); the
+invariants below hold regardless of library.
+
+```tsx
+// next-intl example; swap for the project's i18n hook
+import { useTranslations } from "next-intl";
+
+export function CheckoutSummary({ itemCount }: { itemCount: number }) {
+  const t = useTranslations("checkout");
+  return (
+    <section aria-label={t("summaryLabel")}>
+      <h2>{t("title")}</h2>
+      {/* plurals/interpolation go through the library, never string concatenation */}
+      <p>{t("itemCount", { count: itemCount })}</p>
+    </section>
+  );
+}
+```
+
+Invariants:
+
+- **No hardcoded user-facing strings** in JSX, `aria-*`, `alt`, `title`, placeholders, or
+  toasts; all of them are translatable surfaces.
+- **Add new keys to the i18n source of truth first**, in every supported locale (fallback
+  locale at minimum); never inline a "temporary" English string.
+- **No string concatenation for sentences**: word order differs per language; use
+  interpolation with named params.
+- **Plurals via the library's plural rules** (`count`-style params), not `count === 1 ? ... : ...`.
 
 ---
 
