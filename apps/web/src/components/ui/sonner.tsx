@@ -1,13 +1,7 @@
 "use client";
 
+import { CheckCircle, Info, Spinner, Warning, XOctagon } from "@phosphor-icons/react";
 import { useAtomValue } from "jotai";
-import {
-  CheckCircle,
-  Info,
-  Spinner,
-  Warning,
-  XOctagon,
-} from "@phosphor-icons/react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import { themeAtom } from "@/stores/theme-atoms";
 
