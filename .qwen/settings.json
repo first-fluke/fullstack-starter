@@ -72,7 +72,7 @@
       "command": "'bun' \"$QWEN_PROJECT_DIR/.qwen/hooks/hud.ts\""
     }
   },
-  "$version": 3,
+  "$version": 4,
   "hooksConfig": {
     "enabled": true
   }
