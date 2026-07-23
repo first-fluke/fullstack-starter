@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.25.0](https://github.com/first-fluke/fullstack-starter/compare/v2.24.1...v2.25.0) (2026-07-23)
+
+
+### Features
+
+* **web:** replace lucide-react with phosphor icons ([edab4b7](https://github.com/first-fluke/fullstack-starter/commit/edab4b7ac3087d417ade66d0c9fdf3d13af61550))
+
 ## [2.24.1](https://github.com/first-fluke/fullstack-starter/compare/v2.24.0...v2.24.1) (2026-07-08)
 
 
