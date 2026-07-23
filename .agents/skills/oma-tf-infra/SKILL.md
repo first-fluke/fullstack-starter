@@ -95,12 +95,14 @@ Design, implement, review, and document Terraform-based infrastructure across cl
 | Report result | `NOTIFY` | Final infra summary |
 
 ### Tools and instruments
-- Terraform CLI and provider ecosystem
-- Checkov, tfsec, OPA/Sentinel, Terratest when applicable
+- Terraform CLI (or OpenTofu as a drop-in) and provider ecosystem
+- Checkov, Trivy (`trivy config`, successor to tfsec), OPA/Sentinel, native `terraform test`, Terratest when applicable
+- Infracost for plan-time cost estimation when available
 - Cost, policy, multi-cloud, and ISO resource guides
 
 ### Canonical command path
 ```bash
+terraform init            # required before validate/plan (-backend=false for static-only checks)
 terraform fmt -recursive
 terraform validate
 terraform plan -out=tfplan
@@ -109,7 +111,7 @@ terraform plan -out=tfplan
 Run scanners when available before any apply:
 ```bash
 checkov -d .
-tfsec .
+trivy config .   # tfsec is in maintenance mode; Trivy is its successor
 ```
 
 ### Resource scope
@@ -138,10 +140,10 @@ tfsec .
 4. **Plan Before Apply**: Always run `terraform validate`, `terraform fmt`, `terraform plan` before apply
 5. **Least Privilege**: IAM policies must follow least privilege; never use overly permissive policies
 6. **Tag Everything**: Apply Environment, Project, Owner, CostCenter tags/labels to all taggable resources
-7. **No Secrets in Code**: Never hardcode passwords, API keys, or tokens in .tf files; use provider secret management
+7. **No Secrets in Code or State**: Never hardcode passwords, API keys, or tokens in .tf files; use provider secret management. Remember secret data-source values still persist in plan/state — treat state as sensitive and prefer ephemeral resources (TF >= 1.10) / write-only arguments (TF >= 1.11) where provider support exists
 8. **Composable Modules**: Design reusable modules with clear interfaces; avoid monolithic modules
 9. **Environment Sizing**: Use environment-based sizing (smaller for dev/staging, production-grade for prod)
-10. **Policy as Code**: Run OPA/Sentinel and security scanning (Checkov, tfsec) in CI/CD before apply
+10. **Policy as Code**: Run OPA/Sentinel and security scanning (Checkov, Trivy) in CI/CD before apply
 11. **Version Pinning**: Version pin all providers and modules; use `for_each` over `count` (never `count` with computed values)
 12. **Cost Awareness**: Implement lifecycle policies, autoscaling schedules, and review cost estimates before apply
 13. **No Auto-Approve**: Never use `auto-approve` in production; never `terraform destroy` without backup/confirmation
@@ -206,4 +208,4 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Observability handoff: `../oma-observability/SKILL.md` §Integrations — Collector topology, transport tuning, release metadata
 
 ### Knowledge Reference
-terraform, infrastructure-as-code, iac, cloud, aws, gcp, azure, oracle, oci, multi-cloud, devops, provisioning, infrastructure, compute, database, storage, networking, iam, oidc, workload identity, container, kubernetes, serverless, vpc, subnet, load balancer, cdn, secrets management, state management, backend, provider
+terraform, opentofu, infrastructure-as-code, iac, cloud, aws, gcp, azure, oracle, oci, multi-cloud, devops, provisioning, infrastructure, compute, database, storage, networking, iam, oidc, workload identity, container, kubernetes, serverless, vpc, subnet, load balancer, cdn, secrets management, ephemeral resources, write-only arguments, state management, drift, import block, terraform test, trivy, checkov, infracost, backend, provider

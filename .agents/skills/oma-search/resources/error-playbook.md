@@ -30,15 +30,14 @@
 **Recovery**:
 1. Run `oma search fetch <url>`; this auto-escalates api → probe → impersonate → browser
 2. Each strategy tries progressively more aggressive access methods
-3. If all strategies fail: report "Unable to access this source"; rerun
-   with `--include-archive` to try caches (AMP / archive.today / Wayback)
+3. If all primary strategies fail, the pipeline automatically tries its archive sidecar (AMP / archive.today / Wayback). If that also fails, report "Unable to access this source"; `--include-archive` only promotes archive into the ordered strategy list and is not a second recovery attempt.
 
 ### `oma search fetch` all strategies fail
 **Symptom**: Non-zero exit code after api/probe/impersonate/browser exhausted.
 **Recovery**:
 1. Read the `attempts` array in JSON output: strategies, `elapsedMs`,
    HTTP status, detected `signals`.
-2. Rerun with `--include-archive` for cached fallbacks.
+2. Inspect the archive sidecar attempt, which runs automatically after the primary strategies. Do not rerun solely with `--include-archive`; that flag only changes strategy ordering.
 3. `paywall` signal → content gated; report auth requirement.
 4. `js-essential` + browser failed → site blocks headless Chrome;
    suggest manual fetch or alternative source.
@@ -70,7 +69,7 @@
 1. Check if `glab` is available: `which glab`
 2. If not installed: "GitLab CLI is not installed. Using GitHub search as default."
 3. If not authenticated: "GitLab CLI requires authentication. Run `glab auth login` first."
-4. Fall back to `gh search code` with notice
+4. Fall back to `oma search code` with the default github host, with notice
 
 ### gh/glab returns 0 results
 **Symptom**: No code matches found
@@ -82,7 +81,7 @@
 ## Trust Scoring Errors
 
 ### Domain not in registry
-**Symptom**: URL domain has no entry in trust-registry.md
+**Symptom**: `oma search trust <domain>` returns `level: "unknown"` (no registry, heuristic, or Tranco hit)
 **Recovery**: Label as `unknown` with score `—`. Do NOT exclude from results.
 
 ### --strict mode returns 0 results

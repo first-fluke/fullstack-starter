@@ -1,6 +1,6 @@
 ---
 otel_spec: "1.x (stable API/SDK)"
-otel_semconv: "1.27.0 (2024-11)"
+otel_semconv: "1.43.0 (2026-07)"
 specs:
   - "W3C Trace Context: Level 1 Recommendation 2020-02-06; Level 2 Candidate Recommendation"
   - "W3C Baggage: Recommendation 2022-12-22"
@@ -269,7 +269,7 @@ export TRACEPARENT="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
 # Child process (e.g., test runner) inherits the parent span context
 ```
 
-This pattern enables a single trace to span from the CI trigger event through build, test, deploy, and smoke-test verification steps. Cross-ref `../SKILL.md` for the TRACEPARENT env var description in the skill architecture.
+This pattern enables a single trace to span from the CI trigger event through build, test, deploy, and smoke-test verification steps.
 
 ---
 

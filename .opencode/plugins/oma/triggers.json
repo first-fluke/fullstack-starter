@@ -830,13 +830,7 @@
       "persistent": true,
       "keywords": {
         "*": ["work", "step by step"],
-        "en": [
-          "one by one",
-          "guide me",
-          "walk me through",
-          "manual mode",
-          "one step at a time"
-        ],
+        "en": ["one by one", "one step at a time"],
         "ko": [
           "단계별",
           "단계별로",
@@ -845,83 +839,21 @@
           "하나씩 해줘",
           "순서대로 해줘",
           "차근차근",
-          "차근차근 해줘",
-          "수동으로 해줘"
+          "차근차근 해줘"
         ],
-        "ja": [
-          "ステップバイステップ",
-          "一歩ずつ",
-          "ガイドして",
-          "手動で",
-          "一つずつ",
-          "順番にやって",
-          "手順を教えて"
-        ],
-        "zh": [
-          "逐步",
-          "一步一步",
-          "指导我",
-          "手动",
-          "一个一个",
-          "按顺序",
-          "带我做"
-        ],
-        "es": [
-          "paso a paso",
-          "guíame",
-          "uno por uno",
-          "modo manual",
-          "de a uno",
-          "llévame paso a paso"
-        ],
-        "fr": [
-          "étape par étape",
-          "guide-moi",
-          "un par un",
-          "mode manuel",
-          "accompagne-moi",
-          "montre-moi étape par étape"
-        ],
+        "ja": ["ステップバイステップ", "一歩ずつ", "一つずつ", "順番にやって"],
+        "zh": ["逐步", "一步一步", "一个一个", "按顺序"],
+        "es": ["paso a paso", "uno por uno", "de a uno"],
+        "fr": ["étape par étape", "un par un"],
         "de": [
           "schritt für schritt",
-          "führe mich",
           "eins nach dem anderen",
-          "manueller modus",
-          "zeig mir wie",
           "der reihe nach"
         ],
-        "pt": [
-          "passo a passo",
-          "me guie",
-          "um por um",
-          "modo manual",
-          "me acompanhe",
-          "me mostre passo a passo"
-        ],
-        "ru": [
-          "шаг за шагом",
-          "направь меня",
-          "по одному",
-          "ручной режим",
-          "покажи по шагам",
-          "веди меня"
-        ],
-        "nl": [
-          "stap voor stap",
-          "begeleid me",
-          "een voor een",
-          "handmatige modus",
-          "leid me erdoor",
-          "stap voor stap uitleg"
-        ],
-        "pl": [
-          "krok po kroku",
-          "poprowadź mnie",
-          "jeden po drugim",
-          "tryb ręczny",
-          "przeprowadź mnie",
-          "pokaż krok po kroku"
-        ]
+        "pt": ["passo a passo", "um por um"],
+        "ru": ["шаг за шагом", "по одному"],
+        "nl": ["stap voor stap", "een voor een"],
+        "pl": ["krok po kroku", "jeden po drugim"]
       }
     },
     "deepinit": {
@@ -2601,14 +2533,32 @@
           "rebase workflow",
           "git worktree"
         ],
-        "ko": ["머지 충돌 해결", "리베이스해줘", "워크트리 써줘"],
+        "ko": [
+          "머지 충돌 해결",
+          "리베이스해줘",
+          "워크트리 써줘",
+          "브랜칭 전략",
+          "브랜치 전략 세워줘",
+          "릴리즈 태그 달아줘",
+          "체리픽해줘"
+        ],
         "ja": [
           "マージ衝突解決",
           "リベースして",
           "リリースタグ",
-          "worktree使って"
+          "worktree使って",
+          "ブランチ戦略",
+          "チェリーピック",
+          "リリースタグ付けて"
         ],
-        "zh": ["解决合并冲突", "帮我 rebase", "打发布标签", "用 worktree"]
+        "zh": [
+          "解决合并冲突",
+          "帮我 rebase",
+          "打发布标签",
+          "用 worktree",
+          "分支策略",
+          "帮我 cherry-pick"
+        ]
       }
     },
     "oma-search": {
@@ -3062,7 +3012,10 @@
           "기술 부채",
           "클래스 분리",
           "메서드 추출",
-          "코드 정리해줘"
+          "코드 정리해줘",
+          "특성화 테스트",
+          "핫스팟",
+          "리팩토링 계획"
         ],
         "ja": [
           "リファクタリング",
@@ -3071,7 +3024,10 @@
           "コードスメル",
           "技術的負債",
           "クラスを分割",
-          "メソッド抽出"
+          "メソッド抽出",
+          "特性化テスト",
+          "ホットスポット",
+          "リファクタリング計画"
         ],
         "zh": [
           "重构",
@@ -3080,7 +3036,10 @@
           "代码异味",
           "技术债",
           "拆分类",
-          "提取方法"
+          "提取方法",
+          "特征化测试",
+          "热点",
+          "重构计划"
         ]
       }
     }
@@ -3116,7 +3075,6 @@
       "should you",
       "could we",
       "would you",
-      "what if",
       "what about",
       "why build",
       "why create",
@@ -3127,7 +3085,10 @@
       "뭐야",
       "뭐임",
       "무엇",
-      "어떻게",
+      "어떻게 동작",
+      "어떻게 작동",
+      "어떻게 되는지",
+      "어떻게 하는지",
       "설명해",
       "알려줘",
       "키워드",
@@ -3143,13 +3104,12 @@
       "왜 만들",
       "어떻게 만들",
       "어떨까",
-      "하면 좋을",
+      "하면 좋을지",
       "한다면",
       "할까요",
       "보강할",
       "에 대해",
       "에 대한",
-      "한번 봐",
       "깊게 봐",
       "코드를 한번",
       "그 워크플로우",
@@ -3225,7 +3185,7 @@
       "wykryto"
     ]
   },
-  "excludedWorkflows": ["tools", "stack-set", "schedule"],
+  "excludedWorkflows": ["tools", "stack-set", "schedule", "convert"],
   "cjkScripts": ["ko", "ja", "zh"],
   "extensionRouting": {
     "frontend-engineer": [

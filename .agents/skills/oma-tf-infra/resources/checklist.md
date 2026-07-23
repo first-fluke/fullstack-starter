@@ -8,6 +8,7 @@
 
 ## Security
 - [ ] No secrets, passwords, or API keys in .tf files
+- [ ] Secret values do not persist in state where avoidable: ephemeral resources (TF >= 1.10) / write-only `*_wo` arguments (TF >= 1.11); state treated as sensitive either way
 - [ ] `terraform.tfvars` excluded from git
 - [ ] IAM policies follow least privilege
 - [ ] OIDC/workload identity used for CI/CD (no long-lived credentials)
@@ -43,8 +44,8 @@
 
 ## Policy & Testing
 - [ ] Policy checks (OPA/Sentinel) pass
-- [ ] Security scanning (Checkov/tfsec) clean
-- [ ] Critical modules have integration tests
+- [ ] Security scanning (Checkov/Trivy) clean
+- [ ] Critical modules have `terraform test` or integration tests
 
 ## Compliance (when applicable)
 - [ ] AI systems: IAM, logging, encryption, monitoring, retention controls documented

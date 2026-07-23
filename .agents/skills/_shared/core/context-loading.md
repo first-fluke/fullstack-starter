@@ -17,7 +17,9 @@ This saves context window and prevents confusion from irrelevant information.
 ### Load Based on Difficulty
 4. **Simple**: Proceed to implementation without additional loading
 5. **Medium**: `resources/examples.md` (reference similar examples)
+<!-- oma-docs:ignore-start -->
 6. **Complex**: `resources/examples.md` + `stack/tech-stack.md` + `stack/snippets.md`
+<!-- oma-docs:ignore-end -->
 
 ### Load During Execution as Needed
 7. `resources/checklist.md`: Load at Step 4 (Verify)
@@ -124,7 +126,7 @@ This saves context window and prevents confusion from irrelevant information.
 | Task Type                   | Required Resources                                                       |
 | --------------------------- | ------------------------------------------------------------------------ |
 | Design system creation      | reference/typography.md + reference/color-and-contrast.md + reference/spatial-design.md + design-md-spec.md |
-| Landing page design         | reference/component-patterns.md + reference/motion-design.md + prompt-enhancement.md + examples/landing-page-prompt.md |
+| Landing page design         | reference/component-patterns.md + reference/motion-design.md + prompt-enhancement.md |
 | Design audit                | checklist.md + anti-patterns.md                                          |
 | Design token export         | design-tokens.md                                                         |
 | Stitch MCP integration      | stitch-integration.md                                                    |
@@ -144,7 +146,7 @@ Prompt composition:
 2. execution-protocol.md
 3. Resources matching task type (see tables above)
 4. error-playbook.md (always include; recovery is essential)
-5. Serena Memory Protocol (CLI mode)
+5. Memory Protocol (CLI mode)
 ```
 
 This approach avoids loading unnecessary resources, maximizing subagent context efficiency.

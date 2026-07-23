@@ -86,6 +86,11 @@
     "flatHookEntries": {
       "type": "boolean",
       "description": "When true, settings hook entries are written as flat {command, timeout[, matcher]} objects under each event key (Cursor hooks.json format) instead of nested {matcher, hooks:[...]} groups (Claude Code format)."
+    },
+    "skipSettingsMerge": {
+      "type": "boolean",
+      "description": "When true, the generic installer copies hook scripts and writes the oma-hook.sh wrapper but does NOT merge hook entries into settingsFile. Used by Kiro, whose CLI reads hooks from a dedicated agent config (.kiro/agents/oma-hooks.json via applyKiroOmaHooksAgent) — the generic .kiro/settings/cli.json merge would be dead config Kiro never reads. `extra` (statusLine/permissions) is still applied when present.",
+      "default": false
     }
   },
   "$defs": {
@@ -109,6 +114,10 @@
           "minimum": 1,
           "maximum": 30,
           "default": 5
+        },
+        "loopLimit": {
+          "type": ["integer", "null"],
+          "description": "Cursor `stop` hook only: caps how many times the hook may auto-resubmit a followup_message (Cursor's loop_limit). null = uncapped; omit for Cursor's default (5). Ignored by other vendors."
         }
       }
     },

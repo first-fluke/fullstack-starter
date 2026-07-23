@@ -161,8 +161,10 @@ direction. The safe preset and bold template choices should stay within recogniz
 ## 5. Content-Density Modes
 
 The `density` field in `meta.json` governs how slides are laid out and how much content they carry.
+Its values are the CLI enum `sparse | balanced | dense`: a speaker-led deck maps to `sparse`, a
+reading-first deck maps to `dense`, and `balanced` (the default) sits in between.
 
-### 5a. Speaker-Led (Sparse)
+### 5a. Speaker-Led (`sparse`)
 
 The presenter is the primary content delivery vehicle. Slides are visual anchors.
 
@@ -175,7 +177,7 @@ The presenter is the primary content delivery vehicle. Slides are visual anchors
 | Slide count | Allow 1 slide per 1–2 minutes of talk time |
 | Speaker notes | Extensive notes in `meta.json.speakerNotes[]` for the presenter |
 
-### 5b. Reading-First (Dense)
+### 5b. Reading-First (`dense`)
 
 The deck is a self-contained document. Readers consume it without a presenter.
 
@@ -191,7 +193,8 @@ The deck is a self-contained document. Readers consume it without a presenter.
 ### 5c. Mixed Density
 
 Some decks mix modes (e.g., opener slides are sparse, data slides are dense). Apply the relevant
-mode rules per slide and record the overall dominant mode in `meta.json.density`.
+mode rules per slide and record the overall dominant mode in `meta.json.density`
+(`sparse`, `balanced`, or `dense`).
 
 ---
 
@@ -218,7 +221,7 @@ A well-crafted slide satisfies all of these:
 2. **Scannable hierarchy** — the largest element is the most important.
 3. **Comfortable empty space** — the canvas breathes; content does not fill edge to edge.
 4. **Consistent with the deck** — the color, font, and grid choices are the same as every other slide.
-5. **Readable at scale** — body text ≥ 28 px; the smallest legible text at 1920×1080 passes WCAG AA.
+5. **Readable at scale** — body text ≥ 28 px (doctrine floor; the validator's hard gate rejects only text below 18 px); the smallest legible text at 1920×1080 passes WCAG AA.
 6. **Accessible in motion** — any animations are wrapped in `@media (prefers-reduced-motion: no-preference)`.
 
 ---

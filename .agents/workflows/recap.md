@@ -24,16 +24,16 @@ Inspect the user's request and resolve **at most three** arguments. Default mode
 
 | Mode | Triggers | CLI flag |
 |------|----------|----------|
-| `daily` | No date, "today", "오늘", "yesterday", "어제", specific date ("4월 10일", "2026-04-10") | `--date YYYY-MM-DD` (or omitted for today) |
+| `daily` | No date, "today", "오늘", "yesterday", "어제", specific date ("4월 10일", "2026-04-10") | `--date YYYY-MM-DD` (always pass it — the bare default is a rolling 24h window, not today) |
 | `period` | "this week", "지난 7일", "last month", "past 2 weeks", "이번달" | `--window Nd` |
 
-Only extract a tool filter when the user **explicitly names** one or more tools (e.g., "코덱스만", "claude only", "qwen과 codex"). Supported values: `grok, claude, codex, qwen, cursor, antigravity`. Otherwise omit `--tool`.
+Only extract a tool filter when the user **explicitly names** one or more tools (e.g., "코덱스만", "claude only", "qwen과 codex"). Supported values: `grok, claude, codex, gemini, qwen, cursor, antigravity`. Otherwise omit `--tool`.
 
 Resolution rules (delegate ambiguous cases to the skill):
 - Relative day references → `--date YYYY-MM-DD`
 - Relative weekday references → calculate the date
-- Period phrases → `--window Nd` (1w=7d, 1mo=30d)
-- No date specified → today (omit flags)
+- Period phrases → `--window Nd` (1w=7d, 1mo=30d; the CLI caps windows at 30d)
+- No date specified → today's date as `--date YYYY-MM-DD` (do not omit flags: the bare default `--window 1d` is a rolling 24h window ending now)
 
 If the user supplies multiple conflicting signals (e.g., "지난주 어제"), pick the more specific one and state the assumption in Step 5.
 
@@ -56,7 +56,7 @@ Use one of:
 
 ```bash
 # Today
-oma recap --json
+oma recap --date $(date +%F) --json
 
 # Specific date
 oma recap --date 2026-05-11 --json

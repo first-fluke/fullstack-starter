@@ -1,6 +1,6 @@
 ---
 name: oma-recap
-description: Analyze conversation histories from multiple AI tools (Grok, Claude, Codex, Qwen, Cursor, Antigravity) and generate themed daily/period work summaries. Filter by date or time window.
+description: Analyze conversation histories from multiple AI tools (Grok, Claude, Codex, Gemini, Qwen, Cursor, Antigravity) and generate themed daily/period work summaries. Filter by date or time window.
 ---
 
 # AI Tool Conversation History Summary
@@ -63,7 +63,7 @@ Collect AI tool conversation history for a date or window and synthesize it into
 6. **FINALIZE**: Save and display summary.
 
 ### Transitions
-- If no date is specified, use today.
+- If no date is specified, use today via `--date` (bare `--window` is a rolling window ending now, not calendar-aligned).
 - If window is 3 days or longer, group by project instead of day chronology.
 - If CLI is unavailable, use Claude fallback only and report scope limits.
 - If tasks are under threshold, group them into Miscellaneous or Side Projects.
@@ -97,9 +97,9 @@ Collect AI tool conversation history for a date or window and synthesize it into
 
 ### Canonical command path
 ```bash
-oma recap --json
-oma recap --window 7d --json
 oma recap --date YYYY-MM-DD --json
+oma recap --window 7d --json
+oma recap --json  # rolling last 24h, not "today"
 ```
 
 ### Resource scope
@@ -142,23 +142,27 @@ Determine the target date or window from the user's natural language input. Defa
 - Specific date mentions (month + day, or full date) → convert to `--date YYYY-MM-DD`
 - Relative weekday references (last Monday, this Friday, etc.) → calculate the date
 - Period references (this week, last 3 days, past 2 weeks, etc.) → convert to `--window Nd`
-- No date specified → today (`--window 1d`)
+- No date specified → today, resolved to `--date YYYY-MM-DD` (bare `--window 1d` is a rolling 24-hour window ending now, not the calendar day)
+- The CLI caps windows at 30 days (longer values are trimmed with a warning) — when a requested period gets capped, say so in the recap
 
 ### 2. Collect Data
 
 Extract normalized conversation history via CLI.
 
 ```bash
-# Default (today, all tools)
+# Today (calendar day, all tools)
+oma recap --date $(date +%F) --json
+
+# Last 24 hours (rolling window ending now)
 oma recap --json
 
-# Time window
+# Time window (rolling, ends now; capped at 30d)
 oma recap --window 7d --json
 
 # Specific date
 oma recap --date 2026-04-10 --json
 
-# Tool filter (supported: grok, claude, codex, qwen, cursor, antigravity)
+# Tool filter (supported: grok, claude, codex, gemini, qwen, cursor, antigravity)
 oma recap --tool claude,codex --json
 ```
 
@@ -196,7 +200,7 @@ Read **all** extracted data and analyze with the following criteria:
 
 **Cross-tool analysis:**
 - Track workflow when multiple tools are used in the same time window
-- Example: "Designed in Gemini -> Implemented in Claude -> Reviewed in Codex"
+- Example: "Designed in Antigravity -> Implemented in Claude -> Reviewed in Codex"
 - Derive insights from tool-switching patterns
 
 **Extract from each theme:**

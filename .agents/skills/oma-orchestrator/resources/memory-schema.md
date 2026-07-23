@@ -6,21 +6,21 @@ Each subagent writes only to its own dedicated files. The orchestrator manages s
 
 ## Configuration
 
-Memory base path and tool names are configurable via `mcp.json`:
+Memory base path and tool names are configurable via `.agents/mcp.json` (not the repo-root `.mcp.json`, which is the Claude Code MCP server config):
 ```json
 {
   "memoryConfig": {
-    "basePath": ".serena/memories",
+    "basePath": ".agents/state/memories",
     "tools": {
-      "read": "read_memory",
-      "write": "write_memory",
-      "edit": "edit_memory"
+      "read": "Read",
+      "write": "Write",
+      "edit": "Edit"
     }
   }
 }
 ```
 
-Default base path: `.serena/memories`
+Default base path: `.agents/state/memories`
 
 ## File Structure
 
@@ -68,6 +68,8 @@ Created by the orchestrator at session start. Updated throughout execution.
 
 Master task list created by the orchestrator. Subagents read this to understand their assignment but never write to it.
 
+`Exposed Skills` is the task's `exposed_skill_set` from the domain gate (PHASE 1.5 in `SKILL.md`): the specialist skills injected into the subagent's prompt. `Exposure Fallback` is `true` when classification confidence was too low and the full installed skill library was exposed instead.
+
 ```markdown
 # Task Board
 ## Session: session-{YYYYMMDD}-{HHMMSS}
@@ -79,6 +81,8 @@ Master task list created by the orchestrator. Subagents read this to understand 
 - **Status**: pending | in_progress | completed | failed | blocked
 - **Priority**: 1
 - **Dependencies**: none
+- **Exposed Skills**: oma-backend, oma-db
+- **Exposure Fallback**: false
 - **Description**: Implement user registration and login with JWT tokens
 - **Acceptance Criteria**:
   - POST /api/auth/register with email + password
@@ -93,6 +97,8 @@ Master task list created by the orchestrator. Subagents read this to understand 
 - **Status**: pending
 - **Priority**: 1
 - **Dependencies**: none
+- **Exposed Skills**: oma-frontend, oma-design
+- **Exposure Fallback**: false
 - **Description**: Build login and registration forms with validation
 - **Acceptance Criteria**:
   - Login form with email + password
@@ -107,6 +113,8 @@ Master task list created by the orchestrator. Subagents read this to understand 
 - **Status**: blocked
 - **Priority**: 2
 - **Dependencies**: task-1, task-2
+- **Exposed Skills**: (all installed skills)
+- **Exposure Fallback**: true
 - **Description**: Review all deliverables for security and performance
 - **Acceptance Criteria**:
   - OWASP Top 10 security check

@@ -11,7 +11,7 @@ disable-model-invocation: true
 - **You MUST use MCP tools throughout the workflow.**
   - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation, NOT raw file reads or grep.
   - Use memory write tool to record debugging results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.serena/memories`)
+  - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
   - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
   - MCP tools are the primary interface for all code exploration.
 
@@ -76,6 +76,8 @@ If an error message is provided, proceed immediately.
 ## Step 2: Reproduce the Bug
 
 // turbo
+Run the smallest available failing test, runtime command, or log query that exercises the reported behavior and capture the observed failure signal. If the environment cannot reproduce it, follow `.agents/skills/oma-debug/resources/error-playbook.md` § "Cannot Reproduce the Bug" and record that limitation before continuing.
+
 Use MCP `search_for_pattern` with the error message or stack trace to locate the error in the codebase.
 Use `find_symbol` to identify the exact function and file. Do NOT grep or read files manually.
 

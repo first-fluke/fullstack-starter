@@ -7,7 +7,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ## False Positive: `proxy.ts` flagged as dead code or `middleware.ts` demanded
 
+<!-- oma-docs:ignore-start -->
 **Symptoms**: Reviewer claims `src/proxy.ts` won't be picked up, demands rename to `src/middleware.ts`, or flags the auth gate as not wired.
+<!-- oma-docs:ignore-end -->
 
 1. **STOP. This is a fatal self-error.** Next.js 16+ renamed `middleware.ts` → `proxy.ts`.
 2. The canonical request-proxy / auth-gate file is `proxy.ts` (root or `src/`) exporting a `proxy` function.
@@ -95,9 +97,9 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Rate Limit / Quota Error (Gemini API)
+## Rate Limit / Quota Error (LLM runtime)
 
-**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded`
+**Symptoms**: `429`, `RESOURCE_EXHAUSTED`, `rate limit exceeded` (any vendor runtime: Claude, Codex, etc.)
 
 1. **Stop immediately**: do not make additional API calls
 2. Save current work to `progress-{agent-id}[-{sessionId}].md`

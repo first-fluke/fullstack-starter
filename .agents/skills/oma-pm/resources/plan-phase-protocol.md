@@ -12,7 +12,7 @@ Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow.
 - Present alternatives, don't assume
 
 ### Outputs
-- Task decomposition (P0/P1/P2 priority)
+- Task decomposition (priority tiers: 1 = independent, ascending)
 - Agent assignments
 - API contracts (if needed)
 

@@ -66,10 +66,35 @@ Bug fixing (intentional behavior change) / performance optimization (different g
 - Convention axis: in brownfield, the coding guide and framework conventions beat "theoretically better" patterns - consistency is a component of analysability. Changing a convention is an architecture decision (ADR + lint ratchet for new code + module-wise migration), never a boy-scout edit.
 - Timing: Rule of Three - abstract after reuse evidence accumulates; speculative generality is a smell.
 
+## Naming - operationalizing the unmeasured lever
+
+Rename is the only core transformation with no metric gate; its gate is qualitative: does the new name reveal the entity's **role** and **domain meaning** to the next reader? For variables, Sajaniemi's role taxonomy makes that question checkable (11 roles cover ~99% of variables in procedural/OO code): first identify the role, then verify the name exposes it.
+
+| Role | Behavior | Naming cue |
+|------|----------|-----------|
+| Fixed value | Set once, read thereafter | `maxRetries`, `basePath` |
+| Stepper | Walks a predictable succession | `attempt`, `pageIndex` |
+| Flag | Two-state signal controlling flow | `isStale`, `hasOverflow` |
+| Walker | Traverses a data structure | `cursor`, `currentNode` |
+| Most-recent holder | Latest value seen so far | `lastError`, `currentLine` |
+| Most-wanted holder | Best value found so far | `closestMatch`, `maxSoFar` |
+| Gatherer | Accumulates across values | `total`, `mergedDiff` |
+| Container | Elements enter and leave | `pendingJobs`, `seenIds` |
+| Follower | Previous value of another variable | `prevNode` |
+| Organizer | Holds data being rearranged | `sortedCopy` |
+| Temporary | Held briefly (swap/reuse) | `tmp` - acceptable ONLY in this role |
+
+Rename discipline:
+- Generic names (`data`, `result`, `temp`, `value`) outside the temporary role fail the role check; lying names (name promises X, body does Y) outrank them as targets.
+- One variable, one role: a variable that switches roles mid-scope is a **Split Variable** trigger, not a rename target.
+- Functions are named for intent (what), not mechanism (how); command = verb, query = noun/predicate.
+- Renames are engine-executed (LSP/IDE rename; in agent context, Serena `rename_symbol`), never find-replace; tests re-run regardless.
+- Goodhart applies here too: role vocabulary diagnoses; the terminal check is still "does the next reader understand this cheaper".
+
 ## Execution contexts
 - **Greenfield**: refactoring is the third beat of TDD (Red -> Green -> Refactor) - minute-scale hygiene, net already exists.
 - **Brownfield**: order inverts - find a seam (minimal mechanical change to enable testing) -> characterization tests -> restructure. Large scale: Strangler Fig, Branch by Abstraction, Sprout Method - the system stays working at every point. The classification is per code fragment (coverage map), not per project.
-- **Stateful (data/API)**: git revert does not restore data. Mechanism: **Expand-Contract (parallel change)** - expand (old+new coexist) -> dual-write + backfill -> switch reads -> contract (remove old); feature flags are the standard switch. External consumers: semver + deprecation cycles as a staged contract-transfer protocol.
+- **Stateful (data/API)**: git revert does not restore data. Mechanism: **Expand-Contract (parallel change)** - expand (old+new coexist) -> dual-write + backfill -> switch reads -> contract (remove old); feature flags are the standard switch. External consumers: semver + deprecation cycles as a staged contract-transfer protocol; the pattern vocabulary for that staging (Version Identifier, Two in Production, Aggressive Obsolescence, Limited Lifetime Guarantee - MAP evolution patterns, Zimmermann et al.) lives with `oma-architecture` (`resources/api-evolution.md`) - a published-contract change is an architecture decision, route there for the ADR.
 - **Team concurrency**: big renames collide with every open branch - another reason for "small and frequent". Announce large refactorings + short merge windows; register bulk mechanical commits in `.git-blame-ignore-revs`; LSC (monorepo-wide atomic change + owner-split review) is incrementality at org scale.
 - **Regulated environments**: even behavior-preserving changes trigger re-verification/re-certification - economics invert; batch-per-release refactoring is the one legitimate exception to "continuous flow".
 

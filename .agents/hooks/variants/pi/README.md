@@ -30,18 +30,45 @@ as subprocesses by the bridge.
 |---|---|---|---|
 | keyword-detector + skill-injector | `UserPromptSubmit` | `before_agent_start` | spawn both, append their `additionalContext` to `event.systemPrompt` |
 | test-filter | `PreToolUse` (Bash) | `tool_call` (bash) | spawn test-filter, rewrite `event.input.command` in place |
-| persistent-mode | `Stop` (block) | — | **no analog** (see below) |
+| persistent-mode | `Stop` (block) | `agent_settled` | spawn persistent-mode; on a `block` decision, re-enter via `pi.sendUserMessage(reason)` |
 | hud / status line | `statusLine` | `ctx.ui.setStatus` (RPC only) | not wired |
 
-## Known limitation: persistent workflows
+## Persistent workflows
 
-pi has no stop-blocking event. Its only post-turn hook, `agent_end`, is
-notification-only and cannot re-enter the agent loop. So the
-"block termination until the workflow finishes" behaviour of `orchestrate`,
-`ultrawork`, and `work` cannot be reproduced under pi. The persistent state is
-still written; it simply degrades to **re-injection on the next user turn** via
-`before_agent_start` (the same reinforcement path keyword-detector already
-uses), rather than forcing continuation within a single turn.
+`agent_settled` fires once a run has **fully settled** — no automatic retry,
+compaction, or queued continuation remains. That is pi's analog of a Stop hook,
+so the bridge spawns `persistent-mode.ts` there and, if a persistent workflow
+(`orchestrate`, `ultrawork`, `work`) is still active, re-enters the loop by
+re-injecting the reinforcement text through `pi.sendUserMessage(reason)` (which
+**always triggers a fresh turn**).
+
+Loop safety:
+
+- **Session-scoped state.** The bridge threads `ctx.sessionManager.getSessionId()`
+  into both the `before_agent_start` payload (so keyword-detector's `activateMode`
+  actually writes the workflow state file — it refuses to write under an unknown
+  session) and the `agent_settled` payload (so persistent-mode reads the matching
+  file). Without a session id the whole loop is inert.
+- **Primary terminator.** persistent-mode's own state file caps reinforcements
+  (5) and expires on staleness — after that it returns no `block` and the loop
+  ends. The re-injected reason begins with `[OMA PERSISTENT MODE:`; the bridge
+  detects that sentinel in `before_agent_start` and **skips** re-injection for
+  its own re-entry turns, so keyword-detector never re-activates the workflow and
+  never resets that cap.
+- **Backstop.** A hard ceiling of 50 consecutive re-entries per process (reset on
+  every genuine user turn) guards against a pathological state file.
+- **Pending input / idle.** Re-entry is skipped when `ctx.hasPendingMessages()`
+  is true, and the whole handler is best-effort (`try/catch`) so a broken hook
+  can never wedge pi.
+
+### Version compatibility
+
+`agent_settled` was added to pi **after 0.78.1**. Registration is
+capability-guarded (the `pi.on` call is wrapped in `try/catch`, and
+`pi.sendUserMessage` is feature-checked before use). On older pi builds the
+handler is simply never emitted and persistent workflows degrade to
+**re-injection on the next user turn** via `before_agent_start` — the historical
+behavior. The `before_agent_start` / `tool_call` mappings are unchanged.
 
 ## Vendor identity
 

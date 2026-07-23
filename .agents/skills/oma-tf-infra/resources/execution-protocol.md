@@ -72,8 +72,12 @@ Follow these steps in order (adjust depth by difficulty).
    - Export essential outputs only
    - Document all inputs/outputs in README.md
    - Version modules using Git tags or Terraform Registry
-4. Identify security requirements (IAM, encryption, network boundaries)
-5. Estimate cost impact for new resources
+4. Choose an environment separation strategy:
+   - Prefer directory-per-environment (`envs/dev`, `envs/prod`) with isolated state backends for team setups
+   - CLI workspaces only for lightweight, same-config variants (shared backend is a blast-radius risk)
+   - Consider Terragrunt when many environments share identical module wiring
+5. Identify security requirements (IAM, encryption, network boundaries)
+6. Estimate cost impact for new resources (run Infracost when available)
 
 ## Step 3: Implement
 
@@ -94,12 +98,13 @@ Follow these steps in order (adjust depth by difficulty).
 | Level | Tool | Purpose |
 |-------|------|---------|
 | Unit | `terraform validate` | Syntax, variable types |
-| Static Analysis | TFLint, Checkov | Best practices, security |
+| Static Analysis | TFLint, Checkov, Trivy (`trivy config`) | Best practices, security |
+| Module Tests | `terraform test` (TF >= 1.6, `.tftest.hcl`) | Module logic via plan/apply assertions |
 | Integration | Terratest | Resource creation verification |
 | Compliance | OPA/Sentinel | Organizational policy enforcement |
 | E2E | Custom scripts | Full workflow validation |
 
-See `policy-testing-examples.md` for Terratest, Kitchen-Terraform, and CI/CD integration examples.
+See `policy-testing-examples.md` for native `terraform test`, Terratest, and CI/CD integration examples.
 
 ## Step 4: Verify
 

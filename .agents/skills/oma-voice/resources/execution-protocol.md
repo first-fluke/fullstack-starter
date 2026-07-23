@@ -16,7 +16,7 @@ If the signal is ambiguous, ask one question before proceeding.
 
 ## Step 1: Health check
 
-1. Probe `GET http://127.0.0.1:17493/health` with a 5-second timeout (configurable).
+1. Probe `GET http://127.0.0.1:17493/health` with a 5-second timeout.
 2. On success, continue to Step 2.
 3. On failure, surface this hint and exit with code 5:
    ```
@@ -81,7 +81,7 @@ Run the checklist from `SKILL.md > Clarification protocol`. Notification mode sk
 
 For `asset` and `notify` modes:
 
-1. Call the cached `models` tool.
+1. Probe `GET http://127.0.0.1:17493/models/status` over loopback REST (model status is not exposed as an MCP tool — see Step 2).
 2. If the selected engine reports `loaded: false`, ask the user before triggering a download. Voicebox owns the download flow; this skill only relays the prompt.
 
 ## Step 7: Invoke MCP tool
@@ -111,9 +111,15 @@ Expected response: transcript text and detected language. Pass exactly one of `a
 ## Step 8: Persist output and manifest
 
 ### TTS output
+
+The MCP tool has no save-to-disk: fetch the generated audio over loopback REST
+(`GET /audio/{generation_id}`) and write it as `output.wav` — Voicebox stores
+TTS generations as wav. If the user asked for mp3, transcode locally with
+ffmpeg after the fetch and record `"format": "mp3"` in the manifest.
+
 ```text
 .agents/results/voice/<YYYYMMDD-HHMMSS>-<shortid>/
-├── output.mp3
+├── output.wav
 └── manifest.json
 ```
 
@@ -136,7 +142,7 @@ TTS:
   "profile": "Nova",
   "engine": "kokoro",
   "language": "en",
-  "format": "mp3",
+  "format": "wav",
   "duration_sec": 7.4,
   "created_at": "2026-05-15T09:15:33+09:00"
 }

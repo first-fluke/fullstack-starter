@@ -35,7 +35,10 @@ Conventional Commits applies consistent rules to commit messages to enable:
 | `refactor` | Code improvement without behavior change | - | `refactor: extract helper function` |
 | `perf` | Performance improvements | PATCH | `perf: optimize database queries` |
 | `test` | Add/modify tests | - | `test: add unit tests for auth` |
-| `chore` | Build, config, packages | - | `chore: update dependencies` |
+| `chore` | Maintenance not covered by other types | - | `chore: update .gitignore` |
+| `build` | Build system, external dependencies | - | `build: bump vite to v6` |
+| `ci` | CI configuration and scripts | - | `ci: cache bun install in workflow` |
+| `revert` | Revert a previous commit | varies | `revert: feat(auth): add OAuth2 support` |
 
 ## Scope
 
@@ -117,7 +120,7 @@ Refs #123, #789
 feat(ui): redesign dashboard
 
 Co-Authored-By: Jane Doe <jane@example.com>
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: First Fluke <our.first.fluke@gmail.com>
 ```
 
 ## Branch Naming Convention

@@ -31,10 +31,22 @@
             "name": "oma-hook-PreToolUse",
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'PreToolUse' --matcher 'Bash'",
-            "timeout": 10
+            "timeout": 13
           }
         ],
         "matcher": "Bash"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "oma-hook-SessionStart",
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'SessionStart'",
+            "timeout": 13
+          }
+        ]
       }
     ]
   },

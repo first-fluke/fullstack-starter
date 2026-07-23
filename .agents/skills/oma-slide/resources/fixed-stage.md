@@ -7,16 +7,19 @@
 
 All slides are authored at exactly **1920 × 1080 px**. This is non-negotiable:
 
-- The validator (`oma slide validate`) renders at 1920×1080 and checks geometry at that size.
+- The validator (`oma slide validate`) renders at 1920×1080 and checks geometry at that size;
+  it reports px→pt at 0.75 (1920×1080 px → 1440×810 pt at 96 dpi / 72 pt-per-inch).
 - The exporter (`oma slide pdf|png`) captures at 1920×1080 before any post-processing.
-- PPTX export converts 1920×1080 px to 720×405 pt (÷ 2.667) — pixel authoring only, no pt in HTML.
+- PPTX export places each rasterized slide full-bleed on a LAYOUT_WIDE canvas
+  (13.333 in × 7.5 in = 960×540 pt) — pixel authoring only, no pt in HTML.
 - Do **not** author in percentages, `vw/vh`, or responsive units that reflow the layout.
   Fixed `px` values only inside `.slide`.
 
 ```
 Canvas size:  1920 px wide  ×  1080 px tall
 Aspect ratio: 16:9
-PPTX output:  720 pt wide   ×  405 pt tall   (px ÷ 2.667)
+Validator pt: 1440 pt wide  ×  810 pt tall    (px × 0.75)
+PPTX layout:  13.333 in × 7.5 in (960×540 pt) — raster placed full-bleed
 ```
 
 ## 2. Stage Scaling — How It Works
@@ -79,7 +82,9 @@ output.
 </body>
 ```
 
+<!-- oma-docs:ignore-start -->
 ### Option B — Inlined (single-file bundle — `out/deck.html`)
+<!-- oma-docs:ignore-end -->
 
 `oma slide bundle` inlines both files; the structure is the same but the
 `<link>` is replaced by `<style>...</style>` and `<script src>` becomes `<script>...</script>`.
@@ -104,7 +109,7 @@ For `viewer.html`, the CLI injects:
 |---|---|
 | Slide root | `position: absolute; inset: 0; width: 1920px; height: 1080px;` |
 | Safe zones | Left/right margin ≥ 80px; top/bottom margin ≥ 60px |
-| Body text | 28–36 px minimum; heading 64–120 px |
+| Body text | 28–36 px doctrine floor; heading 64–120 px. (The validator hard-fails only below 18 px — 18–27 px passes the gate but is reserved for captions/labels.) |
 | Icon / decorative image | explicit `width`/`height` in px |
 | Background gradients | allowed (CSS); rasterized to PNG at PPTX export |
 | Clipping / overflow | `overflow: hidden` on `.slide` prevents bleed-out |
@@ -223,10 +228,17 @@ sees the true 1920×1080 px layout. `viewport-base.css` `@media print` rules:
 
 Result: one clean 1920×1080 slide per printed page.
 
-## 10. Presenter View (postMessage API)
+## 10. Presenter View (embedded notes panel + postMessage API)
 
-When `viewer.html` opens the deck inside an `<iframe>`, `deck-stage.js` posts on every
-slide change:
+The presenter view is an **embedded on-screen notes panel** — there is no separate
+presenter window. `deck-stage.js` reads speaker notes from
+`<script type="application/json" id="speaker-notes">` (a JSON object keyed by
+**0-based slide index** as a string: `"0"`, `"1"`, …). Press **`n`** to toggle a
+fixed, semi-transparent panel at the bottom of the viewport showing the current
+slide's note; it updates automatically on slide change, is hidden by default
+(never intercepts clicks when hidden), and is suppressed during print.
+
+For embedding integrations, `deck-stage.js` also posts on every slide change:
 
 ```js
 window.parent.postMessage(
@@ -234,9 +246,6 @@ window.parent.postMessage(
   "*"
 );
 ```
-
-The presenter view reads speaker notes from
-`<script type="application/json" id="speaker-notes">` (a JSON object keyed by 0-based index).
 
 The parent frame can navigate the iframe by posting:
 

@@ -54,7 +54,18 @@ export interface ModeState {
  * Discriminated on `kind`; produced by adapters.ts normalizeInput().
  */
 export type HookInput =
-  | { kind: "prompt"; prompt: string; cwd: string }
+  | {
+      kind: "prompt";
+      prompt: string;
+      cwd: string;
+      /**
+       * SessionStart trigger source (claude: startup|resume|clear|compact).
+       * `compact` lets session-once handlers (serena-primer, state-boundary)
+       * force re-injection: compaction keeps the session id, so their normal
+       * dedup would otherwise skip exactly the turn that lost the context.
+       */
+      source?: string;
+    }
   | {
       kind: "pre_tool";
       toolName: string;

@@ -41,7 +41,7 @@ Drive the Voicebox local app through its MCP server so any MCP-aware agent can s
 - Notification: short message (<= 240 chars), profile id resolved from config.
 
 ### Expected outputs
-- TTS: audio file (`mp3` default, `wav` optional) at `.agents/results/voice/{timestamp}-{shortid}/output.{mp3|wav}` plus `manifest.json`.
+- TTS: audio file (`wav` — Voicebox's native TTS output format; `mp3` optional via a local ffmpeg transcode) at `.agents/results/voice/{timestamp}-{shortid}/output.{wav|mp3}` plus `manifest.json`.
 - STT: `transcript.md` at `.agents/results/voice/transcripts/{timestamp}-{shortid}/` plus `manifest.json`.
 - Notification: ephemeral playback through Voicebox; no disk write by default.
 
@@ -130,8 +130,11 @@ MCP voicebox_list_profiles          ->  pick profile by name or config default
 MCP voicebox_speak     { text, profile, language?, engine?, personality? }
 MCP voicebox_transcribe { audio_path | audio_base64, language?, model? }
 
-# 5. Persist output + manifest
-.agents/results/voice/<timestamp>-<shortid>/output.mp3 + manifest.json
+# 5. Fetch the generated audio (MCP has no save-to-disk; TTS output is wav)
+GET http://127.0.0.1:17493/audio/{generation_id}  ->  wav bytes
+
+# 6. Persist output + manifest
+.agents/results/voice/<timestamp>-<shortid>/output.wav + manifest.json
 .agents/results/voice/transcripts/<timestamp>-<shortid>/transcript.md + manifest.json
 ```
 
@@ -139,16 +142,16 @@ MCP voicebox_transcribe { audio_path | audio_base64, language?, model? }
 
 | Use case | MCP tool | REST backing |
 |---|---|---|
-| TTS generation | `voicebox_speak` | `POST /generate` |
+| TTS generation | `voicebox_speak` | `POST /speak` |
 | STT transcription | `voicebox_transcribe` | `POST /transcribe` |
 | Profile listing | `voicebox_list_profiles` | `GET /profiles` |
 | Captures listing | `voicebox_list_captures` | `GET /history` (captures view) |
 
-Tools not exposed via MCP (REST only): model status (`GET /models/status`), audio file serving (`GET /audio/{generation_id}`). The skill calls those over loopback HTTP when needed.
+Tools not exposed via MCP (REST only): model status (`GET /models/status`), audio file serving (`GET /audio/{generation_id}`), per-version audio (`GET /audio/version/{version_id}`). The skill calls those over loopback HTTP when needed.
 
 **Notes on `voicebox_speak`:**
 - Required: `text`. Optional: `profile`, `engine`, `language`, `personality` (bool).
-- Audio plays on the user speakers and is saved to the Captures / History panel automatically. There is no `save_to_disk` toggle on the MCP tool itself.
+- Audio plays on the user speakers and is saved to the Captures / History panel automatically. There is no `save_to_disk` toggle on the MCP tool itself; to persist a local copy, fetch `GET /audio/{generation_id}` (Voicebox TTS always stores `wav`).
 - Without a default profile set in Voicebox Settings, `profile=` is required.
 
 **Notes on `voicebox_transcribe`:**
@@ -181,10 +184,10 @@ Tools not exposed via MCP (REST only): model status (`GET /models/status`), audi
 2. **Profile required**: if `voicebox_list_profiles` returns empty, instruct the user to create a profile in the Voicebox app (Profiles tab → + New Profile → pick Kokoro preset for the fastest path), then exit.
 3. **Tool-name discovery**: on first invocation, call MCP `tools/list` and cache the resolved names. Reuse the cache for subsequent calls in the same session.
 4. **Length limits**: TTS calls cap at 5000 chars per call; warn at 2000. STT inputs cap at 30 minutes. v1 does not auto-chunk or auto-split.
-5. **Auto-invocation transparency**: notifications fire automatically only when the active task exceeds `auto_notify_after_sec` (default 60s). Always announce intent in one short line before generating audio.
+5. **Auto-invocation transparency**: notifications fire automatically only when the active task exceeds `auto_notify_after_sec` (default 60s). This threshold is agent-enforced guidance — no hook measures task duration — so apply it by judgment when a long task completes or blocks. Always announce intent in one short line before generating audio.
 6. **Path safety**: when the user requests an output path outside `$PWD`, warn once and require explicit confirmation.
 7. **Cancellation**: SIGINT aborts the MCP call and writes no partial output.
-8. **Manifest required**: every generation writes `manifest.json` with at minimum: `skill`, `mode`, `voicebox_generation_id`, `text` (or `transcript_preview`), `profile`, `engine`, `language`, `format` (TTS only), `created_at`.
+8. **Manifest required for persisted output**: asset TTS and transcription modes write `manifest.json` with at minimum: `skill`, `mode`, `voicebox_generation_id`, `text` (or `transcript_preview`), `profile`, `engine`, `language`, `format` (TTS only), `created_at`. Notification mode is exempt because Voicebox Captures is its system of record and no disk output is written by default.
 9. **Out of scope**: voice cloning UI, captures archive, stories editor, microphone dictation loop, and cloud vendors are intentionally not exposed.
 10. **No cost guard**: Voicebox is free. The cost guardrail from `oma-image` does not apply.
 
@@ -198,7 +201,7 @@ Before invoking a TTS or STT call, the agent checks the following. If any requir
 
 **TTS strongly recommended:**
 - [ ] Language explicit or detectable from the text?
-- [ ] Output format (mp3 default, wav optional)?
+- [ ] Output format (wav default; mp3 requires a local ffmpeg transcode)?
 
 **STT required:**
 - [ ] Audio path provided and the file exists?

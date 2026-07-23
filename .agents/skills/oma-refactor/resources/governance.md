@@ -40,5 +40,9 @@ One test framework per language per repo, declared here; changing it follows the
 | TS/JS | **vitest** | `@vitest/coverage-v8` | StrykerJS | residual jest requires a migration ADR |
 | Python | **pytest** | `pytest-cov` | mutmut / cosmic-ray | no unittest-style mixing |
 | Dart/Flutter | **flutter_test** | `flutter test --coverage` | (ecosystem gap - compensate with assertion review) | includes golden tests |
+| Swift | **swift-testing** (XCTest legacy) | `swift test --enable-code-coverage` | (ecosystem gap - compensate with assertion review) | native iOS |
+| Kotlin | **JUnit5** | Kover | PIT/pitest | JVM/Android |
+
+Languages not in this registry require adding a row via the convention-change procedure (ADR) before refactoring work in that language proceeds.
 
 This registry is part of the coding guide and therefore part of any coding agent's effective system prompt; ecosystem gaps are recorded with their compensation rule.

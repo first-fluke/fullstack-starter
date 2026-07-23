@@ -20,7 +20,7 @@ Run through every item before submitting your work.
 
 ## Security
 - [ ] JWT authentication on protected endpoints
-- [ ] Password hashing with bcrypt (cost 10-12)
+- [ ] Password hashing with Argon2id (bcrypt cost 10-12 acceptable for legacy compatibility)
 - [ ] Rate limiting on auth endpoints
 - [ ] Input validation enforced (no raw user input in queries)
 - [ ] SQL injection protected (ORM or parameterized queries)

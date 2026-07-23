@@ -39,6 +39,9 @@ Use this workflow for:
 | chore | Build/configuration |
 | style | Code style |
 | perf | Performance improvements |
+| build | Build system / external dependencies |
+| ci | CI configuration and scripts |
+| revert | Revert a previous commit |
 
 ## Commit Format
 
@@ -87,9 +90,9 @@ Risk score formula (0-100):
 `risk_score = overlap(0-40) + divergence(0-20) + hotspot(0-15) + ownership(0-15) + semantic(0-10)`
 
 Bucket thresholds:
-- **LOW**: 0-29
-- **MEDIUM**: 30-59
-- **HIGH**: 60-100
+- **LOW** (0-29): no overlap, low divergence, no semantic flags
+- **MEDIUM** (30-59): partial overlap or moderate divergence
+- **HIGH** (60-100): line overlap, repeated hotspot collisions, or semantic flags
 
 Scoring guidance:
 - `overlap`: 0 (none), 20 (same file only), 40 (same file + overlapping lines)
@@ -100,14 +103,15 @@ Scoring guidance:
 
 Data sources (preferred order):
 1. PR metadata/diff from GitHub CLI or API
-2. Line-overlap detectors (e.g., `pr-conflict-detector`)
+2. Line-overlap detection — compare diff hunk ranges across candidate branches (no dedicated tool required):
+   ```bash
+   # Changed line ranges per file for one branch vs its merge-base
+   git diff -U0 "$(git merge-base <base> <branch>)"..<branch> -- <file> | grep '^@@'
+   # Repeat per candidate branch; two branches overlap on <file> when their
+   # "+start,count" ranges from the @@ headers intersect.
+   ```
 3. Merge simulation (GitHub mergeability/queue simulation when available)
 4. Local git history for churn/hotspot and ownership hints
-
-Recommended risk buckets:
-- **LOW**: no overlap, low divergence, no semantic flags
-- **MEDIUM**: partial overlap or moderate divergence
-- **HIGH**: line overlap, repeated hotspot collisions, or semantic flags
 
 For large-scope merges, propose merge order as:
 1. LOW in small batches
@@ -115,6 +119,8 @@ For large-scope merges, propose merge order as:
 3. HIGH one-by-one with explicit checkpoints
 
 ### Step 2.6: Ask Gate (must ask before risky operations)
+
+**Precedence:** an explicit, unambiguous user instruction overrides this gate (same as `oma-scm` SKILL.md Guardrail 0) — if the user already told you exactly what to do, state what you are doing and proceed without re-confirming. The single exception that always warrants a heads-up is likely-secret material. The gate below applies when the risky condition was NOT explicitly requested by the user.
 
 Stop and ask user confirmation if any of these are true:
 - merge conflicts are already present
@@ -146,7 +152,7 @@ Do not create commits unless explicitly requested.
 
 ### Step 3B: Commit execution path
 
-1. Separate features if needed (different scope/type and >5 files).
+1. Separate features if needed — one commit per logical change. Tiebreaker when unclear: ≤5 files lean single commit; >5 files spanning multiple scopes/types lean split (see `oma-scm` SKILL.md Step 1.5 precedence).
    After deciding the commit grouping, emit and verify the required split decision:
    ```bash
    oma state:emit "decision.made" '{"subject":"scm.commit-split","decision":"Use the selected commit grouping for the current repository changes.","rationale":"The working tree was inspected and changes were grouped by scope/type before committing."}'
@@ -156,6 +162,7 @@ Do not create commits unless explicitly requested.
 3. Determine scope.
 4. Write description (imperative, lowercase, <=72 chars, no trailing period).
 5. Execute commit with explicit file paths.
+6. Push only when explicitly requested; follow `oma-scm` SKILL.md "Push and PR safety".
 
 ### Step 3.5: Optional Doc Verify Hook
 

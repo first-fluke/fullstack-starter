@@ -3,10 +3,12 @@
  *
  * Provides a <deck-stage> Custom Element (Web Component) that:
  *   1. Scales the 1920×1080 stage uniformly to fit the viewport (letterbox / pillarbox).
- *   2. Handles keyboard navigation (←/→, Space/Shift+Space, PgUp/PgDn, Home/End, 0-9 digits).
+ *   2. Handles keyboard navigation (←/→, Space/Shift+Space, PgUp/PgDn, Home/End, 0-9 digits,
+ *      n = toggle speaker-notes panel).
  *   3. Handles touch swipe (horizontal) and mouse-wheel navigation.
- *   4. Reads speaker notes from <script type="application/json" id="speaker-notes">.
- *   5. Posts { type: "slideIndexChanged", index, total, note } to window.parent for a presenter view.
+ *   4. Reads speaker notes from <script type="application/json" id="speaker-notes">
+ *      and shows them in an on-screen panel toggled with the `n` key (presenter view).
+ *   5. Posts { type: "slideIndexChanged", index, total, note } to window.parent (embed integration).
  *   6. Dispatches a native "slidechange" CustomEvent on <deck-stage>.
  *   7. Manages .active / .visible CSS classes (never display:none).
  *   8. Tags each slide with data-screen-label and data-om-validate on first connect.
@@ -86,6 +88,8 @@ class DeckStage extends HTMLElement {
   #touchStartY = 0;
   #touchStartTime = 0;
   #wheelLocked = false;
+  #notesPanel = null;
+  #notesVisible = false;
 
   /* ── Lifecycle ── */
 
@@ -241,6 +245,53 @@ class DeckStage extends HTMLElement {
         "*"
       );
     }
+
+    /* Keep the on-screen notes panel in sync */
+    this.#updateNotesPanel();
+  }
+
+  /* ── Private: speaker-notes panel (toggle with `n`) ── */
+
+  #ensureNotesPanel() {
+    if (this.#notesPanel) return this.#notesPanel;
+    const panel = document.createElement("div");
+    panel.className = "deck-notes-panel";
+    panel.setAttribute("role", "note");
+    panel.setAttribute("aria-label", "Speaker notes");
+    /* Hidden by default (display:none — never intercepts clicks when hidden). */
+    panel.style.cssText = [
+      "position: fixed",
+      "left: 16px",
+      "right: 16px",
+      "bottom: 16px",
+      "max-height: 30vh",
+      "overflow-y: auto",
+      "padding: 16px 20px",
+      "background: rgba(10, 12, 18, 0.85)",
+      "color: #f2f2f2",
+      "font: 16px/1.5 system-ui, sans-serif",
+      "border-radius: 8px",
+      "white-space: pre-wrap",
+      "z-index: 2147483647",
+      "display: none",
+    ].join("; ");
+    document.body.appendChild(panel);
+    this.#notesPanel = panel;
+    return panel;
+  }
+
+  #toggleNotesPanel() {
+    const panel = this.#ensureNotesPanel();
+    this.#notesVisible = !this.#notesVisible;
+    panel.style.display = this.#notesVisible ? "block" : "none";
+    this.#updateNotesPanel();
+  }
+
+  #updateNotesPanel() {
+    if (!this.#notesVisible || !this.#notesPanel) return;
+    const note =
+      this.#notes[String(this.#currentIndex)] ?? this.#notes[this.#currentIndex] ?? "";
+    this.#notesPanel.textContent = note || "(no speaker note for this slide)";
   }
 
   /* ── Private: scaling ── */
@@ -250,10 +301,11 @@ class DeckStage extends HTMLElement {
    * and applies transform: scale(s) + translate to centre the stage.
    *
    * The stage is positioned so (scaledW, scaledH) is centred in the viewport.
-   * We achieve this by:
-   *   left: (vw - 1920) / 2   (works for both scale < 1 and scale > 1)
-   *   top:  (vh - 1080) / 2
-   * and then transform: scale(s) with transform-origin: top left.
+   * With transform-origin: top left, the on-screen box is scaledW × scaledH,
+   * so centring must use the SCALED dimensions:
+   *   left: (vw - 1920 * s) / 2   (works for both scale < 1 and scale > 1)
+   *   top:  (vh - 1080 * s) / 2
+   * and then transform: scale(s).
    */
   #scaleStage() {
     if (!this.#stageEl) return;
@@ -289,6 +341,8 @@ class DeckStage extends HTMLElement {
   }
 
   #onBeforePrint = () => {
+    /* Notes panel must not overlay printed slides */
+    if (this.#notesPanel) this.#notesPanel.style.display = "none";
     if (!this.#stageEl) return;
     this.#stageEl.style.transform = "none";
     this.#stageEl.style.left = "";
@@ -297,6 +351,9 @@ class DeckStage extends HTMLElement {
   };
 
   #onAfterPrint = () => {
+    if (this.#notesPanel && this.#notesVisible) {
+      this.#notesPanel.style.display = "block";
+    }
     this.#scaleStage();
   };
 
@@ -339,6 +396,12 @@ class DeckStage extends HTMLElement {
       case "End":
         e.preventDefault();
         this.#goTo(this.#slides.length - 1);
+        break;
+
+      case "n":
+      case "N":
+        e.preventDefault();
+        this.#toggleNotesPanel();
         break;
 
       default:

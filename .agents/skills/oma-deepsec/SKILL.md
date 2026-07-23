@@ -211,10 +211,14 @@ Operate Vercel's `deepsec` security scanner inside a target repository safely an
 
 ### Effects and side effects
 - Creates `.deepsec/` (config, lockfile, scaffolding) and `.deepsec/data/<id>/` (gitignored) inside the target repo.
+<!-- oma-docs:ignore-start -->
 - Writes `.env.local` (never commit) and may run `vercel link` / `vercel env pull` (writes `.vercel/project.json` + token).
+<!-- oma-docs:ignore-end -->
 - Spawns long-running AI processes that **cost real money**. Single full scans range from $25 to over $1,200 per the official cost guide and can climb to tens of thousands on very large repos.
 - Reads source code; sends snippets to the configured LLM (gateway = zero retention; direct provider = subject to that provider's policy). Never exfiltrates secrets; the gateway key stays outside the worker sandbox in `sandbox` mode.
+<!-- oma-docs:ignore-start -->
 - May write `.github/workflows/deepsec.yml` (or analogue) when the user asks for a CI gate.
+<!-- oma-docs:ignore-end -->
 - Edits `deepsec.config.ts` and adds `.deepsec/matchers/*.ts` when authoring matchers.
 - Does not commit, push, or open PRs unless the user explicitly authorizes a separate commit step (route via `oma-scm`).
 
@@ -230,7 +234,7 @@ Operate Vercel's `deepsec` security scanner inside a target repository safely an
 9. **Never echo or commit credentials** (`vck_…`, `sk-ant-…`, `sk-…`, OIDC tokens). Treat `.env.local` as secret. Treat `data/` as gitignored by default.
 10. **Treat deepsec like an agent with shell access.** Recommend `sandbox` for prompt-injection-prone repos (vendored code, untrusted deps).
 11. **Findings need verdicts.** For any HIGH+ surfaced to the user, prefer `revalidate`-tagged verdicts (`true-positive` / `false-positive` / `fixed` / `uncertain`) over raw `process` output.
-12. **Do not invent CLI flags.** Anything beyond `resources/scanning.md`'s flag list must be checked against `--help` first.
+12. **Do not invent CLI flags, and trust the CLI over these notes.** Anything beyond `resources/scanning.md`'s flag list must be checked against `--help` first. Likewise, when the CLI's printed model names, defaults, or per-batch costs disagree with the values written in this skill, the CLI is right — upstream moves faster than these resources.
 13. **Ask agent choice before the first paid call.** If the user has not named an agent (`claude` vs `codex`) and `deepsec.config.ts` does not pin `defaultAgent`, ask once with the trade-off clearly stated. Do not also bargain over budget or severity; those are handled via the upstream calibration recommendation (`--limit 50 --concurrency 5` per deepsec docs) and the user-stated `severity_floor`.
 
 ## References

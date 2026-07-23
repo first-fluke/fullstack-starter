@@ -5,18 +5,18 @@ When running as a CLI subagent, follow this protocol for shared state coordinati
 ## State Management
 
 Use file-based I/O for coordination. Coordination/state files (task-board, progress,
-result hand-offs) MUST be written to the **project-root memory store** `.serena/memories/`
+result hand-offs) MUST be written to the **project-root memory store** `.agents/state/memories/`
 — that is the only location the orchestrator (`oma agent:status`), `oma verify`, and the
 memory/retro tooling read. Writing them anywhere else (e.g. `.agents/results/`) leaves them
 orphaned and your run is reported as `crashed`. Human-facing deliverables (plans, bug
 reports, design docs) belong under `.agents/results/` instead.
 
-If Serena MCP is available, use `read_memory`/`write_memory`/`edit_memory` (its default
-base path is `.serena/memories`); otherwise write the same files there directly.
+Write and read these files directly at `.agents/state/memories/` using your native file
+Read/Write/Edit tools; create the directory if it does not yet exist.
 
 ### Path Resolution (CRITICAL)
 
-All result, progress, and state files MUST be written to the **project root** `.serena/memories/` directory, never to a subdirectory's `.serena/memories/`.
+All result, progress, and state files MUST be written to the **project root** `.agents/state/memories/` directory, never to a subdirectory's `.agents/state/memories/`.
 
 - **Project root** = the git repository root (where `.git` exists)
 - **Session-scoped naming**: when running under an orchestration session, append session ID as suffix:
@@ -26,8 +26,8 @@ All result, progress, and state files MUST be written to the **project root** `.
 
 ## On Start
 
-1. Read `.serena/memories/task-board.md` (or `read_memory("task-board.md")`) to confirm your assigned task
-2. Create `.serena/memories/progress-{agent-id}[-{sessionId}].md` with initial status
+1. Read `.agents/state/memories/task-board.md` to confirm your assigned task
+2. Create `.agents/state/memories/progress-{agent-id}[-{sessionId}].md` with initial status
 
 ## During Execution
 
@@ -36,7 +36,7 @@ All result, progress, and state files MUST be written to the **project root** `.
 
 ## On Completion
 
-- Create `.serena/memories/result-{agent-id}[-{sessionId}].md` with final result including:
+- Create `.agents/state/memories/result-{agent-id}[-{sessionId}].md` with final result including:
   - A status line — see **Status line format** below (REQUIRED)
   - Summary of work done
   - Files created/modified

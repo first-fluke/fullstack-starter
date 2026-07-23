@@ -44,6 +44,6 @@ Voicebox bundles seven engines. All run locally; the user picks one when creatin
 
 ## Caveats
 
-- Engine names above are the ones Voicebox surfaces in its UI. If voicebox renames an engine, the skill defers to whatever `get_model_status` returns.
+- Engine names above are the ones Voicebox surfaces in its UI. If voicebox renames an engine, the skill defers to whatever REST `GET /models/status` returns (model status is not exposed as an MCP tool).
 - Voice cloning quality depends on the reference sample voicebox captured. The skill does not judge sample quality; it routes by language only.
 - Some engines auto-download large model weights on first use. Trigger the download from the Voicebox app UI to keep the agent loop responsive.

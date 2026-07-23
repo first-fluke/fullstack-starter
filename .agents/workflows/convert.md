@@ -43,6 +43,8 @@ disable-model-invocation: true
    | **Audio** | `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.opus`, `.aac` | Step 2E | `ffmpeg` |
    | other | — | Stop — out of scope | route to the matching skill |
 
+   **`.gif` disambiguation** (listed in both Image and Video): route by the **target** format — still-image target (`png`, `webp`, …) → Step 2C; video target (`mp4`, `webm`, …) or no target given → Step 2D (treat as animated GIF).
+
 If user provided no file path, ask:
 ```
 Which file should I convert? Provide the path, and the target format if it's an image/video/audio file.
@@ -60,7 +62,8 @@ uvx opendataloader-pdf "{input_path}" --format markdown --output-dir "{output_di
 ```
 
 Variants: `--use-struct-tree` (Tagged PDF), `--image-output embedded` (inline images),
-`--format markdown,json` (multiple formats). Then go to **Step 3 (document normalization)**.
+`--format markdown,json` (multiple formats), `--table-method cluster` (borderless tables),
+`--pages "1-50"` (large PDFs in ranges). Then go to **Step 3 (document normalization)**.
 
 ---
 

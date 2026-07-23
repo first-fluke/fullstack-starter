@@ -1,19 +1,20 @@
 # Memory Protocol (CLI Mode)
 
-> **Note**: This file documents the default (Serena/MCP) memory protocol. Vendor-specific execution protocols are injected automatically by `oma agent:spawn` from `execution-protocols/{vendor}.md`.
+> **Note**: This file documents the default (direct-file) memory protocol. Vendor-specific execution protocols are injected automatically by `oma agent:spawn` from `execution-protocols/{vendor}.md`.
 
 When running as a CLI subagent, follow this protocol.
 
 ## Tool Reference
 
-Tool names are configurable via `mcp.json → memoryConfig.tools`:
-- `[READ]` → default: `read_memory`
-- `[WRITE]` → default: `write_memory`
-- `[EDIT]` → default: `edit_memory`
-- `[LIST]` → default: `list_memories`
-- `[DELETE]` → default: `delete_memory`
+Coordination artifacts are read and written as plain files using your native file tools.
+Tool names remain configurable via `mcp.json → memoryConfig.tools`:
+- `[READ]` → default: `Read`
+- `[WRITE]` → default: `Write`
+- `[EDIT]` → default: `Edit`
+- `[LIST]` → default: directory listing (e.g. `ls` / `list_dir`)
+- `[DELETE]` → default: file delete (e.g. `rm`)
 
-Memory base path is configurable via `memoryConfig.basePath` (default: `.serena/memories`).
+Memory base path is configurable via `memoryConfig.basePath` (default: `.agents/state/memories`). Create the directory if it does not yet exist.
 
 ---
 
@@ -84,18 +85,18 @@ See `../conditional/experiment-ledger.md` for full format and analysis protocol.
 
 ---
 
-## Example with Default Tools (Serena)
+## Example with Default Tools (Direct File)
 
-```python
+```
 # On Start
-read_memory("task-board.md")
-write_memory("progress-backend-session-20260405-100835.md", initial_content)
+Read(".agents/state/memories/task-board.md")
+Write(".agents/state/memories/progress-backend-session-20260405-100835.md", initial_content)
 
 # During Execution
-edit_memory("progress-backend-session-20260405-100835.md", turn_update)
+Edit(".agents/state/memories/progress-backend-session-20260405-100835.md", turn_update)
 
 # On Completion
-write_memory("result-backend-session-20260405-100835.md", final_result)
+Write(".agents/state/memories/result-backend-session-20260405-100835.md", final_result)
 ```
 
 ## Example with Custom Tools

@@ -25,6 +25,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { agyConversationId, isAgyInput, readAgyPrompt } from "./agy-input.ts";
 import { makePromptOutput } from "./hook-output.ts";
+import { normalizePromptInput } from "./prompt-input.ts";
 import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
 import { getProjectDir, inferVendorFromScriptPath } from "./vendor-detect.ts";
 
@@ -136,7 +137,10 @@ export async function run(
   const { cwd: projectDir, sid: sessionId = "unknown" } = ctx;
 
   if (!isSerenaProject(projectDir)) return null;
-  if (!claimSession(projectDir, sessionId)) return null;
+  // Compaction keeps the session id, so the session-once claim would skip
+  // exactly the turn that just lost the primer from context — force re-inject.
+  const forced = input.source === "compact";
+  if (!claimSession(projectDir, sessionId) && !forced) return null;
 
   return { type: "context", additionalContext: primerContext() };
 }
@@ -190,7 +194,7 @@ async function main() {
   const vendor = detectVendor(input);
   const projectDir = getProjectDir(vendor, input);
   const sessionId = getSessionId(input);
-  let prompt = (input.prompt as string) ?? "";
+  let prompt = normalizePromptInput(input.prompt);
 
   // agy's PreInvocation stdin carries no `prompt`; recover it and only act on
   // the first invocation of a turn.

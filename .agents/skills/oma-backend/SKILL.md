@@ -39,7 +39,9 @@ Implement or review backend APIs, authentication, database integration, server-s
 ### Dependencies
 - Project stack manifests and existing backend conventions
 - `resources/execution-protocol.md`, `resources/checklist.md`, and `resources/orm-reference.md`
+<!-- oma-docs:ignore-start -->
 - Optional `stack/stack.yaml`, `stack/tech-stack.md`, snippets, and API templates
+<!-- oma-docs:ignore-end -->
 - Database, queue, cache, mail, auth, or external API resources configured through environment or secret managers
 
 ### Control-flow features
@@ -103,7 +105,9 @@ rg --files
 rg "route|router|service|repository|model|schema|migration" .
 ```
 
+<!-- oma-docs:ignore-start -->
 Then run the project's discovered verification commands, usually lint/typecheck/tests and migrations when schema changes are involved. Prefer `stack/stack.yaml` `verify:` commands when present.
+<!-- oma-docs:ignore-end -->
 
 ### Resource scope
 | Scope | Resource target |
@@ -156,13 +160,13 @@ Router (HTTP) → Service (Business Logic) → Repository (Data Access) → Mode
 2. **No business logic in route handlers**
 3. **All inputs validated** with your stack's validation library
 4. **Parameterized queries only** (never string interpolation)
-5. **JWT + bcrypt for auth**; rate limit auth endpoints
+5. **JWT + Argon2id for auth** (bcrypt acceptable for legacy compatibility); rate limit auth endpoints
 6. **Async where supported**; type annotations on all signatures
 7. **Custom exceptions** via centralized error module (not raw HTTP exceptions)
 8. **Explicit ORM loading strategy**: do not rely on default relation loading when query shape matters
 9. **Explicit transaction boundaries**: group one business operation into one request/service-scoped unit of work
 10. **Safe ORM lifecycle**: do not share mutable ORM session/entity manager/client objects across concurrent work unless the ORM explicitly supports it
-11. **Config from environment**: DB URLs, API keys, secrets, and feature flags come from env vars or secret managers; never hardcode in source
+11. **Config from environment, with graceful fallback**: DB URLs, API keys, secrets, and feature flags come from env vars or secret managers; never hardcode in source. When integrating a third-party API (OpenAI, Anthropic, Stripe, etc.), write BOTH paths: (a) real call when the env key is present, (b) deterministic local fallback when absent, marked with `// TODO(oma-deferred): integrate <vendor> when key is provisioned`. Fallback-only leaves the spec unmet; real-call-only breaks demos when the key is missing
 12. **Stateless services**: no in-memory session or user state between requests; use external stores (DB, Redis, cache) for shared state
 13. **Backing services as resources**: DB, queue, cache, mail are swappable attached resources connected via config; Repository layer must not assume a specific instance
 
@@ -174,10 +178,12 @@ Router (HTTP) → Service (Business Logic) → Repository (Data Access) → Mode
 
 ### Stack-Specific Reference
 
+<!-- oma-docs:ignore-start -->
 - **Stack manifest (SSOT)**: `stack/stack.yaml`: structured declaration (`language`, `framework`, `orm`) and `verify:` contract consumed by `oma verify backend`. Schema: `variants/stack.schema.json`.
 - Tech stack narrative: `stack/tech-stack.md`: human-readable reference only; `stack.yaml` wins on conflict.
 - Code snippets (copy-paste ready): `stack/snippets.md`
 - API template: `stack/api-template.*`
+<!-- oma-docs:ignore-end -->
 
 ## References
 
