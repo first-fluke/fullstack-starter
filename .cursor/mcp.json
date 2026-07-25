@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "serena": {
-      "command": "/Users/gracefullight/.local/share/mise/installs/node/24.17.0/bin/node",
+      "command": "oma",
       "args": [
-        "/Users/gracefullight/.local/share/mise/installs/node/24/bin/oma",
         "bridge",
         "--context",
         "ide"
