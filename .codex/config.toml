@@ -3,8 +3,8 @@ goals = true
 hooks = true
 
 [mcp_servers.serena]
-command = "serena"
-args = [ "start-mcp-server", "--context", "codex", "--project-from-cwd", "--open-web-dashboard", "false" ]
+command = "/Users/gracefullight/.local/share/mise/installs/node/24.17.0/bin/node"
+args = [ "/Users/gracefullight/.local/share/mise/installs/node/24/bin/oma", "bridge", "--context", "codex" ]
 startup_timeout_sec = 90
 
 [mcp_servers.serena.env]

@@ -51,7 +51,8 @@ const DEFAULT_ALLOWED_EXCEPTIONS = ["*.example", "*.sample", "*.template"];
 
 const BYPASS_TOKEN = "OMA_SCM_ALLOW_SECRETS=1";
 
-const CONFIG_RELPATH = join(
+const MAIN_CONFIG_RELPATH = join(".agents", "oma-config.yaml");
+const SKILL_CONFIG_RELPATH = join(
   ".agents",
   "skills",
   "oma-scm",
@@ -62,12 +63,12 @@ const CONFIG_RELPATH = join(
 // --- Config loading (regex-based, consistent with core's yaml handling) ---
 
 /**
- * Extract a top-level yaml string-list section (`key:` followed by `- "item"`
+ * Extract a top-level or indented yaml string-list section (`key:` followed by `- "item"`
  * lines) without a yaml dependency — core handlers must stay standalone.
  */
 export function extractYamlList(content: string, key: string): string[] | null {
   const lines = content.split(/\r?\n/);
-  const start = lines.findIndex((l) => new RegExp(`^${key}:\\s*$`).test(l));
+  const start = lines.findIndex((l) => new RegExp(`^\\s*${key}:\\s*$`).test(l));
   if (start === -1) return null;
   const items: string[] = [];
   for (let i = start + 1; i < lines.length; i++) {
@@ -86,29 +87,33 @@ interface GuardConfig {
 }
 
 function loadGuardConfig(projectDir: string): GuardConfig {
-  const configPath = join(projectDir, CONFIG_RELPATH);
-  if (!existsSync(configPath)) {
-    return {
-      forbidden: DEFAULT_FORBIDDEN_PATTERNS,
-      exceptions: DEFAULT_ALLOWED_EXCEPTIONS,
-    };
+  const pathsToTry = [
+    join(projectDir, MAIN_CONFIG_RELPATH),
+    join(projectDir, SKILL_CONFIG_RELPATH),
+  ];
+
+  for (const configPath of pathsToTry) {
+    if (!existsSync(configPath)) continue;
+    try {
+      const content = readFileSync(configPath, "utf-8");
+      const forbidden = extractYamlList(content, "forbidden_patterns");
+      if (forbidden && forbidden.length > 0) {
+        return {
+          forbidden,
+          exceptions:
+            extractYamlList(content, "allowed_exceptions") ??
+            DEFAULT_ALLOWED_EXCEPTIONS,
+        };
+      }
+    } catch {
+      // Continue to next path or default
+    }
   }
-  try {
-    const content = readFileSync(configPath, "utf-8");
-    return {
-      forbidden:
-        extractYamlList(content, "forbidden_patterns") ??
-        DEFAULT_FORBIDDEN_PATTERNS,
-      exceptions:
-        extractYamlList(content, "allowed_exceptions") ??
-        DEFAULT_ALLOWED_EXCEPTIONS,
-    };
-  } catch {
-    return {
-      forbidden: DEFAULT_FORBIDDEN_PATTERNS,
-      exceptions: DEFAULT_ALLOWED_EXCEPTIONS,
-    };
-  }
+
+  return {
+    forbidden: DEFAULT_FORBIDDEN_PATTERNS,
+    exceptions: DEFAULT_ALLOWED_EXCEPTIONS,
+  };
 }
 
 // --- Glob matching (basename semantics, like .gitignore basename patterns) ---
@@ -199,7 +204,7 @@ export async function run(
     type: "block",
     reason:
       `[oma scm-guard] Blocked: staging likely-secret file(s): ${flagged.join(", ")} ` +
-      `(matched forbidden_patterns in ${CONFIG_RELPATH}). ` +
+      `(matched forbidden_patterns in ${MAIN_CONFIG_RELPATH}). ` +
       `Surface this to the user; if they explicitly approve committing these files, ` +
       `re-run the command prefixed with ${BYPASS_TOKEN}.`,
   };

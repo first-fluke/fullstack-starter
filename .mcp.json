@@ -1,14 +1,12 @@
 {
   "mcpServers": {
     "serena": {
-      "command": "serena",
+      "command": "/Users/gracefullight/.local/share/mise/installs/node/24.17.0/bin/node",
       "args": [
-        "start-mcp-server",
+        "/Users/gracefullight/.local/share/mise/installs/node/24/bin/oma",
+        "bridge",
         "--context",
-        "claude-code",
-        "--project-from-cwd",
-        "--open-web-dashboard",
-        "false"
+        "claude-code"
       ],
       "env": {
         "SERENA_LOG_LEVEL": "info"

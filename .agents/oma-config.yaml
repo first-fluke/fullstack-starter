@@ -11,3 +11,38 @@ telemetry: false
 docs:
   auto_verify: false
   check_urls: true
+
+# Added by oma update — new config keys (template defaults; edit freely)
+scm:
+  conventional_commits: true
+  branching_strategy: github-flow
+  require_pr_for_default_branch: true
+  co_author:
+    enabled: true
+    name: First Fluke
+    email: our.first.fluke@gmail.com
+  forbidden_patterns:
+    - "*.env"
+    - "*.env.*"
+    - credentials.json
+    - secrets.yaml
+    - "*.pem"
+    - "*.key"
+    - .env.local
+    - "*.p12"
+    - "*.pfx"
+    - id_rsa*
+    - id_ed25519*
+    - .npmrc
+    - service-account*.json
+    - "*.keystore"
+    - "*.jks"
+    - "*.tfvars"
+    - "*.tfstate"
+    - "*.tfstate.*"
+    - .netrc
+    - .pypirc
+  allowed_exceptions:
+    - "*.example"
+    - "*.sample"
+    - "*.template"
