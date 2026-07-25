@@ -116,28 +116,66 @@ run = '''
 #!/usr/bin/env bash
 bunx @gracefullight/validate-branch || exit 1
 
-# Get changed files compared to origin
-changed=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD~1)
+# Gate verdicts are cached by content, because a suite's result is a pure
+# function of the code it ran against. Pushing the same commits again — a
+# rejected race, or a re-push after a rebase that moved nothing a gate reads —
+# then costs nothing instead of replaying the full pytest/vitest/flutter runs.
+#
+# The key is the git tree hash of the paths a gate actually depends on plus
+# mise.toml (the gate definition itself), so a web-only change does not
+# invalidate the mobile cache. This replaces the old "diff against
+# origin/main, grep for ^apps/<name>/" selector, which missed changes that
+# reach an app from outside its own directory (packages/*) and silently fell
+# back to HEAD~1 whenever origin/main was absent. Dependency lists are
+# deliberately over-inclusive: an extra rerun is cheap, a false skip is not.
+#
+# Only clean-tree passes are cached. The suites run against the WORKING TREE
+# while the key describes HEAD, so caching a dirty run would let uncommitted
+# code vouch for the commits being pushed.
+CACHE_DIR="$(cd "$(git rev-parse --git-common-dir)" && pwd)/pre-push-cache"
+mkdir -p "$CACHE_DIR"
+find "$CACHE_DIR" -type f -mtime +14 -delete 2>/dev/null || true
 
-if echo "$changed" | grep -q "^apps/api/"; then
-    echo "[pre-push] apps/api detected, running test..."
-    mise //apps/api:test || exit 1
-fi
+# cached_gate <name> <dep-paths> <command...>
+cached_gate() {
+    name=$1; deps=$2; shift 2
 
-if echo "$changed" | grep -q "^apps/web/"; then
-    echo "[pre-push] apps/web detected, running test..."
-    mise //apps/web:test || exit 1
-fi
+    # --verify -q keeps an absent path from echoing the rev back into the key.
+    key=$( { echo "$name"
+             for p in mise.toml $deps; do
+                 git rev-parse --verify -q "HEAD:$p" || echo "absent $p"
+             done
+           } | git hash-object --stdin )
+    marker="$CACHE_DIR/$key"
 
-if echo "$changed" | grep -q "^apps/worker/"; then
-    echo "[pre-push] apps/worker detected, running test..."
-    mise //apps/worker:test || exit 1
-fi
+    if [ -f "$marker" ]; then
+        echo "[pre-push] $name: unchanged since it last passed, skipping."
+        return 0
+    fi
 
-if echo "$changed" | grep -q "^apps/mobile/"; then
-    echo "[pre-push] apps/mobile detected, running test..."
-    # Clear leaked git hook env so flutter's internal git targets its own SDK,
-    # not this worktree (GIT_DIR is absolute in linked worktrees and hijacks it).
+    echo "[pre-push] $name: running..."
+    "$@" || return 1
+
+    # mise.toml joins the dirty check: the gate body that just ran came from the
+    # working tree, but the key describes the committed one.
+    if [ -n "$(git status --porcelain -- mise.toml $deps)" ]; then
+        echo "[pre-push] $name: passed but not cached (uncommitted changes present)."
+    else
+        : > "$marker"
+    fi
+}
+
+# packages/design-tokens and packages/i18n generate sources into apps/web and
+# apps/mobile. A built output already lands in the app tree; listing the source
+# too keeps an unbuilt token or message change from skipping the app's suite.
+WEB_DEPS="apps/web packages/design-tokens packages/i18n"
+MOBILE_DEPS="apps/mobile packages/design-tokens packages/i18n"
+
+cached_gate api "apps/api" mise //apps/api:test || exit 1
+cached_gate web "$WEB_DEPS" mise //apps/web:test || exit 1
+cached_gate worker "apps/worker" mise //apps/worker:test || exit 1
+# Clear leaked git hook env so flutter's internal git targets its own SDK,
+# not this worktree (GIT_DIR is absolute in linked worktrees and hijacks it).
+cached_gate mobile "$MOBILE_DEPS" \
     env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE mise //apps/mobile:test || exit 1
-fi
 '''
