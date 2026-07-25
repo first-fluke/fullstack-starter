@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.0](https://github.com/first-fluke/fullstack-starter/compare/v2.25.0...v2.26.0) (2026-07-25)
+
+
+### Features
+
+* oma 11 ([642d73f](https://github.com/first-fluke/fullstack-starter/commit/642d73fb1e946da5b9da102b97e7b73bdb66313a))
+
 ## [2.25.0](https://github.com/first-fluke/fullstack-starter/compare/v2.24.1...v2.25.0) (2026-07-23)
 
 
