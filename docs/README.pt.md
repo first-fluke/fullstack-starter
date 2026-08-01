@@ -17,7 +17,7 @@ Template monorepo fullstack pronto para produção com Next.js 16, FastAPI, Flut
 graph TB
     subgraph Client["Cliente"]
         Web[Next.js 16<br/>React 19]
-        Mobile[Flutter 3.41.2<br/>Riverpod]
+        Mobile[Flutter 3.44.8<br/>Riverpod]
     end
 
     subgraph GCP["GCP Cloud Run"]
@@ -50,7 +50,7 @@ graph TB
 
 ## Principais Recursos
 
-- **Stack Moderno**: Next.js 16 + React 19, FastAPI, Flutter 3.41.2, TailwindCSS v4
+- **Stack Moderno**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
 - **Segurança de Tipos**: Suporte completo de tipos com TypeScript, Pydantic e Dart
 - **Autenticação**: OAuth com better-auth (Google, GitHub, Facebook)
 - **Internacionalização (i18n)**: next-intl (web), Flutter ARB (mobile), pacote i18n compartilhado
@@ -66,7 +66,7 @@ graph TB
 |--------|------------|
 | **Frontend** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
 | **Backend** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
-| **Mobile** | Flutter 3.41.2, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
+| **Mobile** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
 | **Worker** | FastAPI + CloudTasks/PubSub |
 | **Infraestrutura** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |

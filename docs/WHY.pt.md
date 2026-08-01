@@ -88,7 +88,7 @@ Este documento explica o raciocínio por trás de cada escolha tecnológica nest
 
 ## Mobile
 
-### Flutter 3.41.2
+### Flutter 3.44.8
 
 - **Korea eGovFrame v5**: Selecionado como framework mobile oficial pelo Korea e-Government Standard Framework
 - **Versionamento flexível**: Fácil fixar e atualizar versões Flutter/Dart por projeto

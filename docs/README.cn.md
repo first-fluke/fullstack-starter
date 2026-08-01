@@ -17,7 +17,7 @@
 graph TB
     subgraph Client["客户端"]
         Web[Next.js 16<br/>React 19]
-        Mobile[Flutter 3.41.2<br/>Riverpod]
+        Mobile[Flutter 3.44.8<br/>Riverpod]
     end
 
     subgraph GCP["GCP Cloud Run"]
@@ -50,7 +50,7 @@ graph TB
 
 ## 核心特性
 
-- **现代技术栈**: Next.js 16 + React 19, FastAPI, Flutter 3.41.2, TailwindCSS v4
+- **现代技术栈**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
 - **类型安全**: TypeScript、Pydantic 和 Dart 全栈类型支持
 - **身份验证**: 基于 better-auth 的 OAuth（Google、GitHub、Facebook）
 - **国际化 (i18n)**: next-intl（Web）、Flutter ARB（移动端）、共享 i18n 包
@@ -66,7 +66,7 @@ graph TB
 |------|------|
 | **前端** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
 | **后端** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
-| **移动端** | Flutter 3.41.2, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
+| **移动端** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
 | **Worker** | FastAPI + CloudTasks/PubSub |
 | **基础设施** | Terraform, GCP（Cloud Run、Cloud SQL、Cloud Storage、CDN） |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |

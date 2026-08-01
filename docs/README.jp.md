@@ -17,7 +17,7 @@ Next.js 16、FastAPI、Flutter、GCP インフラを統合した、本番環境�
 graph TB
     subgraph Client["クライアント"]
         Web[Next.js 16<br/>React 19]
-        Mobile[Flutter 3.41.2<br/>Riverpod]
+        Mobile[Flutter 3.44.8<br/>Riverpod]
     end
 
     subgraph GCP["GCP Cloud Run"]
@@ -50,7 +50,7 @@ graph TB
 
 ## 主な機能
 
-- **モダンスタック**: Next.js 16 + React 19、FastAPI、Flutter 3.41.2、TailwindCSS v4
+- **モダンスタック**: Next.js 16 + React 19、FastAPI、Flutter 3.44.8、TailwindCSS v4
 - **型安全性**: TypeScript、Pydantic、Dartによるフルスタックの型サポート
 - **認証**: better-auth ベースの OAuth（Google、GitHub、Facebook）
 - **国際化 (i18n)**: next-intl（Web）、Flutter ARB（モバイル）、共有 i18n パッケージ
@@ -66,7 +66,7 @@ graph TB
 |------|------|
 | **フロントエンド** | Next.js 16、React 19、TailwindCSS v4、shadcn/ui、TanStack Query、Jotai |
 | **バックエンド** | FastAPI、SQLAlchemy (async)、PostgreSQL 16、Redis 7 |
-| **モバイル** | Flutter 3.41.2、Riverpod 3、go_router 17、Firebase Crashlytics、Fastlane |
+| **モバイル** | Flutter 3.44.8、Riverpod 3、go_router 17、Firebase Crashlytics、Fastlane |
 | **ワーカー** | FastAPI + CloudTasks/PubSub |
 | **インフラストラクチャ** | Terraform、GCP（Cloud Run、Cloud SQL、Cloud Storage、CDN） |
 | **CI/CD** | GitHub Actions、Workload Identity Federation |
