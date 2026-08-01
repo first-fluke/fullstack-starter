@@ -49,7 +49,8 @@ function generateColorProperties(colors: Record<string, OklchColor>): string {
 
 function generateTheme(mode: "light" | "dark"): string {
   const colors = mode === "light" ? tokens.color.light : tokens.color.dark;
-  const baseColors = mode === "light" ? "FColors.zincLight" : "FColors.zincDark";
+  // forui 0.24 dropped every predefined scheme except neutral (the old zinc).
+  const baseColors = mode === "light" ? "FColors.neutralLight" : "FColors.neutralDark";
   const touch = true;
   const themeName = mode === "light" ? "Light" : "Dark";
 

@@ -61,7 +61,9 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final brightness = MediaQuery.platformBrightnessOf(context);
     final isDark = brightness == Brightness.dark;
-    final fTheme = isDark ? FThemes.zinc.dark.touch : FThemes.zinc.light.touch;
+    final fTheme = isDark
+        ? FTheme.neutral.dark.touch
+        : FTheme.neutral.light.touch;
 
     return FTheme(
       data: fTheme,

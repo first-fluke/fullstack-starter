@@ -7,7 +7,7 @@ import 'package:forui/forui.dart';
 
 final generatedLightTheme = FThemeData(
   touch: true,
-  colors: FColors.zincLight.copyWith(
+  colors: FColors.neutralLight.copyWith(
     barrier: Color.from(
       alpha: 1.000,
       red: 0.8982,
@@ -114,7 +114,7 @@ final generatedLightTheme = FThemeData(
 
 final generatedDarkTheme = FThemeData(
   touch: true,
-  colors: FColors.zincDark.copyWith(
+  colors: FColors.neutralDark.copyWith(
     barrier: Color.from(
       alpha: 0.100,
       red: 1.0000,
