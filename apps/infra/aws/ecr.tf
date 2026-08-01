@@ -35,19 +35,36 @@ resource "aws_ecr_repository" "worker" {
   tags = { Name = "${var.app_name}-worker" }
 }
 
-# Lifecycle Policy (keep last 10 images)
+# Lifecycle Policy — mirrors the daily `acr purge` task in az/acr.tf: keep the
+# two newest images per repository and drop untagged manifests. CI tags with the
+# full commit SHA (`github.sha`), so "two newest" is the last two deploys.
+# Untagged goes first: an "any" rule must hold the highest rulePriority, because
+# ECR stops evaluating a rule set once an image matches.
 locals {
   ecr_lifecycle_policy = jsonencode({
-    rules = [{
-      rulePriority = 1
-      description  = "Keep last 10 images"
-      selection = {
-        tagStatus   = "any"
-        countType   = "imageCountMoreThan"
-        countNumber = 10
-      }
-      action = { type = "expire" }
-    }]
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire untagged images after 1 day"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 1
+        }
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 2
+        description  = "Keep last 2 images"
+        selection = {
+          tagStatus   = "any"
+          countType   = "imageCountMoreThan"
+          countNumber = 2
+        }
+        action = { type = "expire" }
+      },
+    ]
   })
 }
 
