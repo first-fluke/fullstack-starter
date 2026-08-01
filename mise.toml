@@ -1,4 +1,4 @@
-experimental_monorepo_root = true
+monorepo_root = true
 
 [monorepo]
 config_roots = [
@@ -40,7 +40,7 @@ node = "24"
 python = "3.12"
 bun = "latest"
 uv = "latest"
-flutter = "3.44.4"
+flutter = "3.44.8"
 terraform = "1"
 hadolint = "latest"
 monodep = "0.1.1"
