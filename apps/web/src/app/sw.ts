@@ -17,6 +17,12 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
+// Precache the offline fallback only. `__SW_MANIFEST` otherwise pulls in every
+// build asset, which is not what this service worker is for.
+const precacheEntries = (self.__SW_MANIFEST ?? []).filter(
+  (entry) => (typeof entry === "string" ? entry : entry.url) === "/offline"
+);
+
 const serwist = new Serwist({
   clientsClaim: true,
   fallbacks: {
@@ -30,7 +36,7 @@ const serwist = new Serwist({
     ],
   },
   navigationPreload: true,
-  precacheEntries: self.__SW_MANIFEST,
+  precacheEntries,
   runtimeCaching: sameOriginCache,
   skipWaiting: true,
 });
