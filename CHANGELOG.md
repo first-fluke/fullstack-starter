@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.1](https://github.com/first-fluke/fullstack-starter/compare/v2.26.0...v2.26.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* **web:** declare serwist dependencies and precache offline only ([d874a44](https://github.com/first-fluke/fullstack-starter/commit/d874a44802f8e16e43c5a4feedbaad36ea75c447))
+
 ## [2.26.0](https://github.com/first-fluke/fullstack-starter/compare/v2.25.0...v2.26.0) (2026-07-25)
 
 
