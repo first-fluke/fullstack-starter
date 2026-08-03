@@ -98,3 +98,5 @@ docs/generated/
 .agents/backup/
 
 docs/plans/
+
+.qwen/tmp/
