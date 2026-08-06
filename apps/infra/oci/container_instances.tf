@@ -38,6 +38,7 @@ resource "oci_container_instances_container_instance" "api" {
   compartment_id      = oci_identity_compartment.main.id
   availability_domain = local.availability_domain
   display_name        = "${local.name_prefix}-api-${count.index}"
+  graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape
   shape_config {
@@ -84,6 +85,7 @@ resource "oci_container_instances_container_instance" "web" {
   compartment_id      = oci_identity_compartment.main.id
   availability_domain = local.availability_domain
   display_name        = "${local.name_prefix}-web-${count.index}"
+  graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape
   shape_config {
@@ -138,6 +140,7 @@ resource "oci_container_instances_container_instance" "worker" {
   compartment_id      = oci_identity_compartment.main.id
   availability_domain = local.availability_domain
   display_name        = "${local.name_prefix}-worker-${count.index}"
+  graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape
   shape_config {

@@ -64,6 +64,7 @@ resource "aws_ecs_task_definition" "api" {
   container_definitions = jsonencode([{
     name  = "api"
     image = "${aws_ecr_repository.api.repository_url}:latest"
+    stopTimeout = 120
 
     portMappings = [{
       containerPort = 8000
@@ -108,6 +109,7 @@ resource "aws_ecs_task_definition" "web" {
   container_definitions = jsonencode([{
     name  = "web"
     image = "${aws_ecr_repository.web.repository_url}:latest"
+    stopTimeout = 120
 
     portMappings = [{
       containerPort = 3000
@@ -152,6 +154,7 @@ resource "aws_ecs_task_definition" "worker" {
   container_definitions = jsonencode([{
     name  = "worker"
     image = "${aws_ecr_repository.worker.repository_url}:latest"
+    stopTimeout = 120
 
     environment = concat(local.backend_environment, [
       { name = "OPENAI_API_KEY", value = var.OPENAI_API_KEY },

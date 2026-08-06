@@ -5,6 +5,7 @@ resource "google_cloud_run_v2_service" "api" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
+    timeout = "120s"
     service_account = google_service_account.api.email
 
     scaling {
@@ -101,6 +102,7 @@ resource "google_cloud_run_v2_service" "web" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
+    timeout = "120s"
     service_account = google_service_account.web.email
 
     scaling {
@@ -154,6 +156,7 @@ resource "google_cloud_run_v2_service" "worker" {
   ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
+    timeout = "120s"
     service_account = google_service_account.worker.email
 
     scaling {

@@ -103,6 +103,7 @@ resource "azurerm_container_app" "api" {
 
   template {
     min_replicas = var.api_min_replicas
+    termination_grace_period_seconds = 120
     max_replicas = var.api_max_replicas
 
     http_scale_rule {
@@ -186,6 +187,7 @@ resource "azurerm_container_app" "web" {
 
   template {
     min_replicas = var.web_min_replicas
+    termination_grace_period_seconds = 120
     max_replicas = var.web_max_replicas
 
     http_scale_rule {
@@ -256,6 +258,7 @@ resource "azurerm_container_app" "worker" {
 
   template {
     min_replicas = var.worker_min_replicas
+    termination_grace_period_seconds = 120
     max_replicas = var.worker_max_replicas
 
     # KEDA azure-servicebus scaler on the default subscription
