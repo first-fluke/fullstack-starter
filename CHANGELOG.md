@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.2](https://github.com/first-fluke/fullstack-starter/compare/v2.26.1...v2.26.2) (2026-08-06)
+
+
+### Bug Fixes
+
+* **infra:** set container termination grace period to 120s ([a5dd18e](https://github.com/first-fluke/fullstack-starter/commit/a5dd18eae18cb1003505d6ce64fb73da358fdb83))
+
 ## [2.26.1](https://github.com/first-fluke/fullstack-starter/compare/v2.26.0...v2.26.1) (2026-08-01)
 
 
