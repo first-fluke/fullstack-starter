@@ -72,5 +72,10 @@
   "$version": 4,
   "hooksConfig": {
     "enabled": true
+  },
+  "model": {
+    "generationConfig": {
+      "timeout": 300000
+    }
   }
 }
