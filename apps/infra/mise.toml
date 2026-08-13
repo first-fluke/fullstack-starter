@@ -1,0 +1,74 @@
+[tasks]
+# GCP
+"gcp:init" = { dir = "gcp", run = "terraform init", description = "Initialize GCP Terraform" }
+"gcp:fmt" = { dir = "gcp", run = "terraform fmt -recursive", description = "Format GCP Terraform" }
+"gcp:fmt:check" = { dir = "gcp", run = "terraform fmt -check -recursive", description = "Check GCP Terraform format" }
+"gcp:validate" = { dir = "gcp", run = "terraform validate", description = "Validate GCP Terraform" }
+"gcp:output" = { dir = "gcp", run = "terraform output", description = "Show GCP Terraform outputs" }
+"gcp:state:list" = { dir = "gcp", run = "terraform state list", description = "List GCP Terraform state" }
+"gcp:plan" = { dir = "gcp", run = "infisical run --env=dev --path=/infra -- terraform plan -var-file=terraform.tfvars", description = "Plan GCP infrastructure" }
+"gcp:plan:prod" = { dir = "gcp", run = "infisical run --env=prod --path=/infra -- terraform plan -var-file=terraform.prod.tfvars", description = "Plan GCP production" }
+"gcp:apply" = { dir = "gcp", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply GCP infrastructure" }
+"gcp:apply:prod" = { dir = "gcp", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply GCP production" }
+"gcp:destroy" = { dir = "gcp", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy GCP infrastructure" }
+
+# AWS
+"aws:init" = { dir = "aws", run = "terraform init", description = "Initialize AWS Terraform" }
+"aws:fmt" = { dir = "aws", run = "terraform fmt -recursive", description = "Format AWS Terraform" }
+"aws:fmt:check" = { dir = "aws", run = "terraform fmt -check -recursive", description = "Check AWS Terraform format" }
+"aws:validate" = { dir = "aws", run = "terraform validate", description = "Validate AWS Terraform" }
+"aws:output" = { dir = "aws", run = "terraform output", description = "Show AWS Terraform outputs" }
+"aws:state:list" = { dir = "aws", run = "terraform state list", description = "List AWS Terraform state" }
+"aws:plan" = { dir = "aws", run = "infisical run --env=dev --path=/infra -- terraform plan -var-file=terraform.tfvars", description = "Plan AWS infrastructure" }
+"aws:plan:prod" = { dir = "aws", run = "infisical run --env=prod --path=/infra -- terraform plan -var-file=terraform.prod.tfvars", description = "Plan AWS production" }
+"aws:apply" = { dir = "aws", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply AWS infrastructure" }
+"aws:apply:prod" = { dir = "aws", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply AWS production" }
+"aws:destroy" = { dir = "aws", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy AWS infrastructure" }
+
+# Azure
+"az:init" = { dir = "az", run = "terraform init", description = "Initialize Azure Terraform" }
+"az:fmt" = { dir = "az", run = "terraform fmt -recursive", description = "Format Azure Terraform" }
+"az:fmt:check" = { dir = "az", run = "terraform fmt -check -recursive", description = "Check Azure Terraform format" }
+"az:validate" = { dir = "az", run = "terraform validate", description = "Validate Azure Terraform" }
+"az:output" = { dir = "az", run = "terraform output", description = "Show Azure Terraform outputs" }
+"az:state:list" = { dir = "az", run = "terraform state list", description = "List Azure Terraform state" }
+"az:plan" = { dir = "az", run = "infisical run --env=dev --path=/infra -- terraform plan -var-file=terraform.tfvars", description = "Plan Azure infrastructure" }
+"az:plan:prod" = { dir = "az", run = "infisical run --env=prod --path=/infra -- terraform plan -var-file=terraform.prod.tfvars", description = "Plan Azure production" }
+"az:apply" = { dir = "az", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply Azure infrastructure" }
+"az:apply:prod" = { dir = "az", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply Azure production" }
+"az:destroy" = { dir = "az", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy Azure infrastructure" }
+
+# OCI
+"oci:init" = { dir = "oci", run = "terraform init", description = "Initialize OCI Terraform" }
+"oci:fmt" = { dir = "oci", run = "terraform fmt -recursive", description = "Format OCI Terraform" }
+"oci:fmt:check" = { dir = "oci", run = "terraform fmt -check -recursive", description = "Check OCI Terraform format" }
+"oci:validate" = { dir = "oci", run = "terraform validate", description = "Validate OCI Terraform" }
+"oci:output" = { dir = "oci", run = "terraform output", description = "Show OCI Terraform outputs" }
+"oci:state:list" = { dir = "oci", run = "terraform state list", description = "List OCI Terraform state" }
+"oci:plan" = { dir = "oci", run = "infisical run --env=dev --path=/infra -- terraform plan -var-file=terraform.tfvars", description = "Plan OCI infrastructure" }
+"oci:plan:prod" = { dir = "oci", run = "infisical run --env=prod --path=/infra -- terraform plan -var-file=terraform.prod.tfvars", description = "Plan OCI production" }
+"oci:apply" = { dir = "oci", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply OCI infrastructure" }
+"oci:apply:prod" = { dir = "oci", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply OCI production" }
+"oci:destroy" = { dir = "oci", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy OCI infrastructure" }
+
+# Freemium (Vercel + Supabase + Backblaze)
+"freemium:init" = { dir = "freemium", run = "terraform init", description = "Initialize freemium Terraform" }
+"freemium:fmt" = { dir = "freemium", run = "terraform fmt -recursive", description = "Format freemium Terraform" }
+"freemium:validate" = { dir = "freemium", run = "terraform validate", description = "Validate freemium Terraform" }
+"freemium:output" = { dir = "freemium", run = "terraform output -json", description = "Show freemium Terraform outputs" }
+"freemium:plan" = { dir = "freemium", run = "terraform plan", description = "Plan freemium infrastructure" }
+"freemium:apply" = { dir = "freemium", run = "terraform apply", description = "Apply freemium infrastructure" }
+"freemium:destroy" = { dir = "freemium", run = "terraform destroy", description = "Destroy freemium infrastructure" }
+"freemium:weaviate:up" = { dir = "freemium", run = "bun run scripts/weaviate.ts up", description = "Create WCD cluster" }
+"freemium:weaviate:down" = { dir = "freemium", run = "bun run scripts/weaviate.ts down", description = "Delete WCD cluster" }
+"freemium:weaviate:status" = { dir = "freemium", run = "bun run scripts/weaviate.ts status", description = "Check WCD cluster" }
+"freemium:env:sync" = { dir = "freemium", run = "bun run scripts/env-sync.ts", description = "Sync env vars to Vercel + .env.example" }
+"freemium:status" = { dir = "freemium", run = "bun run scripts/status.ts", description = "Check all provisioned resources" }
+
+[tasks."freemium:setup"]
+description = "Provision everything"
+run = ["mise //apps/infra:freemium:apply", "mise //apps/infra:freemium:weaviate:up", "mise //apps/infra:freemium:env:sync"]
+
+[tasks."freemium:teardown"]
+description = "Destroy everything"
+run = ["mise //apps/infra:freemium:weaviate:down", "mise //apps/infra:freemium:destroy"]

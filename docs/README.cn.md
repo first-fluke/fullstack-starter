@@ -201,6 +201,8 @@ mise dev
 
 ```
 fullstack-starter/
+├── package.json       # bun workspace (apps/web, packages/*)
+├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
 │   ├── api/           # FastAPI 后端
 │   ├── web/           # Next.js 前端
@@ -314,11 +316,11 @@ mise tasks --all
 
 | 命令 | 说明 |
 |---------|-------------|
-| `mise //apps/infra/gcp:init` | 初始化 Terraform |
-| `mise //apps/infra/gcp:plan` | 预览变更 |
-| `mise //apps/infra/gcp:apply` | 应用变更 |
-| `mise //apps/infra/gcp:plan:prod` | 预览生产环境 |
-| `mise //apps/infra/gcp:apply:prod` | 应用生产环境 |
+| `mise //apps/infra:gcp:init` | 初始化 Terraform |
+| `mise //apps/infra:gcp:plan` | 预览变更 |
+| `mise //apps/infra:gcp:apply` | 应用变更 |
+| `mise //apps/infra:gcp:plan:prod` | 预览生产环境 |
+| `mise //apps/infra:gcp:apply:prod` | 应用生产环境 |
 
 </details>
 
@@ -438,9 +440,8 @@ flutterfire configure
 ### 手动部署
 
 ```bash
-# 构建并推送 Docker 镜像
-cd apps/api
-docker build -t gcr.io/PROJECT_ID/api .
+# 从仓库根目录构建并推送 Docker 镜像
+docker build -f apps/api/Dockerfile -t gcr.io/PROJECT_ID/api .
 docker push gcr.io/PROJECT_ID/api
 
 # 部署到 Cloud Run

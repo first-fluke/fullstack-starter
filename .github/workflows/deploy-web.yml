@@ -13,6 +13,8 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
 
@@ -36,9 +38,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
 
     steps:
       - uses: actions/checkout@v6
@@ -52,12 +51,15 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run linter
+        working-directory: apps/web
         run: bun run lint
 
       - name: Run type check
+        working-directory: apps/web
         run: bun run typecheck
 
       - name: Run tests
+        working-directory: apps/web
         run: bun run test
 
   build-and-deploy:
@@ -85,7 +87,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          context: apps/web
+          context: .
+          file: apps/web/Dockerfile
           push: true
           tags: ${{ env.IMAGE }}:${{ github.sha }}
           build-args: |

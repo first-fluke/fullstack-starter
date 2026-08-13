@@ -201,6 +201,8 @@ mise dev
 
 ```
 fullstack-starter/
+├── package.json       # bun workspace (apps/web, packages/*)
+├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
 │   ├── api/           # FastAPI バックエンド
 │   ├── web/           # Next.js フロントエンド
@@ -314,11 +316,11 @@ mise tasks --all
 
 | コマンド | 説明 |
 |---------|-------------|
-| `mise //apps/infra/gcp:init` | Terraform を初期化 |
-| `mise //apps/infra/gcp:plan` | 変更をプレビュー |
-| `mise //apps/infra/gcp:apply` | 変更を適用 |
-| `mise //apps/infra/gcp:plan:prod` | プロダクションをプレビュー |
-| `mise //apps/infra/gcp:apply:prod` | プロダクションを適用 |
+| `mise //apps/infra:gcp:init` | Terraform を初期化 |
+| `mise //apps/infra:gcp:plan` | 変更をプレビュー |
+| `mise //apps/infra:gcp:apply` | 変更を適用 |
+| `mise //apps/infra:gcp:plan:prod` | プロダクションをプレビュー |
+| `mise //apps/infra:gcp:apply:prod` | プロダクションを適用 |
 
 </details>
 
@@ -438,9 +440,8 @@ flutterfire configure
 ### 手動デプロイ
 
 ```bash
-# Docker イメージをビルドしてプッシュ
-cd apps/api
-docker build -t gcr.io/PROJECT_ID/api .
+# リポジトリルートから Docker イメージをビルドしてプッシュ
+docker build -f apps/api/Dockerfile -t gcr.io/PROJECT_ID/api .
 docker push gcr.io/PROJECT_ID/api
 
 # Cloud Run にデプロイ

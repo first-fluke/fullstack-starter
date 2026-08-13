@@ -201,6 +201,8 @@ mise dev
 
 ```
 fullstack-starter/
+├── package.json       # bun workspace (apps/web, packages/*)
+├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
 │   ├── api/           # Backend FastAPI
 │   ├── web/           # Frontend Next.js
@@ -314,11 +316,11 @@ mise tasks --all
 
 | Comando | Descrição |
 |---------|-----------|
-| `mise //apps/infra/gcp:init` | Inicializar Terraform |
-| `mise //apps/infra/gcp:plan` | Visualizar alterações |
-| `mise //apps/infra/gcp:apply` | Aplicar alterações |
-| `mise //apps/infra/gcp:plan:prod` | Visualizar produção |
-| `mise //apps/infra/gcp:apply:prod` | Aplicar produção |
+| `mise //apps/infra:gcp:init` | Inicializar Terraform |
+| `mise //apps/infra:gcp:plan` | Visualizar alterações |
+| `mise //apps/infra:gcp:apply` | Aplicar alterações |
+| `mise //apps/infra:gcp:plan:prod` | Visualizar produção |
+| `mise //apps/infra:gcp:apply:prod` | Aplicar produção |
 
 </details>
 
@@ -439,9 +441,8 @@ Push para a branch `main` aciona o deploy automático:
 ### Deploy Manual
 
 ```bash
-# Compilar e fazer push das imagens Docker
-cd apps/api
-docker build -t gcr.io/PROJECT_ID/api .
+# Compilar e fazer push das imagens Docker a partir da raiz do repositório
+docker build -f apps/api/Dockerfile -t gcr.io/PROJECT_ID/api .
 docker push gcr.io/PROJECT_ID/api
 
 # Deploy para Cloud Run

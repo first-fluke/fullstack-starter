@@ -22,17 +22,17 @@ If you use third-party DNS services (Cloudflare, Route53, etc.), you must map yo
 
 ```bash
 # Initialize
-mise run init
+mise //apps/infra:gcp:init
 
 # Dry-run (dev)
-mise run plan
+mise //apps/infra:gcp:plan
 
 # Apply (dev)
-mise run apply
+mise //apps/infra:gcp:apply
 
 # Dry-run (prod)
-mise run plan:prod
+mise //apps/infra:gcp:plan:prod
 
 # Apply (prod)
-mise run apply:prod
+mise //apps/infra:gcp:apply:prod
 ```

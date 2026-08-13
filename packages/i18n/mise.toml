@@ -2,7 +2,7 @@
 build = { run = "bun scripts/build.ts", description = "Build i18n files for web and mobile" }
 "build:web" = { run = "bun scripts/build.ts --target=web", description = "Build i18n for web only" }
 "build:mobile" = { run = "bun scripts/build.ts --target=mobile", description = "Build i18n for mobile only" }
-install = { run = "bun install", description = "Install dependencies", sources = ["package.json", "bun.lock"] }
+install = { run = "bun install", description = "Install dependencies", sources = ["package.json", "../../package.json", "../../bun.lock"] }
 lint = { run = "bun run biome check --write --unsafe", description = "Run biome linter" }
 format = { run = "bun run biome check --write", description = "Run biome formatter" }
 typecheck = { run = "bun run tsc --noEmit", description = "Run TypeScript type check" }

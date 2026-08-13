@@ -45,13 +45,13 @@ terraform init \
 cp terraform.tfvars.example terraform.tfvars
 
 # Plan / apply (secrets injected via Infisical)
-mise //apps/infra/aws:plan
-mise //apps/infra/aws:apply
+mise //apps/infra:aws:plan
+mise //apps/infra:aws:apply
 
 # Production
 cp terraform.prod.tfvars.example terraform.prod.tfvars
-mise //apps/infra/aws:plan:prod
-mise //apps/infra/aws:apply:prod
+mise //apps/infra:aws:plan:prod
+mise //apps/infra:aws:apply:prod
 ```
 
 ## Secrets

@@ -43,36 +43,41 @@ All stacks expose the same mise tasks:
 
 ```bash
 # GCP
-mise //apps/infra/gcp:init
-mise //apps/infra/gcp:plan
-mise //apps/infra/gcp:apply
-mise //apps/infra/gcp:plan:prod
-mise //apps/infra/gcp:apply:prod
+mise //apps/infra:gcp:init
+mise //apps/infra:gcp:plan
+mise //apps/infra:gcp:apply
+mise //apps/infra:gcp:plan:prod
+mise //apps/infra:gcp:apply:prod
 
 # AWS
-mise //apps/infra/aws:init
-mise //apps/infra/aws:plan
-mise //apps/infra/aws:apply
-mise //apps/infra/aws:plan:prod
-mise //apps/infra/aws:apply:prod
+mise //apps/infra:aws:init
+mise //apps/infra:aws:plan
+mise //apps/infra:aws:apply
+mise //apps/infra:aws:plan:prod
+mise //apps/infra:aws:apply:prod
 
 # Azure
-mise //apps/infra/az:init
-mise //apps/infra/az:plan
-mise //apps/infra/az:apply
-mise //apps/infra/az:plan:prod
-mise //apps/infra/az:apply:prod
+mise //apps/infra:az:init
+mise //apps/infra:az:plan
+mise //apps/infra:az:apply
+mise //apps/infra:az:plan:prod
+mise //apps/infra:az:apply:prod
 
 # Oracle Cloud
-mise //apps/infra/oci:init
-mise //apps/infra/oci:plan
-mise //apps/infra/oci:apply
-mise //apps/infra/oci:plan:prod
-mise //apps/infra/oci:apply:prod
+mise //apps/infra:oci:init
+mise //apps/infra:oci:plan
+mise //apps/infra:oci:apply
+mise //apps/infra:oci:plan:prod
+mise //apps/infra:oci:apply:prod
 
-# Formatting / validation (either stack)
-mise //apps/infra/gcp:fmt
-mise //apps/infra/aws:validate
+# Freemium (Vercel + Supabase + Backblaze)
+mise //apps/infra:freemium:setup
+mise //apps/infra:freemium:status
+mise //apps/infra:freemium:teardown
+
+# Formatting / validation (any stack)
+mise //apps/infra:gcp:fmt
+mise //apps/infra:aws:validate
 ```
 
 See each stack's README for prerequisites (API enablement, state bucket setup, certificates) and stack-specific notes.
