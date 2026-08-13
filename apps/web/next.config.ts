@@ -1,8 +1,12 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 import { withSerwist } from "@serwist/turbopack";
 import createNextIntlPlugin from "next-intl/plugin";
 import { env } from "./src/config/env";
+
+const repoRoot = path.join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
 const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
@@ -37,6 +41,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingRoot: repoRoot,
   poweredByHeader: false,
   reactStrictMode: true,
   reactCompiler: true,

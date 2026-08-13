@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.monodep/
 __pycache__/
 *.pyc
 .venv/

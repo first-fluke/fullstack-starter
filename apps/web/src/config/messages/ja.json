@@ -8,10 +8,5 @@
     "cancel": "キャンセル",
     "confirm": "確認",
     "delete": "削除"
-  },
-  "loginWelcome": "フルスタックスターターへようこそ",
-  "loginSubtitle": "ソーシャルアカウントで簡単に始めましょう",
-  "continueWithGoogle": "Googleで始める",
-  "continueWithFacebook": "Facebookで始める",
-  "continueWithGithub": "GitHubで始める"
+  }
 }

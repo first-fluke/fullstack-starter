@@ -11,9 +11,8 @@ part 'http_validation_error.g.dart';
 
 @Freezed()
 abstract class HttpValidationError with _$HttpValidationError {
-  const factory HttpValidationError({
-    List<ValidationError>? detail,
-  }) = _HttpValidationError;
+  const factory HttpValidationError({List<ValidationError>? detail}) =
+      _HttpValidationError;
 
   factory HttpValidationError.fromJson(Map<String, Object?> json) =>
       _$HttpValidationErrorFromJson(json);

@@ -80,12 +80,8 @@ void main() {
 
         await tokenStorage.clearTokens();
 
-        verify(
-          () => mockStorage.delete(key: 'access_token'),
-        ).called(1);
-        verify(
-          () => mockStorage.delete(key: 'refresh_token'),
-        ).called(1);
+        verify(() => mockStorage.delete(key: 'access_token')).called(1);
+        verify(() => mockStorage.delete(key: 'refresh_token')).called(1);
       });
     });
   });

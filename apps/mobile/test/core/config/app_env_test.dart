@@ -5,10 +5,7 @@ void main() {
   group('resolveBaseUrl', () {
     group('dev environment', () {
       test('returns localhost default when define is empty', () {
-        expect(
-          resolveBaseUrl(AppEnv.dev, ''),
-          equals('http://localhost:8000'),
-        );
+        expect(resolveBaseUrl(AppEnv.dev, ''), equals('http://localhost:8000'));
       });
 
       test('returns provided URL when define is non-empty', () {

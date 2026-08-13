@@ -26,10 +26,8 @@ enum AppEnv {
   ///
   /// Throws a [StateError] when [AppEnv.staging] or [AppEnv.prod] is active
   /// but the `APP_BASE_URL` dart-define is not provided (empty string).
-  String get baseUrl => resolveBaseUrl(
-    this,
-    const String.fromEnvironment('APP_BASE_URL'),
-  );
+  String get baseUrl =>
+      resolveBaseUrl(this, const String.fromEnvironment('APP_BASE_URL'));
 }
 
 /// Resolves the base URL for [env] given the [defineValue] from the

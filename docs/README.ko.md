@@ -201,6 +201,8 @@ mise dev
 
 ```
 fullstack-starter/
+├── package.json       # bun workspace (apps/web, packages/*)
+├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
 │   ├── api/           # FastAPI 백엔드
 │   ├── web/           # Next.js 프론트엔드
@@ -314,11 +316,11 @@ mise tasks --all
 
 | 명령어 | 설명 |
 |--------|------|
-| `mise //apps/infra/gcp:init` | Terraform 초기화 |
-| `mise //apps/infra/gcp:plan` | 변경사항 미리보기 |
-| `mise //apps/infra/gcp:apply` | 변경사항 적용 |
-| `mise //apps/infra/gcp:plan:prod` | 프로덕션 미리보기 |
-| `mise //apps/infra/gcp:apply:prod` | 프로덕션 적용 |
+| `mise //apps/infra:gcp:init` | Terraform 초기화 |
+| `mise //apps/infra:gcp:plan` | 변경사항 미리보기 |
+| `mise //apps/infra:gcp:apply` | 변경사항 적용 |
+| `mise //apps/infra:gcp:plan:prod` | 프로덕션 미리보기 |
+| `mise //apps/infra:gcp:apply:prod` | 프로덕션 적용 |
 
 </details>
 
@@ -438,9 +440,8 @@ flutterfire configure
 ### 수동 배포
 
 ```bash
-# Docker 이미지 빌드/푸시
-cd apps/api
-docker build -t gcr.io/PROJECT_ID/api .
+# Docker 이미지 빌드/푸시 (저장소 루트에서)
+docker build -f apps/api/Dockerfile -t gcr.io/PROJECT_ID/api .
 docker push gcr.io/PROJECT_ID/api
 
 # Cloud Run 배포

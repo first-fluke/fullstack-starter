@@ -22,17 +22,17 @@ Cloudflare, Route53 등 서드파티 DNS를 사용하는 경우, [Cloud Run 도�
 
 ```bash
 # 초기화
-mise run init
+mise //apps/infra:gcp:init
 
 # Dry-run (dev)
-mise run plan
+mise //apps/infra:gcp:plan
 
 # 적용 (dev)
-mise run apply
+mise //apps/infra:gcp:apply
 
 # Dry-run (prod)
-mise run plan:prod
+mise //apps/infra:gcp:plan:prod
 
 # 적용 (prod)
-mise run apply:prod
+mise //apps/infra:gcp:apply:prod
 ```

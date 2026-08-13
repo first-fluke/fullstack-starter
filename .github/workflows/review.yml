@@ -68,7 +68,6 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        working-directory: apps/web
         run: bun install --frozen-lockfile
 
       - uses: reviewdog/action-setup@v1
@@ -112,7 +111,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: apps/api
         run: |
-          uv sync --frozen
+          uv sync --frozen --package api
           uv run ruff check --output-format=json . 2>&1 | \
           jq -r '.[] | {
             message: .message,
@@ -133,7 +132,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: apps/worker
         run: |
-          uv sync --frozen
+          uv sync --frozen --package worker
           uv run ruff check --output-format=json . 2>&1 | \
           jq -r '.[] | {
             message: .message,

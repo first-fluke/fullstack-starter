@@ -38,11 +38,7 @@ _buildContainer() {
     ],
   );
 
-  return (
-    container: container,
-    storage: storage,
-    authService: authService,
-  );
+  return (container: container, storage: storage, authService: authService);
 }
 
 // ---------------------------------------------------------------------------
@@ -51,9 +47,7 @@ _buildContainer() {
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(
-      const RefreshTokenRequest(refreshToken: 'fallback'),
-    );
+    registerFallbackValue(const RefreshTokenRequest(refreshToken: 'fallback'));
   });
 
   group('AuthNotifier', () {

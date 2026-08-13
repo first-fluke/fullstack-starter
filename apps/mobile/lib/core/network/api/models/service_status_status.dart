@@ -16,10 +16,8 @@ enum ServiceStatusStatus {
 
   const ServiceStatusStatus(this.json);
 
-  factory ServiceStatusStatus.fromJson(String json) => values.firstWhere(
-    (e) => e.json == json,
-    orElse: () => $unknown,
-  );
+  factory ServiceStatusStatus.fromJson(String json) =>
+      values.firstWhere((e) => e.json == json, orElse: () => $unknown);
 
   final String? json;
 

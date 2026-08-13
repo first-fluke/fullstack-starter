@@ -6,28 +6,25 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Production stage
 FROM base AS production
 
-# Copy dependency files
 COPY pyproject.toml uv.lock ./
+COPY apps/api/pyproject.toml ./apps/api/pyproject.toml
+COPY apps/worker/pyproject.toml ./apps/worker/pyproject.toml
 
-# Install dependencies
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    uv sync --frozen --no-dev --package api --no-install-workspace
 
-# Copy application code
-COPY src ./src
-COPY alembic ./alembic
-COPY alembic.ini .
+COPY apps/api/src ./apps/api/src
+COPY apps/api/alembic ./apps/api/alembic
+COPY apps/api/alembic.ini ./apps/api/alembic.ini
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash appuser
-USER appuser
+RUN useradd --create-home --shell /bin/bash --uid 1000 appuser
+USER 1000
 
+WORKDIR /app/apps/api
 EXPOSE 8000
 
-CMD ["uv", "run", "fastapi", "run", "src/main.py", "--port", "8000"]
+CMD ["uv", "run", "--project", "/app", "fastapi", "run", "src/main.py", "--port", "8000"]

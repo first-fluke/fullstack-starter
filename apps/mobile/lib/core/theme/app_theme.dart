@@ -15,9 +15,8 @@ class AppTheme {
   static Color get _primaryColor => generatedLightTheme.colors.primary;
 
   /// The light theme.
-  static ThemeData get light => ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor),
-  );
+  static ThemeData get light =>
+      ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: _primaryColor));
 
   /// The dark theme.
   static ThemeData get dark => ThemeData(
