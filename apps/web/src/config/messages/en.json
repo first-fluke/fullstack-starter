@@ -8,10 +8,5 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete"
-  },
-  "loginWelcome": "Welcome to Fullstack Starter",
-  "loginSubtitle": "Get started with your social account",
-  "continueWithGoogle": "Continue with Google",
-  "continueWithFacebook": "Continue with Facebook",
-  "continueWithGithub": "Continue with GitHub"
+  }
 }

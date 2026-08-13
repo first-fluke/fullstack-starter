@@ -53,10 +53,7 @@ RequestOptions _opts({String path = '/test'}) {
   return RequestOptions(path: path, baseUrl: 'http://localhost');
 }
 
-DioException _dioError({
-  required RequestOptions opts,
-  int? statusCode,
-}) {
+DioException _dioError({required RequestOptions opts, int? statusCode}) {
   return DioException(
     requestOptions: opts,
     response: statusCode != null
@@ -72,14 +69,9 @@ DioException _dioError({
 void main() {
   setUpAll(() {
     registerFallbackValue(RequestOptions());
+    registerFallbackValue(const RefreshTokenRequest(refreshToken: 'fallback'));
     registerFallbackValue(
-      const RefreshTokenRequest(refreshToken: 'fallback'),
-    );
-    registerFallbackValue(
-      Response<dynamic>(
-        requestOptions: RequestOptions(),
-        statusCode: 200,
-      ),
+      Response<dynamic>(requestOptions: RequestOptions(), statusCode: 200),
     );
   });
 
@@ -144,17 +136,13 @@ void main() {
           body: any(named: 'body'),
         ),
       ).thenAnswer(
-        (_) async => const TokenResponse(
-          accessToken: 'new_at',
-          refreshToken: 'new_rt',
-        ),
+        (_) async =>
+            const TokenResponse(accessToken: 'new_at', refreshToken: 'new_rt'),
       );
       when(
         () => mockStorage.saveTokens('new_at', 'new_rt'),
       ).thenAnswer((_) async {});
-      when(
-        () => mockRetryDio.fetch<dynamic>(any()),
-      ).thenAnswer(
+      when(() => mockRetryDio.fetch<dynamic>(any())).thenAnswer(
         (_) async => Response<dynamic>(requestOptions: opts, statusCode: 200),
       );
 

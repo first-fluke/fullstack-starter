@@ -9,11 +9,7 @@ import 'clients/authentication_service.dart';
 
 /// fullstack-starter-api `v0.1.0`
 class ApiClient {
-  ApiClient(
-    Dio dio, {
-    String? baseUrl,
-  }) : _dio = dio,
-       _baseUrl = baseUrl;
+  ApiClient(Dio dio, {String? baseUrl}) : _dio = dio, _baseUrl = baseUrl;
 
   final Dio _dio;
   final String? _baseUrl;

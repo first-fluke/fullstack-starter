@@ -18,10 +18,8 @@ enum HealthResponseStatus {
 
   const HealthResponseStatus(this.json);
 
-  factory HealthResponseStatus.fromJson(String json) => values.firstWhere(
-    (e) => e.json == json,
-    orElse: () => $unknown,
-  );
+  factory HealthResponseStatus.fromJson(String json) =>
+      values.firstWhere((e) => e.json == json, orElse: () => $unknown);
 
   final String? json;
 

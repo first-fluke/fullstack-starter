@@ -33,10 +33,7 @@ GoRouter router(Ref ref) {
     },
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
     ],
   );
 }
