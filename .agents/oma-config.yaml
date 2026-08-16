@@ -46,3 +46,8 @@ scm:
     - "*.example"
     - "*.sample"
     - "*.template"
+
+# Added by oma update — new config keys (template defaults; edit freely)
+agents:
+  eval:
+    model: anthropic/claude-sonnet-4-6
