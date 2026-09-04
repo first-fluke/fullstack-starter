@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.27.0](https://github.com/first-fluke/fullstack-starter/compare/v2.26.2...v2.27.0) (2026-09-04)
+
+
+### Features
+
+* **root:** replace better auth with pkce flows ([5b208f3](https://github.com/first-fluke/fullstack-starter/commit/5b208f3bc93c18e435b7a355f9f864b6d220f88c))
+
 ## [2.26.2](https://github.com/first-fluke/fullstack-starter/compare/v2.26.1...v2.26.2) (2026-08-06)
 
 
