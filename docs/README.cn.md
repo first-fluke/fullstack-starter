@@ -52,7 +52,7 @@ graph TB
 
 - **现代技术栈**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
 - **类型安全**: TypeScript、Pydantic 和 Dart 全栈类型支持
-- **身份验证**: 基于 better-auth 的 OAuth（Google、GitHub、Facebook）
+- **身份验证**: 邮箱/密码、OAuth Authorization Code（Google/GitHub PKCE、Facebook）和 WebAuthn 通行密钥
 - **国际化 (i18n)**: next-intl（Web）、Flutter ARB（移动端）、共享 i18n 包
 - **API 客户端自动生成**: Orval（Web）、swagger_parser（移动端）
 - **基础设施即代码**: Terraform + GCP（Cloud Run、Cloud SQL、Cloud Storage）

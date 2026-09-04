@@ -31,4 +31,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get delete => '삭제';
+
+  @override
+  String get login => '로그인';
+
+  @override
+  String get email => '이메일';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get loginWithEmail => '이메일로 로그인';
+
+  @override
+  String get loginWithPasskey => '패스키로 로그인';
+
+  @override
+  String get registerPasskey => '패스키 추가';
+
+  @override
+  String get passkeyRegistered => '패스키를 추가했습니다';
+
+  @override
+  String get logout => '로그아웃';
+
+  @override
+  String get emailRequired => '이메일을 입력해 주세요';
+
+  @override
+  String get emailPasswordRequired => '이메일과 비밀번호를 입력해 주세요';
 }

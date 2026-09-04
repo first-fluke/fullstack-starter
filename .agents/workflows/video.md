@@ -57,7 +57,7 @@ For `demo`, also resolve the **source**: a recorded file or Cap → `--source fi
   | stock video | Pexels (`PEXELS_API_KEY`) | oma-image stills + Ken Burns | `TODO(oma-deferred): pexels` |
   | AIGC video | Pixelle-MCP + RunningHub (`RUNNINGHUB_API_KEY`) | oma-image stills | `TODO(oma-deferred): pixelle` |
   | caption timing | voicebox-stt (MCP `voicebox_transcribe` → REST) | estimate | `TODO(oma-deferred): whisper-cpp` |
-  | music mixing | (not wired — recorded + warned only) | render without music | `TODO(oma-deferred): music` |
+  | music mixing | Strudel offline render (`oma video doctor --install-strudel`) | render without music | — |
   | premium TTS | (not needed — oma-voice is local) | — | — |
 
 - **Pixelle AIGC is a community MCP**: off by default, requires one-time explicit user consent plus a source review before connecting, and is always cost-gated on RunningHub credits.
@@ -71,8 +71,7 @@ For `demo`, also resolve the **source**: a recorded file or Cap → `--source fi
    ```
    What is the video about? Give me a one-line brief, and a mode if you have one (shorts / explainer / demo).
    ```
-2. // turbo
-   Run the readiness check and surface gaps before spending any time on assets:
+2. Run the readiness check and surface gaps before spending any time on assets:
    ```bash
    oma video doctor --format json
    ```
@@ -107,13 +106,12 @@ The agent writes the script — this is the start of the determinism boundary. D
    - `shorts`: a hook-first synthetic script from the topic; each scene gets a `visual.prompt` for oma-image.
    - `explainer`: ground scenes in the README / code / data the user pointed to; mark scenes that should become oma-slide frames vs oma-image diagrams.
    - `demo`: narration + on-screen callouts over the captured footage; visual refs point at the ingested capture segments.
-4. Translate narration / on-screen text via oma-translator when `locale` differs from the source language (key-free). If oma-translator is absent, keep the source text and let the run warn.
-5. // turbo
-   Write the agent-authored script to a file and hand it to the CLI via `--script <path>` so it validates against the schema. **`--script` is mandatory for the agent-as-key path: without it the CLI builds its own skeleton script from the brief and your authored script is never used.** Use `--dry-run` for the first pass so the pipeline emits `script.json` + `render-spec.json` + `manifest.json` **without rendering**:
+4. Translate narration / on-screen text via oma-translation when `locale` differs from the source language (key-free). If oma-translation is absent, keep the source text and let the run warn.
+5. Write the agent-authored script to a file and hand it to the CLI via `--script <path>` so it validates against the schema. **`--script` is mandatory for the agent-as-key path: without it the CLI builds its own skeleton script from the brief and your authored script is never used.** Use `--dry-run` for the first pass so the pipeline emits `script.json` + `render-spec.json` + `manifest.json` **without rendering**:
    ```bash
    oma video generate "<brief>" --mode <mode> --aspect <aspect> --locale <lang> \
      --captions <tiktok|lower-third|none> --visual <auto|generate|stock|aigc|slide> \
-     --voice <profile|none> --music <upbeat|calm|none> --duration <sec|auto> \
+     --voice <profile|none> --music <upbeat|calm|cinematic|lofi|piano|none> --duration <sec|auto> \
      --compositor <remotion|mpt> --seed <n> \
      --script <path-to-agent-authored-script.json> --dry-run --format json
    ```
@@ -133,7 +131,7 @@ The three tracks (per `.agents/skills/oma-video/SKILL.md` and its execution prot
 
 - **Voice** (oma-voice / Voicebox MCP) → a **single** `audio/narration-01.wav` (all scene lines joined into one track — not per-scene files) + `timing.json`. Timing source: `voicebox-stt` (MCP `voicebox_transcribe`, REST `/transcribe` fallback, on the generated wav) → `estimated` (the `tts-native` / `whisper-cpp` source values are reserved but deferred). **The default voice is `none` → a silent video with estimated timing; pass `--voice <profile>` for narration.** If oma-voice is down, the run falls back to silent + estimated timing and warns — it does not hard-fail.
 - **Visual** (per-scene, fallback chain `oma-image → pexels → pixelle`) → `visuals/scene-NN.*`. Default is key-free oma-image stills (aspect snapped to the nearest 16-multiple; Remotion crops to exact frame). `--visual stock` engages Pexels only when `PEXELS_API_KEY` is set; `--visual aigc` engages Pixelle only after consent + cost gate. Each scene that falls back is recorded with `pathTaken: fallback`.
-- **Caption** (key-free) → `captions.srt` / `.vtt`, aligned to `timing.json`, styled `tiktok` or `lower-third`, with platform safe-area presets. Non-source locales translate via oma-translator; if absent, captions keep the source locale and warn.
+- **Caption** (key-free) → `captions.srt` / `.vtt`, aligned to `timing.json`, styled `tiktok` or `lower-third`, with platform safe-area presets. Non-source locales translate via oma-translation; if absent, captions keep the source locale and warn.
 
 Report which path each track took (real vs fallback) and surface any warnings.
 
@@ -168,18 +166,16 @@ For `demo`, the orchestrator produces the footage in place of synthetic visuals,
 
 ---
 
-## Step 6: Composite (Remotion → MPT fallback)
+## Step 6: Composite (Remotion — you author the composition → MPT fallback)
 
-1. The orchestrator renders via the selected compositor:
-   - **Remotion** (default, all modes): renders the vendored `Shorts` / `Explainer` / `Demo` composition from `render-spec.json` props, with embedded Pretendard for cross-machine identical output. Long renders are SIGINT-abortable.
-   - **MoneyPrinterTurbo** (`--compositor mpt`, shorts e2e alt): the agent-written script is injected in custom-script mode; provider keys are env-only and masked in logs.
-   - **Demo raw vs `--polish`**: for `demo`, the **default** is the raw captured footage copied through as the output (no compositor over-processing). `--polish` overlays the Remotion `Demo` composition (intro / captions / zoom) with the captured `capture.mp4` as the full-frame background.
-2. If Remotion bootstrap fails (`CompositorBootstrapError`), the doctor remediation is the fix path — run `oma video doctor --install` once, then re-render. Do not attempt an ad-hoc install mid-run.
-3. // turbo
-   To reproduce or re-render an existing run without regenerating assets (deterministic from the spec):
-   ```bash
-   oma video render <runDir> --format json
-   ```
+1. **Remotion** (default, all modes) — oma ships no composition code; you write it per run on the always-latest Remotion:
+   1. `oma video generate` already scaffolded `<runDir>/remotion/` (warning `composition pending`). If not, or to refresh: `oma video compose <runDir> --format json`.
+   2. Read, in order: `<runDir>/remotion/AUTHORING.md` (contract for this spec), the `remotion-best-practices` and `remotion-markup` SKILL.md paths it lists (remotion-dev/skills at HEAD; `remotion-captions` when `captions.style !== "none"`, `remotion-multimedia` for video/audio), and `.agents/skills/oma-video/resources/remotion-authoring/<mode>.md`.
+   3. Write `<runDir>/remotion/src/Root.tsx` (+ `src/components/*`): one `<Composition id={composition}>` consuming `render-spec.json`, `calculateMetadata` from props, deterministic (no network/randomness), Pretendard via `staticFile("fonts/PretendardVariable.woff2")`. Never edit the generated files.
+   4. `oma video render <runDir> --format json` — typecheck → `npx remotion render` → ffprobe. **Non-zero exit is a composition bug**: read the diagnostics, consult the skills again (`remotion-upgrade` for API moves), fix, re-render. No fixed cap; stop only after two consecutive attempts without progress and report the diagnostics.
+   - **Demo raw vs `--polish`**: for `demo`, the **default** is the raw captured footage copied through as the output. `--polish` means you author the `Demo` composition (intro / callouts / zoom over the capture as `background`).
+2. **MoneyPrinterTurbo** (`--compositor mpt`, shorts e2e alt): the agent-written script is injected in custom-script mode; provider keys are env-only and masked in logs. Needs `oma video doctor --install-mpt` once.
+3. If the toolchain cannot be fetched (offline, nothing cached): `oma video doctor --install` once online. Do not pin or hand-install Remotion.
 4. Confirm the output MP4 exists in the run directory and matches the expected `<mode>-<slug>.mp4` name.
 
 ---
@@ -193,14 +189,14 @@ Review the finished video against the brief and the quality bars. Iterate by re-
    - Narration audio is present (or intentionally silent) and aligns to scenes.
    - Captions are synced to `timing.json`, within the safe area, and legible (static windowed cues, CSS-wrapped, Pretendard, design rule 2).
    - Visuals match each scene's intent; no placeholder leakage unless the run intentionally used the fallback.
-   - Aspect / dimensions are correct for the mode; branding applied as requested. (Music mixing is deferred — a requested music mode only produces a warning, never audio.)
+   - Aspect / dimensions are correct for the mode; branding applied as requested. (A requested music mode yields `music/bgm.wav` mixed at −18 dB, or a fallback warning and a silent render when Strudel is not installed.)
 2. **Route each defect to its stage:**
    - script/narration/scene-count → **Step 3** (re-author script).
    - audio/timing → **Step 4** voice track (check oma-voice, re-synthesize).
    - wrong/placeholder visual → **Step 4** visual track (adjust prompt or `--visual` mode).
    - missing/incomplete demo capture → **Step 4** demo capture track (re-run the web capture; adjust `--ready-selector`/`--capture-timeout`, or fall back to `--source file`).
-   - caption sync/wrap/locale → **Step 4** caption track (or oma-translator).
-   - layout/transition/crop → **Step 6** render-spec → re-render (for `demo`, toggle `--polish`).
+   - caption sync/wrap/locale → **Step 4** caption track (or oma-translation).
+   - layout/transition/crop → **Step 6** edit the composition (`<runDir>/remotion/src`) or the render-spec → `oma video render` (for `demo`, toggle `--polish`).
 3. **Determinism guard:** when validating reproducibility, run the golden harness — render-spec and assets must be byte-identical:
    ```bash
    OMA_VIDEO_MOCK=1 oma video generate "<brief>" --mode <mode> --seed <n> --dry-run --format json

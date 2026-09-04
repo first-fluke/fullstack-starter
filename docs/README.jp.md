@@ -52,7 +52,7 @@ graph TB
 
 - **モダンスタック**: Next.js 16 + React 19、FastAPI、Flutter 3.44.8、TailwindCSS v4
 - **型安全性**: TypeScript、Pydantic、Dartによるフルスタックの型サポート
-- **認証**: better-auth ベースの OAuth（Google、GitHub、Facebook）
+- **認証**: メール/パスワード、OAuth Authorization Code（Google/GitHub PKCE、Facebook）、WebAuthn パスキー
 - **国際化 (i18n)**: next-intl（Web）、Flutter ARB（モバイル）、共有 i18n パッケージ
 - **APIクライアント自動生成**: Orval（Web）、swagger_parser（モバイル）
 - **インフラストラクチャ as Code**: Terraform + GCP（Cloud Run、Cloud SQL、Cloud Storage）

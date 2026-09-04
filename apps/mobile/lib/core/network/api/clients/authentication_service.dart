@@ -5,10 +5,9 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import '../models/api_auth_login_request_body_union.dart';
+import '../models/email_login_request.dart';
 import '../models/refresh_token_request.dart';
 import '../models/register_request.dart';
-import '../models/session_exchange_request.dart';
 import '../models/token_response.dart';
 import '../models/user_response.dart';
 
@@ -29,23 +28,10 @@ abstract class AuthenticationService {
 
   /// Login.
   ///
-  /// Login with OAuth or email/password and issue backend tokens.
-  ///
-  /// Verify OAuth token, create/update user, and issue JWE tokens.
+  /// Login with email/password and issue first-party tokens.
   @POST('/api/auth/login')
   Future<TokenResponse> loginApiAuthLoginPost({
-    @Body() required ApiAuthLoginRequestBodyUnion body,
-  });
-
-  /// Session Exchange.
-  ///
-  /// Exchange better-auth session token for backend JWE tokens.
-  ///
-  /// Used by email/password auth users who have no OAuth provider token.
-  /// Verifies session with better-auth server, then issues backend tokens.
-  @POST('/api/auth/session-exchange')
-  Future<TokenResponse> sessionExchangeApiAuthSessionExchangePost({
-    @Body() required SessionExchangeRequest body,
+    @Body() required EmailLoginRequest body,
   });
 
   /// Refresh Token.

@@ -10,12 +10,12 @@ plan when the brief is a one-liner.
 ## Step 0: Parse Request
 
 1. Extract the brief and flags from the invocation.
-2. Resolve defaults from `config/video-config.yaml` -> env vars -> CLI flags (lowest to highest precedence).
+2. Resolve defaults from shipped code defaults -> the `video:` section of `.agents/oma-config.yaml` -> env vars -> CLI flags (lowest to highest precedence). `config/video-config.yaml` is not consulted.
 3. Validate:
    - `mode` ∈ {`shorts`, `explainer`, `demo`}.
    - `aspect` ∈ {`9:16`, `16:9`, `1:1`, `auto`} (`auto` snaps to the mode default: shorts -> 9:16, explainer/demo -> 16:9).
    - `captions` ∈ {`tiktok`, `lower-third`, `none`}; `visual` ∈ {`auto`, `generate`, `stock`, `aigc`, `slide`}.
-   - `music` ∈ {`upbeat`, `calm`, `none`}; `compositor` ∈ {`remotion`, `mpt`}.
+   - `music` ∈ {`upbeat`, `calm`, `cinematic`, `lofi`, `piano`, `none`}; `compositor` ∈ {`remotion`, `mpt`}.
    - `duration` ≤ `limits.max_duration_sec` (180); resulting `scenes` ≤ `limits.max_scenes` (40).
    - `out` is inside `$PWD` unless `--allow-external-out`.
    - For `demo`: `--capture` (if given) exists, is absolute + `$PWD`-guarded, and is a valid video format.
@@ -62,7 +62,7 @@ all assets ─► render-spec.json ─► [Compositor: Remotion] ─► <mode>-<
 1. **Script**: AgentScriptProvider writes `script.json` (start of the determinism boundary).
 2. **Voice**: oma-voice synthesizes narration -> a **single** `audio/narration-01.wav` (all scene lines joined into one track; per-line offsets live in `timing.json`). Fallback: estimated timing (no wav).
 3. **Visuals**: walk the visual chain. oma-image stills (key-free default) / oma-slide frames (explainer) / Pexels (key) / Pixelle (key). Aspect -> 16-multiple size; Remotion crops to the exact frame.
-4. **Captions**: oma-captions builds `captions.srt` + `captions.vtt` from `timing.json`. For a non-source locale, translate via oma-translator (key-free); absent -> warn + keep source.
+4. **Captions**: oma-captions builds `captions.srt` + `captions.vtt` from `timing.json`. For a non-source locale, translate via oma-translation (key-free); absent -> warn + keep source.
 5. **render-spec**: compose `render-spec.json` (the deterministic compute boundary) from the assets + seed.
 6. **Render**: the compositor consumes `render-spec.json`.
 
@@ -75,7 +75,7 @@ State plainly to the user: **"Demo capture is performed by a human."** Then:
 
 ## Step 5: Compositor Render
 
-- **Remotion (default, live)**: when the toolchain (FFmpeg + the vendored project installed via `oma video doctor --install`) is present, the CLI adapter spawns `npx remotion render src/index.ts <CompId> <mode>-<slug>.mp4 --props=render-spec.json` from `resources/remotion/` — this is the wired, real render path.
+- **Remotion (default, live)**: `oma video generate` stops after `render-spec.json` with `composition pending` and a scaffolded `<runDir>/remotion/` (latest Remotion toolchain, remotion-dev/skills at HEAD). Read `<runDir>/remotion/AUTHORING.md` + the listed skills + `resources/remotion-authoring/<mode>.md`, author `src/Root.tsx`, then `oma video render <runDir> --format json` — it typechecks, spawns `npx remotion render src/index.ts <CompId> <mode>-<slug>.mp4 --props=render-spec.json --public-dir=<runDir>`, and ffprobes the output. Non-zero exit = fix the composition and re-render.
 - **Fallback**: only when the toolchain is missing or the render fails, write a deterministic placeholder mp4 derived from the render-spec so the run dir + manifest are still well-formed with zero toolchain.
 - **MPT (`--compositor mpt`)**: inject the agent-written script (custom-script mode); keys env-only + log masking.
 

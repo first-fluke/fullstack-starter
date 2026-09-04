@@ -32,7 +32,7 @@ Search, fetch, generate, validate, analyze, review, and compare scholarly paper 
 ### When NOT to use
 
 - General web search or non-academic content -> use `oma-search`
-- Translating papers -> use `oma-translator`
+- Translating papers -> use `oma-translation`
 - PDF parsing only (no sidecar) -> use `oma-pdf`
 - Submitting sidecars back to knows.academy -> out of scope (host LLM only consumes/produces locally)
 - Full peer-review workflow with editor system -> out of scope
@@ -250,7 +250,7 @@ curl -s "https://knows.academy/api/proxy/jobs/stats"   # platform health
 
 ### Configuration
 
-Project-specific settings: `config/scholar-config.yaml`
+Project-specific settings: `config/scholar-config.yaml`. One key is user-tunable and lives elsewhere — read `scholar.base_url` from `.agents/oma-config.yaml` first and fall back to `api.base_url` in the skill config. Everything else there (endpoint paths, timeouts, id prefixes, lint rules) is protocol shape, not preference.
 
 ### Troubleshooting
 

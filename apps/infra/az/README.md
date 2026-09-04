@@ -54,7 +54,7 @@ mise //apps/infra:az:apply:prod
 
 ## Secrets
 
-All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, `BETTER_AUTH_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP and AWS setups — Infisical is the single source of truth. The DB password is set as the Flexible Server admin password and wired into the apps as a Container Apps secret reference (never a plain env var).
+All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP and AWS setups — Infisical is the single source of truth. The DB password is set as the Flexible Server admin password and wired into the apps as a Container Apps secret reference (never a plain env var).
 
 ## CI/CD (GitHub Actions OIDC)
 

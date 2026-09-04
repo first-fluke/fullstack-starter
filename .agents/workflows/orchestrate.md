@@ -9,11 +9,10 @@ disable-model-invocation: true
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
+  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration. Do NOT use raw grep as a substitute.
+  - Use file tools (`Read`/`Write`/`Edit`) to persist coordination artifacts directly to `{memoryConfig.basePath}/` (default: `.agents/state/memories/`). Do NOT use Serena's `write_memory` for workflow session state, as verification gates require durable files on disk.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
   - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface.
 - **Read required documents BEFORE starting.**
 
 ---
@@ -37,18 +36,30 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 
 ## Step 1: Load or Create Plan
 
+### 1a. Load
+
 Look for a plan file:
 
 1. Check `.agents/results/plan-{sessionId}.json` (current session's plan).
 2. If not found: find the most recent `.agents/results/plan-*.json` file.
-3. If none exist: ask the user to run `/plan` first, or ask them to describe the tasks to execute.
-- **Do NOT proceed without a plan.**
+3. A plan is **usable** only when every task carries an agent assignment, a priority tier, its dependencies, and acceptance criteria. A plan missing any of these is not execution-ready — fall through to 1b rather than fanning out against it.
+
+### 1b. Create (no usable plan)
+
+A missing plan is not a stop condition. `/orchestrate` creates the plan itself instead of handing the request back to the user:
+
+1. Generate the session ID now (format: `session-YYYYMMDD-HHMMSS`). Step 2 reuses this id verbatim — do not generate a second one.
+2. Read and follow `.agents/workflows/plan.md` step by step, passing this session ID as its `{sessionId}` so the artifact lands at `.agents/results/plan-{sessionId}.json`.
+3. **Do NOT skip `plan.md` Step 6 (Review Plan with User).** It is this run's approval gate — the Step 3 fan-out is authorized by it. Delegation never removes a user gate.
+4. Once the plan is saved and approved, load it and continue to Step 2 with the same session ID.
+
+Stop and report only when the plan cannot be produced: the user declines to plan, or `plan.md` blocks because the request is too underspecified to decompose.
+
+- **Do NOT spawn agents without a usable plan.**
 
 ---
 
 ## Step 2: Initialize Session
-
-// turbo
 
 1. Load configuration:
    - `.agents/oma-config.yaml` (`language`, `model_preset`, and per-agent `agents:` overrides)
@@ -66,8 +77,8 @@ Look for a plan file:
    └──────────┴───────────────────┘
    ```
 
-3. Generate session ID (format: `session-YYYYMMDD-HHMMSS`).
-4. **Domain gate**: for each planned task, classify it into `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`, and derive `exposed_skill_set` (skills whose name is in `domain_tags`). If fewer than 2 skills match confidently, fall back to the full installed set and mark `exposure_fallback: true`. See `.agents/skills/oma-orchestrator/SKILL.md` (PHASE 1.5) for the full rules.
+3. Session ID: reuse the id generated in Step 1b when the plan was created in this run; otherwise generate one now (format: `session-YYYYMMDD-HHMMSS`).
+4. **Domain gate**: for each planned task, classify it into `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`, and derive `exposed_skill_set` (skills whose name is in `domain_tags`). If fewer than 2 skills match confidently, fall back to the full installed set and mark `exposure_fallback: true`. See `.agents/skills/oma-orchestration/SKILL.md` (PHASE 1.5) for the full rules.
 5. Use memory write tool to create `orchestrator-session.md` and `task-board.md` in the memory base path. Record `Exposed Skills` and `Exposure Fallback` per task in `task-board.md`.
 6. Set session status to RUNNING.
 
@@ -75,7 +86,6 @@ Look for a plan file:
 
 ## Step 3: Spawn Agents by Priority Tier
 
-// turbo
 Before spawning agents, emit and verify the required fan-out decision:
 
 ```bash
@@ -85,7 +95,7 @@ oma state:verify --workflow orchestrate --checkpoint fanout-strategy
 
 For each priority tier (lowest first: tier 1, then tier 2, etc.):
 
-- Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`, and only its task's `exposed_skill_set` as the available specialist list (see `.agents/skills/oma-orchestrator/resources/subagent-prompt-template.md` `{EXPOSED_SKILL_SET}`).
+- Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`, and only its task's `exposed_skill_set` as the available specialist list (see `.agents/skills/oma-orchestration/resources/subagent-prompt-template.md` `{EXPOSED_SKILL_SET}`).
 - Use memory edit tool to update `task-board.md` with agent status.
 - If a failed task's review history indicates a specialist outside its `exposed_skill_set` was needed, re-classify the task and re-dispatch with the expanded set instead of retrying against the original narrow set.
 
@@ -148,6 +158,7 @@ Also use memory read tool to poll `progress-{agent}[-{sessionId}].md` for logic 
 
 - Use memory edit tool to update `task-board.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
+- A `no-artifact` status (or `oma agent:spawn` exit code 3) means the vendor exited 0 but wrote no result artifact under the workspace — a silent misdirected write. Treat it as a failed spawn: do NOT collect it as completed; re-dispatch (natively if the external vendor is unreliable) and check the session trail for the `blocker.raised` event.
 
 ### Context Anxiety Check (per polling cycle)
 
@@ -175,14 +186,13 @@ Record reset events in `task-board.md`:
 
 ## Step 5: Verify Completed Agents
 
-// turbo
 For each completed agent, execute the complete review loop:
 
 1. **Mechanical self-check**: require the implementation agent to run applicable lint, typecheck, tests, and diff-scope checks. Feed failures back for correction, up to 3 cycles.
 2. **Automated verify**: run the command below only for `backend`, `frontend`, `mobile`, `qa`, `debug`, and `pm`. For `db`, `refactor`, `architecture`, `tf-infra`, and `docs`, record `SKIP (unsupported agent type)` and continue.
 
 ```
-bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
+bash .agents/skills/oma-orchestration/scripts/verify.sh {agent-type} {workspace}
 ```
 
 - PASS (exit 0) or documented unsupported-type SKIP: continue to cross-review.
@@ -207,7 +217,6 @@ bash .agents/skills/oma-orchestrator/scripts/verify.sh {agent-type} {workspace}
 
 ## Step 6: Collect Results
 
-// turbo
 After all agents complete, use memory read tool to read all `result-{agent}-{sessionId}.md` files.
 Compile summary: completed tasks, failed tasks, files changed, remaining issues.
 

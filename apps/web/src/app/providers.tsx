@@ -7,15 +7,7 @@ import dynamic from "next/dynamic";
 import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
-import { useEffect } from "react";
 import { env } from "@/config/env";
-import {
-  exchangeOAuthForBackendJwt,
-  exchangeSessionForBackendJwt,
-  hasBackendAccessToken,
-  useOAuthSession,
-  useSession,
-} from "@/lib/auth/auth-client";
 import { getQueryClient } from "@/lib/get-query-client";
 
 const TanStackDevTools =
@@ -32,30 +24,6 @@ interface ProvidersProps {
   messages: AbstractIntlMessages;
 }
 
-function BackendJwtBridge() {
-  const { data: session, isPending } = useSession();
-  const { data: oauthSession, isPending: isOAuthPending } = useOAuthSession();
-
-  const user = session?.user;
-  const oauthUser = oauthSession?.user;
-
-  useEffect(() => {
-    if (isPending || isOAuthPending) return;
-
-    if (user) return;
-
-    if (!oauthUser) return;
-
-    if (hasBackendAccessToken()) return;
-
-    exchangeOAuthForBackendJwt()
-      .catch(() => exchangeSessionForBackendJwt())
-      .catch(() => {});
-  }, [isOAuthPending, isPending, oauthUser, user]);
-
-  return null;
-}
-
 export function Providers({ children, locale, messages }: ProvidersProps) {
   const queryClient = getQueryClient();
 
@@ -64,7 +32,6 @@ export function Providers({ children, locale, messages }: ProvidersProps) {
       <QueryClientProvider client={queryClient}>
         <NuqsAdapter>
           <JotaiProvider>
-            <BackendJwtBridge />
             <NextIntlClientProvider locale={locale} messages={messages} timeZone="Asia/Seoul">
               {children}
             </NextIntlClientProvider>

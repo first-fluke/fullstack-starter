@@ -40,6 +40,16 @@ worker_max_instances = 5
 domain        = ""
 api_subdomain = "api"
 
+# Native passkey associations. Include debug, release, and Play fingerprints.
+MOBILE_ANDROID_PACKAGE_NAME             = "com.example.mobile"
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = []
+MOBILE_APPLE_APP_IDS                    = []
+
+# Required for OAuth/passkeys when domain is empty. Use the deployed Cloud Run URLs.
+API_PUBLIC_URL = "https://fullstack-starter-dev-api-xxxxx.a.run.app"
+WEB_PUBLIC_URL = "https://fullstack-starter-dev-web-xxxxx.a.run.app"
+WEBAUTHN_RP_ID = "fullstack-starter-dev-web-xxxxx.a.run.app"
+
 # Scheduled jobs (Cloud Scheduler -> Pub/Sub -> worker)
 # Define cron jobs here instead of in-worker cron loops.
 # schedules = {
@@ -52,7 +62,10 @@ api_subdomain = "api"
 # Secrets (injected via Infisical - do not commit real values)
 # DATABASE_PASSWORD    = ""
 # JWT_SECRET           = ""
-# BETTER_AUTH_SECRET   = ""
 # GOOGLE_CLIENT_ID     = ""
 # GOOGLE_CLIENT_SECRET = ""
+# GITHUB_CLIENT_ID     = ""
+# GITHUB_CLIENT_SECRET = ""
+# FACEBOOK_CLIENT_ID     = ""
+# FACEBOOK_CLIENT_SECRET = ""
 # OPENAI_API_KEY       = ""

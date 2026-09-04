@@ -31,4 +31,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get delete => '削除';
+
+  @override
+  String get login => 'ログイン';
+
+  @override
+  String get email => 'メールアドレス';
+
+  @override
+  String get password => 'パスワード';
+
+  @override
+  String get loginWithEmail => 'メールでログイン';
+
+  @override
+  String get loginWithPasskey => 'パスキーでログイン';
+
+  @override
+  String get registerPasskey => 'パスキーを追加';
+
+  @override
+  String get passkeyRegistered => 'パスキーを追加しました';
+
+  @override
+  String get logout => 'ログアウト';
+
+  @override
+  String get emailRequired => 'メールアドレスを入力してください';
+
+  @override
+  String get emailPasswordRequired => 'メールアドレスとパスワードを入力してください';
 }

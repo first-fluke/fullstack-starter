@@ -46,10 +46,23 @@
         "timeout": 5
       }
     ],
-    "Stop": {
-      "hook": "persistent-mode.ts",
-      "timeout": 5
-    }
+    "PostToolUse": [
+      {
+        "hook": "refactor-guard.ts",
+        "matcher": "Edit|Write|NotebookEdit",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "hook": "persistent-mode.ts",
+        "timeout": 5
+      },
+      {
+        "hook": "refactor-guard.ts",
+        "timeout": 5
+      }
+    ]
   },
   "statusLine": {
     "hook": "hud.ts"
@@ -60,6 +73,8 @@
         "Bash(bun run:*)",
         "Bash(bunx tsx:*)",
         "Bash(git add:*)",
+        "Bash(ls *)",
+        "Bash(oma *)",
         "mcp__serena__*"
       ]
     }

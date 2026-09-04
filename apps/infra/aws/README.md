@@ -56,7 +56,7 @@ mise //apps/infra:aws:apply:prod
 
 ## Secrets
 
-All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, `BETTER_AUTH_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP setup — Infisical is the single source of truth. The DB password is set as the Aurora master password and wired into ECS task environments.
+All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP setup — Infisical is the single source of truth. The DB password is set as the Aurora master password and wired into ECS task environments.
 
 ## Routing
 

@@ -7,5 +7,15 @@
   "save": "保存",
   "cancel": "キャンセル",
   "confirm": "確認",
-  "delete": "削除"
+  "delete": "削除",
+  "login": "ログイン",
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "loginWithEmail": "メールでログイン",
+  "loginWithPasskey": "パスキーでログイン",
+  "registerPasskey": "パスキーを追加",
+  "passkeyRegistered": "パスキーを追加しました",
+  "logout": "ログアウト",
+  "emailRequired": "メールアドレスを入力してください",
+  "emailPasswordRequired": "メールアドレスとパスワードを入力してください"
 }

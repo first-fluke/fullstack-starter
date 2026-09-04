@@ -40,6 +40,11 @@ domain              = "example.com"
 api_subdomain       = "api"
 acm_certificate_arn = "arn:aws:acm:ap-northeast-2:123456789012:certificate/xxxx"
 
+# Native passkey associations (replace with production signing identities).
+MOBILE_ANDROID_PACKAGE_NAME             = "com.example.mobile"
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = []
+MOBILE_APPLE_APP_IDS                    = []
+
 # SES
 ses_domain = "example.com"
 

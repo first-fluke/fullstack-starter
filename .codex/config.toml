@@ -4,7 +4,7 @@ hooks = true
 
 [mcp_servers.serena]
 command = "oma"
-args = [ "bridge", "--context", "codex" ]
+args = [ "bridge", "--context", "oma" ]
 startup_timeout_sec = 90
 
 [mcp_servers.serena.env]

@@ -56,7 +56,7 @@ mise //apps/infra:oci:apply:prod
 
 ## Secrets
 
-All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, `BETTER_AUTH_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP/AWS/Azure setups — Infisical is the single source of truth. The DB password is set as the PostgreSQL admin password and wired into the container instance environments.
+All sensitive variables (`DATABASE_PASSWORD`, `JWT_SECRET`, OAuth keys, AI API keys) are injected as `TF_VAR_*` environment variables via `infisical run`, same as the GCP/AWS/Azure setups — Infisical is the single source of truth. The DB password is set as the PostgreSQL admin password and wired into the container instance environments.
 
 ## CI/CD (GitHub Actions OIDC)
 

@@ -9,7 +9,7 @@ disable-model-invocation: true
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 1 in order.
 - **Never auto-apply sync patches.** Sync mode is always interactive: `[y]` confirm required per doc.
-- **Never modify `.agents/`.** SSOT protection applies in all modes.
+- **Never modify `.agents/` definitions.** SSOT protection covers skills, workflows, rules, agents, and config, in all modes. Generated artifacts under `.agents/results/` and `.agents/state/` are not SSOT — never delete them to "restore" protection.
 - **Follow the host-LLM contract** in `.agents/skills/oma-docs/SKILL.md`: the CLI emits structured data; this workflow performs natural-language synthesis, severity grouping, and patch drafting on top of the JSON output.
 
 ---
@@ -61,7 +61,6 @@ Capture optional arguments from the prompt:
 
 ## Step 3A: Verify Mode
 
-// turbo
 Run the deterministic drift check and capture JSON for downstream synthesis:
 
 ```bash
@@ -120,7 +119,7 @@ oma docs i18n --json --min-severity MEDIUM
 oma docs lint --json
 ```
 
-Host-LLM contract: prioritize CRITICAL/HIGH drift pairs and hand each to `oma-translator` in diff-sync mode; for lint issues, restructure flagged sentences via `oma-translator` with per-file user confirmation. Never bulk-retranslate.
+Host-LLM contract: prioritize CRITICAL/HIGH drift pairs and hand each to `oma-translation` in diff-sync mode; for lint issues, restructure flagged sentences via `oma-translation` with per-file user confirmation. Never bulk-retranslate.
 
 ---
 

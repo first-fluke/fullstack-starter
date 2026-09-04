@@ -45,6 +45,11 @@ enable_waf = true
 domain        = "example.com"
 api_subdomain = "api"
 
+# Native passkey associations (replace with production signing identities).
+MOBILE_ANDROID_PACKAGE_NAME             = "com.example.mobile"
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = []
+MOBILE_APPLE_APP_IDS                    = []
+
 # Monitoring
 enable_monitoring = true
 alarm_email       = "ops@example.com"

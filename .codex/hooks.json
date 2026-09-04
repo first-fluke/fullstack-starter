@@ -19,7 +19,7 @@
             "name": "oma-hook-Stop",
             "type": "command",
             "command": "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'Stop'",
-            "timeout": 10
+            "timeout": 15
           }
         ]
       }
@@ -35,6 +35,19 @@
           }
         ],
         "matcher": "Bash"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "name": "oma-hook-PostToolUse",
+            "type": "command",
+            "command": "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'PostToolUse' --matcher 'apply_patch|Edit|Write'",
+            "timeout": 10
+          }
+        ],
+        "matcher": "apply_patch|Edit|Write"
       }
     ]
   }

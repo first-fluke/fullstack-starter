@@ -3,16 +3,11 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    BETTER_AUTH_SECRET: z.string().min(32, "Secret must be at least 32 characters"),
-    BETTER_AUTH_URL: z.string().url().optional().default("http://localhost:3000"),
-    GOOGLE_CLIENT_ID: z.string().optional().or(z.literal("")),
-    GOOGLE_CLIENT_SECRET: z.string().optional().or(z.literal("")),
-    GITHUB_CLIENT_ID: z.string().optional().or(z.literal("")),
-    GITHUB_CLIENT_SECRET: z.string().optional().or(z.literal("")),
-    FACEBOOK_CLIENT_ID: z.string().optional().or(z.literal("")),
-    FACEBOOK_CLIENT_SECRET: z.string().optional().or(z.literal("")),
     RESEND_API_KEY: z.string().optional().or(z.literal("")),
     EMAIL_FROM: z.string().optional().default("noreply@example.com"),
+    MOBILE_ANDROID_PACKAGE_NAME: z.string().min(1).default("com.example.mobile"),
+    MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS: z.string().optional().default(""),
+    MOBILE_APPLE_APP_IDS: z.string().optional().default(""),
     OTEL_SERVICE_NAME: z.string().optional().default("web"),
     OTEL_SAMPLE_RATE: z
       .string()
@@ -22,7 +17,6 @@ export const env = createEnv({
   },
 
   client: {
-    NEXT_PUBLIC_BETTER_AUTH_URL: z.string().url().optional().default("http://localhost:3000"),
     NEXT_PUBLIC_API_URL: z.string().url().optional().default("http://localhost:8000"),
     NEXT_PUBLIC_SITE_URL: z.string().url().optional().default("https://example.com"),
     NEXT_PUBLIC_ENABLE_DEVTOOLS: z.enum(["true", "false"]).optional().default("false"),
@@ -30,19 +24,13 @@ export const env = createEnv({
   },
 
   runtimeEnv: {
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
-    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-    FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
-    FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
+    MOBILE_ANDROID_PACKAGE_NAME: process.env.MOBILE_ANDROID_PACKAGE_NAME,
+    MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS: process.env.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS,
+    MOBILE_APPLE_APP_IDS: process.env.MOBILE_APPLE_APP_IDS,
     OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
     OTEL_SAMPLE_RATE: process.env.OTEL_SAMPLE_RATE,
-    NEXT_PUBLIC_BETTER_AUTH_URL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_ENABLE_DEVTOOLS: process.env.NEXT_PUBLIC_ENABLE_DEVTOOLS,

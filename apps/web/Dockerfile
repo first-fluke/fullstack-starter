@@ -16,9 +16,7 @@ COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY apps/web ./apps/web
 
 ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_BETTER_AUTH_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_BETTER_AUTH_URL=$NEXT_PUBLIC_BETTER_AUTH_URL
 
 WORKDIR /app/apps/web
 RUN bun run build

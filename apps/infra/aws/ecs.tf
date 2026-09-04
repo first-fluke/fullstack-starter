@@ -62,8 +62,8 @@ resource "aws_ecs_task_definition" "api" {
   task_role_arn            = aws_iam_role.ecs_task.arn
 
   container_definitions = jsonencode([{
-    name  = "api"
-    image = "${aws_ecr_repository.api.repository_url}:latest"
+    name        = "api"
+    image       = "${aws_ecr_repository.api.repository_url}:latest"
     stopTimeout = 120
 
     portMappings = [{
@@ -73,7 +73,20 @@ resource "aws_ecs_task_definition" "api" {
 
     environment = concat(local.backend_environment, [
       { name = "JWT_SECRET", value = var.JWT_SECRET },
+      { name = "JWE_SECRET_KEY", value = var.JWT_SECRET },
       { name = "API_URL", value = local.api_url },
+      { name = "API_PUBLIC_URL", value = local.api_url },
+      { name = "CORS_ORIGINS", value = jsonencode([local.web_url]) },
+      { name = "OAUTH_ALLOWED_WEB_ORIGINS", value = jsonencode([local.web_url]) },
+      { name = "WEBAUTHN_RP_ID", value = var.domain != "" ? var.domain : aws_lb.main.dns_name },
+      { name = "WEBAUTHN_ORIGINS", value = jsonencode([local.web_url]) },
+      { name = "WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS", value = jsonencode(var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS) },
+      { name = "GOOGLE_CLIENT_ID", value = var.GOOGLE_CLIENT_ID },
+      { name = "GOOGLE_CLIENT_SECRET", value = var.GOOGLE_CLIENT_SECRET },
+      { name = "GITHUB_CLIENT_ID", value = var.GITHUB_CLIENT_ID },
+      { name = "GITHUB_CLIENT_SECRET", value = var.GITHUB_CLIENT_SECRET },
+      { name = "FACEBOOK_CLIENT_ID", value = var.FACEBOOK_CLIENT_ID },
+      { name = "FACEBOOK_CLIENT_SECRET", value = var.FACEBOOK_CLIENT_SECRET },
     ])
 
     logConfiguration = {
@@ -107,8 +120,8 @@ resource "aws_ecs_task_definition" "web" {
   task_role_arn            = aws_iam_role.ecs_task.arn
 
   container_definitions = jsonencode([{
-    name  = "web"
-    image = "${aws_ecr_repository.web.repository_url}:latest"
+    name        = "web"
+    image       = "${aws_ecr_repository.web.repository_url}:latest"
     stopTimeout = 120
 
     portMappings = [{
@@ -119,14 +132,9 @@ resource "aws_ecs_task_definition" "web" {
     environment = [
       { name = "ENVIRONMENT", value = var.environment },
       { name = "NEXT_PUBLIC_API_URL", value = local.api_url },
-      { name = "BETTER_AUTH_SECRET", value = var.BETTER_AUTH_SECRET },
-      { name = "BETTER_AUTH_URL", value = local.web_url },
-      { name = "GOOGLE_CLIENT_ID", value = var.GOOGLE_CLIENT_ID },
-      { name = "GOOGLE_CLIENT_SECRET", value = var.GOOGLE_CLIENT_SECRET },
-      { name = "GITHUB_CLIENT_ID", value = var.GITHUB_CLIENT_ID },
-      { name = "GITHUB_CLIENT_SECRET", value = var.GITHUB_CLIENT_SECRET },
-      { name = "KAKAO_CLIENT_ID", value = var.KAKAO_CLIENT_ID },
-      { name = "KAKAO_CLIENT_SECRET", value = var.KAKAO_CLIENT_SECRET },
+      { name = "MOBILE_ANDROID_PACKAGE_NAME", value = var.MOBILE_ANDROID_PACKAGE_NAME },
+      { name = "MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS", value = join(",", var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS) },
+      { name = "MOBILE_APPLE_APP_IDS", value = join(",", var.MOBILE_APPLE_APP_IDS) },
     ]
 
     logConfiguration = {
@@ -152,8 +160,8 @@ resource "aws_ecs_task_definition" "worker" {
   task_role_arn            = aws_iam_role.ecs_task.arn
 
   container_definitions = jsonencode([{
-    name  = "worker"
-    image = "${aws_ecr_repository.worker.repository_url}:latest"
+    name        = "worker"
+    image       = "${aws_ecr_repository.worker.repository_url}:latest"
     stopTimeout = 120
 
     environment = concat(local.backend_environment, [

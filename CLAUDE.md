@@ -6,7 +6,7 @@
 
 ## Architecture
 
-- **SSOT**: `.agents/` directory (do not modify directly)
+- **SSOT**: `.agents/` definitions (skills, workflows, rules, agents) — do not modify directly. Run outputs under `.agents/results/` and `.agents/state/` are generated artifacts, not SSOT.
 - **Response language**: Follows `language` in `.agents/oma-config.yaml`
 - **Skills**: `.agents/skills/` (domain specialists)
 - **Workflows**: `.agents/workflows/` (multi-step orchestration)
@@ -20,7 +20,7 @@
 
 ## Code Search
 
-Prefer **serena MCP** tools over native find/grep when locating code — they are symbol-aware and faster on large repos. Fall back to native Read / Glob / Grep only when serena is unavailable or for plain file content reads.
+Use **serena MCP** tools for code search and discovery — they are symbol-aware and faster on large repos. Native Read / Glob / Grep is a fallback only when serena is unavailable or times out, or for plain non-code content reads. Serena's symbol-aware edit and diagnostic tools remain available after discovery.
 
 | Task | Preferred tool |
 |------|----------------|
@@ -57,7 +57,7 @@ Execute by naming the workflow in your prompt. Keywords are auto-detected via ho
 | convert | `convert.md` | File format conversion by category: documents→Markdown (oma-pdf/oma-hwp), image/video/audio transcode (ffmpeg) |
 | video | `video.md` | Brief → script → assets → render-spec → Remotion (oma-video) |
 | schedule | `schedule.md` | Register & manage time-based agent jobs via `oma schedule:*` |
-| explain | `explain.md` | Diff/PR/branch → self-contained interactive HTML explainer via oma-explainer |
+| explain | `explain.md` | Diff/PR/branch → self-contained interactive HTML explainer via oma-explanation |
 
 (`tools` and `stack-set` are slash-invoked utilities, `schedule` is a slash-invoked workflow (`oma schedule:*` time-based jobs), `convert` is slash-invoked to avoid false positives on "convert this code" phrasing, and `explain` is slash-invoked because "explain" is everyday vocabulary, excluded from keyword detection to avoid false positives; all are intentionally excluded from keyword detection.)
 
@@ -65,16 +65,17 @@ To execute: read and follow `.agents/workflows/{name}.md` step by step.
 
 ## Auto-Detection
 
-Hooks: `UserPromptSubmit` (keyword detection), `PreToolUse`, `Stop` (persistent mode)
+Hooks: `UserPromptSubmit` (keyword detection), `PreToolUse`, `PostToolUse` (refactor-guard recorder, opt-in), `Stop` (persistent mode + refactor guard)
 Keywords defined in `.agents/hooks/core/triggers.json` (multi-language).
 Persistent workflows (orchestrate, ultrawork, work, ralph) block termination until complete.
 Deactivate: say "workflow done".
 
 ## Rules
 
-1. **Do not modify `.agents/` files** (SSOT protection).
+1. **Do not modify `.agents/` definition files** (SSOT protection: skills, workflows, rules, agents, config). Writing run outputs under `.agents/results/` and `.agents/state/` are generated artifacts, not SSOT.
 2. Workflows execute via keyword detection or explicit naming, never self-initiated.
 3. Response language follows `.agents/oma-config.yaml`
+4. Always write Korean (and other non-ASCII) strings in tool-call parameters as literal UTF-8; never as \uXXXX unicode escape style.
 
 ## Project Rules
 

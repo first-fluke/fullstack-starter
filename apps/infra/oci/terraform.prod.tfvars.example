@@ -43,6 +43,11 @@ domain           = "example.com"
 api_subdomain    = "api"
 certificate_ocid = "ocid1.certificate.oc1..xxxx"
 
+# Native passkey associations (replace with production signing identities).
+MOBILE_ANDROID_PACKAGE_NAME             = "com.example.mobile"
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = []
+MOBILE_APPLE_APP_IDS                    = []
+
 # CI/CD - GitHub Actions OIDC
 identity_domain_ocid = "ocid1.domain.oc1..xxxx"
 

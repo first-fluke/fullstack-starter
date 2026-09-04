@@ -52,7 +52,7 @@ graph TB
 
 - **Modern Stack**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
 - **Type Safety**: Full type support with TypeScript, Pydantic, and Dart
-- **Authentication**: OAuth with better-auth (Google, GitHub, Facebook)
+- **Authentication**: Email/password, OAuth Authorization Code (Google/GitHub PKCE, Facebook), and WebAuthn passkeys
 - **Internationalization**: next-intl (web), Flutter ARB (mobile), shared i18n package
 - **Auto-generated API Clients**: Orval (web), swagger_parser (mobile)
 - **Infrastructure as Code**: Terraform + GCP (Cloud Run, Cloud SQL, Cloud Storage)

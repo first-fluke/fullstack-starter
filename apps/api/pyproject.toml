@@ -25,6 +25,7 @@ dependencies = [
     "jwcrypto>=1.5.7",
     "psycopg2-binary>=2.9.12",
     "bcrypt>=5.0.0",
+    "webauthn>=2.7.0",
 ]
 
 # Optional GenAI SDK auto-instrumentation (OTel GenAI semconv).

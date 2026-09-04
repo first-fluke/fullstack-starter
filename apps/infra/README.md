@@ -30,7 +30,7 @@ Terraform configurations for provisioning the fullstack-starter stack. Each clou
 
 ## Shared conventions
 
-- **Secrets via Infisical.** Every `plan`/`apply` task is wrapped with `infisical run --env=<env> --path=/infra`, which injects secrets as `TF_VAR_*` environment variables (`DATABASE_PASSWORD`, `JWT_SECRET`, `BETTER_AUTH_SECRET`, OAuth and AI keys). Nothing sensitive is committed; `*.tfvars` is gitignored.
+- **Secrets via Infisical.** Every `plan`/`apply` task is wrapped with `infisical run --env=<env> --path=/infra`, which injects secrets as `TF_VAR_*` environment variables (`DATABASE_PASSWORD`, `JWT_SECRET`, OAuth and AI keys). Nothing sensitive is committed; `*.tfvars` is gitignored.
 - **Remote state.** GCS backend for `gcp/`, S3 + DynamoDB locking for `aws/`, Azure Storage (`azurerm` backend) for `az/`, native `oci` backend for `oci/` (requires Terraform >= 1.12). All are configured at `terraform init` time via `-backend-config`.
 - **Naming.** Resources are prefixed with `${app_name}-${environment}` (default `fullstack-starter-dev`).
 - **Environment sizing.** `terraform.tfvars` for dev, `terraform.prod.tfvars` for production. Copy from the `.example` files in each stack.

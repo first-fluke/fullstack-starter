@@ -19,7 +19,7 @@
             "name": "oma-hook-Stop",
             "type": "command",
             "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'Stop'",
-            "timeout": 10
+            "timeout": 15
           }
         ]
       }
@@ -36,6 +36,19 @@
         ],
         "matcher": "run_shell_command"
       }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "name": "oma-hook-PostToolUse",
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PostToolUse' --matcher 'write_file|replace'",
+            "timeout": 10
+          }
+        ],
+        "matcher": "write_file|replace"
+      }
     ]
   },
   "mcpServers": {
@@ -44,7 +57,7 @@
       "args": [
         "bridge",
         "--context",
-        "ide"
+        "oma"
       ],
       "env": {
         "SERENA_LOG_LEVEL": "info"
@@ -72,5 +85,16 @@
   "$version": 4,
   "hooksConfig": {
     "enabled": true
+  },
+  "model": {
+    "generationConfig": {
+      "timeout": 300000
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(ls *)",
+      "Bash(oma *)"
+    ]
   }
 }

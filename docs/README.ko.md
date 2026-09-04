@@ -52,7 +52,7 @@ graph TB
 
 - **모던 스택**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
 - **타입 안전성**: TypeScript, Pydantic, Dart 등 전 영역 타입 지원
-- **통합 인증**: better-auth 기반 OAuth (Google, GitHub, Facebook)
+- **통합 인증**: 이메일/비밀번호, OAuth Authorization Code (Google/GitHub PKCE, Facebook), WebAuthn 패스키
 - **국제화 (i18n)**: next-intl (웹), Flutter ARB (모바일), 공용 패키지 통합
 - **API 클라이언트 자동화**: Orval (웹), swagger_parser (모바일) 코드 생성
 - **IaC (Infrastructure as Code)**: Terraform + GCP (Cloud Run, SQL, Storage)

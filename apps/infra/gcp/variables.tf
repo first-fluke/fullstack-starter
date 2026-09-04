@@ -145,6 +145,42 @@ variable "api_subdomain" {
   default     = "api"
 }
 
+variable "MOBILE_ANDROID_PACKAGE_NAME" {
+  description = "Android package name used by Digital Asset Links"
+  type        = string
+  default     = "com.example.mobile"
+}
+
+variable "MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS" {
+  description = "Debug, release, and Play signing SHA-256 certificate fingerprints"
+  type        = list(string)
+  default     = []
+}
+
+variable "MOBILE_APPLE_APP_IDS" {
+  description = "Apple application IDs in TeamID.BundleID format used by AASA"
+  type        = list(string)
+  default     = []
+}
+
+variable "API_PUBLIC_URL" {
+  description = "Public API origin used when no custom domain is configured"
+  type        = string
+  default     = ""
+}
+
+variable "WEB_PUBLIC_URL" {
+  description = "Public web origin used when no custom domain is configured"
+  type        = string
+  default     = ""
+}
+
+variable "WEBAUTHN_RP_ID" {
+  description = "WebAuthn relying-party hostname used when no custom domain is configured"
+  type        = string
+  default     = "localhost"
+}
+
 # GitHub Repository (for WIF)
 variable "github_repository" {
   description = "GitHub repository in format 'owner/repo'"
@@ -188,12 +224,6 @@ variable "JWT_SECRET" {
   sensitive   = true
 }
 
-variable "BETTER_AUTH_SECRET" {
-  description = "Better Auth secret key"
-  type        = string
-  sensitive   = true
-}
-
 # OAuth Providers
 variable "GOOGLE_CLIENT_ID" {
   description = "Google OAuth client ID"
@@ -221,14 +251,14 @@ variable "GITHUB_CLIENT_SECRET" {
   default     = ""
 }
 
-variable "KAKAO_CLIENT_ID" {
-  description = "Kakao OAuth client ID"
+variable "FACEBOOK_CLIENT_ID" {
+  description = "Facebook OAuth client ID"
   type        = string
   default     = ""
 }
 
-variable "KAKAO_CLIENT_SECRET" {
-  description = "Kakao OAuth client secret"
+variable "FACEBOOK_CLIENT_SECRET" {
+  description = "Facebook OAuth client secret"
   type        = string
   sensitive   = true
   default     = ""

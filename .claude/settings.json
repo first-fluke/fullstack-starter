@@ -19,7 +19,7 @@
             "name": "oma-hook-Stop",
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'Stop'",
-            "timeout": 10
+            "timeout": 15
           }
         ]
       }
@@ -48,6 +48,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "name": "oma-hook-PostToolUse",
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'PostToolUse' --matcher 'Edit|Write|NotebookEdit'",
+            "timeout": 10
+          }
+        ],
+        "matcher": "Edit|Write|NotebookEdit"
+      }
     ]
   },
   "statusLine": {
@@ -59,6 +72,8 @@
       "Bash(bun run:*)",
       "Bash(bunx tsx:*)",
       "Bash(git add:*)",
+      "Bash(ls *)",
+      "Bash(oma *)",
       "mcp__serena__*"
     ]
   },

@@ -5,7 +5,7 @@ resource "google_cloud_run_v2_service" "api" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
-    timeout = "120s"
+    timeout         = "120s"
     service_account = google_service_account.api.email
 
     scaling {
@@ -69,6 +69,77 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       env {
+        name  = "JWT_SECRET"
+        value = var.JWT_SECRET
+      }
+
+      env {
+        name  = "JWE_SECRET_KEY"
+        value = var.JWT_SECRET
+      }
+
+      env {
+        name  = "API_PUBLIC_URL"
+        value = local.api_public_url
+      }
+
+      env {
+        name  = "CORS_ORIGINS"
+        value = jsonencode([local.web_public_url])
+      }
+
+      env {
+        name  = "OAUTH_ALLOWED_WEB_ORIGINS"
+        value = jsonencode([local.web_public_url])
+      }
+
+      env {
+        name  = "WEBAUTHN_RP_ID"
+        value = local.web_rp_id
+      }
+
+      env {
+        name  = "WEBAUTHN_ORIGINS"
+        value = jsonencode([local.web_public_url])
+      }
+
+      env {
+        name  = "WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS"
+        value = jsonencode(var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS)
+      }
+
+      env {
+        name  = "GOOGLE_CLIENT_ID"
+        value = var.GOOGLE_CLIENT_ID
+      }
+
+      env {
+        name  = "GOOGLE_CLIENT_SECRET"
+        value = var.GOOGLE_CLIENT_SECRET
+      }
+
+      env {
+        name  = "GITHUB_CLIENT_ID"
+        value = var.GITHUB_CLIENT_ID
+      }
+
+      env {
+        name  = "GITHUB_CLIENT_SECRET"
+        value = var.GITHUB_CLIENT_SECRET
+      }
+
+      env {
+        name  = "FACEBOOK_CLIENT_ID"
+        value = var.FACEBOOK_CLIENT_ID
+      }
+
+      env {
+        name  = "FACEBOOK_CLIENT_SECRET"
+        value = var.FACEBOOK_CLIENT_SECRET
+      }
+
+
+      env {
         name  = "STORAGE_BUCKET"
         value = google_storage_bucket.uploads.name
       }
@@ -102,7 +173,7 @@ resource "google_cloud_run_v2_service" "web" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
-    timeout = "120s"
+    timeout         = "120s"
     service_account = google_service_account.web.email
 
     scaling {
@@ -124,7 +195,22 @@ resource "google_cloud_run_v2_service" "web" {
 
       env {
         name  = "NEXT_PUBLIC_API_URL"
-        value = google_cloud_run_v2_service.api.uri
+        value = local.api_public_url
+      }
+
+      env {
+        name  = "MOBILE_ANDROID_PACKAGE_NAME"
+        value = var.MOBILE_ANDROID_PACKAGE_NAME
+      }
+
+      env {
+        name  = "MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS"
+        value = join(",", var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS)
+      }
+
+      env {
+        name  = "MOBILE_APPLE_APP_IDS"
+        value = join(",", var.MOBILE_APPLE_APP_IDS)
       }
 
       startup_probe {
@@ -156,7 +242,7 @@ resource "google_cloud_run_v2_service" "worker" {
   ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
 
   template {
-    timeout = "120s"
+    timeout         = "120s"
     service_account = google_service_account.worker.email
 
     scaling {

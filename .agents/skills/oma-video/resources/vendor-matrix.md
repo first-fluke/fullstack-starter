@@ -13,7 +13,7 @@ otherwise the chain falls through to a key-free default.
 | script | `[agent-script]` | agent-authored script (agent-as-key) | — | — |
 | voice | `[oma-voice]` | Voicebox MCP TTS + STT timing | estimated timing (no wav) | — |
 | visual | `[oma-image, pexels, pixelle]` | Pexels stock · Pixelle AIGC | oma-image stills + Ken Burns | `TODO(oma-deferred): pexels` / `pixelle` |
-| caption | `[oma-captions]` | oma-translator for non-source locale | source-locale text from timing | `TODO(oma-deferred): oma-translator` |
+| caption | `[oma-captions]` | oma-translation for non-source locale | source-locale text from timing | `TODO(oma-deferred): oma-translation` |
 | capture | `[playwright-web, cap]` (informational — dispatch is by `--source`) | Playwright headed web capture (`--source web`) · Cap CLI trigger | guided protocol + `--capture <path>` | `TODO(oma-deferred): cap` |
 | compositor | `[remotion, mpt]` | Remotion live render (wired, default) · MPT custom-script | deterministic placeholder mp4 (toolchain missing / render failed) | — |
 
@@ -87,7 +87,7 @@ otherwise the chain falls through to a key-free default.
 
 | Field | Value |
 |-------|-------|
-| Real | **wired (default)** — the CLI adapter spawns `npx remotion render src/index.ts <CompId> out.mp4 --props=render-spec.json` in the vendored `resources/remotion/` |
+| Real | **wired (default)** — agent-authored `<runDir>/remotion/` (scaffolded by `oma video compose` on the latest Remotion + remotion-dev/skills); `oma video render` typechecks and spawns `npx remotion render src/index.ts <CompId> out.mp4 --props=render-spec.json --public-dir=<runDir>` |
 | Requires | Node + Chrome Headless Shell + FFmpeg (bootstrapped once via `oma video doctor --install`) |
 | Fallback | deterministic placeholder mp4 derived from the render-spec, used only when the toolchain is missing or the render fails (well-formed run dir + manifest, zero toolchain) |
 | Determinism | render-spec + assets + seed + embedded Pretendard (fetched once by `oma video doctor --install`; system-font fallback when absent); re-render is byte-stable |

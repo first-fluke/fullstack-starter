@@ -1,22 +1,40 @@
 from datetime import UTC, datetime
+from urllib.parse import urlencode
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 
+from src.auth.oauth_service import (
+    cancel_oauth_callback,
+    complete_oauth_callback,
+    consume_exchange_code,
+    create_authorization_url,
+)
+from src.auth.passkey_service import (
+    create_authentication_options,
+    create_registration_options,
+    verify_authentication,
+    verify_registration,
+)
+from src.auth.repository import AuthRepository
+from src.auth.schemas import (
+    OAuthExchangeRequest,
+    OAuthProvider,
+    PasskeyAuthenticationOptionsRequest,
+    PasskeyAuthenticationVerifyRequest,
+    PasskeyRegistrationVerifyRequest,
+)
 from src.lib.auth import (
     CurrentUser,
     EmailLoginRequest,
-    OAuthLoginRequest,
     RefreshTokenRequest,
     RegisterRequest,
-    SessionExchangeRequest,
     TokenResponse,
     decode_token,
     hash_password,
     normalize_email,
-    verify_oauth_token,
     verify_password,
-    verify_session_token,
 )
 from src.lib.dependencies import DBSession
 from src.lib.rate_limit import rate_limit
@@ -103,62 +121,139 @@ async def register(
 @rate_limit(requests=5, window=60)
 async def login(
     request: Request,
-    body: OAuthLoginRequest | EmailLoginRequest,
+    body: EmailLoginRequest,
     db: DBSession,
 ) -> TokenResponse:
-    """Login with OAuth or email/password and issue backend tokens.
-
-    Verify OAuth token, create/update user, and issue JWE tokens.
-    """
-    if isinstance(body, EmailLoginRequest):
-        user = await _get_user_by_email(db, body.email)
-        if not user or not verify_password(body.password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
-            )
-        return _issue_tokens(user)
-
-    user_info = await verify_oauth_token(body.provider, body.access_token)
-    user = await _get_user_by_email(db, user_info.email or body.email)
-
-    if not user:
-        user = await _create_user(
-            db,
-            email=user_info.email or body.email,
-            name=user_info.name,
-            image=user_info.image,
-            email_verified=user_info.email_verified,
+    """Login with email/password and issue first-party tokens."""
+    user = await _get_user_by_email(db, body.email)
+    if not user or not verify_password(body.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
         )
-
     return _issue_tokens(user)
 
 
-@router.post("/session-exchange", response_model=TokenResponse)
+@router.get("/oauth/{provider}/authorize")
 @rate_limit(requests=5, window=60)
-async def session_exchange(
+async def oauth_authorize(
     request: Request,
-    body: SessionExchangeRequest,
+    provider: OAuthProvider,
+    redirect_uri: str,
+    return_to: str = "/",
+    code_challenge: str | None = None,
+    code_challenge_method: str | None = None,
+) -> RedirectResponse:
+    """Start an OAuth Authorization Code + PKCE transaction."""
+    authorization_url = await create_authorization_url(
+        provider,
+        redirect_uri,
+        return_to,
+        client_code_challenge=code_challenge,
+        client_code_challenge_method=code_challenge_method,
+    )
+    return RedirectResponse(authorization_url, status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/oauth/{provider}/callback")
+async def oauth_callback(
+    provider: OAuthProvider,
     db: DBSession,
-) -> TokenResponse:
-    """Exchange better-auth session token for backend JWE tokens.
-
-    Used by email/password auth users who have no OAuth provider token.
-    Verifies session with better-auth server, then issues backend tokens.
-    """
-    user_info = await verify_session_token(body.session_token)
-    user = await _get_user_by_email(db, user_info.email or "")
-
-    if not user:
-        user = await _create_user(
-            db,
-            email=user_info.email or "",
-            name=user_info.name,
-            image=user_info.image,
-            email_verified=user_info.email_verified,
+    state: str,
+    code: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    """Handle the provider callback and redirect with a one-time login code."""
+    if error or not code:
+        redirect_uri, return_to = await cancel_oauth_callback(
+            provider=provider, state=state
+        )
+        separator = "&" if "?" in redirect_uri else "?"
+        query = urlencode({"error": error or "access_denied", "return_to": return_to})
+        return RedirectResponse(
+            f"{redirect_uri}{separator}{query}", status_code=status.HTTP_302_FOUND
         )
 
-    return _issue_tokens(user)
+    repository = AuthRepository(db)
+    exchange_code, redirect_uri, return_to = await complete_oauth_callback(
+        repository, provider=provider, code=code, state=state
+    )
+    separator = "&" if "?" in redirect_uri else "?"
+    query = urlencode({"code": exchange_code, "return_to": return_to})
+    return RedirectResponse(
+        f"{redirect_uri}{separator}{query}", status_code=status.HTTP_302_FOUND
+    )
+
+
+@router.post("/oauth/exchange", response_model=TokenResponse)
+@rate_limit(requests=10, window=60)
+async def oauth_exchange(
+    request: Request,
+    body: OAuthExchangeRequest,
+) -> TokenResponse:
+    """Exchange a single-use OAuth code for first-party access and refresh tokens."""
+    user_id = await consume_exchange_code(body.code, body.code_verifier)
+    from src.lib.auth import create_access_token, create_refresh_token
+
+    return TokenResponse(
+        access_token=create_access_token(user_id),
+        refresh_token=create_refresh_token(user_id),
+    )
+
+
+@router.post("/passkeys/register/options")
+@rate_limit(requests=10, window=60)
+async def passkey_registration_options(
+    current_user: CurrentUser,
+    request: Request,
+    db: DBSession,
+) -> dict[str, object]:
+    """Create options for registering a passkey to the signed-in account."""
+    return await create_registration_options(AuthRepository(db), current_user.id)
+
+
+@router.post("/passkeys/register/verify", status_code=status.HTTP_204_NO_CONTENT)
+@rate_limit(requests=10, window=60)
+async def passkey_registration_verify(
+    current_user: CurrentUser,
+    request: Request,
+    body: PasskeyRegistrationVerifyRequest,
+    db: DBSession,
+) -> Response:
+    """Verify and store a new passkey."""
+    await verify_registration(
+        AuthRepository(db),
+        user_id=current_user.id,
+        ceremony_id=body.ceremony_id,
+        credential=body.credential,
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/passkeys/authenticate/options")
+@rate_limit(requests=10, window=60)
+async def passkey_authentication_options(
+    request: Request,
+    body: PasskeyAuthenticationOptionsRequest,
+    db: DBSession,
+) -> dict[str, object]:
+    """Create options for signing in with a passkey."""
+    return await create_authentication_options(AuthRepository(db), body.email)
+
+
+@router.post("/passkeys/authenticate/verify", response_model=TokenResponse)
+@rate_limit(requests=10, window=60)
+async def passkey_authentication_verify(
+    request: Request,
+    body: PasskeyAuthenticationVerifyRequest,
+    db: DBSession,
+) -> TokenResponse:
+    """Verify a passkey assertion and issue first-party tokens."""
+    return await verify_authentication(
+        AuthRepository(db),
+        ceremony_id=body.ceremony_id,
+        credential=body.credential,
+    )
 
 
 @router.post("/refresh", response_model=TokenResponse)

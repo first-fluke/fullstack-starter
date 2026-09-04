@@ -471,7 +471,15 @@ default_modes:
 # list of tool names to exclude.
 # This extends the existing exclusions (e.g. from the global configuration)
 # Find the list of tools here: https://oraios.github.io/serena/01-about/035_tools.html
-excluded_tools: []
+excluded_tools:
+- write_memory
+- read_memory
+- list_memories
+- delete_memory
+- rename_memory
+- edit_memory
+- onboarding
+- check_onboarding_performed
 
 # list of tools to include that would otherwise be disabled (particularly optional tools that are disabled by default).
 # This extends the existing inclusions (e.g. from the global configuration).

@@ -1,388 +1,99 @@
-# Stateless Token Authentication Architecture
+# 인증
 
-[English](./AUTH.md) | [한국어](./AUTH.ko.md) | [简体中文](./AUTH.cn.md) | [日本語](./AUTH.jp.md) | [Português](./AUTH.pt.md)
+인증의 소유자는 FastAPI 애플리케이션입니다. 로그인 수단이 달라도 Web과 Mobile은 동일한 자체 access/refresh token을 발급받습니다.
 
-## 개요
+## 지원 방식
 
-이 템플릿은 **stateful(상태 저장) 세션 기반 인증** 대신 **stateless(무상태) JWT/JWE 인증 시스템**을 구현합니다. 인증 처리는 전적으로 백엔드에서 수행하며, 프론트엔드는 토큰을 저장하고 전송하는 역할만 담당합니다.
+- 이메일/비밀번호 회원가입 및 로그인
+- Google OAuth 2.0 Authorization Code + PKCE (`S256`)
+- GitHub OAuth 2.0 Authorization Code + PKCE (`S256`)
+- 버전 없는 Graph API 엔드포인트를 사용하는 Facebook Login
+- WebAuthn 패스키 등록 및 로그인
 
-## 아키텍처
+Provider client secret은 API 환경에만 둡니다. Web은 별도 인증 서버를 실행하지 않으며 provider access token도 전달받지 않습니다.
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant BetterAuth
-    participant Backend
-    participant API
+## OAuth 흐름
 
-    User->>BetterAuth: Social Login (OAuth)
-    BetterAuth->>Frontend: OAuth Access Token
-    Frontend->>Backend: POST /api/auth/login (OAuth Token)
-    Backend->>Backend: OAuth Token Re-verification (Provider API)
-    Backend->>Backend: User Creation/Update (DB)
-    Backend->>Backend: JWE Token Issuance (access + refresh)
-    Backend->>Frontend: JWE Token Return
-    Frontend->>API: Authorization Header (access_token)
-    API->>API: JWE Token Verification
-    API->>User: Protected Resource Return
-```
+1. Client가 허용된 `redirect_uri`와 앱 내부 경로인 `return_to`를 담아 `GET /api/auth/oauth/{provider}/authorize`를 엽니다.
+2. API가 일회용 state transaction을 생성합니다. Google과 GitHub에는 PKCE `code_challenge`도 전달합니다.
+3. Provider가 API의 `GET /api/auth/oauth/{provider}/callback`으로 redirect합니다.
+4. API가 state를 소비하고 provider code를 교환한 뒤 `(provider, subject)` identity를 확인합니다. 이후 client에 짧은 수명의 일회용 code를 전달합니다.
+5. Client가 `POST /api/auth/oauth/exchange`를 호출하면 code가 소비되고 자체 access/refresh token이 발급됩니다.
 
-## 핵심 구성 요소
+Native mobile client는 authorize 요청에 별도의 S256 PKCE challenge를 추가하고 최종 교환 시 verifier를 제출합니다. 따라서 custom scheme callback code는 흐름을 시작한 앱에서만 교환할 수 있습니다.
 
-### 1. 백엔드 (FastAPI - `apps/api/`)
+OAuth state의 수명은 10분, client 교환 code의 수명은 60초입니다. 다중 replica 배포에서는 Redis에 저장합니다. 사용자가 동의를 거절한 경우에도 state를 먼저 소비한 뒤 client로 오류를 반환합니다.
 
-**필수 파일:**
+### Provider별 동작
 
-- `src/lib/auth.py` - JWE 토큰 생성/검증, OAuth 검증
-- `src/auth/router.py` - 인증 endpoint
-- `src/users/model.py` - User DB 모델
-- `src/lib/dependencies.py` - 인증용 dependency injection
+| Provider | PKCE | Authorization endpoint |
+| --- | --- | --- |
+| Google | `S256` | `https://accounts.google.com/o/oauth2/v2/auth` |
+| GitHub | `S256` | `https://github.com/login/oauth/authorize` |
+| Facebook | 사용 안 함 | `https://www.facebook.com/dialog/oauth` |
 
-**핵심 함수:**
+Facebook은 이메일을 반환하지 않을 수 있습니다. 이때 API는 전송 불가능한 placeholder email을 만들고 안정적인 Facebook subject를 identity key로 사용합니다. 검증되지 않은 provider email을 기존 local account에 자동 연결하지 않습니다.
 
-- `create_access_token(user_id)` - 만료 1시간의 JWE access token 생성
-- `create_refresh_token(user_id)` - 만료 7일의 JWE refresh token 생성
-- `decode_token(token)` - JWE 토큰 검증 및 payload 추출
-- `verify_oauth_token(provider, token)` - OAuth 토큰 재검증 (Google/GitHub/Facebook)
-- `get_current_user(request)` - Authorization header에서 사용자 추출
+## 이메일과 비밀번호
 
-**Endpoints:**
+- `POST /api/auth/register`: local user를 만들고 token을 반환합니다.
+- `POST /api/auth/login`: 정규화된 email과 bcrypt password hash를 검증합니다.
+- `POST /api/auth/refresh`: refresh token을 원자적으로 교체합니다.
+- `POST /api/auth/logout`: 현재 access/refresh token을 폐기합니다.
+- `GET /api/auth/me`: 인증된 user를 반환합니다.
 
-- `POST /api/auth/login` - OAuth 로그인
-- `POST /api/auth/refresh` - 토큰 갱신
-- `POST /api/auth/logout` - 로그아웃
+## 패스키
 
-**보안:**
+패스키는 WebAuthn을 사용하며 동일한 user record에 연결됩니다.
 
-- JWE 암호화 (A256GCM)
-- Access Token: 만료 1시간
-- Refresh Token: 만료 7일
-- Authorization header 기반 전송
+- `POST /api/auth/passkeys/register/options`: access token이 필요합니다.
+- `POST /api/auth/passkeys/register/verify`: 등록 ceremony를 소비하고 public-key credential을 저장합니다.
+- `POST /api/auth/passkeys/authenticate/options`: email을 기준으로 인증을 시작합니다.
+- `POST /api/auth/passkeys/authenticate/verify`: assertion을 검증하고 signature counter를 갱신한 뒤 token을 반환합니다.
 
-### 2. 프론트엔드 (Next.js - `apps/web/`)
+Challenge는 한 번만 사용할 수 있고 5분 후 만료됩니다. User verification은 필수입니다. Relying-party ID와 origin을 정확히 지정해야 하며 운영 WebAuthn origin은 HTTPS여야 합니다.
 
-**필수 파일:**
+## API 환경변수
 
-- `src/lib/auth.ts` - Better Auth 서버 설정 (OAuth providers)
-- `src/lib/auth-client.ts` - Better Auth 클라이언트 및 토큰 교환 로직
-- `src/lib/api-client.ts` - HTTP 클라이언트 및 토큰 관리 (interceptors)
-- `src/app/api/auth/[...all]/route.ts` - Better Auth route handler
+```env
+API_PUBLIC_URL=https://api.example.com
+OAUTH_ALLOWED_WEB_ORIGINS=["https://example.com"]
+OAUTH_ALLOWED_MOBILE_REDIRECT_URIS=["fullstackstarter://auth/callback"]
 
-**핵심 동작/함수:**
-
-- Better Auth OAuth 로그인 (signIn.social)
-- OAuth → 백엔드 JWT 교환 (자동)
-- Authorization header 자동 주입
-- 401 에러 발생 시 자동 토큰 갱신
-- 자동 토큰 갱신
-- 로그아웃 시 토큰 정리
-
-**보안:**
-
-- localStorage 저장 (prefix: `fullstack_`)
-- JWE 토큰 (백엔드 발급)
-- Authorization header 자동 설정
-
-## 토큰 관리
-
-### Access Token
-
-- **형식:** JWE (JSON Web Encryption)
-- **알고리즘:** A256GCM (AES-256-GCM)
-- **만료:** 1시간
-- **저장 위치:** `localStorage.fullstack_access_token`
-- **사용:** API 요청 시 `Authorization: Bearer {token}` header
-
-### Refresh Token
-
-- **형식:** JWE
-- **알고리즘:** A256GCM
-- **만료:** 7일
-- **저장 위치:** `localStorage.fullstack_refresh_token`
-- **사용:** access token 만료 시 갱신에 사용
-
-## 인증 플로우
-
-### 1. 소셜 로그인
-
-```
-User: Click "Google Login"
-    ↓
-Frontend: signIn.social("google")
-    ↓
-BetterAuth: OAuth redirect
-    ↓
-BetterAuth: OAuth access creation (cookie)
-    ↓
-Frontend: OAuth access token received
-    ↓
-Frontend: exchangeOAuthForBackendJwt() auto execute
-    ↓
-Backend: POST /api/auth/login { provider, access_token, email, name }
-    ↓
-Backend: OAuth token re-verification (Google API)
-    ↓
-Backend: User DB lookup/creation
-    ↓
-Backend: JWE token issuance (access: 1h, refresh: 7d)
-    ↓
-Frontend: JWE token localStorage storage
-```
-
-### 2. 보호된 API 요청
-
-```
-Frontend: API Request
-    ↓
-apiClient: access_token auto add to Authorization header
-    ↓
-Backend: Authorization header verification
-    ↓
-Backend: JWE token decoding
-    ↓
-Backend: user_id extraction
-    ↓
-Backend: User lookup in DB
-    ↓
-API: Protected resource return
-```
-
-### 3. 토큰 갱신 (자동)
-
-```
-Access Token Expired (1 hour)
-    ↓
-401 error on API request
-    ↓
-apiClient: auto use refresh_token
-    ↓
-Backend: POST /api/auth/refresh
-    ↓
-Backend: New access_token issuance
-    ↓
-Frontend: localStorage update
-    ↓
-Request auto retry
-```
-
-### 4. 로그아웃
-
-```
-User: Click "Logout"
-    ↓
-Frontend: signOut()
-    ↓
-Frontend: localStorage.clearTokens()
-    ↓
-Frontend: apiClient.post("/api/auth/logout")
-    ↓
-Backend: Logout processing (client token invalidation if needed)
-```
-
-## 보안 기능
-
-### 1. JWE 암호화
-
-- **완전 암호화:** payload 전체를 암호화
-- **알고리즘:** A256GCM (AES-256-GCM)
-- **장점:** (일반적인 JWT(JWS)와 달리) payload가 노출되지 않음
-- **Authentication Tag (authTag):** 무결성(Integrity) 보장 및 위변조 탐지
-
-### 2. Stateless 특성
-
-- **서버 세션 없음:** 세션 상태를 서버에 저장할 필요 없음
-- **확장 용이:** 로드 밸런싱이 쉬움
-- **스케일 아웃:** 서버 증설이 쉬움
-
-### 3. 토큰 만료 전략
-
-- **Access Token:** 짧은 만료(1시간) - 보안 최적화
-- **Refresh Token:** 긴 만료(7일) - 사용자 편의성
-- **Auto Refresh:** 만료 시 자동 갱신
-
-## 데이터베이스 스키마
-
-### Users 테이블
-
-```python
-class User(Base):
-    id: UUID (PK)
-    email: String (unique, indexed)
-    name: String (nullable)
-    image: String (nullable)
-    email_verified: Boolean (default: False)
-    created_at: DateTime
-    updated_at: DateTime
-```
-
-## 환경 변수
-
-### 백엔드 (apps/api/.env)
-
-```bash
-# JWT/JWE (stateless authentication)
-JWT_SECRET=strong-secret-key-32-chars-or-more
-JWE_SECRET_KEY=strong-encryption-key-32-chars-or-more
-
-# Database
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/app
-
-# Better Auth (OAuth only)
-BETTER_AUTH_URL=http://localhost:3000
-```
-
-### 프론트엔드 (apps/web/.env)
-
-```bash
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Better Auth
-NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=strong-secret-key-32-chars-or-more
-
-# OAuth Providers (optional)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 FACEBOOK_CLIENT_ID=
 FACEBOOK_CLIENT_SECRET=
+
+WEBAUTHN_RP_ID=example.com
+WEBAUTHN_RP_NAME=Fullstack Starter
+WEBAUTHN_ORIGINS=["https://example.com"]
+WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS=["AA:BB:..."]
+
+JWE_SECRET_KEY=
+REDIS_URL=redis://localhost:6379
 ```
 
-## API Endpoints
+Provider callback URL은 다음과 같습니다.
 
-### POST /api/auth/login
-
-**목적:** OAuth token을 백엔드 JWT로 교환
-
-**Request Body:**
-
-```json
-{
-  "provider": "google" | "github" | "facebook",
-  "access_token": "<OAuth provider token>",
-  "email": "user@example.com",
-  "name": "John Doe"
-}
+```text
+https://api.example.com/api/auth/oauth/google/callback
+https://api.example.com/api/auth/oauth/github/callback
+https://api.example.com/api/auth/oauth/facebook/callback
 ```
 
-**Response:**
+Web은 `/.well-known`에서 Digital Asset Links와 AASA도 제공합니다. `MOBILE_ANDROID_PACKAGE_NAME`, `MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS`, `MOBILE_APPLE_APP_IDS`를 설정합니다. Mobile은 `APP_BASE_URL`과 등록된 `fullstackstarter://auth/callback` scheme을 사용합니다. 커밋된 Android host에는 `com.linusu.flutter_web_auth_2.CallbackActivity`가 등록되어 있고, iOS는 `Runner.entitlements`에서 `webcredentials` associated domain을 활성화합니다.
 
-```json
-{
-  "access_token": "<JWE encrypted access token>",
-  "refresh_token": "<JWE encrypted refresh token>",
-  "token_type": "bearer"
-}
-```
+## 주요 구현 파일
 
-### POST /api/auth/refresh
+- `apps/api/src/auth/oauth_service.py`: state, PKCE, provider 교환, identity 확인
+- `apps/api/src/auth/passkey_service.py`: WebAuthn ceremony
+- `apps/api/src/auth/ephemeral_store.py`: Redis 기반 일회용 transaction
+- `apps/api/src/auth/repository.py`: identity 및 passkey 영속화
+- `apps/api/src/auth/router.py`: 공개 인증 API
+- `apps/web/src/lib/auth/auth-client.ts`: browser 로그인 및 WebAuthn helper
+- `apps/mobile/lib/core/auth/providers.dart`: mobile OAuth system session 및 native passkey 연동
 
-**목적:** refresh token으로 새로운 access token 발급
-
-**Request Body:**
-
-```json
-{
-  "refresh_token": "<JWE encrypted refresh token>"
-}
-```
-
-**Response:**
-
-```json
-{
-  "access_token": "<JWE encrypted new access token>",
-  "refresh_token": "<JWE encrypted refresh token>",
-  "token_type": "bearer"
-}
-```
-
-### POST /api/auth/logout
-
-**목적:** 클라이언트 측 토큰 정리
-
-**Response:** 204 No Content
-
-## 클라이언트 토큰 관리
-
-### auth.ts
-
-Better Auth 서버 설정을 담당하는 파일입니다.
-
-### auth-client.ts
-
-Better Auth 클라이언트 초기화 및 OAuth 토큰을 백엔드 JWE 토큰으로 교환하는 로직을 담당합니다.
-
-### api-client.ts
-
-토큰 자동 주입 및 갱신을 위한 interceptor가 설정된 수동 Axios 인스턴스입니다.
-
-**핵심 함수:**
-
-- `exchangeOAuthForBackendJwt()` - OAuth → 백엔드 JWT 자동 교환
-- `setAccessToken()` - access token 저장
-- `setRefreshToken()` - refresh token 저장
-- `clearTokens()` - 전체 토큰 정리
-- `hasBackendAccessToken()` - 백엔드 토큰 존재 여부 확인
-
-**자동 기능:**
-
-- Authorization header 자동 주입 (`apiClient` interceptor)
-- 401 에러 발생 시 자동 토큰 갱신
-- 재시도 큐 관리
-- In-memory 토큰 저장 (Map + localStorage)
-
-## OAuth Providers
-
-### 지원 Provider
-
-| Provider | Client ID Environment Variable | Client Secret Environment Variable | API Endpoint |
-|----------|------------------------------|-----------------------------------|--------------|
-| Google | `GOOGLE_CLIENT_ID` | `GOOGLE_CLIENT_SECRET` | `https://www.googleapis.com/oauth2/v3/userinfo` |
-| GitHub | `GITHUB_CLIENT_ID` | `GITHUB_CLIENT_SECRET` | `https://api.github.com/user` |
-| Facebook | `FACEBOOK_CLIENT_ID` | `FACEBOOK_CLIENT_SECRET` | `https://graph.facebook.com/v19.0/me?fields=id,name,email,picture` |
-
-## 주요 장점
-
-### 1. 성능 개선
-
-- Better Auth 서버 호출 감소 (~50-100ms 절감)
-- 백엔드 부하 감소
-
-### 2. 확장성
-
-- 서버 상태가 없어서 손쉬운 스케일링
-- 로드 밸런싱 용이
-
-### 3. 모바일 친화적
-
-- Authorization header 방식은 모바일에 최적
-- cookie 기반 인증보다 단순
-
-### 4. 보안 강화
-
-- JWE 암호화로 데이터 노출 방지
-- 짧은 access token 만료 시간
-
-## FAQ
-
-**Q: 왜 JWT 대신 JWE를 사용하나요?**
-A: JWE는 payload가 완전히 암호화되어 더 안전합니다. payload 노출을 방지하고, 무결성 보장에 유리합니다.
-
-**Q: 왜 OAuth token을 재검증하나요?**
-A: OAuth provider API를 통해 사용자 정보를 재확인하여 보안을 강화하기 위함입니다. 토큰 탈취 시 공격을 완화하는 데 도움이 됩니다.
-
-**Q: 왜 access token 만료 시간이 1시간인가요?**
-A: 짧은 만료 시간은 보안 측면에서 중요합니다. 토큰이 탈취되었을 때 피해 범위를 최소화합니다. refresh token(7일)으로 갱신할 수 있습니다.
-
-## 참고 자료
-
-- [JWE (JSON Web Encryption) RFC 7516](https://datatracker.ietf.org/doc/html/rfc7516)
-- [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)
-- [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
-- [Better Auth Documentation](https://www.better-auth.com/docs)
-
-**Last Updated:** 2025-01-15
+새 API를 배포하기 전에 `oauth_identities`와 `passkey_credentials`를 추가하는 Alembic migration을 적용해야 합니다.

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { env } from "@/config/env";
-import { clearTokens, getAccessToken, getRefreshToken, setAccessToken } from "@/lib/auth/token";
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token";
 
 export const apiClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
         });
 
         const newAccessToken = response.data.access_token;
-        setAccessToken(newAccessToken);
+        setTokens(response.data);
         onRefreshed(newAccessToken);
         isRefreshing = false;
 

@@ -9,11 +9,10 @@ disable-model-invocation: true
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip phases.** Execute from Phase 0 in order. Explicitly report completion of each phase to the user before proceeding to the next.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
+  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration. Do NOT use raw grep as a substitute.
+  - Use file tools (`Read`/`Write`/`Edit`) to persist coordination artifacts directly to `{memoryConfig.basePath}/` (default: `.agents/state/memories/`). Do NOT use Serena's `write_memory` for workflow session state, as verification gates require durable files on disk.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
   - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
 - **This workflow does NOT stop until all completion criteria pass or safeguards trigger.**
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
@@ -54,8 +53,8 @@ criteria:
 
 **Rules:**
 - Every criterion must be mechanically verifiable (test pass, build success, file exists, command output)
-- Reject subjective criteria ("looks good", "feels right"). Ask the user to rephrase.
-- Present criteria to the user for confirmation before proceeding
+- Ground subjective expectations into concrete, mechanically verifiable checks (test assertions, build status, exit code, file existence)
+- Lock criteria directly into session memory and output them in the execution trace; proceed immediately to Step 0.3 and Phase 1 without halting for interactive confirmation (Ralph is an autonomous persistent execution loop)
 
 ### Step 0.3: Initialize Session
 
@@ -65,7 +64,7 @@ criteria:
 4. **Load prior-session context** (cross-session memory):
    1. Use the memory list tool to find previous `session-ralph-*.md` files. If any exist, read the most recent one and extract: final criteria statuses, BLOCKED items with their failure evidences, and any safeguard trigger.
    2. If `lessons-learned.md` exists in the memory base path, read it.
-   3. If any current criterion overlaps a previously BLOCKED item, re-confirm with the user before proceeding: present the prior failure evidence and ask whether to retry it (carrying that evidence as context for EXEC) or pre-mark it BLOCKED for this session.
+   3. If any current criterion overlaps a previously BLOCKED item, carry the prior failure evidence as context for EXEC and retry unless explicitly excluded by the user request.
 5. Record session start using memory write tool:
    - Create `session-ralph-{sessionId}.md` in the memory base path
    - Include: session start time, user request summary, completion criteria, max_iterations, and prior-session findings loaded in step 4 (or `none`)
@@ -73,8 +72,6 @@ criteria:
 ---
 
 ## Phase 1: EXEC
-
-// turbo
 
 ### Step 1.1: Prepare Ultrawork Input
 
@@ -270,8 +267,6 @@ If `current_iteration >= max_iterations`:
 ---
 
 ## Phase 3: REPLAN
-
-// turbo
 
 ### Step 3.1: Extract Remaining Work
 

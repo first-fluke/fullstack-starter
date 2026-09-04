@@ -181,19 +181,19 @@ bundle exec fastlane ios testflight_deploy  # Deploy to TestFlight
 
 ```bash
 # Initialize Terraform
-mise //apps/infra:gcp:init
+mise //apps/infra/gcp:init
 
 # Preview changes
-mise //apps/infra:gcp:plan
+mise //apps/infra/gcp:plan
 
 # Apply changes
-mise //apps/infra:gcp:apply
+mise //apps/infra/gcp:apply
 
 # Preview production changes
-mise //apps/infra:gcp:plan:prod
+mise //apps/infra/gcp:plan:prod
 
 # Apply production changes
-mise //apps/infra:gcp:apply:prod
+mise //apps/infra/gcp:apply:prod
 ```
 
 ### i18n (packages/i18n)

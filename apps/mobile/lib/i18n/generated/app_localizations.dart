@@ -147,6 +147,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get login;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @loginWithEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in with email'**
+  String get loginWithEmail;
+
+  /// No description provided for @loginWithPasskey.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in with a passkey'**
+  String get loginWithPasskey;
+
+  /// No description provided for @registerPasskey.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a passkey'**
+  String get registerPasskey;
+
+  /// No description provided for @passkeyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Passkey added'**
+  String get passkeyRegistered;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logout;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address'**
+  String get emailRequired;
+
+  /// No description provided for @emailPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and password'**
+  String get emailPasswordRequired;
 }
 
 class _AppLocalizationsDelegate

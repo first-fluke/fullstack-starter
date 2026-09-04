@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Info, Spinner, Warning, XOctagon } from "@phosphor-icons/react";
+import { CheckCircle, Info, Spinner, Warning, XCircle } from "@phosphor-icons/react";
 import { useAtomValue } from "jotai";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import { themeAtom } from "@/stores/theme-atoms";
@@ -16,7 +16,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         success: <CheckCircle className="size-4" />,
         info: <Info className="size-4" />,
         warning: <Warning className="size-4" />,
-        error: <XOctagon className="size-4" />,
+        error: <XCircle className="size-4" />,
         loading: <Spinner className="size-4 animate-spin" />,
       }}
       style={

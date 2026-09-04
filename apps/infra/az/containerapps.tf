@@ -83,7 +83,12 @@ resource "azurerm_container_app" "api" {
   }
 
   dynamic "secret" {
-    for_each = merge(local.backend_secrets, { "jwt-secret" = var.JWT_SECRET })
+    for_each = merge(local.backend_secrets, {
+      "jwt-secret"             = var.JWT_SECRET
+      "google-client-secret"   = var.GOOGLE_CLIENT_SECRET
+      "github-client-secret"   = var.GITHUB_CLIENT_SECRET
+      "facebook-client-secret" = var.FACEBOOK_CLIENT_SECRET
+    })
     content {
       name  = secret.key
       value = secret.value
@@ -102,9 +107,9 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    min_replicas = var.api_min_replicas
+    min_replicas                     = var.api_min_replicas
     termination_grace_period_seconds = 120
-    max_replicas = var.api_max_replicas
+    max_replicas                     = var.api_max_replicas
 
     http_scale_rule {
       name                = "http-concurrency"
@@ -120,7 +125,20 @@ resource "azurerm_container_app" "api" {
       dynamic "env" {
         for_each = concat(local.backend_environment, [
           { name = "JWT_SECRET", value = null, secret_name = "jwt-secret" },
+          { name = "JWE_SECRET_KEY", value = null, secret_name = "jwt-secret" },
           { name = "API_URL", value = local.api_url, secret_name = null },
+          { name = "API_PUBLIC_URL", value = local.api_url, secret_name = null },
+          { name = "CORS_ORIGINS", value = jsonencode([local.web_url]), secret_name = null },
+          { name = "OAUTH_ALLOWED_WEB_ORIGINS", value = jsonencode([local.web_url]), secret_name = null },
+          { name = "WEBAUTHN_RP_ID", value = var.domain != "" ? var.domain : "${local.name_prefix}-web.${azurerm_container_app_environment.main.default_domain}", secret_name = null },
+          { name = "WEBAUTHN_ORIGINS", value = jsonencode([local.web_url]), secret_name = null },
+          { name = "WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS", value = jsonencode(var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS), secret_name = null },
+          { name = "GOOGLE_CLIENT_ID", value = var.GOOGLE_CLIENT_ID, secret_name = null },
+          { name = "GOOGLE_CLIENT_SECRET", value = null, secret_name = "google-client-secret" },
+          { name = "GITHUB_CLIENT_ID", value = var.GITHUB_CLIENT_ID, secret_name = null },
+          { name = "GITHUB_CLIENT_SECRET", value = null, secret_name = "github-client-secret" },
+          { name = "FACEBOOK_CLIENT_ID", value = var.FACEBOOK_CLIENT_ID, secret_name = null },
+          { name = "FACEBOOK_CLIENT_SECRET", value = null, secret_name = "facebook-client-secret" },
         ])
         content {
           name        = env.value.name
@@ -169,11 +187,6 @@ resource "azurerm_container_app" "web" {
     identity = azurerm_user_assigned_identity.apps.id
   }
 
-  secret {
-    name  = "better-auth-secret"
-    value = var.BETTER_AUTH_SECRET
-  }
-
   ingress {
     external_enabled = true
     target_port      = 3000
@@ -186,9 +199,9 @@ resource "azurerm_container_app" "web" {
   }
 
   template {
-    min_replicas = var.web_min_replicas
+    min_replicas                     = var.web_min_replicas
     termination_grace_period_seconds = 120
-    max_replicas = var.web_max_replicas
+    max_replicas                     = var.web_max_replicas
 
     http_scale_rule {
       name                = "http-concurrency"
@@ -205,14 +218,9 @@ resource "azurerm_container_app" "web" {
         for_each = [
           { name = "ENVIRONMENT", value = var.environment, secret_name = null },
           { name = "NEXT_PUBLIC_API_URL", value = local.api_url, secret_name = null },
-          { name = "BETTER_AUTH_SECRET", value = null, secret_name = "better-auth-secret" },
-          { name = "BETTER_AUTH_URL", value = local.web_url, secret_name = null },
-          { name = "GOOGLE_CLIENT_ID", value = var.GOOGLE_CLIENT_ID, secret_name = null },
-          { name = "GOOGLE_CLIENT_SECRET", value = var.GOOGLE_CLIENT_SECRET, secret_name = null },
-          { name = "GITHUB_CLIENT_ID", value = var.GITHUB_CLIENT_ID, secret_name = null },
-          { name = "GITHUB_CLIENT_SECRET", value = var.GITHUB_CLIENT_SECRET, secret_name = null },
-          { name = "KAKAO_CLIENT_ID", value = var.KAKAO_CLIENT_ID, secret_name = null },
-          { name = "KAKAO_CLIENT_SECRET", value = var.KAKAO_CLIENT_SECRET, secret_name = null },
+          { name = "MOBILE_ANDROID_PACKAGE_NAME", value = var.MOBILE_ANDROID_PACKAGE_NAME, secret_name = null },
+          { name = "MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS", value = join(",", var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS), secret_name = null },
+          { name = "MOBILE_APPLE_APP_IDS", value = join(",", var.MOBILE_APPLE_APP_IDS), secret_name = null },
         ]
         content {
           name        = env.value.name
@@ -257,9 +265,9 @@ resource "azurerm_container_app" "worker" {
   }
 
   template {
-    min_replicas = var.worker_min_replicas
+    min_replicas                     = var.worker_min_replicas
     termination_grace_period_seconds = 120
-    max_replicas = var.worker_max_replicas
+    max_replicas                     = var.worker_max_replicas
 
     # KEDA azure-servicebus scaler on the default subscription
     # (mirrors aws/autoscaling.tf worker queue-depth target tracking)

@@ -21,7 +21,8 @@ export const config = {
     // - api routes
     // - _next (Next.js internals)
     // - _vercel (Vercel internals)
+    // - .well-known (native app association files)
     // - static files (images, fonts, etc.)
-    "/((?!api|_next|_vercel|.*\\..*).*)",
+    "/((?!api|_next|_vercel|\\.well-known|.*\\..*).*)",
   ],
 };

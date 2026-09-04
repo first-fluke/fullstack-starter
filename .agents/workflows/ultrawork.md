@@ -9,11 +9,10 @@ disable-model-invocation: true
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step to the user before proceeding to the next.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration.
-  - Use memory tools (read/write/edit) for progress tracking.
+  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration. Do NOT use raw grep as a substitute.
+  - Use file tools (`Read`/`Write`/`Edit`) to persist coordination artifacts directly to `{memoryConfig.basePath}/` (default: `.agents/state/memories/`). Do NOT use Serena's `write_memory` for workflow session state, as verification gates require durable files on disk.
   - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
   - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - Do NOT use raw file reads or grep as substitutes. MCP tools are the primary interface for code and memory operations.
 - **Read the oma-coordination skill BEFORE starting.** Read `.agents/skills/oma-coordination/SKILL.md` and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
 
@@ -59,13 +58,15 @@ Reviewers are read-only evaluators. Implementation and refactor **actions** (Pha
 10. Record session start using memory write tool:
    - Create `session-ultrawork.md` in the memory base path
    - Include: session start time, session ID, user request summary, workflow version (ultrawork)
+11. (Recommended) Attach a mechanical stop gate when the project has a cheap deterministic check:
+   - `oma goal:set --gate typecheck` (allowlist: `typecheck` | `test` | `lint`; maps to the package.json script)
+   - While set, the Stop hook allows the session to end only when the gate passes; failures return the output tail. Add `--budget-minutes <n>` to bound unattended runs with an honest partial stop.
 
 ---
 
 ## Phase 1: PLAN (Steps 1-4)
 
 ### Step 1: Create Plan
-// turbo
 Activate PM Agent to author the plan only (reviews are dispatched separately in Steps 2-4):
 
 1. Analyze requirements.
@@ -119,7 +120,6 @@ Dispatch each of Steps 2, 3, 4 as a **separate fresh isolated reviewer subagent*
 ## Phase 2: IMPL (Step 5)
 
 ### Step 5: Implementation
-// turbo
 Spawn Implementation Agents (Backend/Frontend/Mobile) in parallel.
 
 #### Per-Agent Dispatch
@@ -187,7 +187,6 @@ If no measurement tools: skip; gates fall back to binary checklist.
 ## Phase 3: VERIFY (Steps 6-8)
 
 ### Step 6-8: QA Verification (Cross-Context Review)
-// turbo
 Dispatch each of Steps 6, 7, 8 as a **separate fresh isolated reviewer subagent** per the **Cross-Context Review (CCR) Dispatch** section. Do NOT run all three in one agent, and do NOT pass this session's history or the implementation agents' reasoning into any reviewer prompt. Each reviewer reads only the durable artifacts (git diff, changed files, `.agents/results/plan-{sessionId}.json`, `result-{agent}` files, test/lint output) plus its own review guide section from `multi-review-protocol.md`.
 
 #### If Claude Code
@@ -269,7 +268,6 @@ If baseline was measured at Step 5.2:
 ## Phase 4: REFINE (Steps 9-13)
 
 ### Step 9-13: Deep Refinement
-// turbo
 REFINE mixes two kinds of work: **reviews** (Steps 10, 12), which are read-only evaluations, and **refactor actions** (Steps 9, 11, 13), which change code.
 
 **First, dispatch the two reviews as fresh isolated reviewer subagents** per the **Cross-Context Review (CCR) Dispatch** section — one reviewer for Step 10 (Reusability), one for Step 12 (Consistency). Each reads only the durable artifacts (git diff, changed files) plus its guide section; do not pass this session's history or the implementation agents' reasoning. Collect their verdicts from memory.
@@ -362,7 +360,6 @@ If baseline was measured at Step 5.2:
 ## Phase 5: SHIP (Steps 14-17)
 
 ### Step 14-17: Final QA & Deployment Readiness (Cross-Context Review)
-// turbo
 Dispatch each of Steps 14, 15, 16, 17 as a **separate fresh isolated reviewer subagent** per the **Cross-Context Review (CCR) Dispatch** section. Do NOT run them in one agent, and do NOT pass this session's history or the implementation/refine agents' reasoning into any reviewer prompt. Each reviewer reads only the durable artifacts (git diff, changed files, lint/coverage output, prior `result-*.md`) plus its own review guide section.
 
 #### If Claude Code

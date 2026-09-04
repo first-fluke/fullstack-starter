@@ -31,5 +31,15 @@
   "delete": "Delete",
   "@delete": {
     "description": "Delete button text"
-  }
+  },
+  "login": "Log in",
+  "email": "Email",
+  "password": "Password",
+  "loginWithEmail": "Log in with email",
+  "loginWithPasskey": "Log in with a passkey",
+  "registerPasskey": "Add a passkey",
+  "passkeyRegistered": "Passkey added",
+  "logout": "Log out",
+  "emailRequired": "Enter your email address",
+  "emailPasswordRequired": "Enter your email address and password"
 }

@@ -1,387 +1,67 @@
-# ステートレストークン認証アーキテクチャ
+# 認証
 
-[English](./AUTH.md) | [한국어](./AUTH.ko.md) | [简体中文](./AUTH.cn.md) | 日本語 | [Português](./AUTH.pt.md)
+認証は FastAPI アプリケーションが一元管理します。ログイン方法にかかわらず、Web と Mobile には同じ自社 access/refresh token が発行されます。
 
-## 概要
+## 対応する認証方法
 
-このテンプレートは、**ステートフルセッションベース認証**ではなく、**ステートレス JWT/JWE 認証システム**を実装しています。認証処理は完全にバックエンドで行われ、フロントエンドはトークンの保存と送信のみを担当します。
+- メールアドレスとパスワードによる登録・ログイン
+- Google OAuth 2.0 Authorization Code + PKCE (`S256`)
+- GitHub OAuth 2.0 Authorization Code + PKCE (`S256`)
+- バージョンなしの Graph API エンドポイントを使用する Facebook Login
+- WebAuthn パスキーの登録・認証
 
-## アーキテクチャ
+Provider client secret は API 環境だけに保存します。Web は認証サーバーを実行せず、provider access token も受け取りません。
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant BetterAuth
-    participant Backend
-    participant API
+## OAuth フロー
 
-    User->>BetterAuth: ソーシャルログイン (OAuth)
-    BetterAuth->>Frontend: OAuth アクセストークン
-    Frontend->>Backend: POST /api/auth/login (OAuth トークン)
-    Backend->>Backend: OAuth トークン再検証 (Provider API)
-    Backend->>Backend: ユーザー作成/更新 (DB)
-    Backend->>Backend: JWE トークン発行 (access + refresh)
-    Backend->>Frontend: JWE トークンを返す
-    Frontend->>API: Authorization Header (access_token)
-    API->>API: JWE トークン検証
-    API->>User: 保護されたリソースを返す
-```
+1. Client は許可された `redirect_uri` とアプリ内の `return_to` を指定し、`GET /api/auth/oauth/{provider}/authorize` を開きます。
+2. API は一度だけ使える state transaction を作成します。Google と GitHub には PKCE `code_challenge` も送信します。
+3. Provider は API の `GET /api/auth/oauth/{provider}/callback` に redirect します。
+4. API は state を消費し、provider code を交換して `(provider, subject)` identity を解決します。その後、短時間だけ有効な一度限りの code を client に返します。
+5. Client が `POST /api/auth/oauth/exchange` を呼ぶと、code が消費され、access/refresh token が返されます。
 
-## 主要コンポーネント
+Native mobile client は authorize request に別の S256 PKCE challenge を追加し、最後の交換時に verifier を送信します。これにより custom scheme callback code はフローを開始したアプリだけが交換できます。
 
-### 1. バックエンド (FastAPI - `apps/api/`)
+State の有効期間は 10 分、交換 code は 60 秒です。複数 replica の環境では Redis に保存します。認可が拒否された場合も state は消費されます。
 
-**必須ファイル：**
+| Provider | PKCE | Authorization endpoint |
+| --- | --- | --- |
+| Google | `S256` | `https://accounts.google.com/o/oauth2/v2/auth` |
+| GitHub | `S256` | `https://github.com/login/oauth/authorize` |
+| Facebook | なし | `https://www.facebook.com/dialog/oauth` |
 
-- `src/lib/auth.py` - JWE トークン生成/検証、OAuth 検証
-- `src/auth/router.py` - 認証エンドポイント
-- `src/users/model.py` - ユーザー DB モデル
-- `src/lib/dependencies.py` - 認証用の依存性注入
+Facebook がメールアドレスを返さない場合、API は配信不能な placeholder email を作成し、安定した Facebook subject を identity key として使用します。未検証の provider email を既存アカウントへ自動的に関連付けることはありません。
 
-**主要関数：**
+## メール、パスワード、パスキー
 
-- `create_access_token(user_id)` - JWE アクセストークンを作成（1 時間の有効期限）
-- `create_refresh_token(user_id)` - JWE リフレッシュトークンを作成（7 日間の有効期限）
-- `decode_token(token)` - JWE トークンを検証してペイロードを抽出
-- `verify_oauth_token(provider, token)` - OAuth トークンを再検証（Google/GitHub/Facebook）
-- `get_current_user(request)` - Authorization ヘッダーからユーザーを抽出
+- `POST /api/auth/register`: ローカルユーザーを作成します。
+- `POST /api/auth/login`: 正規化されたメールアドレスと bcrypt password hash を検証します。
+- `POST /api/auth/refresh`: refresh token をローテーションします。
+- `POST /api/auth/passkeys/register/options` と `/verify`: 認証済みユーザーにパスキーを登録します。
+- `POST /api/auth/passkeys/authenticate/options` と `/verify`: assertion を検証し token を発行します。
 
-**エンドポイント：**
+WebAuthn challenge は一度だけ使用でき、5 分で失効します。User verification は必須で、本番 origin には HTTPS が必要です。
 
-- `POST /api/auth/login` - OAuth ログイン
-- `POST /api/auth/refresh` - トークンをリフレッシュ
-- `POST /api/auth/logout` - ログアウト
+## API 環境変数
 
-**セキュリティ：**
-
-- JWE 暗号化 (A256GCM)
-- アクセストークン：1 時間の有効期限
-- リフレッシュトークン：7 日間の有効期限
-- Authorization ヘッダーによる送信
-
-### 2. フロントエンド (Next.js - `apps/web/`)
-
-**必須ファイル：**
-
-- `src/lib/auth.ts` - Better Auth サーバー設定（OAuth プロバイダー）
-- `src/lib/auth-client.ts` - Better Auth クライアントとトークン交換ロジック
-- `src/lib/api-client.ts` - トークン管理付き HTTP クライアント（インターセプター）
-- `src/app/api/auth/[...all]/route.ts` - Better Auth ルートハンドラー
-
-**主要操作/関数：**
-
-- Better Auth OAuth ログイン (signIn.social)
-- OAuth → バックエンド JWT 交換（自動化）
-- Authorization ヘッダー自動注入
-- 401 エラー時の自動トークンリフレッシュ
-- ログアウト時のトークンクリーンアップ
-
-**セキュリティ：**
-
-- localStorage 保存（プレフィックス：`fullstack_`）
-- JWE トークン（バックエンド発行）
-- Authorization ヘッダー自動設定
-
-## トークン管理
-
-### アクセストークン
-
-- **形式：** JWE (JSON Web Encryption)
-- **アルゴリズム：** A256GCM (AES-256-GCM)
-- **有効期限：** 1 時間
-- **保存場所：** `localStorage.fullstack_access_token`
-- **使用方法：** API リクエストの `Authorization: Bearer {token}` ヘッダー
-
-### リフレッシュトークン
-
-- **形式：** JWE
-- **アルゴリズム：** A256GCM
-- **有効期限：** 7 日間
-- **保存場所：** `localStorage.fullstack_refresh_token`
-- **使用方法：** 有効期限切れ時にアクセストークンを更新するために使用
-
-## 認証フロー
-
-### 1. ソーシャルログイン
-
-```
-ユーザー: "Google ログイン" をクリック
-    ↓
-フロントエンド: signIn.social("google")
-    ↓
-BetterAuth: OAuth リダイレクト
-    ↓
-BetterAuth: OAuth access 作成 (cookie)
-    ↓
-フロントエンド: OAuth アクセストークンを受信
-    ↓
-フロントエンド: exchangeOAuthForBackendJwt() を自動実行
-    ↓
-バックエンド: POST /api/auth/login { provider, access_token, email, name }
-    ↓
-バックエンド: OAuth トークン再検証 (Google API)
-    ↓
-バックエンド: ユーザー DB の検索/作成
-    ↓
-バックエンド: JWE トークン発行 (access: 1h, refresh: 7d)
-    ↓
-フロントエンド: JWE トークンを localStorage に保存
-```
-
-### 2. 保護された API リクエスト
-
-```
-フロントエンド: API リクエスト
-    ↓
-apiClient: access_token を Authorization ヘッダーに自動追加
-    ↓
-バックエンド: Authorization ヘッダー検証
-    ↓
-バックエンド: JWE トークンをデコード
-    ↓
-バックエンド: user_id を抽出
-    ↓
-バックエンド: DB でユーザーを検索
-    ↓
-API: 保護されたリソースを返す
-```
-
-### 3. トークンリフレッシュ（自動）
-
-```
-アクセストークンの有効期限切れ (1 時間)
-    ↓
-API リクエストで 401 エラー
-    ↓
-apiClient: refresh_token を自動使用
-    ↓
-バックエンド: POST /api/auth/refresh
-    ↓
-バックエンド: 新しい access_token を発行
-    ↓
-フロントエンド: localStorage を更新
-    ↓
-リクエストを自動再試行
-```
-
-### 4. ログアウト
-
-```
-ユーザー: "ログアウト" をクリック
-    ↓
-フロントエンド: signOut()
-    ↓
-フロントエンド: localStorage.clearTokens()
-    ↓
-フロントエンド: apiClient.post("/api/auth/logout")
-    ↓
-バックエンド: ログアウト処理（必要に応じてクライアントトークンを無効化）
-```
-
-## セキュリティ機能
-
-### 1. JWE 暗号化
-
-- **完全暗号化：** ペイロード全体を暗号化
-- **アルゴリズム：** A256GCM (AES-256-GCM)
-- **利点：** （標準 JWT (JWS) とは異なり）ペイロードが露出しない
-- **認証タグ (authTag)：** 整合性と改竄検出を保証
-
-### 2. ステートレス特性
-
-- **サーバーセッションなし：** サーバー上にセッション状態を保存する必要がない
-- **簡単なスケーリング：** 簡単なロードバランシング
-- **スケールアウト：** サーバーの追加が容易
-
-### 3. トークン有効期限戦略
-
-- **アクセストークン：** 短い有効期限（1 時間）- セキュリティ最適化
-- **リフレッシュトークン：** 長い有効期限（7 日間）- ユーザーコンビニエンス
-- **自動リフレッシュ：** 有効期限切れ時に自動更新
-
-## データベーススキーマ
-
-### ユーザーテーブル
-
-```python
-class User(Base):
-    id: UUID (PK)
-    email: String (一意, インデックス付き)
-    name: String (NULL 可)
-    image: String (NULL 可)
-    email_verified: Boolean (デフォルト: False)
-    created_at: DateTime
-    updated_at: DateTime
-```
-
-## 環境変数
-
-### バックエンド (apps/api/.env)
-
-```bash
-# JWT/JWE (ステートレス認証)
-JWT_SECRET=strong-secret-key-32-chars-or-more
-JWE_SECRET_KEY=strong-encryption-key-32-chars-or-more
-
-# データベース
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/app
-
-# Better Auth (OAuth のみ)
-BETTER_AUTH_URL=http://localhost:3000
-```
-
-### フロントエンド (apps/web/.env)
-
-```bash
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Better Auth
-NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=strong-secret-key-32-chars-or-more
-
-# OAuth プロバイダー（オプション）
+```env
+API_PUBLIC_URL=https://api.example.com
+OAUTH_ALLOWED_WEB_ORIGINS=["https://example.com"]
+OAUTH_ALLOWED_MOBILE_REDIRECT_URIS=["fullstackstarter://auth/callback"]
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
 FACEBOOK_CLIENT_ID=
 FACEBOOK_CLIENT_SECRET=
+WEBAUTHN_RP_ID=example.com
+WEBAUTHN_RP_NAME=Fullstack Starter
+WEBAUTHN_ORIGINS=["https://example.com"]
+WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS=["AA:BB:..."]
+JWE_SECRET_KEY=
+REDIS_URL=redis://localhost:6379
 ```
 
-## API エンドポイント
+Provider callback は `https://api.example.com/api/auth/oauth/{provider}/callback` です。Web は `/.well-known` から Digital Asset Links と AASA も配信します。`MOBILE_ANDROID_PACKAGE_NAME`、`MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS`、`MOBILE_APPLE_APP_IDS` を設定してください。Mobile は `APP_BASE_URL` と `fullstackstarter://auth/callback` scheme を使用します。コミット済みの Android host には callback activity が登録され、iOS では `Runner.entitlements` に `webcredentials` associated domain が設定されています。
 
-### POST /api/auth/login
-
-**目的：** OAuth トークンをバックエンド JWT に交換
-
-**リクエストボディ：**
-
-```json
-{
-  "provider": "google" | "github" | "facebook",
-  "access_token": "<OAuth provider token>",
-  "email": "user@example.com",
-  "name": "John Doe"
-}
-```
-
-**レスポンス：**
-
-```json
-{
-  "access_token": "<JWE encrypted access token>",
-  "refresh_token": "<JWE encrypted refresh token>",
-  "token_type": "bearer"
-}
-```
-
-### POST /api/auth/refresh
-
-**目的：** リフレッシュトークンを使用して新しいアクセストークンを発行
-
-**リクエストボディ：**
-
-```json
-{
-  "refresh_token": "<JWE encrypted refresh token>"
-}
-```
-
-**レスポンス：**
-
-```json
-{
-  "access_token": "<JWE encrypted new access token>",
-  "refresh_token": "<JWE encrypted refresh token>",
-  "token_type": "bearer"
-}
-```
-
-### POST /api/auth/logout
-
-**目的：** クライアント側のトークンクリーンアップ
-
-**レスポンス：** 204 No Content
-
-## クライアント側トークン管理
-
-### auth.ts
-
-このファイルは Better Auth サーバー設定を処理します。
-
-### auth-client.ts
-
-Better Auth クライアントの初期化と、OAuth トークンをバックエンド JWE トークンに交換するロジックを処理します。
-
-### api-client.ts
-
-自動トークン注入とリフレッシュ用のインターセプターが設定された Axios インスタンス。
-
-**主要関数：**
-
-- `exchangeOAuthForBackendJwt()` - 自動 OAuth → バックエンド JWT 交換
-- `setAccessToken()` - アクセストークンを保存
-- `setRefreshToken()` - リフレッシュトークンを保存
-- `clearTokens()` - すべてのトークンをクリア
-- `hasBackendAccessToken()` - バックエンドトークンが存在するか確認
-
-**自動機能：**
-
-- Authorization ヘッダー自動注入（`apiClient` インターセプター経由）
-- 401 エラー時の自動トークンリフレッシュ
-- リトライキュー管理
-- メモリ内トークン保存（Map + localStorage）
-
-## OAuth プロバイダー
-
-### サポートされているプロバイダー
-
-| プロバイダー | クライアント ID 環境変数 | クライアントシークレット環境変数 | API エンドポイント |
-|----------|------------------------------|-----------------------------------|--------------|
-| Google | `GOOGLE_CLIENT_ID` | `GOOGLE_CLIENT_SECRET` | `https://www.googleapis.com/oauth2/v3/userinfo` |
-| GitHub | `GITHUB_CLIENT_ID` | `GITHUB_CLIENT_SECRET` | `https://api.github.com/user` |
-| Facebook | `FACEBOOK_CLIENT_ID` | `FACEBOOK_CLIENT_SECRET` | `https://graph.facebook.com/v19.0/me?fields=id,name,email,picture` |
-
-## 主な利点
-
-### 1. パフォーマンス向上
-
-- Better Auth サーバー呼び出しの削減（~50-100ms の節約）
-- バックエンド負荷の軽減
-
-### 2. スケーラビリティ
-
-- ステートレスサーバーによる簡単なスケーリング
-- 簡単なロードバランシング
-
-### 3. モバイルフレンドリー
-
-- Authorization ヘッダー方式はモバイルに最適
-- Cookie ベースの認証よりシンプル
-
-### 4. セキュリティの強化
-
-- JWE 暗号化によるデータ露出防止
-- 短いアクセストークンの有効期限
-
-## よくある質問
-
-**Q: なぜ JWT の代わりに JWE を使用するのですか？**
-A: JWE はペイロードが完全に暗号化されるため、より安全です。ペイロードの露出を防ぎ、整合性の確保に有利です。
-
-**Q: なぜ OAuth トークンを再検証するのですか？**
-A: OAuth プロバイダー API を通じてユーザー情報を再確認することで、セキュリティを強化します。トークン盗難時の攻撃を緩和するのに役立ちます。
-
-**Q: なぜアクセストークンの有効期限が 1 時間なのですか？**
-A: 短い有効期限はセキュリティに重要です。トークンが漏洩した場合の被害範囲を最小限に抑えます。リフレッシュトークン（7 日間）で更新できます。
-
-## 参考
-
-- [JWE (JSON Web Encryption) RFC 7516](https://datatracker.ietf.org/doc/html/rfc7516)
-- [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)
-- [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
-- [Better Auth Documentation](https://www.better-auth.com/docs)
-
-**最終更新：** 2025-01-15
+主な実装は `apps/api/src/auth/`、`apps/web/src/lib/auth/auth-client.ts`、`apps/mobile/lib/core/auth/providers.dart` にあります。デプロイ前に `oauth_identities` と `passkey_credentials` を追加する Alembic migration を適用してください。

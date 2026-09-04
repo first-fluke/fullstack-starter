@@ -118,21 +118,13 @@
           "authentication"
         ],
         "summary": "Login",
-        "description": "Login with OAuth or email/password and issue backend tokens.\n\nVerify OAuth token, create/update user, and issue JWE tokens.",
+        "description": "Login with email/password and issue first-party tokens.",
         "operationId": "login_api_auth_login_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/OAuthLoginRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/EmailLoginRequest"
-                  }
-                ],
-                "title": "Body"
+                "$ref": "#/components/schemas/EmailLoginRequest"
               }
             }
           },
@@ -162,19 +154,348 @@
         }
       }
     },
-    "/api/auth/session-exchange": {
+    "/api/auth/oauth/{provider}/authorize": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Oauth Authorize",
+        "description": "Start an OAuth Authorization Code + PKCE transaction.",
+        "operationId": "oauth_authorize_api_auth_oauth__provider__authorize_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ],
+              "type": "string",
+              "title": "Provider"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Redirect Uri"
+            }
+          },
+          {
+            "name": "return_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "/",
+              "title": "Return To"
+            }
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code Challenge"
+            }
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code Challenge Method"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/oauth/{provider}/callback": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Oauth Callback",
+        "description": "Handle the provider callback and redirect with a one-time login code.",
+        "operationId": "oauth_callback_api_auth_oauth__provider__callback_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ],
+              "type": "string",
+              "title": "Provider"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "State"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/oauth/exchange": {
       "post": {
         "tags": [
           "authentication"
         ],
-        "summary": "Session Exchange",
-        "description": "Exchange better-auth session token for backend JWE tokens.\n\nUsed by email/password auth users who have no OAuth provider token.\nVerifies session with better-auth server, then issues backend tokens.",
-        "operationId": "session_exchange_api_auth_session_exchange_post",
+        "summary": "Oauth Exchange",
+        "description": "Exchange a single-use OAuth code for first-party access and refresh tokens.",
+        "operationId": "oauth_exchange_api_auth_oauth_exchange_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SessionExchangeRequest"
+                "$ref": "#/components/schemas/OAuthExchangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/passkeys/register/options": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Passkey Registration Options",
+        "description": "Create options for registering a passkey to the signed-in account.",
+        "operationId": "passkey_registration_options_api_auth_passkeys_register_options_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Passkey Registration Options Api Auth Passkeys Register Options Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/passkeys/register/verify": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Passkey Registration Verify",
+        "description": "Verify and store a new passkey.",
+        "operationId": "passkey_registration_verify_api_auth_passkeys_register_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRegistrationVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/passkeys/authenticate/options": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Passkey Authentication Options",
+        "description": "Create options for signing in with a passkey.",
+        "operationId": "passkey_authentication_options_api_auth_passkeys_authenticate_options_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyAuthenticationOptionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Passkey Authentication Options Api Auth Passkeys Authenticate Options Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/passkeys/authenticate/verify": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Passkey Authentication Verify",
+        "description": "Verify a passkey assertion and issue first-party tokens.",
+        "operationId": "passkey_authentication_verify_api_auth_passkeys_authenticate_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyAuthenticationVerifyRequest"
               }
             }
           },
@@ -370,45 +691,94 @@
         "title": "HealthResponse",
         "description": "Health check response with detailed service statuses."
       },
-      "OAuthLoginRequest": {
+      "OAuthExchangeRequest": {
         "properties": {
-          "provider": {
+          "code": {
             "type": "string",
-            "enum": [
-              "google",
-              "github",
-              "facebook"
-            ],
-            "title": "Provider"
+            "maxLength": 256,
+            "minLength": 32,
+            "title": "Code"
           },
-          "access_token": {
-            "type": "string",
-            "title": "Access Token"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "name": {
+          "code_verifier": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 43
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Name"
+            "title": "Code Verifier"
           }
         },
         "type": "object",
         "required": [
-          "provider",
-          "access_token",
+          "code"
+        ],
+        "title": "OAuthExchangeRequest",
+        "description": "Exchange a one-time OAuth login code for first-party tokens."
+      },
+      "PasskeyAuthenticationOptionsRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
           "email"
         ],
-        "title": "OAuthLoginRequest",
-        "description": "OAuth login request."
+        "title": "PasskeyAuthenticationOptionsRequest",
+        "description": "Start a passkey authentication ceremony."
+      },
+      "PasskeyAuthenticationVerifyRequest": {
+        "properties": {
+          "ceremony_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32,
+            "title": "Ceremony Id"
+          },
+          "credential": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Credential"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ceremony_id",
+          "credential"
+        ],
+        "title": "PasskeyAuthenticationVerifyRequest",
+        "description": "Complete a passkey authentication ceremony."
+      },
+      "PasskeyRegistrationVerifyRequest": {
+        "properties": {
+          "ceremony_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32,
+            "title": "Ceremony Id"
+          },
+          "credential": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Credential"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ceremony_id",
+          "credential"
+        ],
+        "title": "PasskeyRegistrationVerifyRequest",
+        "description": "Complete an authenticated passkey registration ceremony."
       },
       "RefreshTokenRequest": {
         "properties": {
@@ -493,20 +863,6 @@
         ],
         "title": "ServiceStatus",
         "description": "Individual service health status."
-      },
-      "SessionExchangeRequest": {
-        "properties": {
-          "session_token": {
-            "type": "string",
-            "title": "Session Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "session_token"
-        ],
-        "title": "SessionExchangeRequest",
-        "description": "Exchange better-auth session token for backend JWE tokens."
       },
       "TokenResponse": {
         "properties": {

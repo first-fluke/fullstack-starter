@@ -35,9 +35,9 @@ locals {
 resource "oci_container_instances_container_instance" "api" {
   count = var.api_count
 
-  compartment_id      = oci_identity_compartment.main.id
-  availability_domain = local.availability_domain
-  display_name        = "${local.name_prefix}-api-${count.index}"
+  compartment_id                       = oci_identity_compartment.main.id
+  availability_domain                  = local.availability_domain
+  display_name                         = "${local.name_prefix}-api-${count.index}"
   graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape
@@ -53,8 +53,21 @@ resource "oci_container_instances_container_instance" "api" {
     image_url    = local.api_image
 
     environment_variables = merge(local.backend_environment, {
-      JWT_SECRET = var.JWT_SECRET
-      API_URL    = local.api_url
+      JWT_SECRET                                = var.JWT_SECRET
+      JWE_SECRET_KEY                            = var.JWT_SECRET
+      API_URL                                   = local.api_url
+      API_PUBLIC_URL                            = local.api_url
+      CORS_ORIGINS                              = jsonencode([local.web_url])
+      OAUTH_ALLOWED_WEB_ORIGINS                 = jsonencode([local.web_url])
+      WEBAUTHN_RP_ID                            = var.domain != "" ? var.domain : local.lb_public_ip
+      WEBAUTHN_ORIGINS                          = jsonencode([local.web_url])
+      WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS = jsonencode(var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS)
+      GOOGLE_CLIENT_ID                          = var.GOOGLE_CLIENT_ID
+      GOOGLE_CLIENT_SECRET                      = var.GOOGLE_CLIENT_SECRET
+      GITHUB_CLIENT_ID                          = var.GITHUB_CLIENT_ID
+      GITHUB_CLIENT_SECRET                      = var.GITHUB_CLIENT_SECRET
+      FACEBOOK_CLIENT_ID                        = var.FACEBOOK_CLIENT_ID
+      FACEBOOK_CLIENT_SECRET                    = var.FACEBOOK_CLIENT_SECRET
     })
 
     health_checks {
@@ -82,9 +95,9 @@ resource "oci_container_instances_container_instance" "api" {
 resource "oci_container_instances_container_instance" "web" {
   count = var.web_count
 
-  compartment_id      = oci_identity_compartment.main.id
-  availability_domain = local.availability_domain
-  display_name        = "${local.name_prefix}-web-${count.index}"
+  compartment_id                       = oci_identity_compartment.main.id
+  availability_domain                  = local.availability_domain
+  display_name                         = "${local.name_prefix}-web-${count.index}"
   graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape
@@ -100,16 +113,11 @@ resource "oci_container_instances_container_instance" "web" {
     image_url    = local.web_image
 
     environment_variables = {
-      ENVIRONMENT          = var.environment
-      NEXT_PUBLIC_API_URL  = local.api_url
-      BETTER_AUTH_SECRET   = var.BETTER_AUTH_SECRET
-      BETTER_AUTH_URL      = local.web_url
-      GOOGLE_CLIENT_ID     = var.GOOGLE_CLIENT_ID
-      GOOGLE_CLIENT_SECRET = var.GOOGLE_CLIENT_SECRET
-      GITHUB_CLIENT_ID     = var.GITHUB_CLIENT_ID
-      GITHUB_CLIENT_SECRET = var.GITHUB_CLIENT_SECRET
-      KAKAO_CLIENT_ID      = var.KAKAO_CLIENT_ID
-      KAKAO_CLIENT_SECRET  = var.KAKAO_CLIENT_SECRET
+      ENVIRONMENT                             = var.environment
+      NEXT_PUBLIC_API_URL                     = local.api_url
+      MOBILE_ANDROID_PACKAGE_NAME             = var.MOBILE_ANDROID_PACKAGE_NAME
+      MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = join(",", var.MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS)
+      MOBILE_APPLE_APP_IDS                    = join(",", var.MOBILE_APPLE_APP_IDS)
     }
 
     health_checks {
@@ -137,9 +145,9 @@ resource "oci_container_instances_container_instance" "web" {
 resource "oci_container_instances_container_instance" "worker" {
   count = var.worker_count
 
-  compartment_id      = oci_identity_compartment.main.id
-  availability_domain = local.availability_domain
-  display_name        = "${local.name_prefix}-worker-${count.index}"
+  compartment_id                       = oci_identity_compartment.main.id
+  availability_domain                  = local.availability_domain
+  display_name                         = "${local.name_prefix}-worker-${count.index}"
   graceful_shutdown_timeout_in_seconds = 120
 
   shape = var.container_shape

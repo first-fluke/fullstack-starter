@@ -1,6 +1,6 @@
 ---
 name: oma-video
-description: Short-form, explainer, and demo video generation via a key-optional 3-tier router. Composes scripts, oma-voice narration, oma-image/oma-slide/stock visuals, key-free captions, and a vendored Remotion compositor into reproducible run directories. Routes three modes — shorts/reels (9:16), explainer (16:9 README/code/data), and demo/walkthrough (screen capture, incl. supervised headed web-app capture of any URL). Use for video, shorts, reels, short-form, demo, explainer, walkthrough, screencast, web capture, video generation, 영상, 숏폼, 쇼츠, 릴스, 데모, 설명 영상.
+description: Short-form, explainer, and demo video generation via a key-optional 3-tier router. Composes scripts, oma-voice narration, oma-image/oma-slide/stock visuals, key-free captions, and a per-run agent-authored Remotion composition (always-latest Remotion + remotion-dev/skills) into reproducible run directories. Routes three modes — shorts/reels (9:16), explainer (16:9 README/code/data), and demo/walkthrough (screen capture, incl. supervised headed web-app capture of any URL). Use for video, shorts, reels, short-form, demo, explainer, walkthrough, screencast, web capture, video generation, 영상, 숏폼, 쇼츠, 릴스, 데모, 설명 영상.
 ---
 
 # Video Agent - Short-form, Explainer & Demo Router
@@ -31,7 +31,7 @@ Generate finished `.mp4` videos through a key-optional, 3-tier (CLI-first / MCP 
 - Generating speech audio only (no video) -> use `oma-voice`
 - Non-linear video editing of an existing finished mp4 -> out of scope (OpenCut-MCP deferred)
 - Supervised headed web capture is in-scope (`--source web`); live streaming is out of scope
-- Interactive HTML explainer document (not a video) -> use `oma-explainer`
+- Interactive HTML explainer document (not a video) -> use `oma-explanation`
 
 ### Expected inputs
 - A brief (topic / README path / data) plus optional mode, aspect, locale, captions, visual, voice, music, duration, compositor, capture path, seed
@@ -68,8 +68,8 @@ outputs:
 ### Dependencies
 - `oma video generate` CLI + central error module (exit codes aligned with `oma search fetch`)
 - oma-voice (Voicebox MCP), oma-image, oma-slide as key-free fallback providers
-- Vendored Remotion project at `resources/remotion/` (compositor)
-- `resources/vendor-matrix.md`, `resources/execution-protocol.md`, `resources/prompt-tips.md`, `config/video-config.yaml`
+- Per-run Remotion project at `<runDir>/remotion/` scaffolded by `oma video compose` on the always-latest toolchain (`~/.cache/oma-video/remotion/<ver>/`); the composition is agent-authored per run following remotion-dev/skills (`resources/remotion-authoring/`)
+- `resources/vendor-matrix.md`, `resources/execution-protocol.md`, `resources/prompt-tips.md`, and the `video:` section of `.agents/oma-config.yaml`
 
 ### Control-flow features
 - Branches by mode (shorts / explainer / demo), aspect, visual strategy, provider availability, cost threshold, capture requirement, and path safety
@@ -82,7 +82,7 @@ outputs:
 ### Entry
 1. Validate that the brief carries enough mode/topic signal (or infer the mode from keywords).
 2. For `demo`, confirm a capture path exists (or Cap is available); otherwise enter the guided protocol.
-3. Resolve defaults from `config/video-config.yaml` -> env vars -> CLI flags; check output path safety and limits.
+3. Resolve defaults from shipped code defaults -> the `video:` section of `.agents/oma-config.yaml` -> env vars -> CLI flags; check output path safety and limits.
 
 ### Scenes
 1. **PREPARE**: Resolve mode/aspect/locale, clarify or amplify the brief, choose the visual + compositor strategy.
@@ -100,9 +100,10 @@ outputs:
 
 ### Failure and recovery
 - If a provider is unavailable, try the next provider in the capability's `order`; only chain exhaustion is a stage failure.
-- If the Remotion toolchain is not bootstrapped, point the user to `oma video doctor --install` (one-time: deps + headless shell + Pretendard font); fall back to the MPT compositor where applicable (MPT itself needs a one-time `oma video doctor --install-mpt`).
+- Remotion is always the latest npm release and oma owns NO composition code: `oma video compose <runDir>` refreshes the toolchain + remotion-dev/skills (throttled) and scaffolds `<runDir>/remotion/`; you author `src/Root.tsx` per its `AUTHORING.md` and `resources/remotion-authoring/<mode>.md`, then `oma video render <runDir>`. A tsc/render failure is a composition bug: re-read the skills, fix, re-render (no fixed cap; stop only after two consecutive attempts without progress and report).
+- If the toolchain cannot be fetched (offline, nothing cached), point the user to `oma video doctor --install` once online; fall back to the MPT compositor where applicable (MPT itself needs a one-time `oma video doctor --install-mpt`).
 - If Voicebox MCP is down, fall back to estimated timing (still produces captions). A whisper.cpp hop between the two is reserved but not yet wired (`TODO(oma-deferred): whisper-cpp`).
-- If the brief locale is non-source, translate via oma-translator (key-free); if absent, warn and keep source text.
+- If the brief locale is non-source, translate via oma-translation (key-free); if absent, warn and keep source text.
 
 ### Exit
 - Success: `<mode>-<slug>.mp4` and `manifest.json` exist in the run directory; all schemas validate.
@@ -129,7 +130,7 @@ outputs:
 ### Tools and instruments
 - `oma video generate`, `oma video doctor`, `oma video list-providers`, `oma video render`
 - Provider adapters: AgentScript, oma-voice, oma-image, oma-slide, Pexels, Pixelle, oma-captions, Cap, Remotion, MPT
-- Vendored Remotion project (`resources/remotion/`), prompt tips, vendor matrix, video config
+- Remotion authoring specs (`resources/remotion-authoring/`), prompt tips, vendor matrix, video config
 
 ### Canonical command path
 ```bash
@@ -200,10 +201,10 @@ Before invoking `oma video generate`, the calling agent runs this checklist. **I
 
 **Strongly recommended (ask if absent AND not inferable):**
 - [ ] **Aspect**: `9:16` (shorts/reels), `16:9` (explainer/demo), `1:1`, or `auto` (snaps to the mode default).
-- [ ] **Locale**: narration + caption language (default from config; translated via oma-translator when non-source).
+- [ ] **Locale**: narration + caption language (default from config; translated via oma-translation when non-source).
 - [ ] **Captions**: `tiktok` (centered, static windowed cues), `lower-third`, or `none`.
 - [ ] **Duration**: target seconds (<= 180) or `auto` (derived from the script).
-- [ ] **Voice / music**: voice profile or `none`; music `upbeat` / `calm` / `none`. **The default voice is `none` → a silent video with estimated caption timing.** Pass `--voice <profile>` (a Voicebox profile) whenever narration is expected. Music mixing is currently deferred (recorded + warned, not mixed).
+- [ ] **Voice / music**: voice profile or `none`; music `upbeat` / `calm` / `none`. **The default voice is `none` → a silent video with estimated caption timing.** Pass `--voice <profile>` (a Voicebox profile) whenever narration is expected. Music is rendered offline by Strudel and mixed at −18 dB; it needs a one-time `oma video doctor --install-strudel` and degrades to no music without it.
 
 **Amplification shortcut.** For a one-line brief (e.g. "shorts about Jeju coffee"), do not pop a questionnaire if the request is genuinely simple. Instead **amplify inline and show the user** the inferred plan before invoking:
 
@@ -247,7 +248,7 @@ oma video generate "<brief>" [--mode shorts|explainer|demo] \
                              [--aspect 9:16|16:9|1:1|auto] [--locale <lang>] \
                              [--captions tiktok|lower-third|none] \
                              [--visual auto|generate|stock|aigc|slide] \
-                             [--voice <profile>|none] [--music upbeat|calm|none] \
+                             [--voice <profile>|none] [--music upbeat|calm|cinematic|lofi|piano|none] \
                              [--duration <sec>|auto] [--compositor remotion|mpt] \
                              [--capture <path>] \
                              [--source file|web] [--url <url>] [--device <name>] \
@@ -264,8 +265,10 @@ oma video generate "<brief>" [--mode shorts|explainer|demo] \
 # A human drives the on-screen flow; press ENTER to stop. NO credential automation. --url/tokens masked.
 # Non-interactive (CI / -y / no TTY) or unresolvable Playwright -> falls back to the guided protocol (no hang).
 # --capture-stop gives CI a non-interactive stop (duration / selector) in place of the ENTER prompt.
-oma video doctor          # readiness report only (no install): Node/Chromium/FFmpeg · Remotion project · Pretendard font · MPT · Playwright · Voicebox MCP · oma-image vendors · Pixelle-MCP · Cap
-oma video doctor --install             # one-time: vendored Remotion deps + Chrome Headless Shell + Pretendard font fetch (offline -> warn, system-font fallback)
+oma video doctor          # readiness report only (no install): Node/Chromium/FFmpeg · Remotion toolchain · remotion-dev/skills · Pretendard font · MPT · Playwright · Voicebox MCP · oma-image vendors · Pixelle-MCP · Cap
+oma video doctor --install             # warm the latest Remotion toolchain (deps + Chrome Headless Shell + Pretendard) and remotion-dev/skills into ~/.cache/oma-video
+oma video doctor --upgrade             # force a latest check now
+oma video compose <runDir> [--format json]   # scaffold/refresh the run's Remotion project + print the authoring contract
 oma video doctor --install-mpt         # one-time: MoneyPrinterTurbo checkout (clone + venv + deps) for --compositor mpt
 oma video doctor --install-playwright  # one-time: npm i playwright + chromium (web capture)
 oma video list-providers  # availability + key/fallback status
@@ -298,7 +301,13 @@ Other skills call `oma video generate --format json` and parse the JSON envelope
 - **Narration is one wav**: oma-voice joins every scene line into a single `audio/narration-01.wav`, referenced by `render-spec.audio.narration`. There are no per-scene `narration-NN.wav` files.
 - **Timing**: per-line offsets live in `timing.json` (voicebox-stt -> estimated; the `tts-native` and `whisper-cpp` source values are reserved but not yet wired — `TODO(oma-deferred): whisper-cpp`); scene boundaries and caption cues are derived from it.
 - **Captions**: key-free `.srt` (+ `.vtt`) built from `timing.json`; `render-spec.captions.file` points at the `.srt`. The compositor renders **static windowed cues** — the cue active at the current frame, CSS-wrapped (no per-word animation).
-- **Music**: deferred (`TODO(oma-deferred): music`) — no music asset source is wired yet, so a requested `--music` mode is recorded in `script.json` and surfaced as a warning, but no music is mixed. When implemented, it mixes under narration at `render-spec.audio.musicGainDb` (default −18 dB).
+- **Music**: `--music <preset>` renders a BGM bed with **Strudel** and mixes it under narration at `render-spec.audio.musicGainDb` (default −18 dB). The bed is generated offline (headless Chrome + `OfflineAudioContext`), so it needs no key, no network, and no audio device — a 30s bed renders in well under a second.
+  - **Presets**: `calm` (sustained pad + arpeggio), `upbeat` (bright plucks), `cinematic` (drone build to a lead), `lofi` (warm chords, swung ticks), `piano` (neoclassical arpeggio). Each preset picks its key and mode from the run `seed`, so the same preset sounds different run to run without a second pattern.
+  - **Artifacts** in the run dir: `music/bgm.wav` (mixed by the compositor), `music/bgm.mp3` (preview), `music/bgm-raw.wav` (pre-master), and `music/pattern.strudel` — the source that produced them, editable and re-renderable by hand.
+  - **Level**: every bed is normalised to −14 LUFS with a static gain before a peak limiter, so `musicGainDb` means the same thing for every preset. Normalisation is deliberately *not* `loudnorm`'s one-pass mode, which flattens the arrangement arc.
+  - **Opt-in install**: `@strudel/*` is AGPL-3.0-or-later while the oma CLI is MIT, so the deps are never bundled and never installed implicitly. Run `oma video doctor --install-strudel` once. The CLI never imports Strudel — it spawns `resources/strudel/render.mjs` as a subprocess, the same boundary the Remotion / Playwright projects use.
+  - **Fallback**: a missing install, a missing Chrome, or a failed render degrades to *no music* with a warning. The run still succeeds and `audio.music` stays unset (never a dangling `staticFile()` ref).
+  - **Determinism**: the built-in beds are oscillator-only (sine / triangle / square / sawtooth), which render byte-identically on replay. Noise sounds (`white` / `pink` / `brown`) draw from `Math.random()` and would break that, so the templates avoid them.
 
 ## References
 
@@ -307,18 +316,18 @@ See `resources/vendor-matrix.md` for provider precheck + fallback-chain rules.
 Author `--script` files against `resources/script-schema.md` (full field reference + example; `schemaVersion: "1.0"` is required).
 Use `resources/prompt-tips.md` for writing effective briefs per mode.
 Before submitting, run `resources/checklist.md`.
-The vendored Remotion compositor lives at `resources/remotion/` (see its `README.md`).
+Remotion compositions are agent-authored per run — see `resources/remotion-authoring/README.md`.
 The web-capture driver lives at `resources/playwright/record.mjs` (runs as a subprocess under the resolved Playwright; never imported into the CLI).
 The MPT fallback compositor driver lives at `resources/mpt/driver.py` (consumed by the CLI's mpt-project internals).
 
 ### Configuration
 
-Project-specific settings: `config/video-config.yaml`.
+Project-specific settings: the `video:` section of `.agents/oma-config.yaml`, which `oma update` preserves. Shipped defaults live in the CLI (`DEFAULT_VIDEO_CONFIG` in `cli/commands/video/config.ts`) — write only the keys you change. The legacy `config/video-config.yaml` is no longer read by the CLI; migration 022 moves anything you had changed there into oma-config (and deletes the file when it was never edited).
 Env vars: `OMA_VIDEO_DEFAULT_MODE`, `OMA_VIDEO_DEFAULT_OUT`, `OMA_VIDEO_YES`, `PEXELS_API_KEY`, `RUNNINGHUB_API_KEY` (+ `POLLINATIONS_API_KEY` via oma-image), `OMA_VIDEO_MOCK`, `OMA_VIDEO_PLAYWRIGHT_DIR` (web-capture Playwright override), `OMA_VIDEO_PWTEST` (opt-in web-capture e2e).
 
 - Execution steps: `resources/execution-protocol.md`
 - Vendor matrix: `resources/vendor-matrix.md`
 - Prompt tips: `resources/prompt-tips.md`
 - Checklist: `resources/checklist.md`
-- Remotion compositor: `resources/remotion/README.md`
+- Remotion authoring: `resources/remotion-authoring/README.md` (+ `shorts.md`, `explainer.md`, `demo.md`)
 - Context loading: `../_shared/core/context-loading.md`

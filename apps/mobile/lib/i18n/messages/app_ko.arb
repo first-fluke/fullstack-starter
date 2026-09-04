@@ -7,5 +7,15 @@
   "save": "저장",
   "cancel": "취소",
   "confirm": "확인",
-  "delete": "삭제"
+  "delete": "삭제",
+  "login": "로그인",
+  "email": "이메일",
+  "password": "비밀번호",
+  "loginWithEmail": "이메일로 로그인",
+  "loginWithPasskey": "패스키로 로그인",
+  "registerPasskey": "패스키 추가",
+  "passkeyRegistered": "패스키를 추가했습니다",
+  "logout": "로그아웃",
+  "emailRequired": "이메일을 입력해 주세요",
+  "emailPasswordRequired": "이메일과 비밀번호를 입력해 주세요"
 }

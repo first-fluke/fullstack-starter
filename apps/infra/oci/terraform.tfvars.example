@@ -63,6 +63,11 @@ domain           = ""
 api_subdomain    = "api"
 certificate_ocid = ""
 
+# Native passkey associations. Include debug, release, and Play fingerprints.
+MOBILE_ANDROID_PACKAGE_NAME             = "com.example.mobile"
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS = []
+MOBILE_APPLE_APP_IDS                    = []
+
 # CI/CD - GitHub Actions OIDC (leave empty to skip CI identity provisioning)
 identity_domain_ocid = ""
 
@@ -76,7 +81,10 @@ alarm_email       = ""
 # Secrets (injected via Infisical - do not commit real values)
 # DATABASE_PASSWORD    = ""
 # JWT_SECRET           = ""
-# BETTER_AUTH_SECRET   = ""
 # GOOGLE_CLIENT_ID     = ""
 # GOOGLE_CLIENT_SECRET = ""
+# GITHUB_CLIENT_ID     = ""
+# GITHUB_CLIENT_SECRET = ""
+# FACEBOOK_CLIENT_ID     = ""
+# FACEBOOK_CLIENT_SECRET = ""
 # OPENAI_API_KEY       = ""

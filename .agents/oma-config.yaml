@@ -46,3 +46,13 @@ scm:
     - "*.example"
     - "*.sample"
     - "*.template"
+
+# Added by oma migration 022 — moved from .agents/skills/*/config/*.yaml, which `oma update` overwrites. Edit freely.
+hwp:
+  version:
+    pinned: 4.1.0
+
+# Added by oma update — new config keys (template defaults; edit freely)
+agents:
+  eval:
+    model: anthropic/claude-sonnet-4-6

@@ -1,0 +1,2 @@
+// Must match the backend WEBAUTHN_RP_ID and the domain serving AASA.
+WEBAUTHN_RP_ID = example.com

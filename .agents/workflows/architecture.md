@@ -49,7 +49,6 @@ If the problem is vague, start in Diagnostic Mode.
 
 ## Step 2: Analyze the Existing System
 
-// turbo
 Read prior decisions in `.agents/results/architecture/` first — new decisions supersede old ones explicitly (update the old ADR's `Status`), never contradict them silently.
 
 Use MCP code analysis tools to understand the current architecture:
@@ -130,7 +129,6 @@ If the decision remains user-owned, present the options with clear tradeoffs rat
 
 ## Step 7: Save the Artifact and Hand Off
 
-// turbo
 Save the architecture artifact to `.agents/results/architecture/`.
 
 Suggested filenames (kebab-case topic, no sequence numbers):
@@ -141,6 +139,15 @@ Suggested filenames (kebab-case topic, no sequence numbers):
 - `diagnosis-<topic>.md`
 
 ADR lifecycle: set `Status` (`Proposed` / `Accepted` / `Superseded by <adr-file>`); when replacing an old ADR, update its `Status` in the same run.
+
+### Step 7a: Render the structural diagram (archify when available)
+
+Only when the decision changes structure (boundaries, dependencies, data flow) and the artifact therefore carries a Mermaid diagram:
+
+1. Run `oma diagram resolve --json` and read `.agents/skills/_shared/conditional/diagram-engine.md`.
+2. `engine: mermaid` → the Mermaid block in the Markdown artifact is the delivered diagram; done.
+3. `engine: archify` → author `<artifact-stem>.archify.json` from the Mermaid topology, then `oma diagram archify validate …` / `oma diagram archify deliver … <artifact-stem>.archify.html` per the protocol. There is **no iteration cap**: keep repairing while the error count improves; stop only on archify's own convergence rule. On success, link the HTML under the artifact's Diagram section; on convergence failure, keep the Mermaid block and report the last diagnostics.
+4. `ok: false` (archify pinned but unresolvable — e.g. first run offline) → stop and tell the user to run `oma diagram update` once online; do not deliver a Mermaid-only artifact silently.
 
 Emit and verify the required ADR/architecture completion decision:
 

@@ -6,7 +6,6 @@ from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 import bcrypt
-import httpx
 from fastapi import Depends, HTTPException, Request, status
 from jwcrypto import jwe, jwk
 from jwcrypto.common import JWException
@@ -31,21 +30,6 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"  # noqa: S105
-
-
-class OAuthLoginRequest(BaseModel):
-    """OAuth login request."""
-
-    provider: Literal["google", "github", "facebook"]
-    access_token: str
-    email: str
-    name: str | None = None
-
-
-class SessionExchangeRequest(BaseModel):
-    """Exchange better-auth session token for backend JWE tokens."""
-
-    session_token: str
 
 
 class EmailLoginRequest(BaseModel):
@@ -190,119 +174,6 @@ def decode_token(token: str) -> TokenPayload:
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from None
-
-
-async def verify_google_token(access_token: str) -> OAuthUserInfo:
-    """Verify Google OAuth token."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://www.googleapis.com/oauth2/v3/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"},
-            timeout=5.0,
-        )
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Google access token",
-            )
-        data = response.json()
-        return OAuthUserInfo(
-            id=data["sub"],
-            email=data["email"],
-            name=data.get("name"),
-            image=data.get("picture"),
-            email_verified=data.get("email_verified", False),
-        )
-
-
-async def verify_github_token(access_token: str) -> OAuthUserInfo:
-    """Verify GitHub OAuth token."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://api.github.com/user",
-            headers={"Authorization": f"Bearer {access_token}"},
-            timeout=5.0,
-        )
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid GitHub access token",
-            )
-        data = response.json()
-        return OAuthUserInfo(
-            id=str(data["id"]),
-            email=data.get("email"),
-            name=data.get("name"),
-            image=data.get("avatar_url"),
-        )
-
-
-async def verify_facebook_token(access_token: str) -> OAuthUserInfo:
-    """Verify Facebook OAuth token."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://graph.facebook.com/me?fields=id,email,name,picture",
-            headers={"Authorization": f"Bearer {access_token}"},
-            timeout=5.0,
-        )
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Facebook access token",
-            )
-        data = response.json()
-        picture_url = data.get("picture", {}).get("data", {}).get("url")
-        return OAuthUserInfo(
-            id=data["id"],
-            email=data.get("email"),
-            name=data.get("name"),
-            image=picture_url,
-        )
-
-
-async def verify_session_token(session_token: str) -> OAuthUserInfo:
-    """Verify better-auth session token and extract user info."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{settings.BETTER_AUTH_URL}/api/auth/get-session",
-            headers={"Cookie": f"better-auth.session_token={session_token}"},
-            timeout=5.0,
-        )
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid session token",
-            )
-        data = response.json()
-        user = data.get("user", {})
-        email = user.get("email")
-        if not email:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid session: no email",
-            )
-        return OAuthUserInfo(
-            id=user.get("id", ""),
-            email=email,
-            name=user.get("name"),
-            image=user.get("image"),
-            email_verified=user.get("emailVerified", False),
-        )
-
-
-async def verify_oauth_token(provider: str, access_token: str) -> OAuthUserInfo:
-    """Verify OAuth token based on provider."""
-    if provider == "google":
-        return await verify_google_token(access_token)
-    elif provider == "github":
-        return await verify_github_token(access_token)
-    elif provider == "facebook":
-        return await verify_facebook_token(access_token)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported provider: {provider}",
-        )
 
 
 async def get_current_user(request: Request) -> CurrentUserInfo:
