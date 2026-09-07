@@ -4,10 +4,8 @@ description: Structured bug diagnosis and fixing workflow that reproduces, diagn
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 1 in order.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **You MUST use MCP tools throughout the workflow.**
   - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation, NOT raw file reads or grep.
   - Use memory write tool to record debugging results.
@@ -25,7 +23,7 @@ Steps 1-5 execute inline for all vendors. Step 6 (similar pattern scanning) may 
 
 ### L1 Decision Events
 
-Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ### Subagent Spawn Criteria
 
@@ -51,13 +49,13 @@ Include diagnosis results and scan scope. Results returned as JSON output.
 Use the native `.gemini/agents/{name}.md` subagent when available (per `_shared/core/vendor-detection.md`); otherwise fall back to:
 
 ```bash
-oma agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
 ```
 
 #### If Antigravity or CLI Fallback
 
 ```bash
-oma agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
 ```
 
 ---
@@ -95,8 +93,8 @@ Identify the root cause, not just the symptom. Check:
 When the root cause is confirmed, emit and verify the required diagnosis decision:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"debug.root-cause","decision":"Treat the confirmed root cause as the basis for the minimal fix.","rationale":"The diagnosis traced the failure path and distinguished the root cause from symptoms."}'
-oma state:verify --workflow debug --checkpoint root-cause
+oma state emit "decision.made" '{"subject":"debug.root-cause","decision":"Treat the confirmed root cause as the basis for the minimal fix.","rationale":"The diagnosis traced the failure path and distinguished the root cause from symptoms."}'
+oma state verify --workflow debug --checkpoint root-cause
 ```
 
 ---
@@ -106,7 +104,7 @@ oma state:verify --workflow debug --checkpoint root-cause
 Present the root cause and proposed fix to the user.
 - The fix should change only what is necessary.
 - Explain why this fixes the root cause, not just the symptom.
-- **You MUST get user confirmation before proceeding to Step 5.**
+- Apply `.agents/skills/_shared/core/execution-policy.md`: proceed when the requested work or decision is already authorized; ask only for a material missing decision or new authorization.
 
 ---
 

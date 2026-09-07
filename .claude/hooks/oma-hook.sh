@@ -26,6 +26,6 @@ else
 fi
 if [ -n "$__oma_bin" ]; then
   # Run oma hook; swallow a non-zero exit so the wrapper is always fail-open.
-  "$__oma_bin" hook "$@" || true
+  "$__oma_bin" hook run "$@" || true
 fi
 exit 0

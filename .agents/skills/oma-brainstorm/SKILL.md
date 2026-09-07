@@ -90,7 +90,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 | Ask targeted questions | `REQUEST` | Clarification phase |
 | Compare approaches | `COMPARE` | Tradeoff matrix |
 | Infer recommendation | `INFER` | Recommended option |
-| Emit option-selection decision | `CALL_TOOL` | `oma state:emit` + `oma state:verify --checkpoint option-selection` |
+| Emit option-selection decision | `CALL_TOOL` | `oma state emit` + `oma state verify --checkpoint option-selection` |
 | Validate approval | `VALIDATE` | Section-by-section confirmation |
 | Run blind review | `VALIDATE` | Independent lens critiques, tiered issue list, Tier 1 resolution |
 | Write design artifact | `WRITE` | `docs/plans/designs/` and memory |
@@ -127,7 +127,7 @@ Explore user intent, constraints, and alternative approaches before planning or 
 
 ### Guardrails
 1. **No implementation or planning before design approval** - brainstorm produces a design document, not code or task plans
-2. **One question at a time** - ask clarifying questions sequentially, not in batches
+2. **One question at a time** - ask clarification and approval questions through the available asynchronous question tool first, following `../_shared/core/clarification-protocol.md`; fall back to a permitted question tool or plain text. Continue independent work while waiting, and never infer approval from silence or a preselected option.
 3. **Always propose 2-3 approaches** - mechanistically distinct when possible; label each `tactical` or `structural`. The recommended option defaults to `structural` and must address the root cause. Recommend `tactical` only for genuinely throwaway scope, not merely because of deadline or effort pressure; include trade-off analysis.
 4. **Prose before matrix** - explain each approach with scenario, plain-language mechanism, solves/leaves, and cost feel; then comparison matrix; then recommendation. Do not lead with matrix-only output
 5. **Section-by-section design** - present design incrementally with user confirmation at each step
@@ -158,7 +158,7 @@ Follow the brainstorm workflow step by step:
 - **Skipping blind review**: Saving a non-trivial design without the independent critique round, or letting the design's author-context leak into escalated reviewer prompts
 
 ## References
-Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
+Vendor-specific execution protocols are injected automatically by `oma agent spawn`.
 Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - TRIZ-lite (optional Step 3 seeding): `resources/triz-lite.md`
 - Context loading: `../_shared/core/context-loading.md`

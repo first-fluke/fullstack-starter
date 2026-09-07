@@ -5,6 +5,7 @@ import http from "node:http";
 import https from "node:https";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import { currentMemoryAdapter } from "./memory-adapter.ts";
 
 function endpointUrl(): string | null {
   if (process.env.OMA_NO_AGENTMEMORY === "1") return null;
@@ -233,6 +234,7 @@ export function parseSearchResults(
 export async function recallFacts(
   query: string,
   k = 5,
+  projectDir: string = process.cwd(),
 ): Promise<RecalledFact[]> {
   if (!query.trim()) return [];
   // The whole body is guarded so this honors its "never throws" contract: the
@@ -240,13 +242,22 @@ export async function recallFacts(
   // socket error from the shared daemon), and an unguarded throw here blanks the
   // boundary snapshot the hook would otherwise emit. Degrade to local-only.
   try {
+    const adapter = currentMemoryAdapter(projectDir);
+    if (adapter) return await adapter.recall(query, k, projectDir);
     if (!(await isAgentMemoryReachable())) return [];
     const url = endpointUrl();
     if (!url) return [];
     const response = await requestAgentMemory(url, "/agentmemory/search", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ query, limit: k }),
+      // Match the project identity used by observeWithTimeout. The query's
+      // project-name term is a relevance hint, not a scope restriction.
+      body: JSON.stringify({
+        query,
+        limit: k,
+        project: basename(projectDir),
+        cwd: projectDir,
+      }),
       timeoutMs: 2000,
     });
     if (response.statusCode < 200 || response.statusCode >= 300) return [];
@@ -266,6 +277,8 @@ export async function observeWithTimeout(payload: {
   // endpoint resolution can throw under load, and a throw here must not abort
   // the hook that fired the observe.
   try {
+    const adapter = currentMemoryAdapter(payload.projectDir);
+    if (adapter) return await adapter.observe(payload);
     if (!(await isAgentMemoryReachable())) return false;
     const url = endpointUrl();
     if (!url) return false;

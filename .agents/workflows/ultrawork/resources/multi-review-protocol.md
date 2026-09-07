@@ -33,7 +33,7 @@ findings: [ { severity: CRITICAL|HIGH|MEDIUM|LOW, file:line, description, fix } 
 evidence: <artifact paths the reviewer actually read>
 ```
 
-The phase coordinator collects these verdicts and folds them into the phase's `result-*.md` and `session-ultrawork.md` records. Dispatch mechanics (native subagent vs `oma agent:spawn`) are defined once in the **Cross-Context Review (CCR) Dispatch** section of `ultrawork.md`.
+The phase coordinator collects these verdicts and folds them into the phase's `result-*.md` and `session-ultrawork.md` records. Dispatch mechanics (native subagent vs `oma agent spawn`) are defined once in the **Cross-Context Review (CCR) Dispatch** section of `ultrawork.md`.
 
 ---
 
@@ -99,7 +99,7 @@ The phase coordinator collects these verdicts and folds them into the phase's `r
 ### 12. Final Review (Step 17)
 - **Question**: "Is this ready to deploy?"
 - **Check**: Complete checklist final verification
-- **Pass Condition**: User final approval
+- **Pass Condition**: Readiness criteria in `phase-gates.md` → SHIP_GATE are met; authorization follows the shared execution policy
 
 ---
 
