@@ -4,10 +4,8 @@ description: Design-first ideation workflow that explores user intent, clarifies
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 1 in order.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **Do NOT write any code.** This workflow produces a design document, not implementation.
 - **You MUST use MCP tools throughout the workflow.**
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
@@ -24,7 +22,7 @@ disable-model-invocation: true
 
 ## L1 Decision Events
 
-Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ---
 
@@ -40,6 +38,7 @@ Use MCP code analysis tools to understand the current codebase:
 ## Step 2: Ask Clarifying Questions
 
 Ask the user clarifying questions **one at a time**. Prefer multiple-choice options when possible.
+For all clarification and approval questions in this workflow, follow `.agents/skills/_shared/core/clarification-protocol.md`: prefer an available asynchronous question tool, continue independent work, and wait for explicit answers before dependent approval steps.
 Key areas to clarify:
 - **Intent**: What problem are they solving? Who is the target user?
 - **Scope**: Must-have vs nice-to-have features
@@ -114,26 +113,26 @@ Questions that help choose: {1–2 optional prompts for the user}
 - Approaches must be **mechanistically distinct** when possible — not three intensities of the same knob.
 - **Engineering-first default:** the recommended approach MUST be `structural` — addressing the root cause with proper engineering. Deadline pressure, effort delta, and "we'll fix it properly later" are NOT valid grounds for recommending tactical. Recommending `tactical` is only allowed when the problem itself is genuinely throwaway scope (e.g., one-line config flip, deprecated module being removed). The tighter the deadline, the more important it is to do it right the first time.
 
-**You MUST get user confirmation on the chosen approach before proceeding to Step 4.**
+Apply `.agents/skills/_shared/core/execution-policy.md`: proceed when the requested work or decision is already authorized; ask only for a material missing decision or new authorization.
 
-After the user chooses an option, emit and verify the required option-selection decision:
+Once the option is resolved from the user request, delegated choice, or a clarification, emit and verify the required option-selection decision. Record how the choice was authorized:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"brainstorm.option-selection","decision":"Proceed with the user-selected approach.","rationale":"The user selected one option after comparing alternatives and tradeoffs."}'
-oma state:verify --workflow brainstorm --checkpoint option-selection
+oma state emit "decision.made" '{"subject":"brainstorm.option-selection","decision":"<selected approach>","rationale":"<existing instruction, delegated choice, or new user selection authorizing this option>"}'
+oma state verify --workflow brainstorm --checkpoint option-selection
 ```
 
 ---
 
 ## Step 4: Present Design
 
-Present the detailed design **section by section**, getting user feedback at each step:
+Present the detailed design **section by section**:
 - Architecture overview (components, data flow)
 - Key interfaces and contracts
 - Integration points with existing code
 - Edge cases and error handling strategy
 
-Each section requires explicit user approval before moving to the next.
+Invite feedback on material decisions; reuse existing authorization under the execution policy. Pause only sections that depend on missing information or new authorization.
 
 ---
 
@@ -161,7 +160,7 @@ Groupthink and authority bias hide real gaps. A blind round, where each perspect
 
 5. **Resolve Tier 1 issues** by updating Step 4 design with either new sections in existing files, new files, or explicit out-of-scope declarations.
 
-6. **Present resolved design** to the user for final approval before Step 6.
+6. **Present the resolved design**, noting changes from the critique. Apply the execution policy before Step 6; ask only for unresolved material decisions or new authorization.
 
 **Blind fidelity — inline vs. delegated:**
 
@@ -169,7 +168,7 @@ The default inline lenses run in *this* session, so the model that authored the 
 
 **Escalation (high-stakes designs only):** when the design is architecturally significant, hard to reverse, or security-/compliance-sensitive, delegate the critique to **fresh-context reviewer subagents** instead of inline lenses, so each reviewer sees only the design artifact — not the conversation history, rationale, or approval flow that carries the author's bias.
 
-- Resolve `target_vendor_for_agent` per agent, then dispatch each reviewer lens using the standard per-agent path: native subagent when `target_vendor_for_agent === current_runtime_vendor`, otherwise `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+- Resolve `target_vendor_for_agent` per agent, then dispatch each reviewer lens using the standard per-agent path: native subagent when `target_vendor_for_agent === current_runtime_vendor`, otherwise `oma agent spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
 - Pass **only the Step 4 design document** (and minimal domain constraints) in the prompt file. Do **not** include the clarification Q&A, prior reservations or accepted compromises, or user approvals — that context is exactly what a blind reviewer must not see.
 - Suggested reviewer agents: `qa-reviewer`, `architecture-reviewer`, plus domain lenses from the stakeholder map in point 1.
 - Consolidate their findings back through points 3-6 above.

@@ -1,13 +1,11 @@
 ---
 name: orchestrate
-description: Automated parallel agent execution that spawns CLI subagents via native dispatch or `oma agent:spawn`, coordinates through MCP Memory, monitors progress, and runs verification
+description: Automated parallel agent execution that spawns CLI subagents via native dispatch or `oma agent spawn`, coordinates through MCP Memory, monitors progress, and runs verification
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
   - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration. Do NOT use raw grep as a substitute.
   - Use file tools (`Read`/`Write`/`Edit`) to persist coordination artifacts directly to `{memoryConfig.basePath}/` (default: `.agents/state/memories/`). Do NOT use Serena's `write_memory` for workflow session state, as verification gates require durable files on disk.
@@ -16,6 +14,11 @@ disable-model-invocation: true
 - **Read required documents BEFORE starting.**
 
 ---
+
+## Agent execution evidence
+
+Follow `.agents/skills/_shared/core/execution-policy.md` and `.agents/skills/_shared/runtime/result-contract.md`. Include QA and REFINE task IDs in the plan. For each native agent, begin a run, record checks, and finalize its structured result. For CLI dispatch, pass `--task-id` and use the injected run identity. Complete phase logs before finalizing the QA/REFINE artifacts; code changes after verification require fresh checks.
+
 
 ## Vendor Detection
 
@@ -30,7 +33,7 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
 4. Read `.agents/skills/_shared/runtime/event-spec.md` for L1 event protocol.
-5. Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+5. Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ---
 
@@ -49,9 +52,9 @@ Look for a plan file:
 A missing plan is not a stop condition. `/orchestrate` creates the plan itself instead of handing the request back to the user:
 
 1. Generate the session ID now (format: `session-YYYYMMDD-HHMMSS`). Step 2 reuses this id verbatim — do not generate a second one.
-2. Read and follow `.agents/workflows/plan.md` step by step, passing this session ID as its `{sessionId}` so the artifact lands at `.agents/results/plan-{sessionId}.json`.
-3. **Do NOT skip `plan.md` Step 6 (Review Plan with User).** It is this run's approval gate — the Step 3 fan-out is authorized by it. Delegation never removes a user gate.
-4. Once the plan is saved and approved, load it and continue to Step 2 with the same session ID.
+2. Read and follow `.agents/workflows/plan.md`, passing this session ID as its `{sessionId}` and requiring an executable JSON plan even for Simple tasks. The artifact lands at `.agents/results/plan-{sessionId}.json`.
+3. Present the plan under `plan.md` Step 6 and reuse existing authorization. Ask only for a material missing decision or new authorization; delegation does not authorize work outside the request.
+4. Once the plan is saved and authorized, load it and continue to Step 2 with the same session ID.
 
 Stop and report only when the plan cannot be produced: the user declines to plan, or `plan.md` blocks because the request is too underspecified to decompose.
 
@@ -89,8 +92,8 @@ Stop and report only when the plan cannot be produced: the user declines to plan
 Before spawning agents, emit and verify the required fan-out decision:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"orchestrate.fanout-strategy","decision":"Spawn agents by priority tier using the loaded plan.","rationale":"The plan is available and determines which agents run in parallel."}'
-oma state:verify --workflow orchestrate --checkpoint fanout-strategy
+oma state emit "decision.made" '{"subject":"orchestrate.fanout-strategy","decision":"Spawn agents by priority tier using the loaded plan.","rationale":"The plan is available and determines which agents run in parallel."}'
+oma state verify --workflow orchestrate --checkpoint fanout-strategy
 ```
 
 For each priority tier (lowest first: tier 1, then tier 2, etc.):
@@ -104,7 +107,7 @@ For each priority tier (lowest first: tier 1, then tier 2, etc.):
 For each planned agent, first resolve the target vendor from `.agents/oma-config.yaml`.
 
 - If `target_vendor === current_runtime_vendor` and that runtime has a verified native role-subagent path, use the native vendor variant agent definition.
-- Otherwise, use `oma agent:spawn` for that agent only.
+- Otherwise, use `oma agent spawn` for that agent only.
 
 ### If Claude Code and target vendor is Claude
 
@@ -132,33 +135,33 @@ Spawn agents via **Agent tool** using `.claude/agents/{agent}.md` definitions.
 
 ### If OpenCode and target vendor is OpenCode
 
-Spawn same-session subagents with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent:spawn` for same-session OpenCode tasks; that external fallback does not appear as a native child task in the active UI/TUI.
+Spawn same-session subagents with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent spawn` for same-session OpenCode tasks; that external fallback does not appear as a native child task in the active UI/TUI.
 
 ### If Codex CLI and target vendor is Codex
 
 Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available.
 Pass each agent its task description, API contracts, and relevant context.
-If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
 
 ### If Gemini CLI and target vendor is Gemini
 
 Spawn native Gemini subagents using `.gemini/agents/{agent}.md` when available.
-If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
 
 ### If target vendor differs from current runtime, or native dispatch is unavailable
 
-Spawn agents using `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}` only (custom subagents not available).
+Spawn agents using `oma agent spawn {agent_id} {prompt_file} {session_id} -w {workspace}` only (custom subagents not available).
 
 ---
 
 ## Step 4: Monitor Progress
 
-Use `oma agent:status {session_id} {agent_id}` to check process health.
+Use `oma agent status {session_id} {agent_id}` to check process health.
 Also use memory read tool to poll `progress-{agent}[-{sessionId}].md` for logic updates.
 
 - Use memory edit tool to update `task-board.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
-- A `no-artifact` status (or `oma agent:spawn` exit code 3) means the vendor exited 0 but wrote no result artifact under the workspace — a silent misdirected write. Treat it as a failed spawn: do NOT collect it as completed; re-dispatch (natively if the external vendor is unreliable) and check the session trail for the `blocker.raised` event.
+- A `no-artifact` status (or `oma agent spawn` exit code 3) means the vendor exited 0 but wrote no result artifact under the workspace — a silent misdirected write. Treat it as a failed spawn: do NOT collect it as completed; re-dispatch (natively if the external vendor is unreliable) and check the session trail for the `blocker.raised` event.
 
 ### Context Anxiety Check (per polling cycle)
 
@@ -223,8 +226,8 @@ Compile summary: completed tasks, failed tasks, files changed, remaining issues.
 Emit and verify the required QA verdict decision before the final report:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"orchestrate.qa-verdict","decision":"Accept completed agents or record change requests.","rationale":"Agent verification results have been collected and classified."}'
-oma state:verify --workflow orchestrate --checkpoint qa-verdict
+oma state emit "decision.made" '{"subject":"orchestrate.qa-verdict","decision":"Accept completed agents or record change requests.","rationale":"Agent verification results have been collected and classified."}'
+oma state verify --workflow orchestrate --checkpoint qa-verdict
 ```
 
 ---

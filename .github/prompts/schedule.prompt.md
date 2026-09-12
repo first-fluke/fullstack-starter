@@ -1,5 +1,5 @@
 ---
-description: Register a scheduled agent job from a natural-language schedule request — parse the interval, resolve agent-id + prompt + workspace, call oma schedule:add, then confirm with oma schedule:list
+description: Register a scheduled agent job from a natural-language schedule request — parse the interval, resolve agent-id + prompt + workspace, call oma schedule create, then confirm with oma schedule list
 mode: agent
 ---
 <!-- oma:generated -->
