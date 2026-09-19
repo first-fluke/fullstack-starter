@@ -1,6 +1,6 @@
 # PLAN Phase Protocol
 
-Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow.
+Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow. Use `.agents/workflows/ultrawork/resources/phase-gates.md` for canonical criteria and `.agents/workflows/ultrawork.md` for reviewer dispatch; this resource does not start additional reviews.
 
 ---
 
@@ -8,8 +8,7 @@ Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow.
 
 ### Tasks
 - Define scope, features, architecture
-- Apply "Think Before Coding" principle
-- Present alternatives, don't assume
+- Resolve material assumptions from context; compare alternatives for unresolved decisions
 
 ### Outputs
 - Task decomposition (priority tiers: 1 = independent, ascending)
@@ -36,9 +35,9 @@ Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow.
 "Was the review done properly?"
 
 ### Checklist
-- [ ] Self-verify Step 2 review was sufficient
-- [ ] No review gaps confirmed
-- [ ] No circular logic
+- [ ] The assigned fresh reviewer checks Step 2 findings against plan criteria and evidence
+- [ ] Uncovered requirements or unsupported findings are identified
+- [ ] The verdict follows the canonical PLAN_GATE and CCR dispatch contract
 
 ---
 
@@ -57,10 +56,11 @@ Execution guide for PLAN Phase (Steps 1-4) in ultrawork workflow.
 ## PLAN_GATE Checklist
 
 Final verification before completing plan:
-- [ ] Acceptance criteria defined
-- [ ] Assumptions documented
-- [ ] Alternatives considered (min 2 for major decisions)
+- [ ] Acceptance criteria have stable IDs and all are covered by relevant `required_checks` argv/cwd declarations
+- [ ] Dependencies, replay prompts and retry safety are explicit; any narrowed `inputs` set covers all behavioral dependencies
+- [ ] Material assumptions documented
+- [ ] Alternatives considered for unresolved major decisions
 - [ ] Over-engineering review completed
-- [ ] Ready for user confirmation
+- [ ] Execution policy applied; existing authorization reused
 
 **Gate failure → Return to Step 1 to revise plan**

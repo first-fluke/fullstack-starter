@@ -1,24 +1,14 @@
 # PM Agent - Execution Protocol
 
-## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
-   - **Simple**: Lightweight plan, 3-5 tasks | **Medium**: Full 4 steps | **Complex**: Full + API contracts
-2. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md` (critical for PM)
-   - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
-   - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-3. **Check lessons**: read cross-domain section in `../../_shared/core/lessons-learned.md`
-4. **If governance, risk, or formal planning matters**: read `resources/iso-planning.md`
-
-**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
-
-Follow these steps in order (adjust depth by difficulty).
+## Preparation
+Use the task's scope, existing project conventions, and acceptance criteria. Follow `../../_shared/core/execution-policy.md` when it has not already been supplied. Read only references needed by the selected operation; consult lessons or recovery guides for an observed issue. Expand planning depth only when the change requires it.
 
 ## Step 1: Analyze Requirements
 - Parse user request into concrete requirements
 - Identify explicit and implicit features
 - List edge cases and assumptions
 - Ask clarifying questions if ambiguous
-- Use Serena (if existing codebase): `get_symbols_overview` to understand current architecture
+- Inspect existing structure and relevant symbols via `../../_shared/core/code-intelligence.md`; use native search and scoped reads when the configured provider is unavailable
 - If risk or governance matters, identify:
   - stakeholders
   - constraints
@@ -27,7 +17,7 @@ Follow these steps in order (adjust depth by difficulty).
 
 ## Step 2: Design Architecture
 - Select tech stack (frontend, backend, mobile, database, infra)
-- Define API contracts (method, path, request/response schema)
+- Reuse or update API contracts for changed cross-boundary work (method, path, request/response schema)
 - Design data models (tables, relationships, indexes)
 - Identify security requirements (auth, validation, encryption)
 - Plan infrastructure (hosting, caching, CDN, monitoring)
@@ -39,6 +29,9 @@ Follow these steps in order (adjust depth by difficulty).
 ## Step 3: Decompose Tasks
 - Break into tasks completable by a single agent
 - Each task has: agent, title, description, acceptance criteria, priority, dependencies, **scope**
+- For executable acceptance gates, `acceptance_criteria` contains `{id, description}` objects; `required_checks` contains unique `{id, criteria, command, cwd}` objects. Cover every criterion with relevant exact argv and a project-relative cwd. See `task-template.json` and `../../_shared/runtime/result-contract.md`.
+- Preserve canonical `dependencies` task IDs and a self-contained `task` prompt for replay. `retry_policy` defaults to `manual`; use `safe` only when repetition cannot duplicate external effects.
+- Optional `inputs` declares a complete set of concrete source, test, configuration and dependency inputs for reusable evidence. Omit it for whole-tree verification. `scope` remains the allowed edit boundary and is not an evidence-input list.
 - `agent`: one of the orchestrator-dispatchable domains — `backend`, `frontend`, `mobile`, `db`, `qa`, `debug`, `pm`, `architecture`, `refactor`, `tf-infra`, `docs` (see the agent mapping table in `.agents/workflows/orchestrate.md`)
 - `scope`: array of directory prefixes this agent is allowed to modify (e.g., `["src/api/", "migrations/"]`). Used by `verify` to detect cross-agent boundary violations in parallel execution.
 - **Test approach (opt-in, per task)**: set `test_approach` where a test strategy matters
@@ -47,7 +40,7 @@ Follow these steps in order (adjust depth by difficulty).
   - `not_applicable`: automated tests inappropriate — **must** fill `test_approach_rationale` and `alternative_verification` (documented manual/alternative check)
   - Do **not** mark `tdd` for: documentation, pure styling, generated code, IaC plans, behavior-preserving refactors (refactor tasks keep their characterization-test safety net), or inherently nondeterministic integrations
   - `test_scope`: which layers the tests cover (e.g., `["unit", "integration"]`)
-  - No `test_approach` value ever waives the global unit-test coverage gate (>= 80%); `not_applicable` code still counts toward the aggregate unless declaratively excluded in coverage config with justification
+  - No `test_approach` value waives a project-defined coverage requirement. Where no target exists, plan evidence for changed behavior and justify exclusions; do not invent a universal percentage
 - Minimize dependencies for maximum parallel execution
 - Priority tiers: 1 = independent (run first), 2 = depends on tier 1, etc.
   - The numeric tier is the **canonical** `priority` value in plan JSON (what the orchestrator fans out on).
@@ -61,7 +54,7 @@ Follow these steps in order (adjust depth by difficulty).
 - Check: Are acceptance criteria measurable and testable?
 - Check: Is `test_approach` valid where set (`tdd|test_after|not_applicable`), with rationale + alternative verification for every `not_applicable`? (`oma verify pm` enforces this contract)
 - Check: Is security considered from the start (not deferred)?
-- Check: Are API contracts defined before frontend/mobile tasks?
+- Check: Are affected API boundaries settled by an existing or updated contract before dependent frontend/mobile work?
 - Check: Are major risks, owners, and approval points explicit when needed?
 - Output task-board.md format for orchestrator compatibility
 

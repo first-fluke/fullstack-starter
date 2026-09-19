@@ -1,7 +1,7 @@
 # Backend Agent - Error Recovery Playbook
 
 When you encounter a failure, find the matching scenario and follow the recovery steps.
-Do NOT stop or ask for help until you have exhausted the playbook.
+Use the relevant recovery steps. If required information or authority is missing, pause the dependent action and continue independent work.
 
 ---
 
@@ -27,7 +27,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
    - Test expects old behavior → update test
    - Implementation has a bug → fix implementation
 4. Run the specific failing test with verbose output
-5. After fix, run full test suite to check for regressions
+5. After the fix, run affected regression tests; run a broader suite only when impact or project requirements justify it
 6. **After 3 failures**: Try a different approach. Record current attempt in progress and implement alternative
 
 ---
@@ -79,15 +79,14 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ---
 
-## Serena Memory Unavailable
+## Workflow State Unavailable
 
-**Symptoms**: `write_memory` / `read_memory` failure, timeout
+Follow `../../_shared/runtime/memory-protocol.md`; state storage is independent of the code-intelligence provider.
 
-1. Retry once (may be transient error)
-2. If 2 consecutive failures: fall back to local files
-   - progress → write to `/tmp/progress-{agent-id}[-{sessionId}].md`
-   - result → write to `/tmp/result-{agent-id}[-{sessionId}].md`
-3. Add `memory_fallback: true` flag to result
+1. Use the injected progress/result paths and session/task identity.
+2. If a file operation fails, retry once when the failure may be transient.
+3. Preserve work and report the failed path and error to the coordinator. Do not silently redirect artifacts to `/tmp` or mark a missing result as completed.
+4. For read-only tasks, return the result through the runtime's response channel as required by the dispatch contract.
 
 ---
 

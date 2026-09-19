@@ -1,21 +1,21 @@
 ---
 name: orchestrate
-description: Automated parallel agent execution that spawns CLI subagents via native dispatch or `oma agent:spawn`, coordinates through MCP Memory, monitors progress, and runs verification
+description: Automated parallel agent execution that spawns CLI subagents via native dispatch or `oma agent spawn`, coordinates through durable file state, monitors progress, and runs verification
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 0 in order. Explicitly report completion of each step before proceeding.
-- **You MUST use MCP tools throughout the entire workflow.** This is NOT optional.
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for code exploration. Do NOT use raw grep as a substitute.
-  - Use file tools (`Read`/`Write`/`Edit`) to persist coordination artifacts directly to `{memoryConfig.basePath}/` (default: `.agents/state/memories/`). Do NOT use Serena's `write_memory` for workflow session state, as verification gates require durable files on disk.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
+- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider's tools; do not install or track a repository; use native scoped search if unavailable or timed out, and record that limit.
+- Persist coordination artifacts through the file-memory contract in `.agents/skills/_shared/runtime/memory-protocol.md`. That path is independent of code-intelligence MCP tools.
 - **Read required documents BEFORE starting.**
 
 ---
+
+## Agent execution evidence
+
+Follow `.agents/skills/_shared/core/execution-policy.md` and `.agents/skills/_shared/runtime/result-contract.md`. Include QA and REFINE task IDs in the plan. For each native agent, begin a run, record checks, and finalize its structured result. For CLI dispatch, pass `--task-id` and use the injected run identity. Complete phase logs before finalizing the QA/REFINE artifacts; code changes after verification require fresh checks.
+
 
 ## Vendor Detection
 
@@ -30,7 +30,7 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 2. Read `.agents/skills/_shared/core/context-loading.md` for resource loading strategy.
 3. Read `.agents/skills/_shared/runtime/memory-protocol.md` for memory protocol.
 4. Read `.agents/skills/_shared/runtime/event-spec.md` for L1 event protocol.
-5. Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+5. Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ---
 
@@ -49,9 +49,9 @@ Look for a plan file:
 A missing plan is not a stop condition. `/orchestrate` creates the plan itself instead of handing the request back to the user:
 
 1. Generate the session ID now (format: `session-YYYYMMDD-HHMMSS`). Step 2 reuses this id verbatim — do not generate a second one.
-2. Read and follow `.agents/workflows/plan.md` step by step, passing this session ID as its `{sessionId}` so the artifact lands at `.agents/results/plan-{sessionId}.json`.
-3. **Do NOT skip `plan.md` Step 6 (Review Plan with User).** It is this run's approval gate — the Step 3 fan-out is authorized by it. Delegation never removes a user gate.
-4. Once the plan is saved and approved, load it and continue to Step 2 with the same session ID.
+2. Read and follow `.agents/workflows/plan.md`, passing this session ID as its `{sessionId}` and requiring an executable JSON plan even for Simple tasks. The artifact lands at `.agents/results/plan-{sessionId}.json`.
+3. Present the plan under `plan.md` Step 6 and reuse existing authorization. Ask only for a material missing decision or new authorization; delegation does not authorize work outside the request.
+4. Once the plan is saved and authorized, load it and continue to Step 2 with the same session ID.
 
 Stop and report only when the plan cannot be produced: the user declines to plan, or `plan.md` blocks because the request is too underspecified to decompose.
 
@@ -79,7 +79,7 @@ Stop and report only when the plan cannot be produced: the user declines to plan
 
 3. Session ID: reuse the id generated in Step 1b when the plan was created in this run; otherwise generate one now (format: `session-YYYYMMDD-HHMMSS`).
 4. **Domain gate**: for each planned task, classify it into `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`, and derive `exposed_skill_set` (skills whose name is in `domain_tags`). If fewer than 2 skills match confidently, fall back to the full installed set and mark `exposure_fallback: true`. See `.agents/skills/oma-orchestration/SKILL.md` (PHASE 1.5) for the full rules.
-5. Use memory write tool to create `orchestrator-session.md` and `task-board.md` in the memory base path. Record `Exposed Skills` and `Exposure Fallback` per task in `task-board.md`.
+5. Create `orchestrator-session-{sessionId}.md` and `task-board-{sessionId}.md` in the memory base. Record `Exposed Skills` and `Exposure Fallback` per task.
 6. Set session status to RUNNING.
 
 ---
@@ -89,14 +89,14 @@ Stop and report only when the plan cannot be produced: the user declines to plan
 Before spawning agents, emit and verify the required fan-out decision:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"orchestrate.fanout-strategy","decision":"Spawn agents by priority tier using the loaded plan.","rationale":"The plan is available and determines which agents run in parallel."}'
-oma state:verify --workflow orchestrate --checkpoint fanout-strategy
+oma state emit "decision.made" '{"subject":"orchestrate.fanout-strategy","decision":"Spawn agents by priority tier using the loaded plan.","rationale":"The plan is available and determines which agents run in parallel."}'
+oma state verify --workflow orchestrate --checkpoint fanout-strategy
 ```
 
 For each priority tier (lowest first: tier 1, then tier 2, etc.):
 
 - Each agent gets: task description, API contracts, relevant context from `_shared/core/context-loading.md`, and only its task's `exposed_skill_set` as the available specialist list (see `.agents/skills/oma-orchestration/resources/subagent-prompt-template.md` `{EXPOSED_SKILL_SET}`).
-- Use memory edit tool to update `task-board.md` with agent status.
+- Update `task-board-{sessionId}.md` with agent status.
 - If a failed task's review history indicates a specialist outside its `exposed_skill_set` was needed, re-classify the task and re-dispatch with the expanded set instead of retrying against the original narrow set.
 
 ### Per-Agent Dispatch
@@ -104,7 +104,7 @@ For each priority tier (lowest first: tier 1, then tier 2, etc.):
 For each planned agent, first resolve the target vendor from `.agents/oma-config.yaml`.
 
 - If `target_vendor === current_runtime_vendor` and that runtime has a verified native role-subagent path, use the native vendor variant agent definition.
-- Otherwise, use `oma agent:spawn` for that agent only.
+- Otherwise, use `oma agent spawn` for that agent only.
 
 ### If Claude Code and target vendor is Claude
 
@@ -132,53 +132,39 @@ Spawn agents via **Agent tool** using `.claude/agents/{agent}.md` definitions.
 
 ### If OpenCode and target vendor is OpenCode
 
-Spawn same-session subagents with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent:spawn` for same-session OpenCode tasks; that external fallback does not appear as a native child task in the active UI/TUI.
+Spawn same-session subagents with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent spawn` for same-session OpenCode tasks; that external fallback does not appear as a native child task in the active UI/TUI.
 
 ### If Codex CLI and target vendor is Codex
 
 Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available.
 Pass each agent its task description, API contracts, and relevant context.
-If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} --task-id {task.id} -w {workspace}`.
 
 ### If Gemini CLI and target vendor is Gemini
 
 Spawn native Gemini subagents using `.gemini/agents/{agent}.md` when available.
-If native dispatch is not verified in the current runtime, fall back to `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}`.
+If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} --task-id {task.id} -w {workspace}`.
 
 ### If target vendor differs from current runtime, or native dispatch is unavailable
 
-Spawn agents using `oma agent:spawn {agent_id} {prompt_file} {session_id} -w {workspace}` only (custom subagents not available).
+Spawn agents using `oma agent spawn {agent_id} {prompt_file} {session_id} --task-id {task.id} -w {workspace}` only (custom subagents not available).
 
 ---
 
 ## Step 4: Monitor Progress
 
-Use `oma agent:status {session_id} {agent_id}` to check process health.
-Also use memory read tool to poll `progress-{agent}[-{sessionId}].md` for logic updates.
+Use `oma agent status {session_id} {agent_id}` to check process health.
+Also poll `progress-{agentId}-{taskId}-{runId}-{sessionId}.md` for logic updates.
 
-- Use memory edit tool to update `task-board.md` with turn counts and status changes.
+- Update `task-board-{sessionId}.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
-- A `no-artifact` status (or `oma agent:spawn` exit code 3) means the vendor exited 0 but wrote no result artifact under the workspace — a silent misdirected write. Treat it as a failed spawn: do NOT collect it as completed; re-dispatch (natively if the external vendor is unreliable) and check the session trail for the `blocker.raised` event.
+- A `no-artifact` status (or `oma agent spawn` exit code 3) means the vendor exited 0 but wrote no result artifact under the workspace — a silent misdirected write. Treat it as a failed spawn: do NOT collect it as completed; re-dispatch (natively if the external vendor is unreliable) and check the session trail for the `blocker.raised` event.
 
-### Context Anxiety Check (per polling cycle)
+### Check stalled progress
 
-At each poll, evaluate for every in-progress agent:
+Use observed failures, missing artifacts, and unmet acceptance criteria to diagnose a stalled agent. Progress-file updates are not reliable turn counts. Do not restart from a fixed turn/progress ratio.
 
-1. **Turn budget ratio**: `turns_used / expected_turns` from difficulty guide
-2. **Progress ratio**: `completed_criteria / total_criteria` from task-board
-
-| Turn Budget | Progress | Action |
-|-------------|----------|--------|
-| < 80% | any | Continue monitoring |
-| >= 80% | >= 50% | Continue (agent is on track to finish) |
-| >= 80% | < 50% | **Context Reset**: Checkpoint + re-spawn (see `_shared/core/context-budget.md`) |
-| 100% (max turns) | < 100% | **Context Reset**: Force checkpoint + re-spawn with remaining items |
-
-Record reset events in `task-board.md`:
-```
-| Agent | Status | Note |
-| backend | reset-1 | Turn budget 80%, progress 40%, checkpoint saved |
-```
+If useful context is lost or progress remains stalled, save completed work, remaining criteria, verification, and artifact paths before resuming or re-dispatching. Preserve partial results and avoid duplicating a live attempt. Follow `.agents/skills/_shared/core/context-budget.md` and the existing retry/cost limits.
 
 > **Claude Code note**: Agent tool returns results synchronously, so no polling is needed. Check status, files changed, and issues directly in each agent's return value.
 
@@ -196,35 +182,27 @@ bash .agents/skills/oma-orchestration/scripts/verify.sh {agent-type} {workspace}
 ```
 
 - PASS (exit 0) or documented unsupported-type SKIP: continue to cross-review.
-- FAIL (exit 1): Before re-spawning, apply the Review Loop termination check:
+- FAIL (exit 1): use the shared aggregate recovery budget. The original attempt,
+  each retry, and each exploration hypothesis consume one attempt. Respect the
+  configured cost cap and reserve a complete 2–3 attempt round before
+  exploration. When a bound is reached, preserve partial evidence and stop
+  recovery; do not report the task as completed.
 
-  > **Review Loop termination conditions** (OR, whichever fires first wins):
-  > 1. Retry count for this agent has reached the configured maximum (default: 2 retries). Do not start another retry cycle.
-  > 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save the current agent's partial results before stopping, then report early termination due to quota. Do not spawn the next retry or any remaining agents in the tier.
-  >
-  > If neither condition is met, re-spawn the agent with error context and increment the retry counter.
-
-- FAIL (after 2 retries, and cost cap not yet exceeded): Activate **Exploration Loop** (load `exploration-loop.md` per `context-loading.md`):
-  1. Generate 2-3 alternative hypotheses for the failing task
-  2. Spawn the **same agent type** with different hypothesis prompts (parallel, separate workspaces)
-  3. Score each result with Quality Score (if available)
-  4. Keep the highest-scoring approach, discard others
-  5. Record all experiments in Experiment Ledger
-
-3. **QA cross-review**: spawn a QA agent with the completed agent's diff, acceptance criteria, mechanical-check evidence, and automated-verify result/SKIP reason. The QA agent returns PASS or FAIL with file-and-line findings. On FAIL, send the findings back to the implementation agent and restart at mechanical self-check. Allow at most 2 QA rejections and 5 total review-loop iterations; after either limit, report the review history and force-complete only with an explicit quality warning.
+3. **QA cross-review**: spawn a QA agent with the completed agent's diff, acceptance criteria, mechanical-check evidence, and automated-verify result/SKIP reason. The QA agent returns PASS or FAIL with file-and-line findings. On FAIL, send the findings back to the implementation agent and restart at mechanical self-check. After the documented review limit, preserve failed checks and unresolved work, then report `partial` or `failed`; never force-complete.
 
 ---
 
 ## Step 6: Collect Results
 
-After all agents complete, use memory read tool to read all `result-{agent}-{sessionId}.md` files.
-Compile summary: completed tasks, failed tasks, files changed, remaining issues.
+After all agents finish, read their claims and run-scoped reports. Collect as
+`completed` only plan tasks with successful required checks; summarize partial,
+blocked, and failed tasks with their remaining issues.
 
 Emit and verify the required QA verdict decision before the final report:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"orchestrate.qa-verdict","decision":"Accept completed agents or record change requests.","rationale":"Agent verification results have been collected and classified."}'
-oma state:verify --workflow orchestrate --checkpoint qa-verdict
+oma state emit "decision.made" '{"subject":"orchestrate.qa-verdict","decision":"Accept completed agents or record change requests.","rationale":"Agent verification results have been collected and classified."}'
+oma state verify --workflow orchestrate --checkpoint qa-verdict
 ```
 
 ---
@@ -236,7 +214,7 @@ Present session summary to the user.
 - If any tasks failed after retries, list them with error details.
 - Suggest next steps: manual fix, re-run specific agents, or run `/review` for QA.
 - Use memory write tool to record final results.
-- If Quality Score was measured during this session:
-  - Generate Experiment Ledger summary (total experiments, keep rate, net delta)
-  - Auto-generate lessons from discarded experiments (delta <= -5) into `lessons-learned.md`
-  - Include agent effectiveness ranking in the report
+- If actual experiments were run during this session:
+  - Summarize experiment decisions and comparable measurement evidence
+  - Record lessons in `lessons-{sessionId}.md` when experiment evidence supports a reusable cause and prevention action
+  - Include the selected approach, comparison evidence, and remaining limits

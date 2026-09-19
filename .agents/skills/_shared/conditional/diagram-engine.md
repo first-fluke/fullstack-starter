@@ -50,14 +50,17 @@ artifact is derived from it — never the other way round.
 
 ## Step 2 — Author the archify JSON IR
 
-Follow the installed archify `SKILL.md` (`<root>/SKILL.md`) verbatim; it is the
-authority on schema, invariants, and repair rules. The oma-specific rules are:
+Consult the installed archify `SKILL.md` (`<root>/SKILL.md`) for its schema,
+invariants, and diagnostic repair rules. Apply these within the user's scope and
+OMA execution policy; vendor guidance does not expand authorization. The oma-specific rules are:
 
 - Type router: architecture/container view → `architecture`; call chain →
   `sequence`; pipeline/lineage → `dataflow`; state machine → `lifecycle`;
   process/CI → `workflow`. When unsure: `oma diagram archify guide "<scenario>" --json`.
+<!-- oma-docs:ignore-start -->
 - Read only `schemas/common.schema.json`, the one matching `schemas/<type>.schema.json`,
   and one matching example under `examples/`. Do not read renderer internals.
+<!-- oma-docs:ignore-end -->
 - Translate the Mermaid topology semantically (archify's "Mermaid input" rule):
   same nodes, same edges, same labels; fresh stable IDs; ≤ 12 primary nodes,
   one main path. Split into two diagrams rather than exceeding that.
@@ -70,24 +73,26 @@ authority on schema, invariants, and repair rules. The oma-specific rules are:
 
 Spec path: sibling of the Markdown artifact, `<artifact-stem>.archify.json`.
 
-## Step 3 — Validate → repair → deliver (no iteration cap)
+## Step 3 — Validate → repair → deliver (bounded)
 
 ```bash
 oma diagram archify validate <type> <stem>.archify.json --quality <quality> --json
 oma diagram archify deliver  <type> <stem>.archify.json <stem>.archify.html --quality <quality> --json [--open]
 ```
 
+<!-- oma-docs:ignore-start -->
 `oma diagram archify …` runs the resolved `bin/archify.mjs` with
 `ARCHIFY_UPDATE_CHECK_DISABLED=1` and propagates the exit code — a non-zero
 exit is never success.
+<!-- oma-docs:ignore-end -->
 
-Repair loop rules (this project imposes **no fixed iteration budget**):
+Repair loop rules:
 
 1. Change only the diagnosed `subject`; verify `evidence`; pick from
    `supportedFixes`; re-validate.
 2. Keep iterating while the objective error count reaches a new minimum.
-3. Stop only when archify's own convergence rule fires — two consecutive
-   rounds with no improvement on the best count — or the spec passes.
+3. Stop when the spec passes, archify's convergence rule fires, after 3 repair
+   attempts, after 10 minutes total, or when the same diagnostic repeats.
 4. Never delete a semantic relationship label merely to pass; never fake a pass
    with `overflow: hidden`, clipped content, or shrunken typography.
 5. A passing final `validate` freezes the spec; `deliver` is then the single

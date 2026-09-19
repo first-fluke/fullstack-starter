@@ -1,9 +1,12 @@
 # Frontend Agent - Tech Stack Reference
 
+These are defaults for new projects without an established stack. Preserve the target project's installed versions and conventions; a scoped feature or fix does not authorize a stack migration.
+
 ## Core Framework
 - **Framework**: Next.js 16+ (App Router), React 19+
 - **Language**: TypeScript (strict mode)
-- **Testing**: Vitest, React Testing Library, Playwright
+- **Testing**: Vitest, React Testing Library
+- **Browser verification**: Browser verification uses the installed MCPs selected in `mcp.devtools_browsers`: Aside (`aside`, default), Chrome DevTools MCP (`chrome`), and Firefox DevTools MCP (`firefox`). Multiple selections are supported; use `oma update mcp` to change them. Discover the selected server’s actual tools before use; tool names and capabilities differ between servers. An empty selection disables browser MCP verification; report any unverified UI checks.
 - **UI**: `shadcn/ui` on the **Base UI** engine (see below)
 
 ## shadcn/ui Primitive Engine — Base UI vs Radix
@@ -54,7 +57,7 @@ Bootstrap with `npx shadcn create` (prompts for the engine) or `npx shadcn init`
 
 ### Proxy replaces Middleware
 
-`middleware.ts` is **BANNED** in this project. It is NOT merely deprecated; touch it and you die. No exceptions.
+For projects using the Next.js 16+ proxy convention, preserve `proxy.ts`. Check the installed framework version and existing routing before proposing a migration.
 
 - File: `middleware.ts` → `proxy.ts` (root or `src/`)
 - Exported function: `middleware` → `proxy`
@@ -63,11 +66,7 @@ Bootstrap with `npx shadcn create` (prompts for the engine) or `npx shadcn init`
 - `src/proxy.ts` is the canonical request-proxy / auth-gate location
 <!-- oma-docs:ignore-end -->
 
-Forbidden actions (any of these is a fatal self-error; retract immediately):
-
-- Creating a new `middleware.ts`
-- Suggesting a rename of `proxy.ts` back to `middleware.ts`
-- Flagging `proxy.ts` as dead code, unused, or not-wired
+Do not infer that a framework entry point is unused from missing imports alone. Verify its location, exports, configuration, and relevant tests before reporting a wiring defect.
 
 Reference: https://nextjs.org/docs/messages/middleware-to-proxy
 
@@ -151,7 +150,9 @@ Guidance:
 3. **Default-free does not mean optional analysis**: if neither atomic nor single-store clearly
    fits, the state probably belongs in TanStack Query (server) or nuqs (URL), not here.
 
-## Serena MCP Shortcuts
+## Optional Serena examples
+
+These examples apply only when Serena is the configured provider and its tools are available. Otherwise use the project-selected provider or native search under the shared code-intelligence contract.
 - `find_symbol("ComponentName")`: locate existing component
 - `get_symbols_overview("src/components")`: list all components
 - `find_referencing_symbols("Button")`: find usages before changes

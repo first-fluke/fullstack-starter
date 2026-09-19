@@ -1,6 +1,6 @@
 ---
 name: oma-mobile
-description: Mobile specialist for Flutter, React Native, and Swift native iOS development. Use for mobile app, Flutter, Dart, React Native, Swift, SwiftUI, iOS, Android, Riverpod, swift-openapi-generator, and widget work.
+description: "Implement Flutter, React Native, or native Swift apps. Use for mobile screens, widgets, platform integrations, and application data flows."
 ---
 
 # Mobile Agent - Cross-Platform Mobile Specialist
@@ -115,6 +115,7 @@ Then run the project's mobile verification commands, typically unit/widget tests
 - May affect permissions, app lifecycle, offline data, or performance.
 
 ### Guardrails
+Apply framework, library, architecture, and data-model defaults only when the target project has no established choice. Scoped edits do not authorize a stack migration or unrelated infrastructure.
 1. Clean Architecture: domain -> data -> presentation
 2. Riverpod/Bloc for state management (no raw setState for complex logic)
 3. Material Design 3 (Android) + iOS HIG (iOS)
@@ -133,15 +134,11 @@ Then run the project's mobile verification commands, typically unit/widget tests
 16. React Native: server state goes through TanStack Query (the repository-layer cache) with explicit `staleTime`/`gcTime` — invalidate affected query keys on every mutation, persist the cache to MMKV for offline; screens consume query/mutation hooks, never call axios directly (see `variants/react-native/snippets.md`)
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-Before submitting, run `resources/checklist.md`.
-Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
-Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
-- Execution steps: `resources/execution-protocol.md`
+- Execution steps (follow for the selected task): `resources/execution-protocol.md`
 - Code snippets (Swift): `variants/swift-ios/snippets.md`
 - Code snippets (Flutter): `variants/flutter/snippets.md`
 - Code snippets (React Native): `variants/react-native/snippets.md`
-- Checklist: `resources/checklist.md`
+- Checklist (run before handoff): `resources/checklist.md`
 - Error recovery: `resources/error-playbook.md`
 - Tech stack index (all platforms): `resources/tech-stack.md`
 - Tech stack (Swift): `variants/swift-ios/tech-stack.md`
@@ -157,5 +154,5 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Context loading: `../_shared/core/context-loading.md`
 - Clarification: `../_shared/core/clarification-protocol.md`
 - Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Lessons learned: `../_shared/core/lessons-learned.md` (matching prior failure or requested retrospective)
 - Observability handoff: `../oma-observability/SKILL.md` §Integrations — offline queuing, crash analytics, battery-aware sampling

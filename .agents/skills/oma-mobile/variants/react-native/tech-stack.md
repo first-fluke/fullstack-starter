@@ -1,5 +1,7 @@
 # Mobile Agent - Tech Stack Reference (React Native)
 
+Starter reference for the selected platform. Preserve existing project choices. The caching implementation below applies only when caching is required; do not add it for an unrelated screen or widget change.
+
 ## Framework: React Native + TypeScript
 
 - **Language**: TypeScript (strict mode; `"strict": true` in `tsconfig.json`)
@@ -41,7 +43,7 @@ See `snippets.md §3` for the canonical Axios instance and auth interceptor.
 
 ## Response Cache: TanStack Query (@tanstack/react-query)
 
-**Read-through caching at the data-fetching layer is mandatory.** TanStack Query owns the repository-layer cache: it caches **decoded JavaScript objects** (not raw response bytes), provides stale-while-revalidate out of the box, and centralizes invalidation so the data-fetching layer is the single source of caching truth.
+**When response caching is required, keep it at the data-fetching layer.** TanStack Query owns the repository-layer cache: it caches **decoded JavaScript objects** (not raw response bytes), provides stale-while-revalidate out of the box, and centralizes invalidation so the data-fetching layer is the single source of caching truth.
 
 ```
 Screen / Component
@@ -83,7 +85,9 @@ See `snippets.md §2` for QueryClient + MMKV persister setup, `snippets.md §5` 
 
 **MMKV** is a C++-backed key-value store (the same one WeChat uses) that is 30× faster than `AsyncStorage` on both platforms. Use it for all non-secret durable state. Use `expo-secure-store` (Expo projects) or `react-native-keychain` (bare RN) for anything that must live in the platform secure enclave (iOS Keychain / Android Keystore).
 
+<!-- oma-docs:ignore-start -->
 Never store secrets in MMKV — it stores plain text unless an `encryptionKey` is passed. The access token lives in an in-memory Zustand `authStore` (`src/store/authStore.ts`) that is hydrated from the Keychain at app start; the axios request interceptor reads it synchronously via `useAuthStore.getState().accessToken`, and a 401 clears both the Keychain and the store. See `snippets.md §10`.
+<!-- oma-docs:ignore-end -->
 
 ## Testing
 

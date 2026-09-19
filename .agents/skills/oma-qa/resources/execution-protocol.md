@@ -1,36 +1,22 @@
 # QA Agent - Execution Protocol
 
-## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
-   - **Simple**: Quick security + quality check | **Medium**: Full 4 steps | **Complex**: Full + prioritized scope
-2. **Check lessons**: read QA section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
-   - Check **Uncertainty Triggers**: security/auth concerns, existing code conflict potential?
-   - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context**: follow `../../_shared/core/context-budget.md` (prioritize high-risk files)
-5. **After review**: add recurring issues to `../../_shared/core/lessons-learned.md`
-6. **If standards matter**: read `resources/iso-quality.md`
-
-**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
-
-Follow these steps in order (adjust depth by difficulty).
+## Preparation
+Use the task's scope, existing project conventions, and acceptance criteria. Follow `../../_shared/core/execution-policy.md` when it has not already been supplied. Read only references needed by the selected operation; consult lessons or recovery guides for an observed issue. Expand planning depth only when the change requires it.
 
 ## Step 1: Scope
 - Identify what to review: new feature, full audit, or specific concern
 - List all files/modules to inspect
 - Determine review depth: quick check vs. comprehensive audit
-- Use Serena to map the codebase:
-  - `get_symbols_overview("src/")`: Understand structure
-  - `search_for_pattern("password.*=.*[\"']")`: Find hardcoded secrets
-  - `search_for_pattern("execute.*\\$\\{")`: Find SQL injection
-  - `search_for_pattern("innerHTML")`: Find XSS vulnerabilities
+- Follow `../../_shared/core/code-intelligence.md` to discover configured code
+  navigation/search tools. If unavailable or timed out, use native scoped
+  search and reads, record that fallback, and continue the review.
 
 ## Step 2: Audit
 Review in this priority order:
 1. **Security** (CRITICAL): OWASP Top 10, auth, injection, data protection
 2. **Performance**: API latency, N+1 queries, bundle size, Core Web Vitals
 3. **Accessibility**: WCAG 2.2 AA, keyboard nav, screen reader, contrast
-4. **Code Quality**: test coverage, complexity, architecture adherence
+4. **Code Quality**: task-defined coverage expectations, complexity, architecture adherence
 
 When applicable, map findings and gaps to:
 - **ISO/IEC 25010** quality characteristics
@@ -51,7 +37,11 @@ at runtime. This step requires interacting with the running application.
 
 ### Execution by App Type
 
-#### Web Applications (Chrome DevTools MCP: Isolated Mode)
+#### Web Applications
+
+Browser verification uses the installed MCPs selected in `mcp.devtools_browsers`: Aside (`aside`, default), Chrome DevTools MCP (`chrome`), and Firefox DevTools MCP (`firefox`). Multiple selections are supported; use `oma update mcp` to change them. Discover the selected server’s actual tools before use; tool names and capabilities differ between servers. An empty selection disables browser MCP verification; report any unverified UI checks.
+
+Run the following checks with a selected, available server. Prefer a separate test context when supported. The tool calls below are Chrome DevTools MCP examples only; for Aside and Firefox DevTools MCP, discover and use their supported equivalents. Record missing capabilities instead of silently changing servers.
 
 1. Start the application (`bun run dev`, `uv run manage.py runserver`, etc.)
 2. Open the app in an **isolated browser context** to avoid contaminating the user's session:
@@ -60,7 +50,7 @@ at runtime. This step requires interacting with the running application.
    ```
    - Pages in the same `isolatedContext` share cookies/storage
    - Pages in different contexts are fully isolated
-   - Always use `isolatedContext: "qa-test"` for QA verification
+   - When using Chrome DevTools MCP, use `isolatedContext: "qa-test"` for QA verification
 3. Navigate and inspect:
    ```
    navigate_page(url)            → navigate within the isolated context (SPA routes, sub-pages)
@@ -94,9 +84,9 @@ at runtime. This step requires interacting with the running application.
    ```
    close_page(pageId)  → close isolated test pages after verification
    ```
-9. **Fallback** (no Chrome DevTools MCP available):
+9. **Fallback** (no selected browser MCP available):
    - Use curl/httpie to hit rendered endpoints
-   - Verify HTTP status codes and response bodies
+   - Verify HTTP status codes and response bodies; record that HTTP checks do not verify browser interactions
    - Check redirects, auth flows, and error pages
 
 #### API Endpoints
@@ -145,22 +135,26 @@ Specifically check for these patterns that static review cannot catch:
 
 ---
 
-## Evaluator Posture: SKEPTICAL by default
+## Evaluator Posture: Evidence-based
 
 Apply this posture when making verdict decisions in Step 3 and Step 4:
-- Assume code has bugs until you prove otherwise with concrete evidence.
+- Base defect findings on reproducible evidence; track unconfirmed hypotheses separately.
 - "Probably works" or "should be fine" is NOT valid evidence. Run it, show output, prove it.
-- If a feature exists in the plan but you cannot verify it works at runtime: FAIL.
+- If a required feature cannot be verified at runtime, record the missing check, reason, and next action. Mark review completeness `partial`, or `blocked` when no independent verification can proceed, following the shared execution policy and host rules.
+- A skipped check, missing tool, or interrupted command is not evidence that the product works or that it contains a defect. A failed verification command must not count as a passing check; diagnose whether it demonstrates a product defect or an environment/configuration problem.
 - Never downgrade a real bug to "non-critical" just to pass a gate.
 - Use WARNING when all remaining issues are MEDIUM or lower and none block deployment.
-- When in doubt between PASS and FAIL, choose FAIL and explain why.
+- When evidence is insufficient, report the verification gap and continue available checks. Do not invent a defect or issue PASS to force a binary verdict.
 
 ## Step 3: Report
 Generate structured report with:
-- Overall status:
-  - PASS: no CRITICAL, no HIGH, and no MEDIUM issues
-  - WARNING: no CRITICAL and no HIGH, but MEDIUM issues exist
-  - FAIL: any CRITICAL or HIGH issue found
+- Report both quality verdict and verification completeness:
+  - PASS: required checks completed; no CRITICAL, HIGH, or MEDIUM issues
+  - WARNING: required checks completed; no CRITICAL or HIGH issues, but MEDIUM issues exist
+  - FAIL: a reproducible CRITICAL or HIGH issue exists, even if other checks remain unavailable
+  - NOT_ASSESSED: required evidence is missing and no confirmed defect warrants FAIL; list any confirmed lower-severity findings separately
+  - Completeness: `completed` when required verification is finished, `partial` when evidence remains missing, or `blocked` when independent work cannot proceed under the shared execution policy and host rules
+- Verification gaps: missing check, cause, completed alternative checks, and concrete next action; keep these separate from defect findings
 - Findings grouped by severity (CRITICAL > HIGH > MEDIUM > LOW)
 - Each finding: file:line, description, remediation code
 - Performance metrics vs. targets
@@ -169,7 +163,7 @@ Generate structured report with:
   - missing test design / traceability / exit criteria
 
 ## Step 4: Verify
-- Run `../../_shared/core/common-checklist.md` for general quality
+- Use applicable sections of `../../_shared/core/common-checklist.md` when the review crosses domains
 
 ## On Error
 See `resources/error-playbook.md` for recovery steps.

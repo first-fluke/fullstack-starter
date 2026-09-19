@@ -20,7 +20,7 @@
         "timeout": 3
       },
       {
-        "hook": "serena-primer.ts",
+        "hook": "code-intelligence-primer.ts",
         "timeout": 3
       }
     ],
@@ -29,6 +29,11 @@
         "hook": "scm-guard.ts",
         "matcher": "Bash",
         "timeout": 3
+      },
+      {
+        "hook": "code-intelligence-guard.ts",
+        "matcher": "Bash",
+        "timeout": 2
       },
       {
         "hook": "test-filter.ts",

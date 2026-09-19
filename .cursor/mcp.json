@@ -11,13 +11,11 @@
         "SERENA_LOG_LEVEL": "info"
       }
     },
-    "chrome-devtools": {
-      "command": "npx",
+    "aside": {
+      "type": "stdio",
+      "command": "aside",
       "args": [
-        "-y",
-        "chrome-devtools-mcp@latest",
-        "--no-usage-statistics",
-        "--isolated"
+        "mcp"
       ]
     }
   }

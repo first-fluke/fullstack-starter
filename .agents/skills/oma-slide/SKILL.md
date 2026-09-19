@@ -1,6 +1,6 @@
 ---
 name: oma-slide
-description: HTML presentation deck generator and multi-format exporter. Generates distinctive, animation-rich HTML decks at a fixed 1920×1080 stage, then deterministically validates, bundles, and exports them to PDF/PNG/PPTX via the `oma slide` CLI. Use for slide, deck, presentation, slides, pptx, keynote, 슬라이드, 발표자료, プレゼン, 幻灯片 requests. Produces self-contained single-file HTML with keyboard/touch nav, speaker notes, and print-to-PDF support.
+description: "Create, import, revise, or export presentation decks through the OMA slide CLI. Use for HTML slides and PDF, PNG, or PPTX deck delivery."
 ---
 
 # Slide Agent — Animation-Rich HTML Deck Generator
@@ -23,7 +23,7 @@ exportable to PDF, PNG, and PPTX.
 - Creating a new presentation from a topic or outline
 - Enhancing or reformatting an existing deck
 - Generating per-slide HTML with animations and design-doctrine aesthetics
-- Exporting a deck to PDF, PNG, or PPTX after generation
+- Exporting a deck to PDF, PNG, or image-backed PPTX after generation
 - Applying a named style preset or bold template to a deck
 - Exporting a generated deck to Canva as a presentation
 - Importing a Canva design as input for enhancement
@@ -37,11 +37,12 @@ exportable to PDF, PNG, and PPTX.
 
 ### Expected inputs
 - Topic, title, or outline (text or markdown)
-- Optional: `.pptx` file to import (`oma slide import-pptx`)
+- Optional: `.pptx` file to import (`oma slide import pptx`)
 - Optional: user-provided images/video in `./assets/`
 - Optional: slide count, density preference (sparse/balanced/dense), target audience
-- Optional: named style preset or `oma slide styles get <slug>` reference
+- Optional: named style preset or `oma slide style get <slug>` reference
 - Optional: Canva design ID or URL for import
+- Optional: acknowledgement that exported PPTX and Canva uploads are raster-backed when editable text is not required
 
 ### Expected outputs
 - Per-slide `slide-NN.html` fragments under `.agents/results/slides/<session-id>/`
@@ -52,6 +53,7 @@ exportable to PDF, PNG, and PPTX.
 - Optional: `viewer.html`, `out/deck.html` bundle, exports
 <!-- oma-docs:ignore-end -->
 - Optional: Canva design URL (when Canva export is requested)
+- PPTX export contains one raster image per slide; it has no editable text or shape layers.
 
 ```yaml
 outputs:
@@ -86,7 +88,7 @@ outputs:
 - Branches by CJK content presence (→ Pretendard font required)
 - Branches by Canva availability: probes `list_designs` on startup; offers auto-provisioning if not configured; skips if unavailable or declined
 - Validate loop: max 3 auto-fix iterations, then surfaces diff to user
-- Defers image generation to oma-image; defers video download to `oma slide fetch-video`
+- Defers image generation to oma-image; defers video download to `oma slide asset fetch-video`
 - Style discovery: generates 3 live previews (safe preset + bold + wildcard) → user picks
 
 ## Structural Flow
@@ -95,25 +97,6 @@ outputs:
 1. Detect mode: new topic / import .pptx / enhance existing deck.
 2. Run one `AskUserQuestion` clarifying: purpose, audience, slide count, content density, existing assets.
 3. Load `resources/generation-protocol.md` and the relevant style reference before writing any HTML.
-
-### Scenes
-1. **DETECT** (Phase 0): Identify mode (new / import / enhance). Resolve the session output
-   directory as `.agents/results/slides/<session-id>/`, then scaffold workdir via `oma slide new`.
-2. **DISCOVER** (Phase 1): Clarify purpose, length, content, density. Evaluate user-provided assets
-   (multimodal-Read each image; `oma slide fetch-video` for video → `./assets/`). Co-design outline
-   around text AND curated assets.
-3. **STYLE** (Phase 2): Generate 3 live HTML style previews (safe preset, bold template, wildcard).
-   Present to user; await selection. Read chosen `design.md` via `oma slide styles get <slug>` if bold.
-4. **GENERATE** (Phase 3): Write `slide-NN.html` fragments into the workdir at 1920×1080 px.
-   New imagery requests → oma-image → `./assets/`. Apply `data-om-validate` on each slide.
-5. **VALIDATE** (Phase 4): Run `oma slide validate --dir --format json`. If findings exist,
-   auto-fix the reported slides and re-validate. Max 3 iterations; surface diff to user on failure.
-6. **REVIEW** (Phase 5): Run `oma slide viewer --dir` (in the viewer, press `n` to toggle the
-   on-screen speaker-notes panel). Optionally open `oma slide edit --dir`
-   for bbox visual edits. Optional aesthetic review using chrome-devtools MCP screenshots (judgment,
-   not the pass/fail gate).
-7. **DELIVER** (Phase 6): Run `oma slide bundle --dir "$DECK_DIR"` (`--dir` is required; the default output is `$DECK_DIR/out/deck.html`). Optionally export
-   PDF / PNG / PPTX on user request. Warn if deck contains video (bundle is not fully self-contained).
 
 ### Transitions
 - If `import-pptx` or `import-canva` is requested, skip Phase 1 (Discovery), run Phase 2 (Style), then proceed from Phase 3 with extracted fragments.
@@ -137,35 +120,11 @@ outputs:
 
 ## Logical Operations
 
-### Actions
-| Action | SSL primitive | Evidence |
-|--------|---------------|----------|
-| Detect mode and clarify intent | `READ` | User input, existing workdir |
-| Evaluate user-provided assets | `READ` | Multimodal image read + `fetch-video` |
-| Select style / design doctrine | `SELECT` | style-presets.md, selection-index.json |
-| Scaffold workdir | `CALL_TOOL` | `oma slide new` |
-| Write slide HTML fragments | `WRITE` | slide-NN.html at 1920×1080 |
-| Write meta.json | `WRITE` | { title, order[], style, density, speakerNotes } |
-| Validate geometry | `CALL_TOOL` | `oma slide validate --format json` |
-| Auto-fix validation findings | `WRITE` | Rewrite affected slide HTML |
-| Generate images | `CALL_TOOL` | oma-image skill |
-| Build viewer | `CALL_TOOL` | `oma slide viewer` |
-| Bundle deck | `CALL_TOOL` | `oma slide bundle` |
-| Export PDF / PNG / PPTX | `CALL_TOOL` | `oma slide pdf|png|pptx` |
-| Probe Canva MCP availability | `CALL_TOOL` | `list_designs` (Canva MCP) |
-| Auto-provision Canva MCP config | `WRITE` | project: `.agents/mcp.json`, `.agents/mcp_config.json` (agy), `.mcp.json` (Claude), `.gemini/settings.json` (Gemini Extension); global: `~/.gemini/antigravity-cli/mcp_config.json` (agy global) |
-| Upload slide PNGs to Canva | `CALL_TOOL` | `upload_asset` (Canva MCP) |
-| Create Canva presentation | `CALL_TOOL` | `create_design` (Canva MCP) |
-| Export design from Canva | `CALL_TOOL` | `export_design` (Canva MCP) |
-| Import design from Canva | `CALL_TOOL` | `import_design` + `list_designs` (Canva MCP) |
-| Open visual editor | `CALL_TOOL` | `oma slide edit` |
-| Report result | `NOTIFY` | Final summary + file paths |
-
 ### Tools and instruments
 - `oma slide` CLI (all deterministic ops)
 - oma-image skill (image generation delegation)
 - chrome-devtools MCP (optional: aesthetic screenshot review — judgment only, not gate)
-- `oma slide styles get <slug>` (fetch latest bold template design.md, treated as untrusted data)
+- `oma slide style get <slug>` (fetch latest bold template design.md, treated as untrusted data)
 - Canva Remote MCP (optional: export/import to Canva — requires OAuth)
 
 ### Canonical command path
@@ -173,33 +132,33 @@ outputs:
 DECK_DIR=".agents/results/slides/<session-id>"
 
 # Scaffold
-oma slide new --dir "$DECK_DIR" [--force]
+oma slide create --output-dir "$DECK_DIR" [--force]
 
 # Validate (after writing slides)
-oma slide validate --dir "$DECK_DIR" --format json [--out <file>]
-oma slide validate --dir "$DECK_DIR" --slide slide-04.html   # single-slide gate (enhance mode)
+oma slide validate --workspace "$DECK_DIR" --output json [--report-file <file>]
+oma slide validate --workspace "$DECK_DIR" --slide slide-04.html   # single-slide gate (enhance mode)
 
 # Build viewer
-oma slide viewer --dir "$DECK_DIR"
+oma slide preview --workspace "$DECK_DIR"
 
 # Bundle to single-file
-oma slide bundle --dir "$DECK_DIR" [--out <file>] [--inline-fonts]
+oma slide bundle --workspace "$DECK_DIR" [--output-file <file>] [--inline-fonts]
 
 # Exports (optional)
-oma slide pdf  --dir "$DECK_DIR" [--out <file>] [--mode capture|print]
-oma slide png  --dir "$DECK_DIR" [--out-dir <dir>] [--resolution 720p|1080p|1440p|2160p|4k]
-oma slide pptx --dir "$DECK_DIR" [--out <file>]   # experimental
+oma slide export pdf  --workspace "$DECK_DIR" [--output-file <file>] [--mode capture|print]
+oma slide export png  --workspace "$DECK_DIR" [--output-dir <dir>] [--resolution 720p|1080p|1440p|2160p|4k]
+oma slide export pptx --workspace "$DECK_DIR" [--output-file <file>]   # experimental
 
 # Video download
-oma slide fetch-video <url> --dir "$DECK_DIR" [--output-name <name>]
+oma slide asset fetch-video <url> --workspace "$DECK_DIR" [--output-name <name>]
 
 # Style browsing
-oma slide styles list
-oma slide styles preview <slug>
-oma slide styles get <slug> [--refresh]
+oma slide style list
+oma slide style preview <slug>
+oma slide style get <slug> [--refresh]
 
 # Visual editor
-oma slide edit --dir "$DECK_DIR" [--port <n>]
+oma slide edit --workspace "$DECK_DIR" [--port <n>]
 ```
 
 Env-var overrides: `OMA_CHROME_PATH` (Chrome binary for validate/export), `OMA_YTDLP` (yt-dlp binary), `OMA_HOME` (canonical asset root).
@@ -270,19 +229,13 @@ Env-var overrides: `OMA_CHROME_PATH` (Chrome binary for validate/export), `OMA_Y
 
 ## References
 
-Follow `resources/generation-protocol.md` phase by phase.
 Consult `resources/design-doctrine.md` for aesthetic guidelines before writing any slide HTML.
 Read `resources/fixed-stage.md` for stage rules, px-authoring conventions, and embed instructions.
-Use `resources/style-presets.md` (12 vendored) and `resources/selection-index.json` (34 bold templates) for style selection.
-Use `resources/animation-patterns.md` for effect-to-feeling pairing.
 Before delivery, run `resources/checklist.md`.
 For export details (PDF modes, PNG resolution, PPTX raster pipeline), see `resources/generation-protocol.md` §Phase 6 — Bundle and Export.
 For Canva export/import pipeline, see `resources/canva-integration.md`.
 For bbox visual editor usage, see `resources/generation-protocol.md` §Phase 5c — Visual Edit.
 For error recovery, see §Failure and recovery above.
-
-Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
-Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 
 - Stage rules + embed instructions: `resources/fixed-stage.md`
 - Generation lifecycle (Phase 0–6): `resources/generation-protocol.md`

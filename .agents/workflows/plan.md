@@ -4,16 +4,10 @@ description: PM planning workflow that gathers requirements, decomposes them int
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 1 in order.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
-  - Use memory tools (write/edit) to record planning results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - Do NOT use raw file reads or grep as substitutes.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
+- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search and scoped reads when unavailable or timed out. Do not install a provider or track a repository automatically.
+- Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
 
 ---
 
@@ -23,7 +17,7 @@ disable-model-invocation: true
 
 ## L1 Decision Events
 
-Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ---
 
@@ -33,7 +27,7 @@ Emit required L1 decisions by calling `oma state:emit` directly, as documented i
 
 > `docs/plans/` does not survive a fresh clone. When a specific artifact must be durable across machines (a design doc referenced from committed documentation, a promoted API contract), commit that file deliberately with `git add -f` — tracked files are unaffected by the ignore afterwards. Committed docs must never reference a plan file that has not been promoted this way.
 
-Two artifacts per plan:
+For Medium/Complex plans, produce two artifacts (Simple routing is defined in Step 3):
 
 1. **Machine-readable**: `.agents/results/plan-{sessionId}.json` consumed by `/orchestrate` and `/work`.
 2. **Human-readable**: `docs/plans/work/{NNN}-{name}.md` with task table, decision log, and progress notes. Lifecycle is tracked via the `Status` field in the file header (`Active` → `Completed`); no folder moves required.
@@ -60,7 +54,7 @@ docs/plans/
 
 ## Step 1: Gather Requirements
 
-Ask the user to describe what they want to build. Clarify:
+Extract requirements already present in the request and project context. Clarify only missing information that changes the plan:
 - Target users
 - Core features (must-have vs nice-to-have)
 - Constraints (tech stack, existing codebase)
@@ -71,8 +65,8 @@ Ask the user to describe what they want to build. Clarify:
 ## Step 2: Analyze Technical Feasibility
 
 If an existing codebase exists, use MCP code analysis tools to scan:
-- `get_symbols_overview` for project structure and architecture patterns.
-- `find_symbol` and `search_for_pattern` to identify reusable code and what needs to be built.
+- Configured structure tools or scoped directory/file inspection for project structure and architecture patterns.
+- Configured symbol/pattern search or native search to identify reusable code and what needs to be built.
 
 Also search `docs/plans/work/` for related past or in-progress plans, and `docs/plans/designs/` for prior design references. Reuse patterns from similar work.
 
@@ -80,13 +74,13 @@ Also search `docs/plans/work/` for related past or in-progress plans, and `docs/
 
 ## Step 3: Assess Complexity
 
-Use `.agents/skills/_shared/core/difficulty-guide.md` to classify:
+Use `.agents/skills/_shared/core/difficulty-guide.md` when scope or dependencies need decomposition. Select plan artifacts for the caller and task:
 
-- **Simple** → no plan artifact needed; execute directly via `/work`.
+- **Simple** → for a standalone planning request, report the direct approach and matching domain skill, then end this workflow without entering `/work`. If implementation is already authorized, continue directly with that skill. If the caller requires an executable plan (e.g. `/orchestrate`), continue through Steps 4-7 and produce a minimal JSON plan; no Markdown tracker is required.
 - **Medium** → produce both JSON and a lightweight markdown tracker (skip Step 4 API contracts if not cross-boundary).
-- **Complex** → produce both artifacts with all sections plus API contracts.
+- **Complex** → produce both artifacts with applicable sections; include API contracts only when a changed boundary needs one.
 
-Report scope assessment to the user. Get confirmation before proceeding.
+Report scope assessment and apply `.agents/skills/_shared/core/execution-policy.md`; reuse existing authorization.
 
 ---
 
@@ -94,15 +88,15 @@ Report scope assessment to the user. Get confirmation before proceeding.
 
 If the plan involves cross-boundary work (frontend ↔ backend, service ↔ service):
 
-1. Design API contracts using `.agents/skills/_shared/core/api-contracts/template.md` (definition/template only — SSOT). Per endpoint:
+1. Reuse the authoritative project contract when it settles the boundary. If a new or updated contract is needed, use `.agents/skills/_shared/core/api-contracts/template.md` (definition/template only — SSOT). Per endpoint:
    - Method, path, request/response schemas
    - Auth requirements, error responses
-2. Save the generated contract to `.agents/results/api-contracts/{contract-name}.md` (run artifact; gitignored). If the contract must be versioned as a durable spec, promote it to `docs/plans/contracts/{contract-name}.md` when committing the feature.
+2. When creating a separate artifact, save the generated contract to `.agents/results/api-contracts/{contract-name}.md` (run artifact; gitignored). If the contract must be versioned as a durable spec, promote it to `docs/plans/contracts/{contract-name}.md` when committing the feature.
 3. Reference from the markdown tracker generated in Step 6.
 4. Emit and verify the required API contract decision:
    ```bash
-   oma state:emit "decision.made" '{"subject":"plan.api-contract","decision":"Use the approved endpoint and contract shape for this plan.","rationale":"The cross-boundary API contract has been reviewed and accepted before task decomposition."}'
-   oma state:verify --workflow plan --checkpoint api-contract
+   oma state emit "decision.made" '{"subject":"plan.api-contract","decision":"Use the approved endpoint and contract shape for this plan.","rationale":"The cross-boundary API contract has been reviewed and accepted before task decomposition."}'
+   oma state verify --workflow plan --checkpoint api-contract
    ```
 
 ---
@@ -121,17 +115,25 @@ Break down the project into actionable tasks. Each task must have:
 ## Step 6: Review Plan with User
 
 Present the full plan: task list, priority tiers, dependency graph, agent assignments, completion criteria.
-**You MUST get user confirmation before proceeding to Step 7.**
+Apply `.agents/skills/_shared/core/execution-policy.md`: proceed when the requested work or decision is already authorized; ask only for a material missing decision or new authorization.
 
 ---
 
 ## Step 7: Save Plan Artifacts
 
-Generate both artifacts.
+Generate the artifacts required by Step 3.
 
 ### 7a. Machine-readable plan
 
 Save `.agents/results/plan-{sessionId}.json` and write a memory summary via the configured memory tool.
+
+Use `.agents/skills/oma-pm/resources/task-template.json`. For executable acceptance gates:
+
+- Declare `acceptance_criteria` as `{id, description}` objects and `required_checks` as `{id, criteria, command, cwd}` objects. Cover every criterion with a relevant check. `command` is exact executable/argv and `cwd` is project-relative. Never insert builds unless explicitly requested.
+- Preserve the canonical `dependencies` task-ID array and a self-contained `task` prompt. `retry_policy` defaults to `manual`; choose `safe` only for repeatable work without duplicate external effects.
+- Optional `inputs` lists concrete project-relative source, test, configuration and dependency files/directories that completely determine the task's behavior. Omit it for whole-tree verification. Do not guess a narrow input scope to make evidence reusable.
+- Keep the JSON plan fixed after dispatch starts. Record progress in the Markdown tracker and run records. Contract changes require a new run.
+- Use `oma agent verify RUN_ID --required` to execute pinned checks and `oma agent resume SESSION_ID --dry-run` to inspect recovery decisions.
 
 ### 7b. Human-readable tracker (Medium/Complex only)
 

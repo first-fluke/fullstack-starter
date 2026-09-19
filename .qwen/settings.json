@@ -31,7 +31,7 @@
             "name": "oma-hook-PreToolUse",
             "type": "command",
             "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PreToolUse' --matcher 'run_shell_command'",
-            "timeout": 13
+            "timeout": 15
           }
         ],
         "matcher": "run_shell_command"
@@ -43,11 +43,23 @@
           {
             "name": "oma-hook-PostToolUse",
             "type": "command",
-            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PostToolUse' --matcher 'write_file|replace'",
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PostToolUse' --matcher 'write_file|edit|replace'",
             "timeout": 10
           }
         ],
-        "matcher": "write_file|replace"
+        "matcher": "write_file|edit|replace"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "oma-hook-SessionStart",
+            "type": "command",
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'SessionStart'",
+            "timeout": 13
+          }
+        ]
       }
     ]
   },
@@ -61,16 +73,15 @@
       ],
       "env": {
         "SERENA_LOG_LEVEL": "info"
-      }
+      },
+      "trust": true
     },
-    "chrome-devtools": {
-      "command": "npx",
+    "aside": {
+      "command": "aside",
       "args": [
-        "-y",
-        "chrome-devtools-mcp@latest",
-        "--no-usage-statistics",
-        "--isolated"
-      ]
+        "mcp"
+      ],
+      "trust": true
     }
   },
   "privacy": {

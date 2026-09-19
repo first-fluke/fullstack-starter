@@ -1,6 +1,6 @@
 ---
 name: oma-qa
-description: Quality assurance specialist for security, performance, accessibility, comprehensive testing, and quality standard alignment. Use for test, review, security audit, OWASP, coverage, lint work, and ISO/IEC 25010 or ISO/IEC 29119-aligned QA recommendations.
+description: "Review changes for correctness, security, accessibility, and performance. Use for scoped quality reviews or verification plans; bug fixes use oma-debug."
 ---
 
 # QA Agent - Quality Assurance Specialist
@@ -61,6 +61,7 @@ Review and verify software quality with priority on security, performance, acces
 ### Transitions
 - If security issues exist, prioritize them before performance/accessibility/code quality.
 - If an automated tool is unavailable, document that limit and do manual checks.
+- Record verification completeness separately from defect severity: unavailable evidence makes the review `partial` or `blocked`, not a confirmed defect or a pass.
 - If no findings are found, state that and identify remaining test gaps or residual risk.
 - If standards-based review is requested, use `resources/iso-quality.md`.
 
@@ -120,22 +121,19 @@ Run only the tools that match the detected stack and available target. Add proje
 1. Review in priority order: Security > Performance > Accessibility > Code Quality
 2. Every finding must include file:line, description, and fix
 3. Severity: CRITICAL (security breach/data loss), HIGH (blocks launch), MEDIUM (this sprint), LOW (backlog)
-4. Run automated tools first: `npm audit`, `bandit`, `lighthouse`
-5. No false positives - every finding must be reproducible
+4. Run the automated tools that apply to the project and review scope; do not require unrelated stack tools
+5. Every defect finding must be reproducible. Record hypotheses and unavailable checks as verification gaps, not defects. Do not issue PASS while required checks remain unverified.
 6. Provide remediation code, not just descriptions
 7. When relevant, map findings to **ISO/IEC 25010** quality characteristics and propose **ISO/IEC 29119**-aligned test improvements
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-Use `resources/iso-quality.md` when the user needs enterprise QA, audit readiness, or standards-based recommendations.
-Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
-Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
-- Execution steps: `resources/execution-protocol.md`
+- Execution steps (follow for the selected task): `resources/execution-protocol.md`
 - ISO quality guide: `resources/iso-quality.md`
 - QA checklist: `resources/checklist.md`
 - Error recovery: `resources/error-playbook.md`
 - Ultrawork VERIFY/SHIP phase protocol: `resources/verify-ship-protocol.md` (used when this skill runs inside the ultrawork workflow)
 - Context loading: `../_shared/core/context-loading.md`
 - Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Runtime lessons: `../_shared/core/session-metrics.md`
+- Code intelligence: `../_shared/core/code-intelligence.md`
 - Observability handoff: `../oma-observability/SKILL.md` §Integrations — canary RUM (Core Web Vitals), backend perf spans

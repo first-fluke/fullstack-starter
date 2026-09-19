@@ -10,9 +10,9 @@ startup_timeout_sec = 90
 [mcp_servers.serena.env]
 SERENA_LOG_LEVEL = "info"
 
-[mcp_servers.chrome-devtools]
-command = "npx"
-args = [ "-y", "chrome-devtools-mcp@latest", "--no-usage-statistics", "--isolated" ]
+[mcp_servers.aside]
+command = "aside"
+args = [ "mcp" ]
 
 [analytics]
 enabled = false

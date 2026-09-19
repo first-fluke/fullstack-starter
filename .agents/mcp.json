@@ -1,17 +1,6 @@
 {
   "mcpServers": {
     "serena": {
-      "command": "serena",
-      "args": [
-        "start-mcp-server",
-        "--context",
-        "oma",
-        "--project-from-cwd",
-        "--open-web-dashboard",
-        "false",
-        "--add-mode",
-        "no-memories"
-      ],
       "env": {
         "SERENA_LOG_LEVEL": "info"
       },
@@ -32,6 +21,18 @@
         "safe_delete_symbol",
         "replace_in_files",
         "initial_instructions"
+      ],
+      "command": "oma",
+      "args": [
+        "bridge",
+        "--context",
+        "oma"
+      ]
+    },
+    "aside": {
+      "command": "aside",
+      "args": [
+        "mcp"
       ]
     }
   },

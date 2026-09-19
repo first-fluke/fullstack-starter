@@ -4,16 +4,10 @@ description: Structured bug diagnosis and fixing workflow that reproduces, diagn
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip steps.** Execute from Step 1 in order.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`find_symbol`, `find_referencing_symbols`, `search_for_pattern`) for bug investigation, NOT raw file reads or grep.
-  - Use memory write tool to record debugging results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - MCP tools are the primary interface for all code exploration.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
+- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search and scoped reads when unavailable or timed out. Do not install a provider or track a repository automatically.
+- Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
 
 ---
 
@@ -25,7 +19,7 @@ Steps 1-5 execute inline for all vendors. Step 6 (similar pattern scanning) may 
 
 ### L1 Decision Events
 
-Emit required L1 decisions by calling `oma state:emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
 
 ### Subagent Spawn Criteria
 
@@ -51,13 +45,13 @@ Include diagnosis results and scan scope. Results returned as JSON output.
 Use the native `.gemini/agents/{name}.md` subagent when available (per `_shared/core/vendor-detection.md`); otherwise fall back to:
 
 ```bash
-oma agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
 ```
 
 #### If Antigravity or CLI Fallback
 
 ```bash
-oma agent:spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
+oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
 ```
 
 ---
@@ -77,14 +71,14 @@ If an error message is provided, proceed immediately.
 
 Run the smallest available failing test, runtime command, or log query that exercises the reported behavior and capture the observed failure signal. If the environment cannot reproduce it, follow `.agents/skills/oma-debug/resources/error-playbook.md` § "Cannot Reproduce the Bug" and record that limitation before continuing.
 
-Use MCP `search_for_pattern` with the error message or stack trace to locate the error in the codebase.
-Use `find_symbol` to identify the exact function and file. Do NOT grep or read files manually.
+Use configured pattern search or native search with the error message or stack trace to locate the error in the codebase.
+Locate the exact function and file with configured symbol tools or native search and scoped reads.
 
 ---
 
 ## Step 3: Diagnose Root Cause
 
-Use MCP `find_referencing_symbols` to trace the execution path backward from the error point.
+Use configured reference tools or native caller inspection to trace the execution path backward from the error point.
 Identify the root cause, not just the symptom. Check:
 - null/undefined access
 - Race conditions
@@ -95,8 +89,8 @@ Identify the root cause, not just the symptom. Check:
 When the root cause is confirmed, emit and verify the required diagnosis decision:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"debug.root-cause","decision":"Treat the confirmed root cause as the basis for the minimal fix.","rationale":"The diagnosis traced the failure path and distinguished the root cause from symptoms."}'
-oma state:verify --workflow debug --checkpoint root-cause
+oma state emit "decision.made" '{"subject":"debug.root-cause","decision":"Treat the confirmed root cause as the basis for the minimal fix.","rationale":"The diagnosis traced the failure path and distinguished the root cause from symptoms."}'
+oma state verify --workflow debug --checkpoint root-cause
 ```
 
 ---
@@ -106,7 +100,7 @@ oma state:verify --workflow debug --checkpoint root-cause
 Present the root cause and proposed fix to the user.
 - The fix should change only what is necessary.
 - Explain why this fixes the root cause, not just the symptom.
-- **You MUST get user confirmation before proceeding to Step 5.**
+- Apply `.agents/skills/_shared/core/execution-policy.md`: proceed when the requested work or decision is already authorized; ask only for a material missing decision or new authorization.
 
 ---
 
@@ -120,7 +114,7 @@ Present the root cause and proposed fix to the user.
 
 ## Step 6: Scan for Similar Patterns
 
-Use MCP `search_for_pattern` to search the codebase for the same pattern that caused the bug.
+Use configured pattern tools or native search to search the codebase for the same pattern that caused the bug.
 Report any other locations that may have the same vulnerability. Fix them if confirmed.
 
 ---

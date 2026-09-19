@@ -68,9 +68,9 @@ Two or more independent clauses + one or more dependent clauses.
    - Medium: 16–25 words (for flow)
    - Long: 26–40 words (for depth)
 3. Paragraphs of 4+ sentences should contain at least 3 of the 4 sentence types; short emphasis paragraphs (2–3 sentences) are exempt
-4. Vary paragraph length (2–8 sentences); uniform blocks signal AI
+4. Vary paragraph length (2–8 sentences) where it improves the argument; uniform blocks alone do not identify AI authorship
 
-> For detailed burstiness detection, semicolon limits, and paragraph length variation rules, see `anti-ai-checklist.md` §9.
+> For rhythm review and punctuation limits, see `anti-ai-checklist.md`, sections "Rhythm and sentence structure" and "Formatting".
 
 ### Sentence openers (vary these)
 
@@ -132,7 +132,7 @@ Every sentence must be fully understandable when read in isolation. If a sentenc
 
 > Nursing educators argue that strict measures should be implemented to avoid infection in medical institutions. Considerable evidence links falling hygiene standards to sharply rising infection rates. Because these risks escalate quickly once standards slip, institutions must adopt procedures that reduce them. To this end, hospitals should require all staff to maintain effective hygiene, and managers should audit compliance at regular intervals.
 
-**Improvements:** Varied openers (subject-first, dependent clause, transitional phrase), mixed simple/complex/compound structures, varied sentence lengths, logical flow from claim → evidence → argument → recommendation — with no banned generic verbs as main verbs and no flagged AI vocabulary.
+**Improvements:** Varied openers (subject-first, dependent clause, transitional phrase), mixed simple/complex/compound structures, varied sentence lengths, logical flow from claim → evidence → argument → recommendation, accurate verbs, and no unnecessary inflated vocabulary.
 
 ## Quick reference: conjunction inventory
 

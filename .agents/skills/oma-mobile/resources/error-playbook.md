@@ -1,7 +1,7 @@
 # Mobile Agent - Error Recovery Playbook
 
 When you encounter a failure, find the matching scenario and follow the recovery steps.
-Do NOT stop or ask for help until you have exhausted the playbook.
+Use the relevant recovery steps. If required information or authority is missing, pause the dependent action and continue independent work.
 
 ---
 
@@ -131,7 +131,7 @@ Do NOT stop or ask for help until you have exhausted the playbook.
 
 ## Rate Limit / Quota / Memory Fallback
 
-Same as the backend playbook: see `../../oma-backend/resources/error-playbook.md` §"Rate Limit / Quota Error (LLM runtime)" and §"Serena Memory Unavailable".
+Same as the backend playbook: see `../../oma-backend/resources/error-playbook.md` §"Rate Limit / Quota Error (LLM runtime)" and the configured code-intelligence or memory fallback guidance.
 
 ---
 

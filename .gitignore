@@ -101,3 +101,6 @@ docs/generated/
 docs/plans/
 
 .qwen/tmp/
+
+.agents/oma-config.local.cue
+.agents/oma-config.local.yaml

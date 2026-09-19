@@ -1,24 +1,14 @@
 # Frontend Agent - Execution Protocol
 
-## Step 0: Prepare
-1. **Assess difficulty**: see `../../_shared/core/difficulty-guide.md`
-   - **Simple**: Skip to Step 3 | **Medium**: All 4 steps | **Complex**: All steps + checkpoints
-2. **Check lessons**: read your domain section in `../../_shared/core/lessons-learned.md`
-3. **Clarify requirements**: follow `../../_shared/core/clarification-protocol.md`
-   - Check **Uncertainty Triggers**: business logic, security/auth, existing code conflicts?
-   - Determine level: LOW → proceed | MEDIUM → present options | HIGH → ask immediately
-4. **Budget context**: follow `../../_shared/core/context-budget.md` (read symbols, not whole files)
-
-**Intelligent Escalation**: When uncertain, escalate early. Don't blindly proceed.
-
-Follow these steps in order (adjust depth by difficulty).
+## Preparation
+Use the task's scope, existing project conventions, and acceptance criteria. Follow `../../_shared/core/execution-policy.md` when it has not already been supplied. Read only references needed by the selected operation; consult lessons or recovery guides for an observed issue. Expand planning depth only when the change requires it.
 
 ## Step 1: Analyze
 - Read the task requirements carefully
 - Read `DESIGN.md` if present at the project root; treat Section 9 (Agent Prompt Guide) as authoritative component spec
 - Identify which components, pages, and hooks are needed
-- Check existing code with Serena: `get_symbols_overview("src/components")`, `find_symbol("ComponentName")`
-- Review existing patterns: `find_referencing_symbols("Button")` to understand usage conventions
+- Inspect existing structure and relevant symbols via `../../_shared/core/code-intelligence.md`; use native search and scoped reads when the configured provider is unavailable
+- Review existing patterns: reference search for `Button` through the configured provider or native search to understand usage conventions
 - List assumptions; ask if unclear
 
 ## Step 2: Plan
@@ -30,7 +20,7 @@ Follow these steps in order (adjust depth by difficulty).
 
 ## Step 3: Implement
 - **Honor the task's `test_approach`** (see `../../_shared/core/test-approach.md`): for `tdd` tasks, write and run the focused test first (record the RED failure), make the minimal change (GREEN), then continue
-- Create/modify files in this order:
+- Typical affected files (choose an order from actual dependencies):
   1. TypeScript types/interfaces
   2. API client hooks (orval-generated from OpenAPI when available; hand-written TanStack Query otherwise)
   3. Reusable UI components (shadcn/ui based)
@@ -40,8 +30,8 @@ Follow these steps in order (adjust depth by difficulty).
 - Follow `resources/tailwind-rules.md` for styling
 
 ## Step 4: Verify
-- Run `resources/checklist.md` items
-- Run `../../_shared/core/common-checklist.md` items
+- Check applicable items in `resources/checklist.md`
+- Use `../../_shared/core/common-checklist.md` only for cross-domain verification
 - Check TypeScript strict mode: no errors
 - For `tdd` tasks, append the `TDD_EVIDENCE` block (test command, RED, GREEN) to the result file per `../../_shared/core/test-approach.md`
 - Verify responsive design at 320px, 768px, 1024px, 1440px

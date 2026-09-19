@@ -21,7 +21,7 @@
     "preToolUse": [
       {
         "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'preToolUse' --matcher 'Shell'",
-        "timeout": 13,
+        "timeout": 15,
         "matcher": "Shell"
       }
     ],

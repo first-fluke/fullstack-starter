@@ -10,6 +10,12 @@
       "env": {
         "SERENA_LOG_LEVEL": "info"
       }
+    },
+    "aside": {
+      "command": "aside",
+      "args": [
+        "mcp"
+      ]
     }
   }
 }

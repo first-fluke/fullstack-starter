@@ -56,3 +56,10 @@ hwp:
 agents:
   eval:
     model: anthropic/claude-sonnet-4-6
+
+# Added by oma update — new config keys (template defaults; edit freely)
+providers:
+  code_intelligence: serena
+mcp:
+  devtools_browsers:
+    - aside

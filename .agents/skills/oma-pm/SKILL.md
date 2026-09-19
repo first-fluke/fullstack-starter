@@ -1,6 +1,6 @@
 ---
 name: oma-pm
-description: Product manager that decomposes requirements into actionable tasks with priorities and dependencies. Use for planning, requirements, specification, scope, prioritization, task breakdown, and ISO 21500, ISO 31000, or ISO 38500-aligned planning recommendations.
+description: "Turn product requirements into scoped tasks with dependencies and acceptance criteria. Use for implementation planning and prioritization."
 ---
 
 # PM Agent - Product Manager
@@ -137,13 +137,10 @@ outputs:
 - Deferred Quality: testing is part of every task, not a final phase
 
 ## References
-Follow `resources/execution-protocol.md` step by step.
-See `resources/examples.md` for input/output examples.
-Use `resources/iso-planning.md` when the user needs standards-based planning, risk framing, or governance-oriented recommendations.
+- Local code tools: `../_shared/core/code-intelligence.md` (code search/navigation)
+
 Save plan to `.agents/results/plan-{sessionId}.json` and `.agents/results/result-pm.md`.
-Vendor-specific execution protocols are injected automatically by `oma agent:spawn`.
-Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
-- Execution steps: `resources/execution-protocol.md`
+- Execution steps (follow for the selected task): `resources/execution-protocol.md`
 - Plan examples: `resources/examples.md`
 - ISO planning guide: `resources/iso-planning.md`
 - Error recovery: `resources/error-playbook.md`
@@ -156,4 +153,4 @@ Source files live under `../_shared/runtime/execution-protocols/{vendor}.md`.
 - Reasoning templates: `../_shared/core/reasoning-templates.md`
 - Clarification: `../_shared/core/clarification-protocol.md`
 - Context budget: `../_shared/core/context-budget.md`
-- Lessons learned: `../_shared/core/lessons-learned.md`
+- Lessons learned: `../_shared/core/lessons-learned.md` (matching prior failure or requested retrospective)

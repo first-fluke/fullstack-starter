@@ -1,143 +1,33 @@
-# Quality Score Continuum
+# Quality Measurements
 
-Replaces binary PASS/FAIL gate evaluation with a **continuous quantitative score** (0-100).
-Inspired by autoresearch's val_bpb metric: objective, comparable, and trackable over time.
+Load when the task or active workflow needs a measured baseline or experiment comparison with defined metrics. The mere presence of tests or lint does not activate a scoring phase. Ordinary verification uses the applicable checks directly.
 
----
+## Preserve independent acceptance gates
 
-## Score Dimensions
-
-| Dimension | Weight | Measurement Method | Measurer |
-|-----------|--------|--------------------|----------|
-| **Correctness** | 0.30 | Test pass rate (passed / total) | Agent runs `test` via Bash |
-| **Security** | 0.25 | OWASP checklist completion rate | QA Agent review |
-| **Performance** | 0.15 | No regression vs baseline (estimate) | Agent or QA estimate |
-| **Coverage** | 0.15 | Test coverage % from tool output | Agent runs coverage via Bash |
-| **Consistency** | 0.15 | Lint + type errors (100 - error_count, min 0) | Agent runs lint/type-check via Bash |
-
-### Composite Score Formula
-
-```
-composite = (correctness * 0.30) + (security * 0.25) + (performance * 0.15)
-          + (coverage * 0.15) + (consistency * 0.15)
-```
-
----
-
-## Measurement Protocol
-
-### How to Measure (Practical)
-
-Agents with **Bash** tool can measure directly:
-
-```bash
-# Correctness: parse test output
-npm test 2>&1 | tail -5          # or: uv run pytest -q
-# → extract passed/failed counts → score = (passed / total) * 100
-
-# Coverage: parse coverage output
-npm run coverage 2>&1 | grep "All files"   # or: uv run pytest --cov
-# → extract % → score = coverage_percent
-
-# Consistency: count lint + type errors
-npm run lint 2>&1 | grep -c "error"        # or: uv run ruff check
-npm run type-check 2>&1 | grep -c "error"
-# → score = max(0, 100 - error_count)
-```
-
-**When automated tools are unavailable** (no test suite, no lint config):
-- Agent estimates the dimension based on code review (0-100)
-- Must note `(estimated)` next to the score
-- Estimated scores carry lower weight in delta decisions (see below)
-
-### When to Measure
-
-Quality Score is measured **on demand**, not at every step. Load `quality-score.md` only at these checkpoints:
-
-| Checkpoint | Trigger | Measurer |
-|-----------|---------|----------|
-| IMPL baseline | After implementation complete, before VERIFY | Orchestrator (inline) or impl agent |
-| Post-VERIFY | After QA verification complete | QA Agent |
-| Post-REFINE | After refinement complete | Debug Agent or Orchestrator |
-| Final | Before SHIP_GATE | QA Agent |
-
----
-
-## Score Thresholds
-
-| Range | Grade | Gate Decision |
-|-------|-------|---------------|
-| 90-100 | A | PASS, proceed immediately |
-| 75-89 | B | CONDITIONAL PASS, proceed with noted improvements |
-| 60-74 | C | FAIL, must improve before proceeding |
-| 0-59 | D | HARD FAIL, rollback and re-plan required |
-
----
-
-## Keep/Discard Rule
-
-Changes are evaluated by their **impact on the score**, not just by whether they pass review.
-
-```
-IF score_after >= score_before:
-    KEEP change
-ELSE IF (score_before - score_after) < 5:
-    REVIEW (minor regression, justify in experiment ledger)
-ELSE:
-    DISCARD change (revert and try alternative)
-```
-
-### Delta Recording
-
-Every scored change is recorded in the Experiment Ledger (see `experiment-ledger.md`).
-Record via memory protocol: `[EDIT]("experiment-ledger.md", append row)`.
-
----
-
-## Score Record Format
-
-```markdown
-### Quality Score @ {PHASE}_{checkpoint}
-| Dimension | Score | Detail |
-|-----------|-------|--------|
-| Correctness | 85 | 17/20 tests pass |
-| Security | 90 | No CRITICAL/HIGH, 1 MEDIUM |
-| Performance | 75 | (estimated) no regression observed |
-| Coverage | 70 | 70% line coverage |
-| Consistency | 95 | 0 lint errors, 1 type warning |
-| **Composite** | **83.5** | Grade: B |
-```
-
----
-
-## Dimension Customization (Optional)
+Tests, authorization/security requirements, and project acceptance criteria remain independent gates. A performance improvement cannot offset a correctness or security failure. Do not assign default weights, convert checklist completion into a security score, or trigger rollback from an arbitrary grade.
 
 <!-- oma-docs:ignore-start -->
-Projects can override weights in `.agents/config/quality-score.yaml`:
-
-```yaml
-weights:
-  correctness: 0.25
-  security: 0.35
-  performance: 0.10
-  coverage: 0.15
-  consistency: 0.15
-thresholds:
-  pass: 85
-  hard_fail: 60
-```
+OMA does not implement a loader for `.agents/config/quality-score.yaml` or a universal composite scorer. If a project already provides a scoring command, record its formula, inputs, applicability, and output; do not infer configuration support from a sample path. A project composite may supplement the evidence but cannot waive mandatory checks.
 <!-- oma-docs:ignore-end -->
 
-If config file is absent, use the defaults defined in this document.
+## Measure a comparable baseline
 
----
+1. Define the behavior, metric, units, direction, scope, and acceptance threshold from the task or project. Use the same command, dataset, environment, and measurement method before and after.
+2. Reuse still-current verification artifacts. When new measurements are needed, capture the command's exit status and structured output (JSON, JUnit, SARIF, LCOV, or project equivalent). Do not infer totals from truncated console text.
+3. Record the artifact path and revision/run identity with the result. Mark unavailable measurements as missing with a reason; estimates are labeled and excluded from measured comparisons.
+4. Compare each applicable measure and check result. For noisy metrics, use the project's sampling/tolerance method; a single timing sample does not prove a regression.
+5. Keep a change when it meets required behavior and comparison criteria. Investigate a regression before deciding whether to repair or discard the experiment; preserve unrelated work. Record a material tradeoff when requirements permit it.
 
-## Integration Points
+For an actual experiment, use `experiment-ledger.md`. Ordinary test passes do not require a ledger row or a new measurement at every phase. Re-measure only affected metrics after relevant changes, failures, or uncertainty.
 
-| Component | How It Uses Quality Score |
-|-----------|--------------------------|
-| **Phase Gates** | Gate criteria reference composite score threshold |
-| **Experiment Ledger** | Records score delta per experiment |
-| **Exploration Loop** | Compares scores across alternative approaches |
-| **Session Metrics** | Tracks score progression through session |
-| **Lessons Learned** | Discarded experiments (delta <= -5) auto-feed lessons |
+## Evidence record
+
+Use existing result artifacts or a compact table such as:
+
+| Measure | Baseline | Candidate | Method / evidence | Verdict |
+|---|---|---|---|---|
+| Required tests | pass | pass | exact command, exit status, report paths | pass |
+| Request p95 latency | measured ms | measured ms | same workload, environment, sample method | within target / regression / inconclusive |
+| Security finding | finding ID | remediation status | reproduction and verification paths | resolved / unresolved |
+
+Report missing evidence without inventing a score. Authorization, builds, verification, and completion follow `../core/execution-policy.md`.

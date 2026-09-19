@@ -1,16 +1,7 @@
 # Architecture Agent - Execution Protocol
 
-## Step 0: Prepare
-1. Assess difficulty using `../../_shared/core/difficulty-guide.md`
-2. Clarify the decision:
-   - What is being decided?
-   - What constraints already exist?
-   - What would make this decision successful?
-3. Identify scope:
-   - single component/module
-   - subsystem
-   - cross-cutting system architecture
-4. Choose the lightest fitting methodology via `methodology-selection.md`
+## Preparation
+Use the task's scope, existing project conventions, and acceptance criteria. Follow `../../_shared/core/execution-policy.md` when it has not already been supplied. Read only references needed by the selected operation; consult lessons or recovery guides for an observed issue. Expand planning depth only when the change requires it.
 
 ## Step 1: Frame the Problem
 - Separate symptoms from decisions
@@ -26,7 +17,7 @@
   - note decisions that constrain this one
   - if this decision replaces one, plan to mark the old ADR superseded — never silently contradict it
 - Analyze only the code and docs relevant to the decision
-  - prefer symbol-aware tools (serena MCP: `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `search_for_pattern`) when available
+  - follow `../../_shared/core/code-intelligence.md` for configured symbol, reference, and pattern tools or native fallback
 - Map existing architecture:
   - key modules or services
   - ownership boundaries
@@ -112,8 +103,8 @@
 - Emit and verify the completion decision event:
 
 ```bash
-oma state:emit "decision.made" '{"subject":"architecture.adr-complete","decision":"<one-line decision>","rationale":"<one-line rationale>"}'
-oma state:verify --workflow architecture --checkpoint adr-complete
+oma state emit "decision.made" '{"subject":"architecture.adr-complete","decision":"<one-line decision>","rationale":"<one-line rationale>"}'
+oma state verify --workflow architecture --checkpoint adr-complete
 ```
 
 ## Escalation

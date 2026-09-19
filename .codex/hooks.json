@@ -31,7 +31,7 @@
             "name": "oma-hook-PreToolUse",
             "type": "command",
             "command": "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'PreToolUse' --matcher 'Bash'",
-            "timeout": 13
+            "timeout": 15
           }
         ],
         "matcher": "Bash"

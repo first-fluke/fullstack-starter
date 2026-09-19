@@ -4,17 +4,11 @@ description: Design workflow that creates design systems, DESIGN.md, and design 
 disable-model-invocation: true
 ---
 
-# MANDATORY RULES: VIOLATION IS FORBIDDEN
-
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
-- **NEVER skip phases.** Execute from Phase 1 in order.
+- Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **Do NOT write implementation code.** This workflow produces DESIGN.md, design tokens, and design guidance, not application code.
-- **You MUST use MCP tools throughout the workflow.**
-  - Use code analysis tools (`get_symbols_overview`, `find_symbol`, `search_for_pattern`) to analyze the existing codebase.
-  - Use memory tools (write/edit) to record design results.
-  - Memory path: configurable via `memoryConfig.basePath` (default: `.agents/state/memories`)
-  - Tool names: configurable via `memoryConfig.tools` in `.agents/mcp.json`
-  - Do NOT use raw file reads or grep as substitutes.
+- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search and scoped reads when unavailable or timed out. Do not install a provider or track a repository automatically.
+- Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
 
 ---
 
@@ -82,7 +76,7 @@ Otherwise, if the user request is vague (< 3 sentences, no section
 details):
 - Load `.agents/skills/oma-design/resources/prompt-enhancement.md`
 - Transform into section-by-section specification
-- Present enhanced prompt to user for confirmation
+- Present the enhanced prompt; clarify only material assumptions not resolved by the existing request
 
 If already detailed: skip to Phase 4.
 
@@ -106,7 +100,7 @@ anti-patterns flagged in the Phase 2 pre-audit. Multi-vendor merges
 require the dimension-level selection dialog from
 `.agents/skills/oma-design/resources/getdesign-fetcher.md`.
 
-**You MUST get user confirmation on the chosen direction before proceeding.**
+Apply `.agents/skills/_shared/core/execution-policy.md`: proceed when the requested work or decision is already authorized; ask only for a material missing decision or new authorization.
 
 ---
 
