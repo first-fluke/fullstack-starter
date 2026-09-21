@@ -8,10 +8,12 @@ Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clar
 - **Response language**: Follow `language` in `.agents/oma-config.yaml`.
 - **Skills**: Read the relevant `.agents/skills/{name}/SKILL.md` when needed.
 - **Subagents**:
+  - claude: Same-vendor native dispatch via Claude Code Agent tool with `.claude/agents/{name}.md`; cross-vendor fallback via `oma agent spawn`
   - codex: Same-vendor native dispatch via Codex custom agents in `.codex/agents/{name}.toml`; cross-vendor fallback via `oma agent spawn`
   - cursor: `@agent-name` (defined in `.cursor/agents/`)
   - qwen: Same-vendor native dispatch via Qwen Code subagents in `.qwen/agents/{name}.md`; cross-vendor fallback via `oma agent spawn`
   - pi: pi has no native subagent API; use `oma agent spawn {agent} {prompt} {sessionId} --vendor pi` for CLI subprocess dispatch
+- Write non-ASCII tool-call parameters as literal UTF-8, not Unicode escapes.
 
 ## Per-Agent Dispatch
 

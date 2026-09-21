@@ -102,5 +102,10 @@
       "Bash(ls *)",
       "Bash(oma *)"
     ]
+  },
+  "model": {
+    "generationConfig": {
+      "timeout": 300000
+    }
   }
 }
