@@ -5,10 +5,6 @@ resolution-markers = [
     "python_full_version >= '3.15'",
     "python_full_version < '3.15'",
 ]
-conflicts = [[
-    { package = "api", extra = "genai-google" },
-    { package = "api", extra = "genai-openai" },
-]]
 
 [manifest]
 members = [
@@ -151,7 +147,7 @@ version = "4.15.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.15' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a9/d2/f4d173e22df740bc37b1db102b386ba719b66e95b0f0d751f556b387e6d2/anyio-4.15.1.tar.gz", hash = "sha256:9f28306018cbd6d329e64a36d58256edff76dd996fe423bc957326e578b82a94", size = 276966, upload-time = "2026-09-05T10:42:39.44Z" }
 wheels = [
@@ -495,7 +491,7 @@ name = "cffi"
 version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pycparser", marker = "implementation_name != 'PyPy' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "pycparser", marker = "implementation_name != 'PyPy'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9e/ef/008a1939e372c06329a3fce4279c02f328488f3526744906eeec3da7ad5f/cffi-2.1.1.tar.gz", hash = "sha256:dd31f52ea1086513bb9df30f8fcee9b8918323ae067a3d5b78bc826a000712be", size = 530807, upload-time = "2026-08-03T21:21:18.939Z" }
 wheels = [
@@ -735,7 +731,7 @@ name = "cryptography"
 version = "50.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cffi", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "cffi", marker = "platform_python_implementation != 'PyPy'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/bb/ad/5d6702db60b1e40b41ef513b6967ff5848f307d50f8449baf1634f5908f1/cryptography-50.0.1.tar.gz", hash = "sha256:5dd9bda1c12b4162f6ff568eeb5e0ff956c28d14406e875cfe8a63a2d414ff20", size = 880381, upload-time = "2026-08-25T19:45:45.499Z" }
 wheels = [
@@ -837,7 +833,7 @@ name = "faker"
 version = "40.39.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "tzdata", marker = "sys_platform == 'win32' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6d/62/fea935af7a312f073c99d470b05a7c96650ee8d9562ce82e8cb7ee4c1247/faker-40.39.0.tar.gz", hash = "sha256:52799ad96fcf92aab2fc96a9e03869bbf1a634300f7cd91c38dbfd51f639f6fa", size = 2029463, upload-time = "2026-09-14T16:50:17.939Z" }
 wheels = [
@@ -1594,7 +1590,7 @@ version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ast-serialize" },
-    { name = "librt", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "librt", marker = "platform_python_implementation != 'PyPy'" },
     { name = "mypy-extensions" },
     { name = "pathspec" },
     { name = "typing-extensions" },
@@ -2241,7 +2237,7 @@ name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
@@ -2522,7 +2518,7 @@ name = "sqlalchemy"
 version = "2.0.54"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/29/9c/271aa905cf2964f841371a97f3e63ab692bf51b4423d0491e67bc7f64037/sqlalchemy-2.0.54.tar.gz", hash = "sha256:baa8521e8ee9f24e75dfc7aaabc08020e551ef0d48d7c3e3536f5cddf277586b", size = 9969559, upload-time = "2026-09-15T21:06:57.337Z" }
@@ -2585,7 +2581,7 @@ version = "0.27.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "rich" },
     { name = "shellingham" },
 ]
@@ -2651,7 +2647,7 @@ standard = [
     { name = "httptools" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
-    { name = "uvloop", marker = "(platform_python_implementation != 'PyPy' and sys_platform != 'cygwin' and sys_platform != 'win32') or (platform_python_implementation == 'PyPy' and extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai') or (sys_platform == 'cygwin' and extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai') or (sys_platform == 'win32' and extra == 'extra-3-api-genai-google' and extra == 'extra-3-api-genai-openai')" },
+    { name = "uvloop", marker = "platform_python_implementation != 'PyPy' and sys_platform != 'cygwin' and sys_platform != 'win32'" },
     { name = "watchfiles" },
     { name = "websockets" },
 ]

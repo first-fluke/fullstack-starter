@@ -60,9 +60,6 @@ dev = [
 
 [tool.uv]
 managed = true
-# openai-v2 and google-genai pin incompatible opentelemetry-util-genai ranges
-# (2026-Q2); declare them mutually exclusive so each resolves independently.
-conflicts = [[{ extra = "genai-openai" }, { extra = "genai-google" }]]
 
 [tool.poe.tasks]
 dev = "fastapi dev src/main.py --port 8000"
