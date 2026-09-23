@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.27.1](https://github.com/first-fluke/fullstack-starter/compare/v2.27.0...v2.27.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **api:** narrow azure storage return types for mypy ([4b0ef3b](https://github.com/first-fluke/fullstack-starter/commit/4b0ef3b4373ba4ccce2e0b341c7327ae23edcb07))
+
 ## [2.27.0](https://github.com/first-fluke/fullstack-starter/compare/v2.26.2...v2.27.0) (2026-09-04)
 
 
