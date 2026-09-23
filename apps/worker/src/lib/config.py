@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     WORKER_OIDC_AUDIENCE: str | None = None
 
     @model_validator(mode="after")
-    def _require_audience_when_verify_enabled(self) -> "Settings":
+    def _require_audience_when_verify_enabled(self) -> Settings:
         """Fail closed: audience must be set when OIDC verification is enabled.
 
         google-auth skips audience verification when ``audience=None``, which

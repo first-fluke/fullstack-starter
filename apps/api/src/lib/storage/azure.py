@@ -72,9 +72,7 @@ class AzureBlobStorageProvider(StorageProvider):
         self._account_key = account_key
 
     @classmethod
-    def from_settings(
-        cls, config: Settings | None = None
-    ) -> "AzureBlobStorageProvider":
+    def from_settings(cls, config: Settings | None = None) -> AzureBlobStorageProvider:
         """Build an adapter from application settings.
 
         Raises:
@@ -207,7 +205,7 @@ class AzureBlobStorageProvider(StorageProvider):
         """Close the underlying client and its transport."""
         await self._client.close()
 
-    async def __aenter__(self) -> "AzureBlobStorageProvider":
+    async def __aenter__(self) -> AzureBlobStorageProvider:
         return self
 
     async def __aexit__(self, *_exc: object) -> None:

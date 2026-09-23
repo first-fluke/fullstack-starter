@@ -57,7 +57,7 @@ EOF
 
 [tools]
 node = "26"
-python = "3.12"
+python = "3.14"
 bun = "latest"
 uv = "latest"
 flutter = "3.47.5"

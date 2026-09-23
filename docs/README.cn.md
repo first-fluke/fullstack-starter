@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.12]
+        API[FastAPI<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -156,7 +156,7 @@ curl https://mise.run | sh
 # 信任项目配置（首次克隆时需要）
 mise trust
 
-# 安装所有运行时（Node 26、Python 3.12、Flutter 3、bun、uv、Terraform）
+# 安装所有运行时（Node 26、Python 3.14、Flutter 3、bun、uv、Terraform）
 mise install
 ```
 

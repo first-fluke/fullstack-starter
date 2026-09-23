@@ -3,7 +3,7 @@ name = "api"
 version = "0.1.0"
 description = "FastAPI backend API"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.141.1",
     "sqlalchemy[asyncio]>=2.0.54",
@@ -94,7 +94,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic"]

@@ -139,7 +139,7 @@ class RedisRateLimiter:
         self._redis: redis_module.Redis | None = None
         self._script_sha: str | None = None
 
-    async def _get_redis(self) -> "redis_module.Redis":
+    async def _get_redis(self) -> redis_module.Redis:
         """Lazy Redis connection."""
         if self._redis is None:
             import redis.asyncio as redis
@@ -147,7 +147,7 @@ class RedisRateLimiter:
             self._redis = redis.from_url(settings.REDIS_URL or "")
         return self._redis
 
-    async def _get_script_sha(self, redis: "redis_module.Redis") -> str:
+    async def _get_script_sha(self, redis: redis_module.Redis) -> str:
         """Load the Lua script via SCRIPT LOAD and cache the SHA."""
         if self._script_sha is None:
             self._script_sha = await redis.script_load(_SLIDING_WINDOW_LUA)

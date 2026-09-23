@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS: list[str] = []
 
     @model_validator(mode="after")
-    def add_android_webauthn_origins(self) -> "Settings":
+    def add_android_webauthn_origins(self) -> Settings:
         """Allow native Android origins derived from trusted signing certs."""
         for fingerprint in self.WEBAUTHN_ANDROID_SHA256_CERT_FINGERPRINTS:
             try:
@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str | None = None
 
     @model_validator(mode="after")
-    def derive_redis_url(self) -> "Settings":
+    def derive_redis_url(self) -> Settings:
         """Build REDIS_URL from cloud-provider host settings when needed."""
         if self.REDIS_URL or not self.REDIS_HOST:
             return self

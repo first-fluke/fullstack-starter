@@ -39,7 +39,7 @@ class PaginatedResponse[T](BaseModel):
         total: int,
         page: int,
         limit: int,
-    ) -> "PaginatedResponse[T]":
+    ) -> PaginatedResponse[T]:
         """
         Create a paginated response.
 

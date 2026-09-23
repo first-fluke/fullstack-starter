@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.12]
+        API[FastAPI<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -156,7 +156,7 @@ curl https://mise.run | sh
 # プロジェクト設定を信頼する（初回クローン時に必要）
 mise trust
 
-# すべてのランタイムをインストール（Node 26、Python 3.12、Flutter 3、bun、uv、Terraform）
+# すべてのランタイムをインストール（Node 26、Python 3.14、Flutter 3、bun、uv、Terraform）
 mise install
 ```
 

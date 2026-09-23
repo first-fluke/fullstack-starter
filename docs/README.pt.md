@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.12]
+        API[FastAPI<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -156,7 +156,7 @@ curl https://mise.run | sh
 # Confiar na configuração do projeto (necessário no primeiro clone)
 mise trust
 
-# Instalar todos os runtimes (Node 26, Python 3.12, Flutter 3, bun, uv, Terraform)
+# Instalar todos os runtimes (Node 26, Python 3.14, Flutter 3, bun, uv, Terraform)
 mise install
 ```
 

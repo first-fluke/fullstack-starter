@@ -14,7 +14,7 @@ from src.lib.config import settings
 
 
 class _FakeOAuthClient:
-    async def __aenter__(self) -> "_FakeOAuthClient":
+    async def __aenter__(self) -> _FakeOAuthClient:
         return self
 
     async def __aexit__(self, *_args: object) -> None:
@@ -38,7 +38,7 @@ class _FakeOAuthClient:
 
 
 class _FakeFacebookClient:
-    async def __aenter__(self) -> "_FakeFacebookClient":
+    async def __aenter__(self) -> _FakeFacebookClient:
         return self
 
     async def __aexit__(self, *_args: object) -> None:

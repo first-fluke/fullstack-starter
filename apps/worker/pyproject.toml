@@ -3,7 +3,7 @@ name = "worker"
 version = "0.1.0"
 description = "FastAPI worker for async tasks"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.141.1",
     "pydantic-settings>=2.15.0",
@@ -43,5 +43,5 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = true
