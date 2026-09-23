@@ -98,6 +98,51 @@ async def test_download_reads_all_bytes() -> None:
     assert data == b"hello"
 
 
+async def test_upload_returns_str() -> None:
+    blob_client = _blob_client_mock(f"{ACCOUNT_URL}/bucket/key.txt")
+    provider = _provider_with(blob_client)
+
+    url = await provider.upload("bucket", "key.txt", b"hello")
+
+    assert isinstance(url, str)
+
+
+async def test_upload_rejects_non_str_url() -> None:
+    # Regression: the SDK is typed as Any when the extra is absent, so the
+    # adapter must narrow the URL to str instead of passing Any through.
+    blob_client = _blob_client_mock(f"{ACCOUNT_URL}/bucket/key.txt")
+    blob_client.url = None
+    provider = _provider_with(blob_client)
+
+    with pytest.raises(TypeError):
+        await provider.upload("bucket", "key.txt", b"hello")
+
+
+async def test_download_returns_bytes() -> None:
+    blob_client = _blob_client_mock(f"{ACCOUNT_URL}/bucket/key.txt")
+    stream = MagicMock()
+    stream.readall = AsyncMock(return_value=b"hello")
+    blob_client.download_blob = AsyncMock(return_value=stream)
+    provider = _provider_with(blob_client)
+
+    data = await provider.download("bucket", "key.txt")
+
+    assert isinstance(data, bytes)
+
+
+async def test_download_rejects_non_bytes_payload() -> None:
+    # Regression: readall() returns str when a download encoding is set; the
+    # bytes contract must be enforced rather than leaking Any to callers.
+    blob_client = _blob_client_mock(f"{ACCOUNT_URL}/bucket/key.txt")
+    stream = MagicMock()
+    stream.readall = AsyncMock(return_value="hello")
+    blob_client.download_blob = AsyncMock(return_value=stream)
+    provider = _provider_with(blob_client)
+
+    with pytest.raises(TypeError):
+        await provider.download("bucket", "key.txt")
+
+
 async def test_download_missing_raises_file_not_found() -> None:
     blob_client = _blob_client_mock(f"{ACCOUNT_URL}/bucket/missing.txt")
     blob_client.download_blob = AsyncMock(side_effect=ResourceNotFoundError("nope"))

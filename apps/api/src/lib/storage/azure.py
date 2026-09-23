@@ -141,7 +141,13 @@ class AzureBlobStorageProvider(StorageProvider):
         await blob_client.upload_blob(
             data, overwrite=True, content_settings=content_settings
         )
-        return blob_client.url
+        # Narrow explicitly: without the storage-azure extra installed, mypy
+        # sees the SDK as Any (ignore_missing_imports).
+        url = blob_client.url
+        if not isinstance(url, str):
+            msg = f"Azure SDK returned non-str blob URL: {type(url).__name__}"
+            raise TypeError(msg)
+        return url
 
     async def download(self, bucket: str, key: str) -> bytes:
         blob_client = self._client.get_blob_client(container=bucket, blob=key)
@@ -149,7 +155,11 @@ class AzureBlobStorageProvider(StorageProvider):
             stream = await blob_client.download_blob()
         except ResourceNotFoundError as exc:
             raise FileNotFoundError(f"{bucket}/{key}") from exc
-        return await stream.readall()
+        payload = await stream.readall()
+        if not isinstance(payload, bytes):
+            msg = f"Azure SDK returned non-bytes payload: {type(payload).__name__}"
+            raise TypeError(msg)
+        return payload
 
     async def delete(self, bucket: str, key: str) -> None:
         blob_client = self._client.get_blob_client(container=bucket, blob=key)
