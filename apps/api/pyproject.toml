@@ -5,27 +5,27 @@ description = "FastAPI backend API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi[standard]>=0.136.3",
-    "sqlalchemy[asyncio]>=2.0.50",
-    "alembic>=1.18.4",
-    "pydantic-settings>=2.14.1",
+    "fastapi[standard]>=0.141.1",
+    "sqlalchemy[asyncio]>=2.0.54",
+    "alembic>=1.20.0",
+    "pydantic-settings>=2.15.0",
     "asyncpg>=0.31.0",
     "python-multipart>=0.0.32",
     "httpx>=0.28.1",
     "tenacity>=9.1.4",
-    "redis>=8.0.0",
-    "structlog>=25.5.0",
-    "opentelemetry-api>=1.42.1",
-    "opentelemetry-sdk>=1.42.1",
-    "opentelemetry-instrumentation-fastapi>=0.63b1",
-    "opentelemetry-instrumentation-sqlalchemy>=0.63b1",
-    "opentelemetry-instrumentation-httpx>=0.63b1",
-    "opentelemetry-instrumentation-redis>=0.63b1",
-    "opentelemetry-exporter-otlp>=1.42.1",
-    "jwcrypto>=1.5.7",
-    "psycopg2-binary>=2.9.12",
+    "redis>=8.1.0",
+    "structlog>=26.1.0",
+    "opentelemetry-api>=1.44.0",
+    "opentelemetry-sdk>=1.44.0",
+    "opentelemetry-instrumentation-fastapi>=0.65b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.65b0",
+    "opentelemetry-instrumentation-httpx>=0.65b0",
+    "opentelemetry-instrumentation-redis>=0.65b0",
+    "opentelemetry-exporter-otlp>=1.44.0",
+    "jwcrypto>=1.6.1",
+    "psycopg2-binary>=2.9.13",
     "bcrypt>=5.0.0",
-    "webauthn>=2.7.0",
+    "webauthn>=3.0.0",
 ]
 
 # Optional GenAI SDK auto-instrumentation (OTel GenAI semconv).
@@ -35,22 +35,22 @@ dependencies = [
 # (src/lib/ai/telemetry.py) import-guards both, so absence is a safe no-op.
 [project.optional-dependencies]
 genai-openai = ["opentelemetry-instrumentation-openai-v2>=2.4b0"]
-genai-google = ["opentelemetry-instrumentation-google-genai>=0.7b1"]
+genai-google = ["opentelemetry-instrumentation-google-genai>=1.1b1"]
 # Object storage backend (STORAGE_BACKEND="azure"). azure-identity enables
 # managed/workload identity; connection-string and shared-key auth need only
 # azure-storage-blob. Install with `uv sync --extra storage-azure`.
 storage-azure = [
-    "azure-storage-blob>=12.24.0",
-    "azure-identity>=1.19.0",
-    "aiohttp>=3.10.0",
+    "azure-storage-blob>=12.30.3",
+    "azure-identity>=1.25.3",
+    "aiohttp>=3.14.3",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.16",
-    "poethepoet>=0.46.0",
-    "mypy>=2.1.0",
-    "pytest>=9.0.3",
+    "ruff>=0.16.8",
+    "poethepoet>=0.48.0",
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "factory-boy>=3.3.3",
@@ -98,6 +98,12 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic"]
+# The optional GenAI instrumentors ship untyped __init__s. A per-line ignore
+# would become an unused-ignore error when the extra is absent, so exempt them.
+untyped_calls_exclude = [
+    "opentelemetry.instrumentation.openai_v2",
+    "opentelemetry.instrumentation.google_genai",
+]
 
 [[tool.mypy.overrides]]
 module = ["asyncpg.*"]
