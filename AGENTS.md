@@ -8,10 +8,12 @@ Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clar
 - **Response language**: Follow `language` in `.agents/oma-config.yaml`.
 - **Skills**: Read the relevant `.agents/skills/{name}/SKILL.md` when needed.
 - **Subagents**:
+  - claude: Same-vendor native dispatch via Claude Code Agent tool with `.claude/agents/{name}.md`; cross-vendor fallback via `oma agent spawn`
   - codex: Same-vendor native dispatch via Codex custom agents in `.codex/agents/{name}.toml`; cross-vendor fallback via `oma agent spawn`
   - cursor: `@agent-name` (defined in `.cursor/agents/`)
   - qwen: Same-vendor native dispatch via Qwen Code subagents in `.qwen/agents/{name}.md`; cross-vendor fallback via `oma agent spawn`
   - pi: pi has no native subagent API; use `oma agent spawn {agent} {prompt} {sessionId} --vendor pi` for CLI subprocess dispatch
+- Write non-ASCII tool-call parameters as literal UTF-8, not Unicode escapes.
 
 ## Per-Agent Dispatch
 
@@ -19,7 +21,7 @@ Resolve each agent from `.agents/oma-config.cue` or `.agents/oma-config.yaml`, o
 
 ## Code Search
 
-Serena MCP is required for code search and discovery. Load deferred tools before use. Use `find_file` for paths, `search_for_pattern` for content, and `find_symbol` / `get_symbols_overview` for symbols; a PreToolUse hook denies native Grep, Glob and recursive shell search (`rg`, `grep -r`, `find -name`). Use native search/read only when Serena is unavailable or times out (prefix the shell command with `OMA_CI_ALLOW_NATIVE=1`), or for plain non-code content.
+Serena MCP is required for code search and discovery. Load deferred tools before use. Use `find_file` for paths, `search_for_pattern` for content, and `find_symbol` / `get_symbols_overview` for symbols; the PreToolUse guard allows native searches confined to confirmed provider exclusions or paths outside this project. Use native search/read when Serena is unavailable, times out, or cannot search the requested path (prefix the shell command with `OMA_CI_ALLOW_NATIVE=1`), or for plain non-code content.
 
 ## Workflows
 
