@@ -12,7 +12,7 @@ const _kRefreshTokenKey = 'refresh_token';
 /// {@endtemplate}
 class TokenStorage {
   /// {@macro token_storage}
-  const TokenStorage({FlutterSecureStorage? storage})
+  const new({FlutterSecureStorage? storage})
     : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;

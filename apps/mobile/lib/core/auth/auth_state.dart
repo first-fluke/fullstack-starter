@@ -8,16 +8,16 @@ part 'auth_state.freezed.dart';
 @freezed
 sealed class AuthState with _$AuthState {
   // Private constructor required to add custom members to a freezed class.
-  const AuthState._();
+  const new _();
 
   /// The user is authenticated and tokens are available.
-  const factory AuthState.authenticated({
+  const factory authenticated({
     required String accessToken,
     required String refreshToken,
   }) = Authenticated;
 
   /// The user is not authenticated.
-  const factory AuthState.unauthenticated() = Unauthenticated;
+  const factory unauthenticated() = Unauthenticated;
 
   /// Returns a redacted string to prevent credentials leaking into logs or
   /// crash reports.

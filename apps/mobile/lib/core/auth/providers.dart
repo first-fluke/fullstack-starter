@@ -60,16 +60,15 @@ Uri buildOAuthAuthorizationUri(
   OAuthProvider provider, {
   required String codeChallenge,
 }) {
-  return Uri.parse(
-    '$baseUrl/api/auth/oauth/${provider.name}/authorize',
-  ).replace(
-    queryParameters: {
-      'redirect_uri': _oauthCallbackUri,
-      'return_to': '/',
-      'code_challenge': codeChallenge,
-      'code_challenge_method': 'S256',
-    },
-  );
+  return Uri.parse('$baseUrl/api/auth/oauth/${provider.name}/authorize')
+      .replace(
+        queryParameters: {
+          'redirect_uri': _oauthCallbackUri,
+          'return_to': '/',
+          'code_challenge': codeChallenge,
+          'code_challenge_method': 'S256',
+        },
+      );
 }
 
 /// Provides the Dio instance shared by the generated [generated.ApiClient].

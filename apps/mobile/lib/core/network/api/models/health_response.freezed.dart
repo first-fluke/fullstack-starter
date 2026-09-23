@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'health_response.dart';
@@ -9,6 +9,7 @@ part of 'health_response.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $HealthResponseCopyWith<HealthResponse> get copyWith => _$HealthResponseCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HealthResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.services, services)&&(identical(other.version, version) || other.version == version));
+  final _this = this as HealthResponse;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HealthResponse&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.services, _this.services)&&(identical(other.version, _this.version) || other.version == _this.version));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(services),version);
+int get hashCode {
+  final _this = this as HealthResponse;
+  return Object.hash(runtimeType,_this.status,const DeepCollectionEquality().hash(_this.services),_this.version);
+}
 
 @override
 String toString() {
-  return 'HealthResponse(status: $status, services: $services, version: $version)';
+  final _this = this as HealthResponse;
+  return 'HealthResponse(status: ${_this.status}, services: ${_this.services}, version: ${_this.version})';
 }
 
 
@@ -66,7 +72,7 @@ class _$HealthResponseCopyWithImpl<$Res>
 /// Create a copy of HealthResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? services = null,Object? version = null,}) {
-  return _then(_self.copyWith(
+  return _then(HealthResponse(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as HealthResponseStatus,services: null == services ? _self.services : services // ignore: cast_nullable_to_non_nullable
 as Map<String, ServiceStatus>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
@@ -211,7 +217,7 @@ return $default(_that.status,_that.services,_that.version);case _:
 @JsonSerializable()
 
 class _HealthResponse implements HealthResponse {
-  const _HealthResponse({required this.status, required final  Map<String, ServiceStatus> services, this.version = '0.1.0'}): _services = services;
+  const _HealthResponse({required this.status, required  Map<String, ServiceStatus> services, this.version = '0.1.0'}): _services = services;
   factory _HealthResponse.fromJson(Map<String, dynamic> json) => _$HealthResponseFromJson(json);
 
 @override final  HealthResponseStatus status;
@@ -237,16 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HealthResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._services, _services)&&(identical(other.version, version) || other.version == version));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _HealthResponse&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.services, _services)&&(identical(other.version, version) || other.version == version));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_services),version);
+int get hashCode {
+    return Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_services),version);
+}
 
 @override
 String toString() {
-  return 'HealthResponse(status: $status, services: $services, version: $version)';
+    return 'HealthResponse(status: $status, services: $services, version: $version)';
 }
 
 

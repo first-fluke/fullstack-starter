@@ -5,10 +5,10 @@ import 'package:dio/dio.dart';
 /// {@endtemplate}
 sealed class AppException implements Exception {
   /// {@macro app_exception}
-  const AppException(this.message);
+  const new(this.message);
 
   /// Maps a [DioException] to the appropriate [AppException] subclass.
-  factory AppException.fromDio(DioException e) {
+  factory fromDio(DioException e) {
     final statusCode = e.response?.statusCode;
 
     if (e.type == DioExceptionType.connectionError ||
@@ -36,23 +36,23 @@ sealed class AppException implements Exception {
 /// Thrown when a network connectivity error occurs.
 final class NetworkException extends AppException {
   /// Creates a [NetworkException].
-  const NetworkException(super.message);
+  const new(super.message);
 }
 
 /// Thrown when the server returns a 401 Unauthorized response.
 final class UnauthorizedException extends AppException {
   /// Creates an [UnauthorizedException].
-  const UnauthorizedException(super.message);
+  const new(super.message);
 }
 
 /// Thrown when the server returns a 5xx response.
 final class ServerException extends AppException {
   /// Creates a [ServerException].
-  const ServerException(super.message);
+  const new(super.message);
 }
 
 /// Thrown for any error that does not fit the other categories.
 final class UnknownException extends AppException {
   /// Creates an [UnknownException].
-  const UnknownException(super.message);
+  const new(super.message);
 }

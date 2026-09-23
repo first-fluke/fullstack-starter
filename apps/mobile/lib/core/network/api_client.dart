@@ -6,7 +6,7 @@ import 'package:mobile/core/config/app_env.dart';
 /// {@endtemplate}
 class ApiClient {
   /// {@macro api_client}
-  ApiClient({String? baseUrl, Dio? dio})
+  new({String? baseUrl, Dio? dio})
     : _dio =
           dio ??
           Dio(

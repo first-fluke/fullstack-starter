@@ -18,8 +18,8 @@
 @import firebase_core;
 #endif
 
-#if __has_include(<firebase_crashlytics/FLTFirebaseCrashlyticsPlugin.h>)
-#import <firebase_crashlytics/FLTFirebaseCrashlyticsPlugin.h>
+#if __has_include(<firebase_crashlytics/FirebaseCrashlyticsPlugin.h>)
+#import <firebase_crashlytics/FirebaseCrashlyticsPlugin.h>
 #else
 @import firebase_crashlytics;
 #endif
@@ -59,7 +59,7 @@
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];
   [FLTFirebaseCorePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCorePlugin"]];
-  [FLTFirebaseCrashlyticsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCrashlyticsPlugin"]];
+  [FirebaseCrashlyticsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FirebaseCrashlyticsPlugin"]];
   [FlutterSecureStorageDarwinPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterSecureStorageDarwinPlugin"]];
   [FlutterWebAuth2Plugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterWebAuth2Plugin"]];
   [FPPPackageInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPPackageInfoPlusPlugin"]];

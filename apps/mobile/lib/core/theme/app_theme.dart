@@ -9,7 +9,7 @@ import 'package:mobile/core/theme/generated_theme.dart';
 /// visually consistent.
 /// {@endtemplate}
 class AppTheme {
-  AppTheme._();
+  new _();
 
   /// The primary color from the generated light theme token set.
   static Color get _primaryColor => generatedLightTheme.colors.primary;

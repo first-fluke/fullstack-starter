@@ -13,12 +13,11 @@ import 'package:mocktail/mocktail.dart';
 // Mocks
 // ---------------------------------------------------------------------------
 
-class _MockTokenStorage extends Mock implements TokenStorage {}
+class _MockTokenStorage extends Mock implements TokenStorage;
 
-class _MockAuthenticationService extends Mock
-    implements AuthenticationService {}
+class _MockAuthenticationService extends Mock implements AuthenticationService;
 
-class _MockDio extends Mock implements Dio {}
+class _MockDio extends Mock implements Dio;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -139,9 +138,8 @@ void main() {
         (_) async =>
             const TokenResponse(accessToken: 'new_at', refreshToken: 'new_rt'),
       );
-      when(
-        () => mockStorage.saveTokens('new_at', 'new_rt'),
-      ).thenAnswer((_) async {});
+      when(() => mockStorage.saveTokens('new_at', 'new_rt'))
+          .thenAnswer((_) async {});
       when(() => mockRetryDio.fetch<dynamic>(any())).thenAnswer(
         (_) async => Response<dynamic>(requestOptions: opts, statusCode: 200),
       );

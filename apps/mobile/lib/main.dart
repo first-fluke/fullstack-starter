@@ -55,7 +55,7 @@ Future<void> main() async {
 /// {@endtemplate}
 class MyApp extends ConsumerWidget {
   /// {@macro my_app}
-  const MyApp({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

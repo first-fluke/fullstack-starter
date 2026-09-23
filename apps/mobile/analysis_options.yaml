@@ -18,6 +18,9 @@ analyzer:
     - "**/*.freezed.dart"
     # Firebase generated file
     - "lib/firebase_options.dart"
+    - build/**
+    - android/**
+    - ios/**
   errors:
     # Ignore invalid_annotation_target for json_serializable
     invalid_annotation_target: ignore

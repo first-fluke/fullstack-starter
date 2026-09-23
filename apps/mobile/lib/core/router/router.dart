@@ -42,7 +42,7 @@ GoRouter router(Ref ref) {
 /// A [ChangeNotifier] that listens to the auth state provider and notifies
 /// go_router when the state changes, triggering the redirect callback.
 class _AuthStateListenable extends ChangeNotifier {
-  _AuthStateListenable(Ref ref) {
+  new(Ref ref) {
     _subscription = ref.listen<AsyncValue<AuthState>>(
       authStateProvider,
       (prev, next) => notifyListeners(),
@@ -63,7 +63,7 @@ class _AuthStateListenable extends ChangeNotifier {
 /// {@endtemplate}
 class HomePage extends ConsumerWidget {
   /// {@macro home_page}
-  const HomePage({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -80,9 +80,8 @@ class HomePage extends ConsumerWidget {
         }
       } on Exception {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(localizations.error)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(localizations.error)));
         }
       }
     }
@@ -116,7 +115,7 @@ class HomePage extends ConsumerWidget {
 /// {@endtemplate}
 class LoginPage extends ConsumerStatefulWidget {
   /// {@macro login_page}
-  const LoginPage({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -144,9 +143,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         await ref.read(authStateProvider.notifier).loginWithOAuth(provider);
       } on Exception {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(localizations.error)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(localizations.error)));
         }
       }
     }
@@ -166,9 +164,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             .loginWithEmail(email, password);
       } on Exception {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(localizations.error)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(localizations.error)));
         }
       }
     }
@@ -176,18 +173,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     Future<void> loginWithPasskey() async {
       final email = _emailController.text.trim();
       if (email.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(localizations.emailRequired)),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(localizations.emailRequired)));
         return;
       }
       try {
         await ref.read(authStateProvider.notifier).loginWithPasskey(email);
       } on Exception {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(localizations.error)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(localizations.error)));
         }
       }
     }

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'validation_error.dart';
@@ -9,6 +9,7 @@ part of 'validation_error.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $ValidationErrorCopyWith<ValidationError> get copyWith => _$ValidationErrorCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&const DeepCollectionEquality().equals(other.loc, loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.input, input)&&const DeepCollectionEquality().equals(other.ctx, ctx));
+  final _this = this as ValidationError;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ValidationError&&const DeepCollectionEquality().equals(other.loc, _this.loc)&&(identical(other.msg, _this.msg) || other.msg == _this.msg)&&(identical(other.type, _this.type) || other.type == _this.type)&&const DeepCollectionEquality().equals(other.input, _this.input)&&const DeepCollectionEquality().equals(other.ctx, _this.ctx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(loc),msg,type,const DeepCollectionEquality().hash(input),const DeepCollectionEquality().hash(ctx));
+int get hashCode {
+  final _this = this as ValidationError;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.loc),_this.msg,_this.type,const DeepCollectionEquality().hash(_this.input),const DeepCollectionEquality().hash(_this.ctx));
+}
 
 @override
 String toString() {
-  return 'ValidationError(loc: $loc, msg: $msg, type: $type, input: $input, ctx: $ctx)';
+  final _this = this as ValidationError;
+  return 'ValidationError(loc: ${_this.loc}, msg: ${_this.msg}, type: ${_this.type}, input: ${_this.input}, ctx: ${_this.ctx})';
 }
 
 
@@ -66,7 +72,7 @@ class _$ValidationErrorCopyWithImpl<$Res>
 /// Create a copy of ValidationError
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? loc = null,Object? msg = null,Object? type = null,Object? input = freezed,Object? ctx = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(ValidationError(
 loc: null == loc ? _self.loc : loc // ignore: cast_nullable_to_non_nullable
 as List<dynamic>,msg: null == msg ? _self.msg : msg // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -213,7 +219,7 @@ return $default(_that.loc,_that.msg,_that.type,_that.input,_that.ctx);case _:
 @JsonSerializable()
 
 class _ValidationError implements ValidationError {
-  const _ValidationError({required final  List<dynamic> loc, required this.msg, required this.type, this.input, this.ctx}): _loc = loc;
+  const _ValidationError({required  List<dynamic> loc, required this.msg, required this.type, this.input, this.ctx}): _loc = loc;
   factory _ValidationError.fromJson(Map<String, dynamic> json) => _$ValidationErrorFromJson(json);
 
  final  List<dynamic> _loc;
@@ -241,16 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ValidationError&&const DeepCollectionEquality().equals(other._loc, _loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.input, input)&&const DeepCollectionEquality().equals(other.ctx, ctx));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ValidationError&&const DeepCollectionEquality().equals(other.loc, _loc)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.input, input)&&const DeepCollectionEquality().equals(other.ctx, ctx));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_loc),msg,type,const DeepCollectionEquality().hash(input),const DeepCollectionEquality().hash(ctx));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_loc),msg,type,const DeepCollectionEquality().hash(input),const DeepCollectionEquality().hash(ctx));
+}
 
 @override
 String toString() {
-  return 'ValidationError(loc: $loc, msg: $msg, type: $type, input: $input, ctx: $ctx)';
+    return 'ValidationError(loc: $loc, msg: $msg, type: $type, input: $input, ctx: $ctx)';
 }
 
 

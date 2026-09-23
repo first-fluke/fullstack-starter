@@ -13,7 +13,7 @@ import 'package:mobile/core/network/api/models/refresh_token_request.dart';
 /// {@endtemplate}
 class AuthInterceptor extends QueuedInterceptorsWrapper {
   /// {@macro auth_interceptor}
-  AuthInterceptor({
+  new({
     required this.tokenStorage,
     required this.authService,
     required this.onLogout,

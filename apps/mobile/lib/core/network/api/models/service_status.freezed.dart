@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'service_status.dart';
@@ -9,6 +9,7 @@ part of 'service_status.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -28,16 +29,21 @@ $ServiceStatusCopyWith<ServiceStatus> get copyWith => _$ServiceStatusCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceStatus&&(identical(other.status, status) || other.status == status)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.error, error) || other.error == error));
+  final _this = this as ServiceStatus;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceStatus&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.error, _this.error) || other.error == _this.error));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,latencyMs,error);
+int get hashCode {
+  final _this = this as ServiceStatus;
+  return Object.hash(runtimeType,_this.status,_this.latencyMs,_this.error);
+}
 
 @override
 String toString() {
-  return 'ServiceStatus(status: $status, latencyMs: $latencyMs, error: $error)';
+  final _this = this as ServiceStatus;
+  return 'ServiceStatus(status: ${_this.status}, latencyMs: ${_this.latencyMs}, error: ${_this.error})';
 }
 
 
@@ -66,7 +72,7 @@ class _$ServiceStatusCopyWithImpl<$Res>
 /// Create a copy of ServiceStatus
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? latencyMs = freezed,Object? error = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(ServiceStatus(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ServiceStatusStatus,latencyMs: freezed == latencyMs ? _self.latencyMs : latencyMs // ignore: cast_nullable_to_non_nullable
 as num?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
@@ -231,16 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceStatus&&(identical(other.status, status) || other.status == status)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.error, error) || other.error == error));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceStatus&&(identical(other.status, status) || other.status == status)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.error, error) || other.error == error));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,status,latencyMs,error);
+int get hashCode {
+    return Object.hash(runtimeType,status,latencyMs,error);
+}
 
 @override
 String toString() {
-  return 'ServiceStatus(status: $status, latencyMs: $latencyMs, error: $error)';
+    return 'ServiceStatus(status: $status, latencyMs: $latencyMs, error: $error)';
 }
 
 

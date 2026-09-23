@@ -14,14 +14,13 @@ import 'package:passkeys/types.dart';
 // Mocks
 // ---------------------------------------------------------------------------
 
-class _MockTokenStorage extends Mock implements TokenStorage {}
+class _MockTokenStorage extends Mock implements TokenStorage;
 
-class _MockAuthenticationService extends Mock
-    implements AuthenticationService {}
+class _MockAuthenticationService extends Mock implements AuthenticationService;
 
-class _MockDio extends Mock implements Dio {}
+class _MockDio extends Mock implements Dio;
 
-class _MockPasskeyAuthenticator extends Mock implements PasskeyAuthenticator {}
+class _MockPasskeyAuthenticator extends Mock implements PasskeyAuthenticator;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -65,12 +64,7 @@ _buildPasskeyContainer() {
       passkeyAuthenticatorProvider.overrideWithValue(passkeys),
     ],
   );
-  return (
-    container: container,
-    storage: storage,
-    dio: dio,
-    passkeys: passkeys,
-  );
+  return (container: container, storage: storage, dio: dio, passkeys: passkeys);
 }
 
 Map<String, Object?> _registrationOptions() => {
@@ -78,11 +72,7 @@ Map<String, Object?> _registrationOptions() => {
   'public_key': <String, dynamic>{
     'challenge': 'AQID',
     'rp': {'id': 'example.com', 'name': 'Fullstack Starter'},
-    'user': {
-      'id': 'dXNlcg',
-      'name': 'user@example.com',
-      'displayName': 'User',
-    },
+    'user': {'id': 'dXNlcg', 'name': 'user@example.com', 'displayName': 'User'},
     'excludeCredentials': <Object?>[],
     'pubKeyCredParams': [
       {'type': 'public-key', 'alg': -7},
@@ -168,9 +158,8 @@ void main() {
         // Initial state: unauthenticated.
         when(storage.getAccessToken).thenAnswer((_) async => null);
         when(storage.getRefreshToken).thenAnswer((_) async => null);
-        when(
-          () => storage.saveTokens('new_at', 'new_rt'),
-        ).thenAnswer((_) async {});
+        when(() => storage.saveTokens('new_at', 'new_rt'))
+            .thenAnswer((_) async {});
 
         // Await build.
         await container.read(authStateProvider.future);
@@ -292,9 +281,8 @@ void main() {
 
         when(storage.getAccessToken).thenAnswer((_) async => null);
         when(storage.getRefreshToken).thenAnswer((_) async => null);
-        when(
-          () => storage.saveTokens('passkey-at', 'passkey-rt'),
-        ).thenAnswer((_) async {});
+        when(() => storage.saveTokens('passkey-at', 'passkey-rt'))
+            .thenAnswer((_) async {});
         when(
           () => dio.post<Map<String, Object?>>(
             '/api/auth/passkeys/authenticate/options',
