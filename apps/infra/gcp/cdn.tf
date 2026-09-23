@@ -29,12 +29,17 @@ resource "google_compute_region_network_endpoint_group" "web" {
   }
 }
 
+# load_balancing_scheme is pinned to the classic "EXTERNAL" scheme on every
+# backend service and global forwarding rule: google provider 8.x changed the
+# default to EXTERNAL_MANAGED, and the scheme must match across the whole LB.
+# Migrating to EXTERNAL_MANAGED is a separate, deliberate change.
 resource "google_compute_backend_service" "web" {
-  count           = var.domain != "" ? 1 : 0
-  name            = "${local.name_prefix}-web-backend"
-  protocol        = "HTTPS"
-  timeout_sec     = 30
-  security_policy = google_compute_security_policy.main[0].id
+  count                 = var.domain != "" ? 1 : 0
+  name                  = "${local.name_prefix}-web-backend"
+  protocol              = "HTTPS"
+  timeout_sec           = 30
+  security_policy       = google_compute_security_policy.main[0].id
+  load_balancing_scheme = "EXTERNAL"
 
   backend {
     group = google_compute_region_network_endpoint_group.web[0].id
@@ -77,11 +82,12 @@ resource "google_compute_region_network_endpoint_group" "api" {
 }
 
 resource "google_compute_backend_service" "api" {
-  count           = var.domain != "" ? 1 : 0
-  name            = "${local.name_prefix}-api-backend"
-  protocol        = "HTTPS"
-  timeout_sec     = 60
-  security_policy = google_compute_security_policy.main[0].id
+  count                 = var.domain != "" ? 1 : 0
+  name                  = "${local.name_prefix}-api-backend"
+  protocol              = "HTTPS"
+  timeout_sec           = 60
+  security_policy       = google_compute_security_policy.main[0].id
+  load_balancing_scheme = "EXTERNAL"
 
   backend {
     group = google_compute_region_network_endpoint_group.api[0].id
@@ -158,6 +164,8 @@ resource "google_compute_global_forwarding_rule" "https" {
   port_range = "443"
   ip_address = google_compute_global_address.main[0].address
 
+  load_balancing_scheme = "EXTERNAL"
+
   labels = local.labels
 }
 
@@ -185,6 +193,8 @@ resource "google_compute_global_forwarding_rule" "http" {
   target     = google_compute_target_http_proxy.redirect[0].id
   port_range = "80"
   ip_address = google_compute_global_address.main[0].address
+
+  load_balancing_scheme = "EXTERNAL"
 
   labels = local.labels
 }

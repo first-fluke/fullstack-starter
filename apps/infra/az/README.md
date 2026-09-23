@@ -24,8 +24,8 @@ Terraform configuration for deploying the fullstack-starter stack to Azure. See 
 - Terraform >= 1.9.0
 - Azure CLI logged in with Owner/Contributor on the target subscription, plus permission to create Entra ID applications (initial provisioning)
 - A resource group + storage account + blob container for remote state (see `versions.tf`)
-- Registered resource providers: `Microsoft.App`, `Microsoft.ContainerRegistry`, `Microsoft.DBforPostgreSQL`, `Microsoft.Cache`, `Microsoft.ServiceBus`, `Microsoft.Cdn`, `Microsoft.Storage`, `Microsoft.OperationalInsights`, `Microsoft.Insights` (`az provider register --namespace <name>`)
-- `ARM_SUBSCRIPTION_ID` exported (azurerm 4.x requires an explicit subscription)
+- Registered resource providers: `Microsoft.App`, `Microsoft.ContainerRegistry`, `Microsoft.DBforPostgreSQL`, `Microsoft.Cache`, `Microsoft.ServiceBus`, `Microsoft.Cdn`, `Microsoft.Storage`, `Microsoft.OperationalInsights`, `Microsoft.Insights`, `Microsoft.Network`, `Microsoft.ManagedIdentity` (`az provider register --namespace <name>`). azurerm 5.x does not auto-register any of them (`resource_provider_registrations = "none"` in `provider.tf`)
+- `ARM_SUBSCRIPTION_ID` exported (azurerm 4.x+ requires an explicit subscription)
 
 ## Usage
 

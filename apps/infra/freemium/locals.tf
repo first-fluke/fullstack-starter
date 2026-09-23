@@ -11,4 +11,9 @@ locals {
   web_env_vars = {
     NEXT_PUBLIC_SUPABASE_URL = local.supabase_url
   }
+
+  # vercel provider >= 4.8 requires an explicit `sensitive` on every env var.
+  # Only real secrets are marked sensitive (write-only in the Vercel API and
+  # dashboard); a team-wide sensitive-env policy may force the rest to true.
+  sensitive_env_keys = ["B2_APPLICATION_KEY"]
 }

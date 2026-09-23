@@ -3,7 +3,7 @@ resource "vercel_project" "api" {
   framework      = null
   root_directory = "apps/api"
 
-  git_repository {
+  git_repository = {
     type = "github"
     repo = var.github_repo
   }
@@ -16,6 +16,7 @@ resource "vercel_project_environment_variable" "api" {
   key        = each.key
   value      = each.value
   target     = ["production", "preview"]
+  sensitive  = contains(local.sensitive_env_keys, each.key)
 }
 
 resource "vercel_project" "web" {
@@ -23,7 +24,7 @@ resource "vercel_project" "web" {
   framework      = "nextjs"
   root_directory = "apps/web"
 
-  git_repository {
+  git_repository = {
     type = "github"
     repo = var.github_repo
   }
@@ -36,4 +37,5 @@ resource "vercel_project_environment_variable" "web" {
   key        = each.key
   value      = each.value
   target     = ["production", "preview"]
+  sensitive  = contains(local.sensitive_env_keys, each.key)
 }

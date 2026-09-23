@@ -12,9 +12,12 @@ resource "azurerm_log_analytics_workspace" "main" {
 }
 
 resource "azurerm_container_app_environment" "main" {
-  name                       = "${local.name_prefix}-env"
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
+  name                = "${local.name_prefix}-env"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  # azurerm 5.x: logs_destination is no longer computed and must be set to
+  # "log-analytics" for log_analytics_workspace_id to take effect.
+  logs_destination           = "log-analytics"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 
   # VNet integration so apps reach the private PostgreSQL server
