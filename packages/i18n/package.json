@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
-    "@types/node": "^24.10.7",
-    "tsx": "^4.21.0",
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
     "typescript": "^7"
   }
 }
