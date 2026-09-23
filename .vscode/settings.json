@@ -4,6 +4,7 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": "explicit"
   },
+  "js/ts.experimental.useTsgo": true,
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff"
   },

@@ -79,7 +79,7 @@ install = { run = ["bun install", "uv sync --all-packages", "mise //apps/mobile:
 lint = { depends = ["//apps/api:lint", "//apps/web:lint", "//apps/worker:lint"], description = "Lint all apps" }
 test = { depends = ["//apps/api:test", "//apps/web:test", "//apps/worker:test"], description = "Test all apps" }
 "tokens:build" = { depends = ["//packages/design-tokens:build"], description = "Build design tokens" }
-typecheck = { depends = ["//apps/api:typecheck", "//apps/web:typecheck"], description = "Type check all apps" }
+typecheck = { depends = ["//apps/api:typecheck", "//apps/web:typecheck", "//packages/design-tokens:typecheck", "//packages/i18n:typecheck"], description = "Type check all apps and packages" }
 
 [tasks."git:commit-msg"]
 description = "Validate commit message using commitlint"

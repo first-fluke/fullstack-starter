@@ -37,7 +37,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jotai": "^2.19.0",
-    "next": "^16.2.2",
+    "next": "^16.3.0",
     "next-intl": "^4.9.0",
     "nuqs": "^2.8.9",
     "react": "^19.2.4",
@@ -48,7 +48,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
+    "@biomejs/biome": "^2.5.14",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
@@ -57,11 +57,11 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "esbuild": "^0.28.0",
     "happy-dom": "^20.11.1",
-    "orval": "^8.6.2",
+    "orval": "^8.36.0",
     "postcss": "^8.5.8",
     "serwist": "^9.5.12",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "vite": "^8.0.3",
     "vitest": "^4.1.2"
   }

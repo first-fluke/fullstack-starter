@@ -8,6 +8,7 @@
     "google.arb-editor",
     "hashicorp.terraform",
     "hverlin.mise-vscode",
-    "streetsidesoftware.code-spell-checker"
+    "streetsidesoftware.code-spell-checker",
+    "TypeScriptTeam.native-preview"
   ]
 }

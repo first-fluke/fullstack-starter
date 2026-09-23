@@ -62,7 +62,7 @@ function main(): void {
 
   watcher.on("change", (path) => {
     console.log(`\n📝 File changed: ${path}`);
-    debouncedBuild();
+    void debouncedBuild();
   });
 
   watcher.on("error", (error) => {
@@ -70,7 +70,7 @@ function main(): void {
   });
 
   console.log("🔨 Running initial build...\n");
-  debouncedBuild();
+  void debouncedBuild();
 }
 
 main();
