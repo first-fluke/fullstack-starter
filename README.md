@@ -156,7 +156,7 @@ curl https://mise.run | sh
 # Trust project config (required on first clone)
 mise trust
 
-# Install all runtimes (Node 24, Python 3.12, Flutter 3, bun, uv, Terraform)
+# Install all runtimes (Node 26, Python 3.12, Flutter 3, bun, uv, Terraform)
 mise install
 ```
 
