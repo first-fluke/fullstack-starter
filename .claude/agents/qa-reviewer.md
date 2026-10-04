@@ -3,7 +3,7 @@ name: qa-reviewer
 description: OWASP security, performance, accessibility, code quality review agent
 tools: Read, Grep, Glob, Bash
 model: sonnet
-maxTurns: 15
+maxTurns: 100
 skills:
   - oma-qa
 ---

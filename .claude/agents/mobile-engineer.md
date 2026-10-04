@@ -4,7 +4,7 @@ description: Flutter/React Native/Swift native mobile implementation. Use for
   mobile app, widgets, SwiftUI, platform feature work.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 40
+maxTurns: 100
 skills:
   - oma-mobile
 ---

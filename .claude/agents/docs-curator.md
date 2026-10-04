@@ -5,7 +5,7 @@ description: Documentation drift detection and sync specialist. Use to update
   reflecting recent diffs.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 15
+maxTurns: 100
 skills:
   - oma-docs
 ---

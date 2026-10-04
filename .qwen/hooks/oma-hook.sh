@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Preserve distinct Qwen events; the shared primer deduplicates by session.
+# Duplicate deliveries from a project + global double install are dropped
+# inside `oma hook run` (payload hash + this wrapper's path); distinct events
+# always run.
 __oma_bin=""
 if [ -n "${OMA_BIN:-}" ] && [ -x "${OMA_BIN}" ]; then
   __oma_bin="${OMA_BIN}"
@@ -16,6 +18,6 @@ else
 fi
 if [ -n "$__oma_bin" ]; then
   # Run oma hook; swallow a non-zero exit so the wrapper is always fail-open.
-  "$__oma_bin" hook run "$@" || true
+  OMA_HOOK_WRAPPER="$0" "$__oma_bin" hook run "$@" || true
 fi
 exit 0

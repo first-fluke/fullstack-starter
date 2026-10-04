@@ -1,6 +1,6 @@
 project:
   name: fullstack-starter
-  description: Modern fullstack monorepo template with Next.js 16, FastAPI, 
+  description: Modern fullstack monorepo template with Next.js 16, FastAPI,
     Flutter, and GCP infrastructure
 
 # list of languages for which language servers are started; choose from:
@@ -276,44 +276,43 @@ project:
 structure:
   monorepo: true
   apps:
-  - name: api
-    path: apps/api
-    language: python
-    framework: fastapi
-    description: FastAPI backend with PostgreSQL, Redis, and async SQLAlchemy
+    - name: api
+      path: apps/api
+      language: python
+      framework: fastapi
+      description: FastAPI backend with PostgreSQL, Redis, and async SQLAlchemy
 
-  - name: web
-    path: apps/web
-    language: typescript
-    framework: nextjs
-    description: Next.js 16 frontend with React 19, TailwindCSS v4, and 
-      shadcn/ui
+    - name: web
+      path: apps/web
+      language: typescript
+      framework: nextjs
+      description: Next.js 16 frontend with React 19, TailwindCSS v4, and shadcn/ui
 
-  - name: worker
-    path: apps/worker
-    language: python
-    framework: fastapi
-    description: Background worker for Cloud Tasks and Pub/Sub
+    - name: worker
+      path: apps/worker
+      language: python
+      framework: fastapi
+      description: Background worker for Cloud Tasks and Pub/Sub
 
-  - name: mobile
-    path: apps/mobile
-    language: dart
-    framework: flutter
-    description: Flutter mobile app with Riverpod and go_router
+    - name: mobile
+      path: apps/mobile
+      language: dart
+      framework: flutter
+      description: Flutter mobile app with Riverpod and go_router
 
-  - name: infra
-    path: apps/infra
-    language: hcl
-    framework: terraform
-    description: GCP infrastructure with Terraform
+    - name: infra
+      path: apps/infra
+      language: hcl
+      framework: terraform
+      description: GCP infrastructure with Terraform
 
   packages:
-  - name: design-tokens
-    path: packages/design-tokens
-    description: Shared design tokens (Source of Truth)
-  - name: i18n
-    path: packages/i18n
-    description: Shared i18n package (Source of Truth)
+    - name: design-tokens
+      path: packages/design-tokens
+      description: Shared design tokens (Source of Truth)
+    - name: i18n
+      path: packages/i18n
+      description: Shared i18n package (Source of Truth)
 
 conventions:
   naming:
@@ -400,20 +399,19 @@ commands:
     mobile: dart format .
 
 important_files:
-- mise.toml: Runtime versions and task runner
-- biome.json: JS/TS linting and formatting
-- bun-workspace.yaml: bun workspace configuration
-- apps/api/pyproject.toml: Python dependencies and tasks
-- apps/api/docker-compose.infra.yml: Local infrastructure (PostgreSQL, Redis, 
-    MinIO)
-- apps/web/package.json: Web dependencies and scripts
-- apps/infra/variables.tf: Infrastructure configuration
+  - mise.toml: Runtime versions and task runner
+  - biome.json: JS/TS linting and formatting
+  - bun-workspace.yaml: bun workspace configuration
+  - apps/api/pyproject.toml: Python dependencies and tasks
+  - apps/api/docker-compose.infra.yml: Local infrastructure (PostgreSQL, Redis, MinIO)
+  - apps/web/package.json: Web dependencies and scripts
+  - apps/infra/variables.tf: Infrastructure configuration
 
 documentation:
-- .agent/rules/GEMINI.md: Project overview for AI agents
-- .agent/rules/build-guide.md: Build and deployment guide
-- .agent/rules/lint-format-guide.md: Linting and formatting guide
-- .agent/rules/test-guide.md: Testing guide
+  - .agent/rules/GEMINI.md: Project overview for AI agents
+  - .agent/rules/build-guide.md: Build and deployment guide
+  - .agent/rules/lint-format-guide.md: Linting and formatting guide
+  - .agent/rules/test-guide.md: Testing guide
 
 # list of mode names to that are always to be included in the set of active modes
 # The full set of modes to be activated is base_modes + default_modes.
@@ -472,14 +470,14 @@ default_modes:
 # This extends the existing exclusions (e.g. from the global configuration)
 # Find the list of tools here: https://oraios.github.io/serena/01-about/035_tools.html
 excluded_tools:
-- write_memory
-- read_memory
-- list_memories
-- delete_memory
-- rename_memory
-- edit_memory
-- onboarding
-- check_onboarding_performed
+  - write_memory
+  - read_memory
+  - list_memories
+  - delete_memory
+  - rename_memory
+  - edit_memory
+  - onboarding
+  - check_onboarding_performed
 
 # list of tools to include that would otherwise be disabled (particularly optional tools that are disabled by default).
 # This extends the existing inclusions (e.g. from the global configuration).
@@ -555,7 +553,15 @@ ignored_memory_patterns: []
 # Maps the language key to the options.
 # The settings are considered only if the project is trusted (see global configuration to define trusted projects).
 # See https://oraios.github.io/serena/02-usage/050_configuration.html#language-server-specific-settings
-ls_specific_settings: {}
+ls_specific_settings:
+  {
+    dart:
+      {
+        initializationOptions: { onlyAnalyzeProjectsWithOpenFiles: true },
+        dart_sdk_version: 3.13.4,
+        dart_executable: mise
+      }
+  }
 
 # list of mode names to be activated additionally for this project, e.g. ["query-projects"]
 # The full set of modes to be activated is base_modes (from global config) + default_modes + added_modes.
@@ -583,7 +589,7 @@ ls_additional_workspace_folders: []
 #     - "./subproject1"
 #     - "./subproject2"
 ls_workspace_folders:
-- .
+  - .
 
 # optional shell command to run before the language backend (LSP or JetBrains) is initialised.
 # the command runs in the project root directory and is only executed if the project is trusted
@@ -642,12 +648,12 @@ additional_workspace_folders: []
 # The first language server is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
-- python
-- typescript
-- dart
-- terraform
+  - python
+  - typescript
+  - dart
+  - terraform
 language_servers:
-- python
-- typescript
-- dart
-- terraform
+  - python
+  - typescript
+  - dart
+  - terraform

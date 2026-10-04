@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 - **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
-- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search and scoped reads when unavailable or timed out. Do not install a provider or track a repository automatically.
+- Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search only for paths outside this project or ignored paths when unavailable or timed out. Do not install a provider or track a repository automatically.
 - Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
 - **Read the oma-coordination skill BEFORE starting.** Read `.agents/skills/oma-coordination/SKILL.md` and follow its Core Rules.
 - **Follow the context-loading guide.** Read `.agents/skills/_shared/core/context-loading.md` and load only task-relevant resources.
@@ -45,7 +45,7 @@ Analyze the user's request and identify involved domains (frontend, backend, mob
 
 - Single domain: suggest using the specific agent directly.
 - Multiple domains: proceed to Step 2.
-- Use configured code-intelligence tools or native search and scoped reads to understand the existing codebase structure relevant to the request.
+- Use configured code-intelligence tools to understand the existing codebase structure relevant to the request. Native search is only for paths outside this project or ignored paths.
 - Report analysis results to the user.
 
 ---
@@ -145,13 +145,13 @@ If QA finds CRITICAL or HIGH issues:
 
 Apply the shared per-task attempt and cost budget in `.agents/skills/oma-orchestration/SKILL.md`. Count the original attempt, each retry, and every exploration hypothesis; the workflow cycle limit never grants additional attempts.
 
-1. Re-spawn the responsible agent with QA findings. **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
-2. Emit and verify the remediation decision before accepting any fix/ignore choice:
+1. Select the action for each finding and identify its current revision/attempt before re-dispatch. **The fix prompt MUST instruct root-cause remediation, not symptom suppression.** Forbid tactical patches (try/catch swallowing, validation bypass, hardcoded values, feature flags hiding the bug, silencing the failing test) unless the agent can explicitly justify why a structural fix is out of scope for this iteration (e.g., upstream library bug, deprecated path, hotfix window). Bias toward the orthodox engineering fix even when it costs more lines or touches more files.
+2. Emit and verify each finding-specific remediation choice before dispatching its fix or accepting a defer/ignore choice. Record the actual action, cause, owner, and authorization for any exception:
    ```bash
-   oma state emit "decision.made" '{"subject":"work.remediation-choice","decision":"Fix the responsible QA finding with root-cause remediation or explicitly defer it.","rationale":"QA identified a CRITICAL/HIGH issue requiring a recorded remediation choice."}'
-   oma state verify --workflow work --checkpoint remediation-choice
+   oma state emit "decision.made" '{"subject":"work.remediation-choice","instanceId":"<finding ID and revision/attempt>","decision":"<fix|defer|ignore> <finding ID>: <specific remedy and owner or accepted residual risk>.","rationale":"<cause, verification evidence, and existing authorization or resolved exception>","evidence":["<finding/review artifact path>"]}'
+   oma state verify --workflow work --checkpoint remediation-choice --instance "<finding ID and revision/attempt>"
    ```
-3. If a defined comparison is active, refresh affected measurements after the fix and verify required checks. Record actual experiment decisions with evidence.
+3. Dispatch authorized fixes to their owners with the recorded action and evidence. If a defined comparison is active, refresh affected measurements after the fix and verify required checks. Record actual experiment decisions with evidence.
 4. Before each new fix cycle, apply the loop termination check:
 
    > **Fix Loop termination conditions** (OR, whichever fires first wins):

@@ -19,7 +19,7 @@
             "name": "oma-hook-Stop",
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/oma-hook.sh\" --vendor 'claude' --event 'Stop'",
-            "timeout": 15
+            "timeout": 40
           }
         ]
       }

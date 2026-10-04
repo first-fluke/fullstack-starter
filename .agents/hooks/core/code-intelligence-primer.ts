@@ -20,11 +20,16 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { agyConversationId, isAgyInput, readAgyPrompt } from "./agy-input.ts";
+import { agyConversationId, readAgyPrompt } from "./agy-input.ts";
 import { makePromptOutput } from "./hook-output.ts";
 import { normalizePromptInput } from "./prompt-input.ts";
-import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
-import { getProjectDir, inferVendorFromScriptPath } from "./vendor-detect.ts";
+import type {
+  HandlerCtx,
+  HandlerResult,
+  HookConfig,
+  HookInput,
+} from "./types.ts";
+import { detectVendorFromInput, getProjectDir } from "./vendor-detect.ts";
 
 const SESSION_TTL_MS = 60 * 60 * 1000;
 
@@ -70,24 +75,48 @@ function readCodeIntelligenceFromYaml(
 }
 
 /**
+ * `providers.<key>` from the config `oma hook run` loaded, normalized like
+ * the YAML reader (lowercased; booleans as "true" / "false").
+ */
+function readProvidersValueFromConfig(
+  config: HookConfig,
+  key: string,
+): string | null {
+  const providers = config.providers;
+  if (!providers || typeof providers !== "object" || Array.isArray(providers)) {
+    return null;
+  }
+  const value = (providers as Record<string, unknown>)[key];
+  if (typeof value === "boolean") return String(value);
+  return typeof value === "string" ? value.trim().toLowerCase() : null;
+}
+
+/**
  * Resolves the selected code-intelligence provider.
- * Looks in oma-config.local.yaml, oma-config.yaml, and falls back to
+ * Uses `config` (CUE / local overlay aware, from `oma hook run`) when given,
+ * otherwise oma-config.local.yaml and oma-config.yaml; falls back to
  * detecting .serena/project.yml.
  */
 export function detectCodeIntelligenceProvider(
   projectDir: string,
+  config?: HookConfig,
 ): CodeIntelligenceProvider | null {
-  for (const rel of [
-    join(".agents", "oma-config.local.yaml"),
-    join(".agents", "oma-config.yaml"),
-  ]) {
-    const p = join(projectDir, rel);
-    if (existsSync(p)) {
-      try {
-        const val = readCodeIntelligenceFromYaml(readFileSync(p, "utf-8"));
-        if (val) return val;
-      } catch {
-        // fall open
+  if (config) {
+    const val = readProvidersValueFromConfig(config, "code_intelligence");
+    if (val === "gortex" || val === "serena") return val;
+  } else {
+    for (const rel of [
+      join(".agents", "oma-config.local.yaml"),
+      join(".agents", "oma-config.yaml"),
+    ]) {
+      const p = join(projectDir, rel);
+      if (existsSync(p)) {
+        try {
+          const val = readCodeIntelligenceFromYaml(readFileSync(p, "utf-8"));
+          if (val) return val;
+        } catch {
+          // fall open
+        }
       }
     }
   }
@@ -114,7 +143,12 @@ export type CodeIntelligenceGuardMode = "block" | "off";
  */
 export function detectCodeIntelligenceGuardMode(
   projectDir: string,
+  config?: HookConfig,
 ): CodeIntelligenceGuardMode {
+  if (config) {
+    const val = readProvidersValueFromConfig(config, "code_intelligence_guard");
+    return val === "off" || val === "false" || val === "warn" ? "off" : "block";
+  }
   for (const rel of [
     join(".agents", "oma-config.local.yaml"),
     join(".agents", "oma-config.yaml"),
@@ -218,7 +252,7 @@ export function primerContext(
       "[OMA GORTEX PRIMER]",
       "For code work, use Gortex MCP tools for code search, navigation, impact, contracts and edits.",
       "A PreToolUse hook guards native Grep, Glob and recursive shell search. Searches confined to confirmed provider exclusions or paths outside this project are allowed.",
-      "Load deferred tools before use. If Gortex is unavailable, times out, or cannot search the requested path, use native tools: prefix the shell search command with `OMA_CI_ALLOW_NATIVE=1`.",
+      "Load deferred tools before use. Native search is only for paths outside this project or ignored paths. Do not use it to search project source. If Gortex is unavailable or times out, do not retry it this session.",
     ].join("\n");
   }
   return [
@@ -226,7 +260,7 @@ export function primerContext(
     "For code work, load deferred Serena tools if needed and read `initial_instructions` once unless already provided.",
     "Use `find_file` instead of Glob, `search_for_pattern` instead of Grep / recursive shell search, and `find_symbol` / `get_symbols_overview` for symbols. Native searches confined to confirmed provider exclusions or paths outside this project are allowed by the PreToolUse guard.",
     "Omit `max_answer_chars`; narrow the query if results exceed the limit.",
-    "If Serena is unavailable, times out, or cannot search the requested path, use native tools: prefix the shell search command with `OMA_CI_ALLOW_NATIVE=1`. Do not retry timed-out MCP calls this session.",
+    "If Serena is unavailable or times out, do not retry the MCP call this session. Native search is only for paths outside this project or ignored paths. Do not use it to search project source.",
   ].join("\n");
 }
 
@@ -235,7 +269,7 @@ export function primerContext(
 /**
  * Pure decision function — injects the code intelligence primer on the first
  * prompt of an activated project's session, else returns null.
- * `ctx.cwd` must be the resolved git-root project directory.
+ * `ctx.cwd` must be the resolved OMA project root.
  */
 export async function run(
   input: HookInput,
@@ -245,7 +279,7 @@ export async function run(
 
   const { cwd: projectDir, sid: sessionId = "unknown" } = ctx;
 
-  const provider = detectCodeIntelligenceProvider(projectDir);
+  const provider = detectCodeIntelligenceProvider(projectDir, ctx.config);
   if (!provider) return null;
 
   // Compaction keeps the session id, so the session-once claim would skip
@@ -257,32 +291,6 @@ export async function run(
 }
 
 // ── Standalone entry (pi subprocess / direct bun invocation) ──
-
-function detectVendor(input: Record<string, unknown>): Vendor {
-  const byScriptPath = inferVendorFromScriptPath(import.meta.filename);
-  if (byScriptPath) return byScriptPath;
-  if (isAgyInput(input)) return "antigravity";
-  const event = input.hook_event_name as string | undefined;
-  const hookEventName = input.hookEventName as string | undefined;
-  if (process.env.GROK_WORKSPACE_ROOT) return "grok";
-  if (
-    process.env.KIRO_PROJECT_DIR ||
-    event === "userPromptSubmit" ||
-    hookEventName === "userPromptSubmit"
-  ) {
-    return "kiro";
-  }
-  if (event === "PreInvocation") return "antigravity";
-  if (event === "beforeSubmitPrompt") return "cursor";
-  if (
-    event === "UserPromptSubmit" &&
-    "session_id" in input &&
-    !("sessionId" in input)
-  )
-    return "codex";
-  if (process.env.QWEN_PROJECT_DIR) return "qwen";
-  return "claude";
-}
 
 function getSessionId(input: Record<string, unknown>): string {
   return (
@@ -302,7 +310,7 @@ export async function runStandAlone() {
     process.exit(0);
   }
 
-  const vendor = detectVendor(input);
+  const vendor = detectVendorFromInput(input, "prompt", import.meta.filename);
   const projectDir = getProjectDir(vendor, input);
   const sessionId = getSessionId(input);
   let prompt = normalizePromptInput(input.prompt);

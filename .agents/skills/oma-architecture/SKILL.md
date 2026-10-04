@@ -121,12 +121,12 @@ outputs:
 - Optional stakeholder-agent consultation only when cross-cutting enough to justify cost
 
 ### Canonical workflow path
-Use the configured code-intelligence provider for structure, symbols, references, and integration points. If unavailable, use native search and scoped reads:
+Use the configured code-intelligence provider for structure, symbols, references, and integration points. If unavailable, use native search only for paths outside this project or ignored paths:
 
-```bash
-ls .agents/results/architecture/   # prior decisions — read before deciding
-rg --files
-rg "ADR|architecture|boundary|service|module|dependency|owner|interface" .
+```text
+1. Read prior decisions in .agents/results/architecture/.
+2. Discover the configured provider's file, symbol, reference, and pattern tools.
+3. Inspect architecture-relevant modules, ownership, and integration points within the selected scope.
 ```
 
 Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or ADR mode before writing the artifact.
@@ -158,7 +158,7 @@ Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or
 8. When a decision is material, compare at least two genuinely different options before recommending one.
 9. Save architecture artifacts to `.agents/results/architecture/`.
 10. Read prior artifacts in `.agents/results/architecture/` before deciding; when replacing an old decision, mark it superseded rather than contradicting it.
-11. When a durable artifact is finalized, emit the `architecture.adr-complete` L1 decision event and verify the checkpoint (commands in `resources/execution-protocol.md` Step 7).
+11. When a durable artifact is finalized in an active OMA workflow, record its actual recommendation, authority status, rationale, revision, and evidence with `architecture.adr-complete` (execution protocol Step 7). A completed proposal does not supply user approval or authorize implementation.
 
 ### Method Selection Summary
 - **Diagnostic Mode**: vague pain, unclear architecture symptom
