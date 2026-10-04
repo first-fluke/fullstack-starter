@@ -133,7 +133,7 @@ return {1, remaining, window}
 class RedisRateLimiter:
     """Redis-based rate limiter using sliding window (atomic Lua script)."""
 
-    def __init__(self, requests: int, window: int):
+    def __init__(self, requests: int, window: int) -> None:
         self.requests = requests
         self.window = window
         self._redis: redis_module.Redis | None = None

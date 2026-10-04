@@ -49,7 +49,7 @@ storage-azure = [
 dev = [
     "ruff>=0.16.8",
     "poethepoet>=0.48.0",
-    "mypy>=2.3.1",
+    "pyrefly>=1.3.2",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
@@ -76,7 +76,7 @@ format = "ruff format ."
 check = ["lint", "format"]
 
 # Type checking
-typecheck = "mypy src"
+typecheck = "pyrefly check"
 
 # All checks
 "all-checks" = ["check", "typecheck"]
@@ -90,39 +90,25 @@ test = "pytest tests/ -n 4"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
-[tool.mypy]
-python_version = "3.14"
-strict = true
-plugins = ["pydantic.mypy"]
-exclude = ["alembic"]
-# The optional GenAI instrumentors ship untyped __init__s. A per-line ignore
-# would become an unused-ignore error when the extra is absent, so exempt them.
-untyped_calls_exclude = [
-    "opentelemetry.instrumentation.openai_v2",
-    "opentelemetry.instrumentation.google_genai",
-]
-
-[[tool.mypy.overrides]]
-module = ["asyncpg.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["redis.asyncio.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["jwcrypto.*"]
-ignore_missing_imports = true
-
-# Optional GenAI auto-instrumentation packages (installed via extras only).
-[[tool.mypy.overrides]]
-module = [
+[tool.pyrefly]
+python-version = "3.14"
+project-includes = ["src"]
+search-path = ["."]
+preset = "strict"
+check-unannotated-defs = true
+# Pydantic models are supported natively.
+# Preserve import exceptions for untyped and optional SDKs.
+ignore-missing-imports = [
+    "asyncpg.*",
+    "redis.asyncio.*",
+    "jwcrypto.*",
     "opentelemetry.instrumentation.openai_v2.*",
     "opentelemetry.instrumentation.google_genai.*",
+    "azure.*",
 ]
-ignore_missing_imports = true
+# Preserve the previous treatment of untyped crypto SDK modules.
+replace-untyped-imports-with-any = ["jwcrypto.*"]
 
-# Optional object storage SDKs (installed via the storage-azure extra only).
-[[tool.mypy.overrides]]
-module = ["azure.*"]
-ignore_missing_imports = true
+[tool.pyrefly.errors]
+no-any-return = "error"
+unannotated-return = "error"

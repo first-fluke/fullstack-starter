@@ -2,6 +2,7 @@
 
 import uuid
 from collections.abc import Awaitable, Callable
+from typing import override
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -14,6 +15,7 @@ REQUEST_ID_HEADER = "X-Request-ID"
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Reads or generates X-Request-ID and binds it to structlog contextvars."""
 
+    @override
     async def dispatch(
         self,
         request: Request,

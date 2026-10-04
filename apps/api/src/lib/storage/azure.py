@@ -20,6 +20,7 @@ This adapter requires the optional ``storage-azure`` extra::
 """
 
 from datetime import UTC, datetime, timedelta
+from typing import override
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.blob import (
@@ -139,8 +140,7 @@ class AzureBlobStorageProvider(StorageProvider):
         await blob_client.upload_blob(
             data, overwrite=True, content_settings=content_settings
         )
-        # Narrow explicitly: without the storage-azure extra installed, mypy
-        # sees the SDK as Any (ignore_missing_imports).
+        # Narrow optional SDK return values explicitly when the extra is absent.
         url = blob_client.url
         if not isinstance(url, str):
             msg = f"Azure SDK returned non-str blob URL: {type(url).__name__}"
@@ -201,6 +201,7 @@ class AzureBlobStorageProvider(StorageProvider):
         blob_client = self._client.get_blob_client(container=bucket, blob=key)
         return f"{blob_client.url}?{sas_token}"
 
+    @override
     async def aclose(self) -> None:
         """Close the underlying client and its transport."""
         await self._client.close()

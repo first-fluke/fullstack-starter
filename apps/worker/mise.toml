@@ -4,3 +4,4 @@ install = { run = "uv sync --all-packages", description = "Install dependencies"
 lint = { run = "uv run poe lint", description = "Lint Worker" }
 format = { run = "uv run poe format", description = "Format Worker" }
 test = { run = "uv run poe test", description = "Test Worker" }
+typecheck = { run = "uv run poe typecheck", description = "Type check Worker" }

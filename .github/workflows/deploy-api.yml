@@ -59,7 +59,7 @@ jobs:
 
       - name: Run type checker
         working-directory: apps/api
-        run: uv run mypy src
+        run: uv run poe typecheck
 
       - name: Run tests
         working-directory: apps/api
