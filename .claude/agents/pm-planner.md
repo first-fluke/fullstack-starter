@@ -3,7 +3,7 @@ name: pm-planner
 description: PM requirements analysis, task decomposition, API contract definition agent
 tools: Read, Write, Grep, Glob, Bash
 model: sonnet
-maxTurns: 10
+maxTurns: 100
 skills:
   - oma-pm
 ---

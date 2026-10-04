@@ -28,7 +28,7 @@
     "stop": [
       {
         "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'stop'",
-        "timeout": 15,
+        "timeout": 40,
         "loop_limit": null
       }
     ],

@@ -19,7 +19,7 @@
             "name": "oma-hook-Stop",
             "type": "command",
             "command": "'.codex/hooks/oma-hook.sh' --vendor 'codex' --event 'Stop'",
-            "timeout": 15
+            "timeout": 40
           }
         ]
       }

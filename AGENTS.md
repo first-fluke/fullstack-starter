@@ -21,7 +21,7 @@ Resolve each agent from `.agents/oma-config.cue` or `.agents/oma-config.yaml`, o
 
 ## Code Search
 
-Serena MCP is required for code search and discovery. Load deferred tools before use. Use `find_file` for paths, `search_for_pattern` for content, and `find_symbol` / `get_symbols_overview` for symbols; the PreToolUse guard allows native searches confined to confirmed provider exclusions or paths outside this project. Use native search/read when Serena is unavailable, times out, or cannot search the requested path (prefix the shell command with `OMA_CI_ALLOW_NATIVE=1`), or for plain non-code content.
+Serena MCP is required for code search and discovery. Load deferred tools before use. Use `find_file` for paths, `search_for_pattern` for content, and `find_symbol` / `get_symbols_overview` for symbols. Native search is only for paths outside this project, ignored paths, or plain non-code content. The PreToolUse guard already allows searches confined to confirmed provider exclusions or paths outside this project.
 
 ## Workflows
 

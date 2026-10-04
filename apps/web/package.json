@@ -6,7 +6,9 @@
   "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "bun run build:compile && bun run build:generate",
+    "build:compile": "next build --experimental-build-mode compile",
+    "build:generate": "next build --experimental-build-mode generate",
     "start": "next start",
     "lint": "biome check --write --unsafe --error-on-warnings src",
     "format": "biome check --write --unsafe src",

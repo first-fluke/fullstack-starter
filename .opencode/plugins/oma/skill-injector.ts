@@ -21,51 +21,20 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { agyConversationId, isAgyInput, readAgyPrompt } from "./agy-input.ts";
+import { agyConversationId, readAgyPrompt } from "./agy-input.ts";
 import { toPosixPath } from "./fs-utils.ts";
 import { makePromptOutput } from "./hook-output.ts";
 import { isRelayedAgentMessage, normalizePromptInput } from "./prompt-input.ts";
 // triggers.json is imported statically: bundler inlines it into the oma binary;
 // standalone bun runs resolve the sibling file (pi / direct run).
 import embeddedTriggers from "./triggers.json" with { type: "json" };
-import type { HandlerCtx, HandlerResult, HookInput, Vendor } from "./types.ts";
-import { getProjectDir, inferVendorFromScriptPath } from "./vendor-detect.ts";
+import type { HandlerCtx, HandlerResult, HookInput } from "./types.ts";
+import { detectVendorFromInput, getProjectDir } from "./vendor-detect.ts";
 
 const MAX_SKILLS = 3;
 const SESSION_TTL_MS = 60 * 60 * 1000;
-const DEFAULT_CJK_SCRIPTS = ["ko", "ja", "zh"];
 
 // ── Vendor Detection ──────────────────────────────────────────
-
-function detectVendor(input: Record<string, unknown>): Vendor {
-  const event = input.hook_event_name as string | undefined;
-  const hookEventName = input.hookEventName as string | undefined;
-  const byScriptPath = inferVendorFromScriptPath(import.meta.filename);
-  if (byScriptPath) return byScriptPath;
-
-  // agy (Antigravity) sends no hook_event_name; detect by its stdin shape.
-  if (isAgyInput(input)) return "antigravity";
-
-  if (process.env.GROK_WORKSPACE_ROOT || hookEventName?.includes("prompt")) {
-    if (process.env.GROK_WORKSPACE_ROOT) return "grok";
-  }
-
-  if (
-    process.env.KIRO_PROJECT_DIR ||
-    event === "userPromptSubmit" ||
-    hookEventName === "userPromptSubmit"
-  ) {
-    return "kiro";
-  }
-
-  if (event === "PreInvocation") return "antigravity";
-  if (event === "beforeSubmitPrompt") return "cursor";
-  if (event === "UserPromptSubmit") {
-    if ("session_id" in input && !("sessionId" in input)) return "codex";
-  }
-  if (process.env.QWEN_PROJECT_DIR) return "qwen";
-  return "claude";
-}
 
 function getSessionId(input: Record<string, unknown>): string {
   return (
@@ -80,32 +49,13 @@ function getSessionId(input: Record<string, unknown>): string {
 
 interface SkillsTriggerConfig {
   skills?: Record<string, { keywords: Record<string, string[]> }>;
-  cjkScripts?: string[];
 }
 
 /**
- * Load the skills-trigger config from the embedded (bundler-inlined /
- * sibling-resolved) triggers.json. Returns {} on any shape error.
+ * The embedded (bundler-inlined / sibling-resolved) triggers.json. Read only,
+ * so it is shared instead of deep-cloned on every prompt.
  */
-function loadTriggersConfig(): SkillsTriggerConfig {
-  try {
-    return structuredClone(embeddedTriggers) as SkillsTriggerConfig;
-  } catch {
-    return {};
-  }
-}
-
-function detectLanguage(projectDir: string): string {
-  const prefsPath = join(projectDir, ".agents", "oma-config.yaml");
-  if (!existsSync(prefsPath)) return "en";
-  try {
-    const content = readFileSync(prefsPath, "utf-8");
-    const match = content.match(/^language:\s*(\S+)/m);
-    return match?.[1] ?? "en";
-  } catch {
-    return "en";
-  }
-}
+const TRIGGERS = embeddedTriggers as unknown as SkillsTriggerConfig;
 
 // ── Pattern Building ──────────────────────────────────────────
 
@@ -113,14 +63,16 @@ export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export function buildTriggerPatterns(
-  triggers: string[],
-  lang: string,
-  cjkScripts: string[],
-): RegExp[] {
+/**
+ * Boundaries depend only on the trigger itself (same rule as
+ * keyword-detector): ASCII triggers need word boundaries, triggers containing
+ * non-ASCII text match as substrings. The configured response language must
+ * not strip boundaries — `language: ko` used to make "work" match "network".
+ */
+export function buildTriggerPatterns(triggers: string[]): RegExp[] {
   return triggers.map((kw) => {
     const escaped = escapeRegex(kw).replace(/\s+/g, "\\s+");
-    if (cjkScripts.includes(lang) || /[^\p{ASCII}]/u.test(kw)) {
+    if (/[^\p{ASCII}]/u.test(kw)) {
       return new RegExp(escaped, "i");
     }
     return new RegExp(`\\b${escaped}\\b`, "i");
@@ -175,19 +127,33 @@ export interface SkillMatch {
   matchedTriggers: string[];
 }
 
-export function matchSkills(
-  prompt: string,
-  lang: string,
-  skills: SkillEntry[],
+interface CompiledSkillTriggers {
+  triggers: string[];
+  patterns: RegExp[];
+}
+
+// Compiled per config object and skill name. The embedded config is a single
+// shared object, so every prompt after the first reuses the compiled regexes
+// (none use the `g` flag, so test() is stateless).
+const compiledSkillCache = new WeakMap<
+  SkillsTriggerConfig,
+  Map<string, CompiledSkillTriggers | null>
+>();
+
+function compiledTriggersFor(
   config: SkillsTriggerConfig,
-): SkillMatch[] {
-  const cjkScripts = config.cjkScripts ?? DEFAULT_CJK_SCRIPTS;
-  const matches: SkillMatch[] = [];
+  skillName: string,
+): CompiledSkillTriggers | null {
+  let perConfig = compiledSkillCache.get(config);
+  if (!perConfig) {
+    perConfig = new Map();
+    compiledSkillCache.set(config, perConfig);
+  }
+  if (perConfig.has(skillName)) return perConfig.get(skillName) ?? null;
 
-  for (const skill of skills) {
-    const jsonEntry = config.skills?.[skill.name];
-    if (!jsonEntry) continue;
-
+  const jsonEntry = config.skills?.[skillName];
+  let compiled: CompiledSkillTriggers | null = null;
+  if (jsonEntry) {
     // All languages merged, never gated by config language: users prompt in
     // whichever language they think in (`language` controls the RESPONSE
     // language). A keyword written in language X can only match a prompt
@@ -201,16 +167,33 @@ export function matchSkills(
     ];
 
     const seen = new Set<string>();
-    const allTriggers: string[] = [];
+    const triggers: string[] = [];
     for (const t of jsonTriggers) {
       const key = t.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      allTriggers.push(t);
+      triggers.push(t);
     }
-    if (allTriggers.length === 0) continue;
+    if (triggers.length > 0) {
+      compiled = { triggers, patterns: buildTriggerPatterns(triggers) };
+    }
+  }
+  perConfig.set(skillName, compiled);
+  return compiled;
+}
 
-    const patterns = buildTriggerPatterns(allTriggers, lang, cjkScripts);
+export function matchSkills(
+  prompt: string,
+  skills: SkillEntry[],
+  config: SkillsTriggerConfig,
+): SkillMatch[] {
+  const matches: SkillMatch[] = [];
+
+  for (const skill of skills) {
+    const compiled = compiledTriggersFor(config, skill.name);
+    if (!compiled) continue;
+
+    const { triggers: allTriggers, patterns } = compiled;
     const matched: string[] = [];
     let score = 0;
 
@@ -490,12 +473,10 @@ export async function run(
   if (startsWithSlashCommand(prompt)) return null;
   if (isPersistentWorkflowActive(projectDir, sessionId)) return null;
 
-  const lang = detectLanguage(projectDir);
-  const config = loadTriggersConfig();
   const cleaned = stripCodeBlocks(prompt);
   const skills = discoverSkills(projectDir);
 
-  const matches = matchSkills(cleaned, lang, skills, config);
+  const matches = matchSkills(cleaned, skills, TRIGGERS);
   if (matches.length === 0) return null;
 
   const { fresh, nextState } = filterFreshMatches(
@@ -520,7 +501,7 @@ async function main() {
     process.exit(0);
   }
 
-  const vendor = detectVendor(input);
+  const vendor = detectVendorFromInput(input, "prompt", import.meta.filename);
   const projectDir = getProjectDir(vendor, input);
   const sessionId = getSessionId(input);
   let prompt = normalizePromptInput(input.prompt);

@@ -4,7 +4,7 @@ description: Architecture review and recommendation. Use for system design,
   module boundaries, ADRs, and tradeoff analysis.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
-maxTurns: 15
+maxTurns: 100
 skills:
   - oma-architecture
 ---

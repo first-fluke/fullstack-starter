@@ -38,7 +38,7 @@ music, duration, compositor, capture path, and seed. Outputs live in
 
 `OMA_VIDEO_MOCK=1` is a test harness only. It can create deterministic text
 placeholders with an `.mp4` name; those files are never a user deliverable. A
-missing Remotion/MPT toolchain, an un-authored composition, a render error, or
+missing HyperFrames/MPT toolchain, an un-authored composition, a render error, or
 an invalid video fails with diagnostics and leaves the script/render spec for
 recovery.
 
@@ -69,8 +69,12 @@ provides context only; it never automates login or starts a recorder. Without
    providers require their environment key and the cost guardrail. Local
    fallbacks may replace voice, visuals, captions, or music; record coverage in
    warnings. A compositor failure is never a fallback video.
-3. Confirm estimated spend at or above `cost.guardrail_usd` or `--max-usd`
-   unless `--yes` or `OMA_VIDEO_YES=1` authorizes it.
+3. Before a paid provider action or rerun, compare the planning estimate with
+   `cost.guardrail_usd` or `--max-usd` and reuse existing spend authorization.
+   In an active OMA video workflow, record the actual paid, limited, fallback, or
+   declined choice before executing it (execution protocol Step 2). Pass `--yes`
+   or `OMA_VIDEO_YES=1` only for an already authorized paid action; the event does
+   not grant permission.
 4. Respect `limits.max_duration_sec` (180) and `limits.max_scenes` (40).
    Cancel subprocess work on SIGINT/SIGTERM.
 5. Keep run directories. Never auto-prune a user’s video artifacts.
@@ -90,7 +94,7 @@ oma video generate "explain this project" --mode explainer --seed 42 --dry-run
 # Human-recorded demo input.
 oma video generate "feature walkthrough" --mode demo --capture <absolute-path>.mp4
 
-# Scaffold the per-run Remotion project, author src/Root.tsx as instructed,
+# Scaffold the per-run HyperFrames project, author index.html as instructed,
 # then render and validate the encoded output.
 oma video compose <runDir> --output json
 oma video render <runDir> --output json
@@ -107,10 +111,10 @@ Read video and asset paths from the manifest; the JSON envelope has no
 
 ### Failure and recovery
 
-- Missing Remotion composition: `oma video compose <runDir>` prepares the
-project and authoring contract. Author `<runDir>/remotion/src/Root.tsx` using
+- Missing HyperFrames composition: `oma video compose <runDir>` prepares the
+project and authoring contract. Author `<runDir>/hyperframes/index.html` using
 the generated `AUTHORING.md`, then invoke `oma video render <runDir>`. The
-command typechecks, renders, and ffprobes the output. Fix a reported composition
+command lints, renders, and ffprobes the output. Fix a reported composition
 or toolchain failure and re-run; return a failure report when it cannot render.
 
 - Missing MPT toolchain: `--compositor mpt` requires the installed checkout, its virtual environment,
@@ -135,8 +139,8 @@ Load only what the task needs:
   fallback order.
 - `resources/script-schema.md` when authoring or validating `--script` input.
 - `resources/prompt-tips.md` when turning a brief into scene prompts.
-- `resources/remotion-authoring/README.md` and the selected mode guide before
-  writing `Root.tsx`.
+- `resources/hyperframes-authoring/README.md` and the selected mode guide before
+  writing `index.html`.
 - `resources/checklist.md` before handing a real video to a user.
 
 ### Verification

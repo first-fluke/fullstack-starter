@@ -15,9 +15,9 @@ plan when the brief is a one-liner.
    - `mode` ∈ {`shorts`, `explainer`, `demo`}.
    - `aspect` ∈ {`9:16`, `16:9`, `1:1`, `auto`} (`auto` snaps to the mode default: shorts -> 9:16, explainer/demo -> 16:9).
    - `captions` ∈ {`tiktok`, `lower-third`, `none`}; `visual` ∈ {`auto`, `generate`, `stock`, `aigc`, `slide`}.
-   - `music` ∈ {`upbeat`, `calm`, `cinematic`, `lofi`, `piano`, `none`}; `compositor` ∈ {`remotion`, `mpt`}.
+   - `music` ∈ {`upbeat`, `calm`, `cinematic`, `lofi`, `piano`, `none`}; `compositor` ∈ {`hyperframes`, `mpt`}.
    - `duration` ≤ `limits.max_duration_sec` (180); resulting `scenes` ≤ `limits.max_scenes` (40).
-   - `out` is inside `$PWD` unless `--allow-external-out`.
+   - `out` is inside `$PWD` unless `--allow-external-output`.
    - For `demo`: `--capture` (if given) exists, is absolute + `$PWD`-guarded, and is a valid video format.
 4. If invalid: exit code 4 with a message identifying the offending field.
 
@@ -40,8 +40,8 @@ plan when the brief is a one-liner.
 
 1. Estimate cost = sum of each selected provider's `estimateCost()` (most are `$0`; Pixelle/RunningHub credits are non-zero).
 2. If `--dry-run`: emit `script.json` / `render-spec.json` / `manifest.json`, skip rendering, exit 0.
-3. If estimate ≥ `cost.guardrail_usd` (or `--max-usd`) and not `--yes` / `OMA_VIDEO_YES=1`:
-   - Prompt on stderr: `Estimated cost $X.XX. Proceed? (y/N)`. Decline -> exit 1.
+3. Before a non-dry run whose estimate reaches the guardrail or whose paid-provider choice requires authorization, reuse existing authorization for that provider, amount, and scope. Resolve only missing authorization. In an active OMA video workflow, emit `video.cost-confirmation` with the current script/provider-plan `instanceId`, actual paid/limited/fallback/declined action, rationale, and planning-manifest evidence; verify with `--instance` before the provider action (workflow Step 4 owns the command template).
+4. The CLI throws a cost-guardrail error and exits 1 when the cumulative provider estimate reaches the threshold without `--yes`; it does not collect a workflow decision through an interactive prompt. Planning may hit the same guard: retain the error/manifest estimate or rerun with `--dry-run --yes` to finish planning without paid generation or rendering. Keep `--dry-run` on that planning rerun. On a non-dry run, pass `--yes` / `OMA_VIDEO_YES=1` only when the paid action is already authorized. A declined path may be replaced by an authorized key-free plan and re-planned. A new provider or increased estimate must fit current authorization before paid work resumes.
 
 ## Step 3: Cancellation Setup
 
@@ -56,12 +56,12 @@ script.json ─► parallel:
    ├► [VoiceProvider]   ─► audio/narration-01.wav (single joined track) + timing.json
    ├► [VisualProvider]  ─► visuals/scene-NN.*
    └► [CaptionProvider] ─► captions.srt / captions.vtt
-all assets ─► render-spec.json ─► [Compositor: Remotion] ─► <mode>-<slug>.mp4
+all assets ─► render-spec.json ─► [Compositor: HyperFrames] ─► <mode>-<slug>.mp4
 ```
 
 1. **Script**: AgentScriptProvider writes `script.json` (start of the determinism boundary).
 2. **Voice**: oma-voice synthesizes narration -> a **single** `audio/narration-01.wav` (all scene lines joined into one track; per-line offsets live in `timing.json`). Fallback: estimated timing (no wav).
-3. **Visuals**: walk the visual chain. oma-image stills (key-free default) / oma-slide frames (explainer) / Pexels (key) / Pixelle (key). Aspect -> 16-multiple size; Remotion crops to the exact frame.
+3. **Visuals**: walk the visual chain. oma-image stills (key-free default) / oma-slide frames (explainer) / Pexels (key) / Pixelle (key). Aspect -> 16-multiple size; HyperFrames crops to the exact frame.
 4. **Captions**: oma-captions builds `captions.srt` + `captions.vtt` from `timing.json`. For a non-source locale, translate via oma-translation (key-free); absent -> warn + keep source.
 5. **render-spec**: compose `render-spec.json` (the deterministic compute boundary) from the assets + seed.
 6. **Render**: the compositor consumes `render-spec.json`.
@@ -76,7 +76,7 @@ State plainly to the user: **"Demo capture is performed by a human."** Then:
 ## Step 5: Compositor Render
 
 <!-- oma-docs:ignore-start -->
-- **Remotion (default, live)**: `oma video generate` stops after `render-spec.json` with `composition pending` and a scaffolded `<runDir>/remotion/` (latest Remotion toolchain, remotion-dev/skills at HEAD). Read `<runDir>/remotion/AUTHORING.md` + the listed skills + `resources/remotion-authoring/<mode>.md`, author `src/Root.tsx`, then `oma video render <runDir> --output json` — it typechecks, spawns `npx remotion render src/index.ts <CompId> <mode>-<slug>.mp4 --props=render-spec.json --public-dir=<runDir>`, and ffprobes the output. Non-zero exit = fix the composition and re-render.
+- **HyperFrames (default, live)**: `generate` emits the asset bus and a pending HTML project at `<runDir>/hyperframes/`. Read its `AUTHORING.md`, the listed upstream API skills, and `resources/hyperframes-authoring/<mode>.md`. Author `index.html` with local assets and seekable animation. Run `oma video render <runDir> --output json`: lint → strict render → ffprobe stream/dimensions/duration checks → manifest update. Fix reported failures and re-render.
 <!-- oma-docs:ignore-end -->
 - **Failure**: a missing toolchain, render failure, missing video stream, or non-positive duration is a failure with diagnostics. Keep the run directory and recovery artifacts; do not write a placeholder MP4. `OMA_VIDEO_MOCK=1` permits deterministic placeholders for tests only.
 - **MPT (`--compositor mpt`)**: inject the agent-written script (custom-script mode); keys env-only + log masking. It requires the installed checkout, venv, and ffmpeg; setup or render failures fail with diagnostics.
@@ -94,7 +94,7 @@ State plainly to the user: **"Demo capture is performed by a human."** Then:
    - `[oma video] <capability> <provider> ok (Xs)`
    - `[oma video] <capability> <provider> fallback -> <fallback>`
 2. Print the run-dir path and, only on success, the validated mp4 path.
-3. For `--format json`: write `{exitCode, runDir, manifestPath, scriptPath, renderSpecPath, warnings, error}` to stdout as one JSON object (no `outputs` key — read output/asset paths from the manifest at `manifestPath`).
+3. For `--output json`: write `{exitCode, runDir, manifestPath, scriptPath, renderSpecPath, warnings, error}` to stdout as one JSON object (no `outputs` key — read output/asset paths from the manifest at `manifestPath`).
 
 ## Step 8: Exit Code Aggregation (aligned with `oma search fetch`)
 
@@ -112,7 +112,7 @@ State plainly to the user: **"Demo capture is performed by a human."** Then:
 | Situation | Action |
 |-----------|--------|
 | No provider for a required capability | Exit 5, print `Run: oma video doctor` |
-| Remotion or MPT toolchain not bootstrapped | Exit 1 + `oma video doctor` remediation; retain render-spec and authored composition for recovery |
+| HyperFrames or MPT toolchain not bootstrapped | Exit 1 + `oma video doctor` remediation; retain render-spec and authored composition for recovery |
 | Voicebox MCP down | Fall back to estimated timing; still emit captions (whisper.cpp hop deferred: `TODO(oma-deferred): whisper-cpp`) |
 | Pexels / Pixelle key absent | Skip provider; fall through to oma-image stills; annotate coverage in `warnings` |
 | `demo` with no capture + no Cap | Guided protocol (Step 4b); stop without rendering |
