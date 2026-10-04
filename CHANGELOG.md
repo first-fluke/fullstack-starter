@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.27.2](https://github.com/first-fluke/fullstack-starter/compare/v2.27.1...v2.27.2) (2026-10-04)
+
+
+### Bug Fixes
+
+* **web:** reduce build memory usage and update OMA ([12d8578](https://github.com/first-fluke/fullstack-starter/commit/12d857830c945794b20ae9a072489f699466aa55))
+* **web:** reduce next build memory usage ([2d7d467](https://github.com/first-fluke/fullstack-starter/commit/2d7d467f7136d25a8e437eaf054d5b6e22999d99))
+
 ## [2.27.1](https://github.com/first-fluke/fullstack-starter/compare/v2.27.0...v2.27.1) (2026-09-23)
 
 
