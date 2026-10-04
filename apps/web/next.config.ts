@@ -1,8 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { NextConfig } from "next";
-
 import { withSerwist } from "@serwist/turbopack";
+import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import { env } from "./src/config/env";
 
@@ -61,6 +60,10 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     typedEnv: true,
+    // Limit build memory while upstream worker controls are pending:
+    // https://github.com/vercel/next.js/issues/95745
+    cpus: 3,
+    turbopackFileSystemCacheForBuild: false,
   },
   async headers() {
     return [

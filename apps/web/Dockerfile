@@ -19,6 +19,8 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 WORKDIR /app/apps/web
+# Compile and generate in separate processes so compiler memory is released
+# before collecting page data and prerendering. Stop if either phase fails.
 RUN bun run build
 
 FROM base AS runner
