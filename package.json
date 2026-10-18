@@ -2,5 +2,9 @@
   "name": "fullstack-starter",
   "private": true,
   "packageManager": "bun@1.4.2",
-  "workspaces": ["apps/web", "packages/*"]
+  "workspaces": ["apps/web", "packages/*"],
+  "devDependencies": {
+    "@commitlint/cli": "20",
+    "@gracefullight/validate-branch": "1.1.6"
+  }
 }
