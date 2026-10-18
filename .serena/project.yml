@@ -1,318 +1,48 @@
 project:
   name: fullstack-starter
-  description: Modern fullstack monorepo template with Next.js 16, FastAPI,
+  description: Modern fullstack monorepo template with Next.js 16, FastAPI, 
     Flutter, and GCP infrastructure
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   powershell          python              python_jedi         r                   rego
-#   ruby                ruby_solargraph     rust                scala               swift
-#   terraform           toml                typescript          typescript_vts      vue
-#   yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   swift               terraform           toml                typescript          typescript_vts
-#   vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   swift               terraform           toml                typescript          typescript_vts
-#   vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   swift               terraform           toml                typescript          typescript_vts
-#   vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   swift               terraform           toml                typescript          typescript_vts
-#   vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  bash                clojure             cpp                 csharp
-#   csharp_omnisharp    dart                elixir              elm                 erlang
-#   fortran             fsharp              go                  groovy              haskell
-#   java                julia               kotlin              lua                 markdown
-#   matlab              nix                 pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   swift               terraform           toml                typescript          typescript_vts
-#   vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  ansible             bash                clojure             cpp
-#   cpp_ccls            crystal             csharp              csharp_omnisharp    dart
-#   elixir              elm                 erlang              fortran             fsharp
-#   go                  groovy              haskell             haxe                hlsl
-#   java                json                julia               kotlin              lean4
-#   lua                 luau                markdown            matlab              msl
-#   nix                 ocaml               pascal              perl                php
-#   php_phpactor        powershell          python              python_jedi         python_ty
-#   r                   rego                ruby                ruby_solargraph     rust
-#   scala               solidity            swift               systemverilog       terraform
-#   toml                typescript          typescript_vts      vue                 yaml
-#   zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  angular             ansible             bash                clojure
-#   cpp                 cpp_ccls            crystal             csharp              csharp_omnisharp
-#   dart                elixir              elm                 erlang              fortran
-#   fsharp              go                  groovy              haskell             haxe
-#   hlsl                html                java                json                julia
-#   kotlin              lean4               lua                 luau                markdown
-#   matlab              msl                 nix                 ocaml               pascal
-#   perl                php                 php_phpactor        powershell          python
-#   python_jedi         python_ty           r                   rego                ruby
-#   ruby_solargraph     rust                scala               scss                solidity
-#   swift               systemverilog       terraform           toml                typescript
-#   typescript_vts      vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Angular projects, use angular (subsumes typescript+html; requires `npm install` in the project root)
-#   - For SCSS / Sass / plain CSS, use scss (some-sass-language-server handles all three)
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-# list of languages for which language servers are started (LSP backend only); choose from:
-#   ada                 al                  angular             ansible             bash
-#   bsl                 clojure             cpp                 cpp_ccls            crystal
-#   csharp              csharp_omnisharp    cue                 dart                elixir
-#   elm                 erlang              fortran             fsharp              gdscript
-#   go                  groovy              haskell             haxe                hlsl
-#   html                java                json                julia               kotlin
-#   latex               lean4               lua                 luau                markdown
-#   matlab              msl                 nix                 ocaml               pascal
-#   perl                php                 php_phpactor        php_phpantom        powershell
-#   python              python_jedi         python_pyrefly      python_ty           r
-#   rego                ruby                ruby_solargraph     rust                scala
-#   scss                solidity            svelte              swift               systemverilog
-#   terraform           toml                typescript          typescript_vts      vue
-#   yaml                zig
-#   (This list may be outdated; generated with scripts/print_language_list.py;
-#   For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py)
-# For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Angular projects, use angular (subsumes typescript+html; requires `npm install` in the project root)
-#   - For Svelte projects, use svelte (subsumes typescript/javascript for .svelte projects; requires npm)
-#   - For SCSS / Sass / plain CSS, use scss (some-sass-language-server handles all three)
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-
-
-# list of languages for which language servers are started; choose from:
-#   al                  angular             ansible             bash                clojure
-#   cpp                 cpp_ccls            crystal             csharp              csharp_omnisharp
-#   dart                elixir              elm                 erlang              fortran
-#   fsharp              go                  groovy              haskell             haxe
-#   hlsl                html                java                json                julia
-#   kotlin              lean4               lua                 luau                markdown
-#   matlab              msl                 nix                 ocaml               pascal
-#   perl                php                 php_phpactor        powershell          python
-#   python_jedi         python_ty           r                   rego                ruby
-#   ruby_solargraph     rust                scala               scss                solidity
-#   svelte              swift               systemverilog       terraform           toml
-#   typescript          typescript_vts      vue                 yaml                zig
-#   (This list may be outdated. For the current list, see values of Language enum here:
-#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py
-#   For some languages, there are alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
-# Note:
-#   - For C, use cpp
-#   - For JavaScript, use typescript
-#   - For Angular projects, use angular (subsumes typescript+html; requires `npm install` in the project root)
-#   - For Svelte projects, use svelte (subsumes typescript/javascript for .svelte projects; requires npm)
-#   - For SCSS / Sass / plain CSS, use scss (some-sass-language-server handles all three)
-#   - For Free Pascal/Lazarus, use pascal
-# Special requirements:
-#   Some languages require additional setup/installations.
-#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
-# When using multiple languages, the first language server that supports a given file will be used for that file.
-# The first language is the default language and the respective language server will be used as a fallback.
-# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 structure:
   monorepo: true
   apps:
-    - name: api
-      path: apps/api
-      language: python
-      framework: fastapi
-      description: FastAPI backend with PostgreSQL, Redis, and async SQLAlchemy
+  - name: api
+    path: apps/api
+    language: python
+    framework: fastapi
+    description: FastAPI backend with PostgreSQL, Redis, and async SQLAlchemy
 
-    - name: web
-      path: apps/web
-      language: typescript
-      framework: nextjs
-      description: Next.js 16 frontend with React 19, TailwindCSS v4, and shadcn/ui
+  - name: web
+    path: apps/web
+    language: typescript
+    framework: nextjs
+    description: Next.js 16 frontend with React 19, TailwindCSS v4, and 
+      shadcn/ui
 
-    - name: worker
-      path: apps/worker
-      language: python
-      framework: fastapi
-      description: Background worker for Cloud Tasks and Pub/Sub
+  - name: worker
+    path: apps/worker
+    language: python
+    framework: fastapi
+    description: Background worker for Cloud Tasks and Pub/Sub
 
-    - name: mobile
-      path: apps/mobile
-      language: dart
-      framework: flutter
-      description: Flutter mobile app with Riverpod and go_router
+  - name: mobile
+    path: apps/mobile
+    language: dart
+    framework: flutter
+    description: Flutter mobile app with Riverpod and go_router
 
-    - name: infra
-      path: apps/infra
-      language: hcl
-      framework: terraform
-      description: GCP infrastructure with Terraform
+  - name: infra
+    path: apps/infra
+    language: hcl
+    framework: terraform
+    description: GCP infrastructure with Terraform
 
   packages:
-    - name: design-tokens
-      path: packages/design-tokens
-      description: Shared design tokens (Source of Truth)
-    - name: i18n
-      path: packages/i18n
-      description: Shared i18n package (Source of Truth)
+  - name: design-tokens
+    path: packages/design-tokens
+    description: Shared design tokens (Source of Truth)
+  - name: i18n
+    path: packages/i18n
+    description: Shared i18n package (Source of Truth)
 
 conventions:
   naming:
@@ -321,7 +51,6 @@ conventions:
     functions: camelCase
     python_functions: snake_case
     constants: SCREAMING_SNAKE_CASE
-
   code_style:
     typescript:
       formatter: biome
@@ -336,7 +65,6 @@ conventions:
       config: analysis_options.yaml
     terraform:
       formatter: terraform fmt
-
   testing:
     web:
       unit: vitest
@@ -347,7 +75,6 @@ conventions:
     mobile:
       unit: flutter_test
       integration: integration_test
-
 tools:
   runtime_manager: mise
   package_managers:
@@ -358,7 +85,6 @@ tools:
     javascript: bun scripts
     python: poe (poethepoet)
     dart: flutter commands
-
 commands:
   install:
     root: bun install
@@ -366,52 +92,47 @@ commands:
     web: bun install
     worker: uv sync --frozen
     mobile: flutter pub get
-
   dev:
     api: poe dev
     web: bun dev
     worker: poe dev
     mobile: flutter run
-
   build:
     root: bun build
     api: docker build -t api .
     web: bun build
     worker: docker build -t worker .
     mobile: flutter build
-
   test:
     root: bun test
     api: poe test
     web: bun test
     worker: poe test
     mobile: flutter test
-
   lint:
     root: bun lint
     api: poe lint
     web: bun lint
     mobile: flutter analyze
-
   format:
     root: bun format
     api: poe format
     mobile: dart format .
-
 important_files:
-  - mise.toml: Runtime versions and task runner
-  - biome.json: JS/TS linting and formatting
-  - bun-workspace.yaml: bun workspace configuration
-  - apps/api/pyproject.toml: Python dependencies and tasks
-  - apps/api/docker-compose.infra.yml: Local infrastructure (PostgreSQL, Redis, MinIO)
-  - apps/web/package.json: Web dependencies and scripts
-  - apps/infra/variables.tf: Infrastructure configuration
+- mise.toml: Runtime versions and task runner
+- biome.json: JS/TS linting and formatting
+- bun-workspace.yaml: bun workspace configuration
+- apps/api/pyproject.toml: Python dependencies and tasks
+- apps/api/docker-compose.infra.yml: Local infrastructure (PostgreSQL, Redis, 
+    MinIO)
+- apps/web/package.json: Web dependencies and scripts
+- apps/infra/variables.tf: Infrastructure configuration
 
 documentation:
-  - .agent/rules/GEMINI.md: Project overview for AI agents
-  - .agent/rules/build-guide.md: Build and deployment guide
-  - .agent/rules/lint-format-guide.md: Linting and formatting guide
-  - .agent/rules/test-guide.md: Testing guide
+- .agent/rules/GEMINI.md: Project overview for AI agents
+- .agent/rules/build-guide.md: Build and deployment guide
+- .agent/rules/lint-format-guide.md: Linting and formatting guide
+- .agent/rules/test-guide.md: Testing guide
 
 # list of mode names to that are always to be included in the set of active modes
 # The full set of modes to be activated is base_modes + default_modes.
@@ -470,14 +191,14 @@ default_modes:
 # This extends the existing exclusions (e.g. from the global configuration)
 # Find the list of tools here: https://oraios.github.io/serena/01-about/035_tools.html
 excluded_tools:
-  - write_memory
-  - read_memory
-  - list_memories
-  - delete_memory
-  - rename_memory
-  - edit_memory
-  - onboarding
-  - check_onboarding_performed
+- write_memory
+- read_memory
+- list_memories
+- delete_memory
+- rename_memory
+- edit_memory
+- onboarding
+- check_onboarding_performed
 
 # list of tools to include that would otherwise be disabled (particularly optional tools that are disabled by default).
 # This extends the existing inclusions (e.g. from the global configuration).
@@ -554,14 +275,11 @@ ignored_memory_patterns: []
 # The settings are considered only if the project is trusted (see global configuration to define trusted projects).
 # See https://oraios.github.io/serena/02-usage/050_configuration.html#language-server-specific-settings
 ls_specific_settings:
-  {
-    dart:
-      {
-        initializationOptions: { onlyAnalyzeProjectsWithOpenFiles: true },
-        dart_sdk_version: 3.13.4,
-        dart_executable: mise
-      }
-  }
+  dart:
+    initializationOptions:
+      onlyAnalyzeProjectsWithOpenFiles: true
+    dart_sdk_version: 3.13.4
+    dart_executable: mise
 
 # list of mode names to be activated additionally for this project, e.g. ["query-projects"]
 # The full set of modes to be activated is base_modes (from global config) + default_modes + added_modes.
@@ -589,7 +307,7 @@ ls_additional_workspace_folders: []
 #     - "./subproject1"
 #     - "./subproject2"
 ls_workspace_folders:
-  - .
+- .
 
 # optional shell command to run before the language backend (LSP or JetBrains) is initialised.
 # the command runs in the project root directory and is only executed if the project is trusted
@@ -648,12 +366,65 @@ additional_workspace_folders: []
 # The first language server is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
-  - python
-  - typescript
-  - dart
-  - terraform
+- python
+- typescript
+- dart
+- terraform
+
+# list of language servers to start when using the LSP backend; choose from:
+#   ada                    al                     angular                ansible                astro
+#   bash                   bsl                    clojure                cpp                    cpp_ccls
+#   crystal                csharp                 csharp_omnisharp       cue                    dart
+#   deno                   elixir                 elm                    erlang                 fortran
+#   fsharp                 gdscript               gleam                  go                     groovy
+#   haskell                haxe                   hlsl                   html                   java
+#   json                   julia                  julia_fatou            kotlin                 latex
+#   lean4                  lua                    lua_emmylua            luau                   markdown
+#   matlab                 msl                    nextflow               nix                    ocaml
+#   pascal                 perl                   php                    php_devsense           php_phpactor
+#   php_phpantom           powershell             python                 python_basedpyright    python_jedi
+#   python_pyrefly         python_ty              qml                    r                      rego
+#   ruby                   ruby_solargraph        rust                   scala                  scss
+#   solidity               svelte                 swift                  systemverilog          terraform
+#   toml                   typescript             typescript_vts         vue                    wolfram
+#   yaml                   zig
+#   (This list may be outdated; generated with scripts/print_language_list.py;
+#   For the current list, see values of the LanguageServerId enum here:
+#   https://github.com/oraios/serena/blob/main/src/solidlsp/ls_config.py)
+# For some languages, there are several alternative language servers, e.g. csharp_omnisharp, ruby_solargraph.)
+# Note:
+#   - For C, use cpp
+#   - For JavaScript, use typescript
+#   - For Angular projects, use angular (subsumes typescript+html; requires `npm install` in the project root)
+#   - For Astro projects, use astro (subsumes typescript/javascript for .astro projects; requires npm)
+#   - For Svelte projects, use svelte (subsumes typescript/javascript for .svelte projects; requires npm)
+#   - For Deno projects, use deno (serves the same .ts/.js files as typescript; requires the deno CLI on PATH)
+#   - For SCSS / Sass / plain CSS, use scss (some-sass-language-server handles all three)
+#   - For Free Pascal/Lazarus, use pascal
+#   - External Python adapters may add further registered IDs; install the adapter package first
+#     and then use its ID here, for example: example
+# Special requirements:
+#   Some language servers require additional setup/installations.
+#   See here for details: https://oraios.github.io/serena/01-about/020_programming-languages.html#language-servers
+# When using multiple language servers, the first language server that supports a given file will be used for that file.
+# The first language server is the default language and the respective language server will be used as a fallback.
+# Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 language_servers:
-  - python
-  - typescript
-  - dart
-  - terraform
+- python
+- typescript
+- dart
+- terraform
+
+# list of APIs (facades or facade methods, e.g. "lsp" or "lsp.get_diagnostics_for_symbol") to include in the REPL
+# that would otherwise be disabled (particularly optional methods, which are disabled by default).
+# This extends the existing inclusions (e.g. from the global configuration).
+included_apis: []
+
+# list of APIs (facades or facade methods, e.g. "lsp" or "lsp.find_symbol") to exclude from the REPL.
+# This extends the existing exclusions (e.g. from the global configuration).
+excluded_apis: []
+
+# The interface through which the agent (LLM) accesses Serena's functionality (overrides the global setting).
+# Valid values: tools, REPL (see the global configuration for details); leave empty to use the global setting.
+# Note: the interface is fixed at startup. If a project is activated post-init, its setting is not applied.
+agent_interface:
