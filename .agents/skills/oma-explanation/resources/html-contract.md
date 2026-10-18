@@ -2,6 +2,12 @@
 
 This resource specifies HOW the generated HTML file behaves and is validated. For content requirements, refer to the sibling `document-structure.md` file.
 
+> Pages made by `oma explain render` meet sections 1–5 by construction (inline CSS and
+> script under a `default-src 'none'` policy, `<pre>` code, light/dark themes, shuffled quiz
+> with per-option feedback). For those pages this contract reduces to section 6
+> (`oma explain validate`) and section 7 (secret gates). Sections 1–5 remain the rules for
+> hand-written HTML.
+
 ## 1. Self-contained Rule
 The generated HTML file MUST make ZERO external resource loads.
 - No CDN scripts or stylesheets.
@@ -33,7 +39,7 @@ font-family: Pretendard, 'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto San
 - **Diagram Visuals:** Every diagram/visual MUST be wrapped in a `<div class="diagram-wrapper">` with `overflow-x: auto; max-width: 100%;` and use SVG `viewBox` / CSS variables (`var(...)`) to prevent mobile clipping and guarantee seamless Dark/Light theme switching.
 - **Contrast:** WCAG AA contrast in BOTH light and dark themes.
 - **Dark Mode:** Must support `prefers-color-scheme: dark` as well as explicit manual theme toggling via data attributes.
-- **Motion:** Animations are optional and must be subtle. `prefers-reduced-motion` MUST be respected.
+- **Motion:** Animations are optional and must be subtle.
 - **Focus States:** Visible focus states are required on all interactive elements.
 
 ## 5. Quiz JS Specification
@@ -65,7 +71,7 @@ Loop: fix and re-validate at most **3 iterations**, then STOP and surface the fa
   grep -i -E '<script[ >]' {file}
   ```
 - **Filename matches format** (the pattern is anchored, so check the basename, not the full path):
-  Ensure filename follows `{YYYY-MM-DD}-{slug}.html` with the date in `Asia/Seoul` timezone.
+  Ensure filename follows `{YYYY-MM-DD}-{slug}.html` with the date in the oma-config `timezone` (system timezone when unset).
   ```bash
   basename "{file}" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}-.+\.html$'
   ```

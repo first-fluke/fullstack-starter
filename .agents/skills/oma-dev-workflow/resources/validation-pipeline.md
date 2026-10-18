@@ -2,8 +2,81 @@
 
 Use the project's existing app commands. The examples name web, api and mobile;
 adapt that list to the repository. Shared packages, root configuration and unknown
-paths conservatively trigger every app. Build, package and install tasks remain
+paths conservatively trigger every app. Select tools and nonmutating commands from
+[tooling-profiles.md](tooling-profiles.md). Build, package and install tasks remain
 subject to the execution policy.
+
+## Repeated local validation
+
+Group local validation runs by repository, branch, worktree directory, and the
+same pipeline/app scope. Within that scope, keep only the latest invocation:
+
+- Before starting a replacement, identify the running invocation it supersedes.
+  Establish which invocation is newest so an older invocation cannot cancel a
+  newer one when reruns arrive together.
+- Stop the previous invocation and its owned child processes, and confirm they
+  have exited before starting the replacement.
+- Limit cancellation to the verified validation run. If ownership or shutdown
+  cannot be confirmed, report the limitation rather than terminate unrelated
+  processes or start overlapping checks. Avoid blanket process-name termination.
+- Record superseded runs as canceled, never passed. A canceled Git-hook check
+  must return a nonzero status. Discard partial or stale results and use only the
+  latest completed run that checks the current working tree.
+- Skipping the new run and exiting 0 because some `pytest`, `vitest`, or hook
+  process is still alive is a false pass. Exit nonzero unless this invocation
+  checked the current tree.
+- A wall-clock budget may leave remaining work running only when the hook itself
+  exits nonzero. The next run of the same content may reuse a recorded pass. A
+  recorded failure blocks that content.
+- Do not append `|| true` to a gate so a scheduler continues. Continuing after a
+  failure is allowed only when the runner still returns the aggregate nonzero
+  status. A direct invocation of the same gates must fail the same way.
+
+## Commitlint setup
+
+Inspect the package manager, lockfile, commitlint config and hook manager first.
+Keep existing configuration and integrate with existing hooks. Install
+`@commitlint/cli` and `@commitlint/config-conventional` as local development
+dependencies through the detected package manager; pin resolved versions and commit
+its lockfile. Install those locked dependencies during local environment setup.
+Do not fetch commitlint during the hook (`npx -y`, `bunx`, `pnpm dlx`). A
+repository that already pins its package manager and commitlint calls that
+local binary. An extra mise task is optional when the hook already runs under
+`mise exec`.
+
+For an npm repository, a one-time setup task can run:
+
+```bash
+npm install --save-dev --save-exact @commitlint/cli @commitlint/config-conventional
+```
+
+Use the corresponding local execution command behind mise tasks:
+
+| Package manager | Local commitlint command |
+|-----------------|--------------------------|
+| npm | `npm exec --no -- commitlint` |
+| pnpm | `pnpm exec commitlint` |
+| Yarn | `yarn exec commitlint` |
+| Bun | `bun run commitlint` |
+
+The task examples below use `./node_modules/.bin/commitlint` for an npm repository.
+Adapt them to the detected manager, including Yarn PnP. A missing dependency or
+config is an error; never replace commitlint with a successful no-op. When
+commitlint is requested in a Python/Dart-only repository, explicitly provision a
+pinned Node runtime with mise and a repository-local package manifest/lockfile for
+these development tools. Report that prerequisite instead of silently adding a
+runtime when commitlint was not requested.
+
+```javascript
+// commitlint.config.cjs — keep an existing project config when present.
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [2, 'always', ['feat', 'fix', 'perf', 'build', 'revert', 'docs',
+                              'style', 'refactor', 'test', 'chore', 'ci', 'infra']],
+  },
+};
+```
 
 ## Local hooks
 
@@ -41,34 +114,73 @@ EOF
 A linked worktree can share these hooks with other worktrees. If the project uses
 core.hooksPath, use its existing installation process instead.
 
-Copy [affected-checks.py](affected-checks.py) to the project's
-`.mise/scripts/affected-checks.py`. It uses NUL-delimited Git paths and argv
-subprocess calls. App checks run against the working tree; staged paths select
-which apps to check. Do not run formatters that silently rewrite unstaged files.
+Place checks by cost. Pre-commit lints staged files and does not rewrite
+unstaged work. Typecheck runs the affected app's project configuration, on the
+push gate when that check would dominate commit time. Do not pass individual
+filenames to `tsc` or pyrefly.
+
+Keep a selector the repository already uses when it fails closed: shared or
+unknown paths run the full suite, and the base is the merge-base with the target
+branch. That includes carve-outs a path list cannot see, such as generated
+specs, an import graph, or config files a test runner ignores. Copy
+[affected-checks.py](affected-checks.py) only when the repository has no such
+selector. Do not replace app task flags with a raw `bunx` or `uv` command that
+can drift from them.
+
+Cap hook concurrency to a measured limit. More workers can make the same suite
+slower. The parallel `depends` examples below are not an instruction to use
+every core.
+
+When using the helper, copy it to `.mise/scripts/affected-checks.py`. It uses
+NUL-delimited Git paths and argv subprocess calls. Adapt `APPS` and `CHECK_APPS`
+to the repository: include only apps with applicable checks, such as excluding a
+Dockerfile-only target from `typecheck`. Do not create passing placeholder tasks.
+App checks run against the working tree; staged paths select which apps to check.
+The `typecheck` task still uses the app's project configuration, not a list of
+changed filenames. Do not run formatters that silently rewrite unstaged files.
+
+Define each app's required `check` task as an aggregate of its applicable lint,
+typecheck and `format:check` tasks, as shown in the tooling profiles. Include
+`format:check` only when a project formatter check is configured; never use a
+mutating `format` task in hooks or CI. Shared dependencies in the aggregate run
+once, so Dart lint/typecheck aliases can share one analyzer task. Missing required
+tasks and failures in configured checks must fail validation.
+
+The helper invokes app tasks only. If the Dockerfile profile defines a root
+`lint:dockerfile` task, add that task once to the dependencies of `git:pre-commit`
+and `validate:changed`, and run `mise run lint:dockerfile` once in the CI checks
+step. This also covers root/shared Dockerfiles. Omit those additions when the
+repository has no configured Dockerfile check.
 
 ```toml
 [tasks."git:commit-msg"]
 description = "Validate a commit message"
 usage = 'arg "<file>"'
-run = 'bunx @commitlint/cli@20 --edit "$usage_file"'
+run = './node_modules/.bin/commitlint --edit "$usage_file"'
 
 [tasks."git:pre-commit"]
 description = "Lint apps affected by staged changes"
 run = "python3 .mise/scripts/affected-checks.py --staged --kind lint"
 
 [tasks."git:pre-push"]
-description = "Test the complete branch change"
+description = "Check and test the complete branch change"
+run = "mise run validate:changed"
+
+[tasks."check:changed"]
 # Set CHECK_BASE to this project's target branch. Missing/unavailable base runs all apps.
-run = 'python3 .mise/scripts/affected-checks.py --base "${CHECK_BASE:-origin/main}" --kind test'
+run = 'python3 .mise/scripts/affected-checks.py --base "${CHECK_BASE:-origin/main}" --kind check'
 
 [tasks."lint:changed"]
 run = 'python3 .mise/scripts/affected-checks.py --base "${CHECK_BASE:-origin/main}" --kind lint'
+
+[tasks."typecheck:changed"]
+run = 'python3 .mise/scripts/affected-checks.py --base "${CHECK_BASE:-origin/main}" --kind typecheck'
 
 [tasks."test:changed"]
 run = 'python3 .mise/scripts/affected-checks.py --base "${CHECK_BASE:-origin/main}" --kind test'
 
 [tasks."validate:changed"]
-depends = ["lint:changed", "test:changed"]
+depends = ["check:changed", "test:changed"]
 ```
 
 Use the PR target's merge base, not HEAD~1. A documentation-only final commit must
@@ -77,14 +189,19 @@ conservative checks rather than report an empty affected set.
 
 ## CI
 
-Use full history and an explicit comparison base. The push before-SHA and PR
-base-SHA below are example event values; an unavailable/zero revision triggers
-all checks. Configure dependency provisioning using the repository's existing CI
-setup before these commands; this example does not install dependencies.
+Use full history and an explicit comparison base. App checks run on pushes and
+PRs, use the complete branch comparison, and fall back to all applicable apps if
+the base is missing, zero or unavailable. Commit messages are validated by the
+local `commit-msg` hook.
+
+Configure runtime/dependency provisioning using the repository's existing CI
+setup before validation. This example expects locked dependencies to be installed.
 
 ```yaml
 name: CI
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -98,20 +215,10 @@ jobs:
         env:
           CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          python3 .mise/scripts/affected-checks.py --base "$CHECK_BASE" --kind lint
+          set -eu
+          python3 .mise/scripts/affected-checks.py --base "$CHECK_BASE" --kind check
           python3 .mise/scripts/affected-checks.py --base "$CHECK_BASE" --kind test
-      # Use the project's existing typecheck command where applicable.
 ```
 
-## Commit message configuration
-
-```javascript
-// commitlint.config.cjs — keep an existing project config when present.
-module.exports = {
-  extends: ['@commitlint/config-conventional'],
-  rules: {
-    'type-enum': [2, 'always', ['feat', 'fix', 'perf', 'build', 'revert', 'docs',
-                              'style', 'refactor', 'test', 'chore', 'ci', 'infra']],
-  },
-};
-```
+Commitlint reference: [installation](https://commitlint.js.org/guides/getting-started.html),
+[local hooks](https://commitlint.js.org/guides/local-setup.html).

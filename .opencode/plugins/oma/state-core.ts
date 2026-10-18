@@ -243,9 +243,19 @@ export function emitEvent(
   sid: string,
   event: Omit<Partial<OmaEvent>, "sid"> & { kind: string },
 ): OmaEvent {
-  return withSessionWriteLock(projectDir, sid, () =>
+  const enriched = withSessionWriteLock(projectDir, sid, () =>
     appendEvent(projectDir, sid, event),
   );
+  // Migration acquires index before session. Release the session lock before
+  // updating the index so a concurrent migration can finish its path switch.
+  if (enriched.kind === "session.ended") {
+    updateIndex(projectDir, (index) => {
+      for (const [category, activeSid] of Object.entries(index.active)) {
+        if (activeSid === sid) delete index.active[category];
+      }
+    });
+  }
+  return enriched;
 }
 
 function appendEvent(
@@ -296,13 +306,6 @@ function appendEvent(
     event.kind === "session.ended"
   ) {
     refreshMetaUnlocked(projectDir, sid);
-  }
-  if (event.kind === "session.ended") {
-    updateIndex(projectDir, (index) => {
-      for (const [category, activeSid] of Object.entries(index.active)) {
-        if (activeSid === sid) delete index.active[category];
-      }
-    });
   }
   return enriched;
 }
@@ -385,6 +388,25 @@ function refreshMetaUnlocked(projectDir: string, sid: string): SessionMeta {
   return meta;
 }
 
+/**
+ * Home override the vendor process runs under, as an event payload fragment.
+ * Launchers such as Orca give each account its own home, so a vendor session's
+ * transcript is only reachable later if the event records where it lives.
+ */
+export function vendorHomePayload(
+  vendor: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): { vendorHome?: string } {
+  const home =
+    vendor === "codex"
+      ? env.CODEX_HOME
+      : vendor === "claude"
+        ? env.CLAUDE_CONFIG_DIR
+        : undefined;
+  const trimmed = home?.trim();
+  return trimmed ? { vendorHome: trimmed } : {};
+}
+
 export function activateWorkflowSession(args: {
   projectDir: string;
   workflow: string;
@@ -399,6 +421,10 @@ export function activateWorkflowSession(args: {
     kind: "session.created",
     vendor: args.vendor,
     vendorSid: args.vendorSid,
-    payload: { workflow: args.workflow, category },
+    payload: {
+      workflow: args.workflow,
+      category,
+      ...vendorHomePayload(args.vendor),
+    },
   });
 }

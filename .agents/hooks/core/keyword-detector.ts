@@ -109,13 +109,15 @@ export const CLI_INVOCATION_AT_START = new RegExp(
 /**
  * Per-workflow skip predicates. A workflow listed here will be skipped when
  * its predicate returns true for the (already-normalized) cleaned text.
- * The map is intentionally empty at boot — populate it to add workflow-specific
- * overrides without restructuring the matching loop.
+ * Visual design requires a visual target; generic design verbs also describe
+ * skill authoring, APIs, schemas, and other nonvisual work.
  */
 export const KEYWORD_SKIP_PREDICATES: Record<
   string,
   (text: string) => boolean
-> = {};
+> = {
+  design: (text) => !hasVisualDesignContext(text),
+};
 
 /**
  * Default predicate: skip ALL workflow triggers when the prompt starts with a
@@ -390,6 +392,67 @@ export function buildPatternEntries(
 
 export function buildPatterns(keywords: Record<string, string[]>): RegExp[] {
   return buildPatternEntries(keywords).map((e) => e.regex);
+}
+
+// These words name the act of designing, but do not identify a visual target.
+// Keep the remaining visual vocabulary in triggers.json as the shared source.
+const GENERIC_DESIGN_KEYWORDS = new Set([
+  "design",
+  "디자인",
+  "디자인해줘",
+  "디자인 만들어줘",
+  "デザイン",
+  "デザインして",
+  "デザインを作って",
+  "设计",
+  "设计一下",
+  "做个设计",
+  "diseño",
+  "diseña",
+  "crea un diseño",
+  "haz el diseño",
+  "fais le design",
+  "crée un design",
+  "gestalte",
+  "erstelle ein design",
+  "mach das design",
+  "faça o design",
+  "crie um design",
+  "monte o design",
+  "дизайн",
+  "сделай дизайн",
+  "создай дизайн",
+  "оформи",
+  "ontwerp",
+  "ontwerp dit",
+  "maak een ontwerp",
+  "projekt",
+  "zaprojektuj",
+  "stwórz projekt",
+  "zrób design",
+]);
+
+const VISUAL_DESIGN_PATTERNS = [
+  /\bdesign\s+(?:(?:a|an|the|this|our|new)\s+)?(?:ui|ux)\b(?=\s*(?:$|[.!?,;]|\b(?:for|of|to|and)\b))/,
+  ...buildPatternEntries(TRIGGERS.workflows.design?.keywords ?? {})
+    .filter(
+      ({ keyword }) => !GENERIC_DESIGN_KEYWORDS.has(keyword.toLowerCase()),
+    )
+    .map(({ regex }) => regex),
+  ...buildPatterns({
+    en: ["screen", "page", "website", "interface"],
+    ko: ["화면", "페이지", "웹사이트", "UI를", "UX를"],
+    ja: ["画面", "ページ"],
+    zh: ["页面", "界面"],
+  }),
+];
+
+function hasVisualDesignContext(text: string): boolean {
+  if (/(?:^|\s)\/design(?![\w-])/.test(text)) return true;
+  return VISUAL_DESIGN_PATTERNS.some((pattern) => {
+    const match = pattern.exec(text);
+    return match !== null && !isTechnicalReference(text, match.index, match[0]);
+  });
 }
 
 /**
@@ -667,6 +730,21 @@ export function startsWithSlashCommand(prompt: string): boolean {
   return /^\/[a-zA-Z][\w-]*/.test(prompt.trim());
 }
 
+/**
+ * The persistent workflow a prompt invokes as a slash command (`/ultrawork …`,
+ * or namespaced as `/oma:ultrawork …`), or null. A typed slash command is the
+ * most explicit invocation there is, so it must persist like a named one.
+ */
+export function persistentSlashWorkflow(
+  prompt: string,
+  config: TriggerConfig,
+): string | null {
+  const m = /^\/(?:[\w-]+:)?([a-zA-Z][\w-]*)(?=\s|$)/.exec(prompt.trim());
+  const name = m?.[1]?.toLowerCase();
+  if (!name) return null;
+  return config.workflows[name]?.persistent ? name : null;
+}
+
 // ── Extension Detection ──────────────────────────────────────
 
 const EXCLUDE_EXTS = new Set([
@@ -776,18 +854,20 @@ async function activateL1WorkflowSession(
   category = "main",
 ): Promise<string | null> {
   try {
-    const [{ setActiveSession }, { createSessionId, emitEvent }] =
-      await Promise.all([
-        import("./state-marker.ts"),
-        import("./state-emit.ts"),
-      ]);
+    const [
+      { setActiveSession },
+      { createSessionId, emitEvent, vendorHomePayload },
+    ] = await Promise.all([
+      import("./state-marker.ts"),
+      import("./state-emit.ts"),
+    ]);
     const sid = createSessionId();
     setActiveSession(projectDir, category, sid);
     await emitEvent(projectDir, sid, {
       kind: "session.created",
       vendor,
       vendorSid,
-      payload: { workflow, category },
+      payload: { workflow, category, ...vendorHomePayload(vendor) },
     });
     return sid;
   } catch (e) {
@@ -1048,7 +1128,21 @@ export async function run(
   const { vendor, cwd: projectDir, sid: sessionId = "unknown" } = ctx;
 
   if (!prompt.trim()) return null;
-  if (startsWithSlashCommand(prompt)) return null;
+  if (startsWithSlashCommand(prompt)) {
+    // The command itself loads the workflow; the hook only makes a
+    // persistent one enforceable by writing its state file.
+    const slashWorkflow = persistentSlashWorkflow(prompt, TRIGGERS);
+    if (slashWorkflow) {
+      const omaSid = await activateL1WorkflowSession(
+        projectDir,
+        slashWorkflow,
+        vendor,
+        sessionId,
+      );
+      activateMode(projectDir, slashWorkflow, sessionId, omaSid);
+    }
+    return null;
+  }
   // Relayed inter-agent messages carry another agent's text, not a user
   // request — their content must not drive workflow keyword detection.
   if (isRelayedAgentMessage(prompt)) return null;

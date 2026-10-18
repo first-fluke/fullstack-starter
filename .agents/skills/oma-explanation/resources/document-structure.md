@@ -4,6 +4,12 @@
 > Read this document to understand WHAT content is generated and in what tone.
 > For HOW the HTML is styled and behaves, see `html-contract.md`.
 
+> **Authoring path**: write a draft and render it with `oma explain render` (see
+> `draft-format.md`). The four sections below become panels in the same order; the renderer
+> supplies the page shell, so the TOC and diagram-markup rules in sections 1 and 6 apply
+> literally only to the hand-written HTML fallback. Topic-mode pages follow `draft-format.md`
+> and are not bound to the four sections.
+
 ---
 
 ## 1. Overall Shape
@@ -105,5 +111,5 @@ The explainer must read with authoritative clarity, smooth transitions between s
 
 Every document must end with a provenance footer containing:
 - **Generated-from reference**: The commit range, PR number, or branch used as input.
-- **Generation Date**: The timestamp localized to the `Asia/Seoul` timezone.
+- **Generation Date**: The date in the oma-config `timezone`, falling back to the system timezone when unset.
 - **Excluded Files**: If the diff was oversized and files were dropped, list the excluded files in a footnote. Never silently truncate.

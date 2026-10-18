@@ -1,22 +1,30 @@
 ---
 name: oma-explanation
-description: "Create an offline HTML explanation of a code diff, PR, or branch. Use when an interactive code-change walkthrough is requested."
+description: "Create an offline HTML explanation of a code change (diff, PR, branch) or of a topic, system, or question. Use when a visual walkthrough document is requested."
 ---
 
-# oma-explanation — Interactive HTML Code-Change Explainer
+# oma-explanation — Interactive HTML Explainer
 
 ## Scheduling
 
 ### Goal
-Generate an educational, self-contained interactive HTML document that explains a code change to
-a reader — deep skippable background for newcomers, core intuition with toy data, a comprehension-
-ordered code walkthrough, and a five-question quiz — saved under `.agents/results/explain/` and
-validated against a deterministic checklist.
+Generate an educational, self-contained interactive HTML document, saved under
+`.agents/results/explain/` and validated against a deterministic checklist. Two modes:
+
+- **Change mode** — explains a code change: deep skippable background for newcomers, core
+  intuition with toy data, a comprehension-ordered code walkthrough, and a five-question quiz.
+- **Topic mode** — explains a concept, a system, or the answer to a question as a one-page
+  visual sheet: lead answer, then panels of diagrams, tables, and short prose.
+
+In both modes the model writes a Markdown **draft** and `oma explain render` produces the HTML.
+Layout, theme, diagram geometry, and the quiz script are the renderer's, not the model's.
 
 ### Intent signature
 - User invokes `/explain`, names this skill, or asks for a rich explanation/walkthrough of a
   diff, PR, branch, or commit range (설명서, 해설, コード解説, 代码讲解).
-- Another skill or workflow delegates "explain this change as a document" output.
+- User asks for a visual / HTML explanation of a topic that is not a diff: how a system works,
+  a comparison, an answer worth keeping as a page (`/explain how does the row planner work`).
+- Another skill or workflow delegates "explain this as a document" output.
 - Activation is slash/explicit/delegated only — this skill is intentionally excluded from
   keyword auto-detection ("explain" is everyday vocabulary; `convert` precedent).
 
@@ -24,6 +32,7 @@ validated against a deterministic checklist.
 - Explaining a PR, branch, commit range, or the current staged/unstaged change as a document
 - Onboarding a teammate onto a change they did not write
 - Producing a reviewable teaching artifact after a large or subtle change lands
+- Turning an architecture, a protocol, a comparison, or a long answer into one visual page
 
 ### When NOT to use
 - Narrated explainer *video* → use `oma-video` (explainer mode); this skill produces HTML documents
@@ -33,7 +42,11 @@ validated against a deterministic checklist.
   skill narrates a change educationally, it does not evaluate it
 
 ### Expected inputs
-- **Target ref**, resolved in this order:
+- **Mode**: `topic` when the request names a subject and no ref resolves from it; otherwise
+  `change`. An explicit ref always means change mode.
+- **Topic** (topic mode): the question or subject, plus the code or docs it is about. Explore
+  them first; a topic page states facts from the repository, not from memory.
+- **Target ref** (change mode), resolved in this order:
   1. Explicit argument — PR number (`#640`, via `gh pr diff`), branch (`git diff main...{branch}`),
      or SHA range (`a..b` / `a...b`)
   2. Staged changes (`git diff --cached`)
@@ -46,7 +59,7 @@ validated against a deterministic checklist.
 
 ### Expected outputs
 - One self-contained HTML file at `.agents/results/explain/{YYYY-MM-DD}-{slug}.html`
-  (date in Asia/Seoul; same date + slug rerun overwrites).
+  (date in oma-config `timezone`, else the system timezone; same date + slug rerun overwrites).
 - TL;DR summary and file path reported to the user; `open <path>` attempted (warn-only).
 - Opt-in archify sidecar `{YYYY-MM-DD}-{slug}.archify.html` (+ `.archify.json`) linked from the
   explainer by a plain anchor, when `diagram.explain_sidecar` is on or the user asks and
@@ -65,7 +78,8 @@ outputs:
 ```
 
 ### Dependencies
-- `resources/document-structure.md` — WHAT the document contains (sections, diagrams, style)
+- `resources/draft-format.md` — the draft you write and the `oma explain render` commands
+- `resources/document-structure.md` — WHAT a change explainer contains (sections, diagrams, style)
 - `resources/html-contract.md` — HOW the HTML behaves and is validated (self-contained rules,
   quiz JS, grep checklist, secret gates)
 - `git`; optional `gh` CLI for PR refs
@@ -84,31 +98,43 @@ outputs:
   sidecar as incomplete.
 - Oversized diffs: lockfiles/generated files excluded automatically, remaining diff grouped per
   file; exclusions listed in the provenance footer (never silent).
+- Render errors name the draft line and print the failing component's syntax; fix that line
+  and re-render. Prose warnings are fixed by rewriting, not by `style: off`.
 - Validation is supported via the `oma explain validate [file]` CLI command (and deterministic grep checklist in `html-contract.md`).
 
 ## Structural Flow
 
 ### Entry
-1. Resolve the target ref via the Expected-inputs order; never guess an alternative ref.
-2. Read `resources/document-structure.md` and `resources/html-contract.md` before generating.
+1. Select change or topic mode from the Expected inputs. In change mode, resolve the
+   target ref in the stated order; never guess an alternative ref. In topic mode,
+   resolve the question and available source material without requiring a diff.
+2. Read `resources/draft-format.md` before generating; in change mode also
+   `resources/document-structure.md` and `resources/html-contract.md`.
 3. Determine reader level, output language, and quiz count.
 
 ### Scenes
-1. **RESOLVE**: Map the user's request to a concrete diff source; report which ref was chosen.
-2. **COLLECT**: Gather the diff and explore surrounding code through the configured
+1. **RESOLVE**: In change mode, map the request to a concrete diff source and report the
+   chosen ref. In topic mode, identify the question, scope, and source material.
+2. **COLLECT**: Gather the diff or topic sources and explore relevant code through the configured
    `code_intelligence` capability. If it is unavailable or times out, use native search only for paths outside this project or ignored paths
    and record that limit.
-3. **GATE**: Run the pre-generation secret scan on the diff. On hit: stop, report masked
+3. **GATE**: Run the pre-generation secret scan on the collected material. On hit: stop, report masked
    locations, await user confirmation for redacted continuation.
-4. **GENERATE**: Author the HTML per both resources contracts — TOC, Background (two tiers),
-   Intuition (toy data + diagram families), Code walkthrough (comprehension order), Quiz.
+4. **GENERATE**: Write the draft per `draft-format.md` and run `oma explain render`.
+   Change mode: Background (two tiers), Intuition (toy data + diagrams), Code walkthrough
+   (comprehension order), Quiz, as panels in that order, with `template: doc` (linear, with
+   contents). Topic mode: lead answer, then 4–9 panels, one idea each, a diagram wherever a
+   relation or a sequence is the point; `template: sheet` for an overview, `doc` for a
+   walkthrough.
+   Hand-written HTML is a fallback only for content no component can express; say so in
+   the report.
 5. **VALIDATE**: Run the grep checklist from `html-contract.md` (including the final-HTML secret
    scan). Fix → re-validate, max 3 iterations; then surface failures and stop.
 6. **DELIVER**: Save to `.agents/results/explain/{YYYY-MM-DD}-{slug}.html`, attempt
-   `open <path>` (warn-only), report TL;DR + path. If the archify sidecar is requested and
-   resolves, derive it from the primary flow diagram, validate/deliver it within two attempts
-   and five minutes total, anchor-link it when successful, and re-run the checklist once.
-   Stop on a repeated no-progress diagnosis. A sidecar failure never blocks delivery.
+   `open <path>` (warn-only), report TL;DR + path. The archify sidecar comes from the
+   same render: `--archify` (or `diagram.explain_sidecar`) derives the spec from the
+   `{archify}` panel's flow/sequence block, delivers it, and links it. Report the sidecar
+   status the command prints. A sidecar failure never blocks delivery.
 
 ### Transitions
 - Explicit ref argument present → skip auto-detection, use it verbatim.
@@ -116,17 +142,17 @@ outputs:
 - Validation failure ×3 → stop and present the failing checklist items; do not deliver silently.
 
 ### Failure and recovery
-- Empty diff / unresolvable ref → stop; offer recent commits as candidates.
-- Binary- or generated-only diff → stop; nothing explainable.
-- PR ref with `gh` missing or unauthenticated → give install/auth guidance + local branch-diff alternative.
-- Merge/rebase in progress → stop; worktree unstable.
-- Non-git directory → stop immediately.
+- Change mode, empty diff / unresolvable ref → stop; offer recent commits as candidates.
+- Change mode, binary- or generated-only diff → stop; nothing explainable.
+- Change mode, PR ref with `gh` missing or unauthenticated → give install/auth guidance + local branch-diff alternative.
+- Change mode, merge/rebase in progress → stop; worktree unstable.
+- Change mode, non-git directory → stop immediately. Topic mode can run without git.
 - `open` failure / headless environment → warn-only; the reported path suffices.
 
 ### Exit
 - Success: validated HTML artifact exists, path reported, quiz functional.
 - Partial: artifact generated but checklist unresolved after 3 loops — failures listed explicitly.
-- Failure: unresolvable ref, non-git directory, binary/generated-only diff, or unstable worktree —
+- Change-mode failure: unresolvable ref, non-git directory, binary/generated-only diff, or unstable worktree —
   stopped before generation; no artifact produced, guidance given per Failure and recovery.
 
 ## Logical Operations
@@ -137,14 +163,15 @@ outputs:
 | Resolve target ref | `SELECT` | git/gh commands, resolution order |
 | Collect diff + context | `READ` | `git diff` / `gh pr diff`, configured code intelligence or native fallback |
 | Secret gates (pre/post) | `VALIDATE` | masked-hit report, user confirmation |
-| Author HTML | `WRITE` | `.agents/results/explain/*.html` |
+| Author draft + render | `WRITE` | draft → `oma explain render` → `.agents/results/explain/*.html` |
 | Checklist validation | `VALIDATE` | grep checklist results, ≤3 fix loops |
 | Deliver | `NOTIFY` | TL;DR + path, `open` attempt |
 
 ### Tools and instruments
 - `git`; optional `gh` (PR refs via `gh pr diff`)
 - Configured `code_intelligence` capability for surrounding-code exploration; native search only for paths outside this project or ignored paths
-- `resources/document-structure.md`, `resources/html-contract.md`
+- `oma explain render | lint | components | patch | validate`
+- `resources/draft-format.md`, `resources/document-structure.md`, `resources/html-contract.md`
 
 ### Resource scope
 | Scope | Resource target |
@@ -155,10 +182,11 @@ outputs:
 | `CREDENTIALS` | `gh` auth token if configured; no other secrets handled |
 
 ### Preconditions
-- Resolvable git repository, not mid-merge/rebase
-- Explainable diff for the resolved ref (non-empty, not binary-only, not generated-only or
+- Change mode: resolvable git repository, not mid-merge/rebase
+- Change mode: explainable diff for the resolved ref (non-empty, not binary-only, not generated-only or
   version-bump-only — see the predicate in `.agents/workflows/explain.md` Step 1)
-- `gh` authenticated when a PR ref is requested
+- Change mode: `gh` authenticated when a PR ref is requested
+- Topic mode: a question and enough source material to support the explanation; no git repository or diff required
 
 ### Effects and side effects
 - Writes exactly one HTML file under `.agents/results/explain/`
@@ -177,5 +205,6 @@ outputs:
 Driven end-to-end by `.agents/workflows/explain.md` (slash-only; `disable-model-invocation: true`).
 
 ## References
-- `resources/document-structure.md` — document content contract
+- `resources/draft-format.md` — draft syntax, components, writing rules, sidecar
+- `resources/document-structure.md` — change-explainer content contract
 - `resources/html-contract.md` — HTML behavior, validation checklist, secret gates
