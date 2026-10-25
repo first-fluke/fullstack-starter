@@ -84,7 +84,7 @@ mise //apps/infra:vm:plan:prod
 mise //apps/infra:vm:apply:prod
 mise //apps/infra:vm:deploy            # configure host + deploy image digests
 mise //apps/infra:vm:deploy:schedules  # push worker cron file only
-mise //apps/infra:vm:check             # terraform fmt + ansible syntax
+mise //apps/infra:vm:check             # terraform fmt + ansible syntax + ansible-lint (pre-commit runs this)
 
 # Formatting / validation (any stack)
 mise //apps/infra:gcp:fmt

@@ -95,5 +95,5 @@ description = "Destroy everything"
 run = ["mise //apps/infra:freemium:weaviate:down", "mise //apps/infra:freemium:destroy"]
 
 [tasks."vm:check"]
-description = "Format-check Terraform and syntax-check Ansible for the VM stack"
-run = ["mise //apps/infra:vm:fmt:check", "mise //apps/infra:vm:ansible:check"]
+description = "Format-check Terraform, syntax-check and lint Ansible for the VM stack (same as CI)"
+run = ["mise //apps/infra:vm:fmt:check", "mise //apps/infra:vm:ansible:check", "mise //apps/infra:vm:ansible:lint"]
