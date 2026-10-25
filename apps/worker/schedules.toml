@@ -1,0 +1,19 @@
+# Cron jobs for the single-VM deployment (apps/infra/vm).
+#
+# Loaded only when WORKER_SCHEDULES_FILE points at this file. Managed stacks
+# (Cloud Run, ECS, Container Apps) schedule through the cloud scheduler
+# declared in Terraform and leave this file unused.
+#
+# Changes take effect when the worker container is recreated:
+#   mise //apps/infra:vm:deploy:schedules
+#
+# Fields: five-field cron (minute hour day month weekday). Weekdays use names
+# (mon..sun, mon-fri); numbers are rejected because APScheduler and crontab
+# disagree on them. Day and weekday must BOTH match when both are set.
+timezone = "UTC"
+
+[[jobs]]
+id = "scheduler_heartbeat"
+task = "scheduler_heartbeat"
+cron = "*/5 * * * *"
+enabled = true

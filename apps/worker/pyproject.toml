@@ -5,6 +5,7 @@ description = "FastAPI worker for async tasks"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "apscheduler>=3.11.0,<4",
     "fastapi[standard]>=0.141.1",
     "pydantic-settings>=2.15.0",
     "httpx>=0.28.1",
@@ -37,6 +38,7 @@ format = "ruff format ."
 check = ["lint", "format"]
 typecheck = "pyrefly check"
 test = "pytest tests/ --suppress-no-test-exit-code"
+"schedules:check" = "python -m src.lib.schedules"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

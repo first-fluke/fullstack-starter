@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import model_validator
@@ -22,6 +23,11 @@ class Settings(BaseSettings):
 
     WORKER_VERIFY_OIDC: bool = False
     WORKER_OIDC_AUDIENCE: str | None = None
+
+    # In-process cron for single-instance deployments (apps/infra/vm). Leave
+    # unset on managed stacks, which schedule through Cloud Scheduler instead.
+    # Run exactly one worker process when this is set.
+    WORKER_SCHEDULES_FILE: Path | None = None
 
     @model_validator(mode="after")
     def _require_audience_when_verify_enabled(self) -> Settings:
