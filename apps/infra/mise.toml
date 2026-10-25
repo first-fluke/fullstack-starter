@@ -11,6 +11,7 @@
 "gcp:apply" = { dir = "gcp", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply GCP infrastructure" }
 "gcp:apply:prod" = { dir = "gcp", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply GCP production" }
 "gcp:destroy" = { dir = "gcp", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy GCP infrastructure" }
+"gcp:init:local" = { dir = "gcp", run = "terraform init -backend=false -input=false", description = "Install GCP providers without a backend (for validate)" }
 
 # AWS
 "aws:init" = { dir = "aws", run = "terraform init", description = "Initialize AWS Terraform" }
@@ -24,6 +25,7 @@
 "aws:apply" = { dir = "aws", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply AWS infrastructure" }
 "aws:apply:prod" = { dir = "aws", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply AWS production" }
 "aws:destroy" = { dir = "aws", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy AWS infrastructure" }
+"aws:init:local" = { dir = "aws", run = "terraform init -backend=false -input=false", description = "Install AWS providers without a backend (for validate)" }
 
 # Azure
 "az:init" = { dir = "az", run = "terraform init", description = "Initialize Azure Terraform" }
@@ -37,6 +39,7 @@
 "az:apply" = { dir = "az", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply Azure infrastructure" }
 "az:apply:prod" = { dir = "az", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply Azure production" }
 "az:destroy" = { dir = "az", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy Azure infrastructure" }
+"az:init:local" = { dir = "az", run = "terraform init -backend=false -input=false", description = "Install Azure providers without a backend (for validate)" }
 
 # OCI
 "oci:init" = { dir = "oci", run = "terraform init", description = "Initialize OCI Terraform" }
@@ -50,6 +53,7 @@
 "oci:apply" = { dir = "oci", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply OCI infrastructure" }
 "oci:apply:prod" = { dir = "oci", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply OCI production" }
 "oci:destroy" = { dir = "oci", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy OCI infrastructure" }
+"oci:init:local" = { dir = "oci", run = "terraform init -backend=false -input=false", description = "Install OCI providers without a backend (for validate)" }
 
 # Freemium (Vercel + Supabase + Backblaze)
 "freemium:init" = { dir = "freemium", run = "terraform init", description = "Initialize freemium Terraform" }
@@ -78,6 +82,7 @@
 "vm:apply" = { dir = "vm", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply VM infrastructure" }
 "vm:apply:prod" = { dir = "vm", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply VM production" }
 "vm:destroy" = { dir = "vm", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy VM infrastructure" }
+"vm:init:local" = { dir = "vm", run = "terraform init -backend=false -input=false", description = "Install VM providers without a backend (for validate)" }
 
 # Ansible runs in an isolated, pinned controller through uv (no system Ansible needed).
 "vm:ansible:check" = { dir = "vm/ansible", run = "uv tool run --python 3.14 --from ansible-core==2.21.5 ansible-playbook -i localhost, --syntax-check playbook.yml", description = "Syntax-check the VM playbook" }
@@ -94,14 +99,30 @@ run = ["mise //apps/infra:freemium:apply", "mise //apps/infra:freemium:weaviate:
 description = "Destroy everything"
 run = ["mise //apps/infra:freemium:weaviate:down", "mise //apps/infra:freemium:destroy"]
 
+# Static checks per stack. Terraform CI and the pre-commit hook both run exactly
+# these tasks; `<stack>:init:local` only caches providers, no state or cloud access.
+[tasks."gcp:check"]
+description = "Static checks for the GCP stack (same as CI): terraform fmt + validate"
+run = ["mise //apps/infra:gcp:fmt:check", "mise //apps/infra:gcp:init:local", "mise //apps/infra:gcp:validate"]
+
+[tasks."aws:check"]
+description = "Static checks for the AWS stack (same as CI): terraform fmt + validate"
+run = ["mise //apps/infra:aws:fmt:check", "mise //apps/infra:aws:init:local", "mise //apps/infra:aws:validate"]
+
+[tasks."az:check"]
+description = "Static checks for the Azure stack (same as CI): terraform fmt + validate"
+run = ["mise //apps/infra:az:fmt:check", "mise //apps/infra:az:init:local", "mise //apps/infra:az:validate"]
+
+[tasks."oci:check"]
+description = "Static checks for the OCI stack (same as CI): terraform fmt + validate"
+run = ["mise //apps/infra:oci:fmt:check", "mise //apps/infra:oci:init:local", "mise //apps/infra:oci:validate"]
+
 [tasks."vm:check"]
-description = "Static checks for the VM stack, same as CI: terraform fmt + validate, ansible syntax + lint"
-dir = "vm"
-# init -backend=false only installs providers (cached in .terraform/); no state or cloud access.
+description = "Static checks for the VM stack (same as CI): terraform fmt + validate, ansible syntax + lint"
 run = [
-  "terraform fmt -check -recursive",
-  "terraform init -backend=false -input=false > /dev/null",
-  "terraform validate",
+  "mise //apps/infra:vm:fmt:check",
+  "mise //apps/infra:vm:init:local",
+  "mise //apps/infra:vm:validate",
   "mise //apps/infra:vm:ansible:check",
   "mise //apps/infra:vm:ansible:lint",
 ]

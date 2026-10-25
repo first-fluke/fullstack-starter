@@ -89,6 +89,10 @@ mise //apps/infra:vm:check             # terraform fmt + validate, ansible synta
 # Formatting / validation (any stack)
 mise //apps/infra:gcp:fmt
 mise //apps/infra:aws:validate
+
+# Static checks: terraform fmt + validate (+ ansible syntax/lint for vm).
+# Terraform CI and the pre-commit hook run exactly this task per stack.
+mise //apps/infra:gcp:check
 ```
 
 See each stack's README for prerequisites (API enablement, state bucket setup, certificates) and stack-specific notes.

@@ -24,6 +24,23 @@ hooks {
         glob = "apps/mobile/**"
         check = "env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE mise //apps/mobile:lint"
       }
+      // Same tasks Terraform CI runs; see apps/infra/mise.toml `<stack>:check`.
+      ["infra-gcp"] {
+        glob = "apps/infra/gcp/**"
+        check = "mise //apps/infra:gcp:check"
+      }
+      ["infra-aws"] {
+        glob = "apps/infra/aws/**"
+        check = "mise //apps/infra:aws:check"
+      }
+      ["infra-az"] {
+        glob = "apps/infra/az/**"
+        check = "mise //apps/infra:az:check"
+      }
+      ["infra-oci"] {
+        glob = "apps/infra/oci/**"
+        check = "mise //apps/infra:oci:check"
+      }
       ["infra-vm"] {
         glob = "apps/infra/vm/**"
         check = "mise //apps/infra:vm:check"
