@@ -111,7 +111,7 @@ Add OAuth client ids and secrets, AI keys and anything else from [`apps/api/.env
 ## 4. Deploy
 
 ```bash
-mise //apps/infra:vm:check     # terraform fmt + ansible syntax + ansible-lint; pre-commit runs the same
+mise //apps/infra:vm:check     # terraform fmt + validate, ansible syntax + lint; pre-commit runs the same
 mise //apps/infra:vm:deploy
 ```
 
