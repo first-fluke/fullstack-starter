@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        stack: [gcp, aws, az, oci]
+        stack: [gcp, aws, az, oci, vm]
 
     defaults:
       run:
@@ -46,3 +46,35 @@ jobs:
           echo "| Stack | Step | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| ${{ matrix.stack }} | fmt / init / validate | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
+
+  ansible:
+    name: Ansible (vm)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/infra/vm/ansible
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Syntax check
+        run: uv tool run --python 3.14 --from ansible-core==2.21.5 ansible-playbook -i localhost, --syntax-check playbook.yml
+
+      - name: Lint
+        run: uv tool run --python 3.14 --from ansible-lint==26.10.1 --with ansible-core==2.21.5 ansible-lint playbook.yml
+
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "| Stack | Step | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| vm/ansible | syntax / lint | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY

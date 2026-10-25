@@ -24,6 +24,10 @@ hooks {
         glob = "apps/mobile/**"
         check = "env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE mise //apps/mobile:lint"
       }
+      ["infra-vm"] {
+        glob = "apps/infra/vm/**"
+        check = "mise //apps/infra:vm:check"
+      }
       ["hadolint"] {
         glob = List("**/Dockerfile", "**/Dockerfile.*")
         check = "hadolint {{files}}"
