@@ -1,0 +1,25 @@
+#!/bin/bash
+{{ ansible_managed | comment }}
+# Restore a pg_dump custom-format archive produced by backup.sh.
+# Stop external writes and take a fresh backup before running this.
+set -euo pipefail
+if [ "$#" -ne 1 ]; then
+    echo "Usage: sudo $0 /path/to/database.dump" >&2
+    exit 2
+fi
+database_dump=$(realpath "$1")
+test -s "$database_dump"
+exec 9>/run/{{ app_name }}-backup.lock
+if ! flock -n 9; then
+    echo "Backup or restore is already running." >&2
+    exit 1
+fi
+cd '{{ app_root }}'
+compose=(docker compose --env-file '{{ compose_env }}')
+"${compose[@]}" stop web api{% if worker_enabled %} worker{% endif %}
+
+"${compose[@]}" exec -T postgres sh -c \
+  'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --single-transaction --exit-on-error' \
+  < "$database_dump"
+"${compose[@]}" up -d --wait --wait-timeout 300
+curl --fail "http://127.0.0.1:{{ api_port }}{{ api_health_path }}"

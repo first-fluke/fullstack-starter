@@ -1,0 +1,137 @@
+{{ ansible_managed | comment }}
+name: {{ app_name }}
+x-logging: &logging
+  driver: json-file
+  options: {max-size: 10m, max-file: '3'}
+x-database-env: &database-env
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  DATABASE_URL_SYNC: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+services:
+  postgres:
+    image: {{ postgres_image }}
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes: ['{{ data_root }}/postgres:/var/lib/postgresql/data']
+    networks: [database]
+    mem_limit: {{ postgres_mem_limit }}
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+{% if redis_enabled %}
+  redis:
+    image: {{ redis_image }}
+    restart: unless-stopped
+    logging: *logging
+    command: [redis-server, --appendonly, 'yes', --maxmemory, '{{ redis_mem_limit | regex_replace("m$", "mb") }}', --maxmemory-policy, allkeys-lru]
+    volumes: ['{{ data_root }}/redis:/data']
+    networks: [database]
+    mem_limit: {{ redis_mem_limit }}
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+{% endif %}
+  # One-shot Alembic run: `docker compose run --rm migrate`. The profile keeps
+  # it out of `up`, so the boot service never races the API against it.
+  migrate:
+    image: '{{ api_image }}'
+    profiles: [tools]
+    logging: *logging
+    env_file: {{ compose_env }}
+    environment:
+      <<: *database-env
+      PROJECT_ENV: prod
+    command: [uv, run, --project, /app, alembic, upgrade, head]
+    networks: [database]
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    image: '{{ api_image }}'
+    restart: unless-stopped
+    logging: *logging
+    env_file: {{ compose_env }}
+    environment:
+      <<: *database-env
+      PROJECT_ENV: prod
+      API_PUBLIC_URL: 'https://{{ api_domain }}'
+      CORS_ORIGINS: '["https://{{ domain }}"]'
+      OAUTH_ALLOWED_WEB_ORIGINS: '["https://{{ domain }}"]'
+      WEBAUTHN_RP_ID: '{{ domain }}'
+      WEBAUTHN_ORIGINS: '["https://{{ domain }}"]'
+      # Host nginx reaches the container from the Docker bridge gateway.
+      TRUSTED_PROXY_IPS: '["172.16.0.0/12"]'
+{% if redis_enabled %}
+      REDIS_URL: redis://redis:6379/0
+{% endif %}
+    ports: ['127.0.0.1:{{ api_port }}:8000']
+    networks: [database, app]
+    mem_limit: {{ api_mem_limit }}
+    depends_on:
+      postgres: {condition: service_healthy}
+{% if redis_enabled %}
+      redis: {condition: service_healthy}
+{% endif %}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000{{ api_health_path }}', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+  web:
+    image: '{{ web_image }}'
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_URL: 'https://{{ api_domain }}'
+    ports: ['127.0.0.1:{{ web_port }}:3000']
+    networks: [app]
+    mem_limit: {{ web_mem_limit }}
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, bun, -e, "fetch('http://127.0.0.1:3000{{ web_health_path }}').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+{% if worker_enabled %}
+  worker:
+    image: '{{ worker_image }}'
+    restart: unless-stopped
+    # Shutdown drains running jobs for up to 25s (see apps/worker/src/lib/scheduler.py).
+    stop_grace_period: 40s
+    logging: *logging
+    env_file: {{ compose_env }}
+    environment:
+      PROJECT_ENV: prod
+      WORKER_SCHEDULES_FILE: /app/config/schedules.toml
+    volumes:
+      - type: bind
+        source: {{ config_root }}/schedules.toml
+        target: /app/config/schedules.toml
+        read_only: true
+        bind: {create_host_path: false}
+    networks: [database, app]
+    mem_limit: {{ worker_mem_limit }}
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080{{ worker_health_path }}', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+{% endif %}
+networks:
+  database: {internal: true}
+  app:

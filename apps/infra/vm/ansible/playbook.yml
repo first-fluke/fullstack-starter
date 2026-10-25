@@ -1,0 +1,454 @@
+---
+# Configure one Ubuntu 24.04 Compute Engine VM to run the stack with Docker
+# Compose behind host nginx with Let's Encrypt. Idempotent: rerun to deploy new
+# image digests, rotate app.env or change schedules. Tags: tls, worker-schedules.
+- name: Configure the single application VM
+  hosts: all
+  become: true
+  vars:
+    compose_env: "{{ config_root }}/app.env"
+    registry_host: "{{ api_image | regex_replace('/.*$', '') }}"
+    # /snap/bin holds gcloud and docker-credential-gcloud on GCE images.
+    system_path: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+  pre_tasks:
+    - name: Validate deployment inputs
+      ansible.builtin.assert:
+        that:
+          - app_name is match('^[a-z][a-z0-9-]{1,30}$')
+          - domain is match('^[a-zA-Z0-9.-]+$')
+          - api_domain is match('^[a-zA-Z0-9.-]+$')
+          - api_domain != domain
+          - certificate_email is defined
+          - api_image is match('^.+@sha256:[a-f0-9]{64}$')
+          - web_image is match('^.+@sha256:[a-f0-9]{64}$')
+          - not worker_enabled or worker_image is match('^.+@sha256:[a-f0-9]{64}$')
+          - app_env_file is defined
+          - data_device is defined
+          - not backup_enabled or backup_provider == 'gcs'
+          - not backup_enabled or backup_bucket is match('^[a-z0-9][a-z0-9._-]+[a-z0-9]$')
+        fail_msg: Use real DNS names, a production app.env and immutable linux/amd64 image digests.
+
+    - name: Install runtime packages
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - certbot
+          - cron
+          - curl
+          - docker-compose-v2
+          - docker.io
+          - e2fsprogs
+          - gnupg
+          - python3
+          - unattended-upgrades
+        state: present
+        update_cache: true
+
+    - name: Enable Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Configure the registry credential helper for root's Docker
+      when: registry_credential_helper | length > 0
+      ansible.builtin.copy:
+        dest: /root/.docker/config.json
+        mode: "0600"
+        content: "{{ {'credHelpers': {registry_host: registry_credential_helper}} | to_nice_json }}\n"
+
+    - name: Remove ABI-bound distribution Brotli modules
+      ansible.builtin.apt:
+        name: [libnginx-mod-http-brotli-filter, libnginx-mod-http-brotli-static]
+        state: absent
+
+    - name: Find obsolete Brotli dynamic module load files
+      ansible.builtin.find:
+        paths: /etc/nginx/modules-enabled
+        patterns: "*brotli*.conf"
+        file_type: any
+      register: nginx_legacy_brotli_loads
+
+    - name: Remove obsolete Brotli dynamic module load files
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ nginx_legacy_brotli_loads.files }}"
+
+    - name: Install official nginx repository signing key
+      ansible.builtin.get_url:
+        url: https://nginx.org/keys/nginx_signing.key
+        dest: /usr/share/keyrings/nginx-archive-keyring.asc
+        checksum: sha256:55385da31d198fa6a5012d40ae98ecb272a6c4e8fffffba94719ffd3e87de37a
+        mode: "0644"
+
+    - name: Read official nginx signing key fingerprints
+      ansible.builtin.command:
+        argv: [gpg, --batch, --show-keys, --with-colons, /usr/share/keyrings/nginx-archive-keyring.asc]
+      register: nginx_signing_key
+      changed_when: false
+
+    - name: Verify official nginx signing key fingerprint
+      ansible.builtin.assert:
+        that: "'573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62' in nginx_signing_key.stdout"
+
+    - name: Configure official nginx stable repository
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/nginx.list
+        mode: "0644"
+        content: |
+          deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.asc] https://nginx.org/packages/ubuntu {{ ansible_facts['distribution_release'] }} nginx
+
+    - name: Prefer packages from the official nginx repository
+      ansible.builtin.copy:
+        dest: /etc/apt/preferences.d/99nginx
+        mode: "0644"
+        content: |
+          Package: nginx nginx-module-*
+          Pin: origin nginx.org
+          Pin-Priority: 900
+
+    - name: Install pinned official nginx stable package
+      ansible.builtin.apt:
+        name: "nginx={{ nginx_package_version }}"
+        state: present
+        update_cache: true
+        dpkg_options: force-confdef,force-confold
+      register: nginx_package
+
+    - name: Remove distribution default nginx sites
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/nginx/sites-enabled/default
+        - /etc/nginx/conf.d/default.conf
+
+    - name: Read installed nginx capabilities
+      ansible.builtin.command:
+        argv: [/usr/sbin/nginx, -V]
+      register: nginx_capabilities
+      changed_when: false
+
+    - name: Require HTTP/3 support in the official nginx package
+      ansible.builtin.assert:
+        that: "'--with-http_v3_module' in nginx_capabilities.stderr"
+
+    - name: Verify installed nginx configuration
+      ansible.builtin.command:
+        argv: [/usr/sbin/nginx, -t]
+      changed_when: false
+
+    - name: Activate the official nginx package
+      ansible.builtin.systemd:
+        name: nginx
+        state: '{{ "restarted" if nginx_package.changed else "started" }}'
+        enabled: true
+        daemon_reload: true
+
+  tasks:
+    # Data disk ---------------------------------------------------------------
+    - name: Wait for the dedicated persistent disk
+      ansible.builtin.wait_for:
+        path: "{{ data_device }}"
+        timeout: 60
+
+    - name: Inspect disk signatures without modifying data
+      ansible.builtin.command:
+        argv: [wipefs, --no-act, --noheadings, --output, TYPE, "{{ data_device }}"]
+      register: disk_signatures
+      changed_when: false
+
+    - name: Reject unexpected existing filesystems or partition tables
+      ansible.builtin.assert:
+        that: disk_signatures.stdout | trim in ['', 'ext4']
+        fail_msg: Dedicated disk must be empty or ext4; refusing to overwrite existing signatures.
+
+    - name: Create ext4 on an empty disk
+      ansible.builtin.command:
+        argv: [mkfs.ext4, "{{ data_device }}"]
+      when: disk_signatures.stdout | trim == ''
+      changed_when: true
+
+    - name: Create mount point
+      ansible.builtin.file:
+        path: "{{ data_root }}"
+        state: directory
+        mode: "0755"
+
+    - name: Persist dedicated disk mount
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^\S+\s+{{ data_root | regex_escape }}\s+'
+        line: "{{ data_device }} {{ data_root }} ext4 defaults,discard 0 2"
+
+    - name: Check whether data mount is active
+      ansible.builtin.command:
+        argv: [findmnt, --mountpoint, "{{ data_root }}"]
+      register: data_mount
+      changed_when: false
+      failed_when: data_mount.rc not in [0, 1]
+
+    - name: Mount dedicated disk
+      ansible.builtin.command:
+        argv: [mount, "{{ data_root }}"]
+      when: data_mount.rc == 1
+      changed_when: true
+
+    - name: Verify expected disk is mounted at the data directory
+      ansible.builtin.command:
+        argv: [findmnt, --evaluate, --source, "{{ data_device }}", --mountpoint, "{{ data_root }}"]
+      changed_when: false
+
+    # Layout ------------------------------------------------------------------
+    - name: Create protected runtime directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner | default('root') }}"
+        group: "{{ item.group | default('root') }}"
+      loop:
+        - { path: "{{ app_root }}", mode: "0755" }
+        - { path: "{{ config_root }}", mode: "0700" }
+        # postgres:alpine runs as uid/gid 70, redis:alpine as 999.
+        - { path: "{{ data_root }}/postgres", mode: "0700", owner: "70", group: "70" }
+        - { path: "{{ data_root }}/redis", mode: "0700", owner: "999", group: "999" }
+        - { path: "{{ data_root }}/backups", mode: "0700" }
+        - { path: /var/www/letsencrypt, mode: "0755" }
+
+    - name: Install controller-provided secrets
+      ansible.builtin.copy:
+        src: "{{ app_env_file }}"
+        dest: "{{ compose_env }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Install worker schedules
+      when: worker_enabled
+      tags: [worker-schedules]
+      ansible.builtin.copy:
+        src: "{{ worker_schedule_file }}"
+        dest: "{{ config_root }}/schedules.toml"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload worker schedules
+
+    - name: Install production compose
+      ansible.builtin.template:
+        src: compose.yaml.j2
+        dest: "{{ app_root }}/compose.yaml"
+        mode: "0644"
+
+    - name: Install boot service
+      ansible.builtin.template:
+        src: app.service.j2
+        dest: "/etc/systemd/system/{{ app_name }}.service"
+        mode: "0644"
+
+    # Application -------------------------------------------------------------
+    - name: Run database migrations
+      ansible.builtin.command:
+        argv: [docker, compose, --env-file, "{{ compose_env }}", run, --rm, --quiet-pull, migrate]
+        chdir: "{{ app_root }}"
+      environment:
+        PATH: "{{ system_path }}"
+      changed_when: true
+      no_log: true
+
+    - name: Start application containers
+      ansible.builtin.command:
+        argv: [docker, compose, --env-file, "{{ compose_env }}", up, -d, --pull, always, --wait, --wait-timeout, "300"]
+        chdir: "{{ app_root }}"
+      environment:
+        PATH: "{{ system_path }}"
+      register: compose_start
+      changed_when: "'Started' in compose_start.stderr or 'Created' in compose_start.stderr or 'Recreated' in compose_start.stderr"
+      no_log: true
+
+    - name: Enable application on boot
+      ansible.builtin.systemd:
+        name: "{{ app_name }}"
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Install daily maintenance service and timer
+      when: maintenance_command | length > 0
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: "/etc/systemd/system/{{ app_name }}-{{ item }}"
+        mode: "0644"
+      loop: [maintenance.service, maintenance.timer]
+
+    - name: Enable daily maintenance timer
+      when: maintenance_command | length > 0
+      ansible.builtin.systemd:
+        name: "{{ app_name }}-maintenance.timer"
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # TLS ---------------------------------------------------------------------
+    - name: Check for existing TLS certificate
+      tags: [tls]
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      register: tls_certificate
+
+    - name: Install challenge server before initial issuance
+      tags: [tls]
+      ansible.builtin.template:
+        src: nginx-bootstrap.conf.j2
+        dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+        mode: "0644"
+      when: not tls_certificate.stat.exists
+      notify: Reload nginx
+
+    - name: Flush HTTP challenge configuration
+      tags: [tls]
+      ansible.builtin.meta: flush_handlers
+
+    - name: Ensure nginx is running
+      tags: [tls]
+      ansible.builtin.systemd:
+        name: nginx
+        enabled: true
+        state: started
+
+    - name: Obtain TLS certificate with HTTP-01
+      tags: [tls]
+      ansible.builtin.command:
+        argv:
+          - certbot
+          - certonly
+          - --webroot
+          - --webroot-path
+          - /var/www/letsencrypt
+          - --cert-name
+          - "{{ domain }}"
+          - --domain
+          - "{{ domain }}"
+          - --domain
+          - "{{ api_domain }}"
+          - --expand
+          - --email
+          - "{{ certificate_email }}"
+          - --agree-tos
+          - --non-interactive
+        creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+
+    - name: Install final HTTPS configuration
+      tags: [tls]
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Install certificate renewal reload hook
+      tags: [tls]
+      ansible.builtin.copy:
+        dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx
+        mode: "0755"
+        content: |
+          #!/bin/sh
+          /usr/sbin/nginx -t && systemctl reload nginx
+
+    - name: Enable certificate renewal timer
+      tags: [tls]
+      ansible.builtin.systemd:
+        name: certbot.timer
+        enabled: true
+        state: started
+
+    # Backups -----------------------------------------------------------------
+    - name: Install backup and restore scripts
+      when: backup_enabled
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: "{{ app_root }}/{{ item }}"
+        mode: "0700"
+      loop: [backup.sh, restore.sh]
+
+    - name: Install daily backup cron
+      when: backup_enabled
+      ansible.builtin.cron:
+        name: "{{ app_name }} database backup"
+        hour: "{{ backup_hour }}"
+        minute: "{{ backup_minute }}"
+        user: root
+        job: "{{ app_root }}/backup.sh >> /var/log/{{ app_name }}-backup.log 2>&1"
+
+    - name: Enable backup scheduler on boot
+      when: backup_enabled
+      ansible.builtin.systemd:
+        name: cron
+        enabled: true
+        state: started
+
+    - name: Install backup log rotation
+      when: backup_enabled
+      ansible.builtin.copy:
+        dest: "/etc/logrotate.d/{{ app_name }}-backup"
+        mode: "0644"
+        content: |
+          /var/log/{{ app_name }}-backup.log {
+            weekly
+            rotate 8
+            compress
+            missingok
+            notifempty
+          }
+
+    # Verification ------------------------------------------------------------
+    - name: Apply nginx TLS configuration
+      tags: [tls]
+      ansible.builtin.meta: flush_handlers
+
+    - name: Verify public API through TLS
+      tags: [tls]
+      ansible.builtin.uri:
+        url: "https://{{ api_domain }}{{ api_health_path }}"
+        status_code: 200
+      register: api_health
+      until: api_health.status == 200
+      retries: 6
+      delay: 5
+
+    - name: Verify public web through TLS
+      tags: [tls]
+      ansible.builtin.uri:
+        url: "https://{{ domain }}{{ web_health_path }}"
+        status_code: 200
+      register: web_health
+      until: web_health.status == 200
+      retries: 6
+      delay: 5
+
+  handlers:
+    - name: Reload worker schedules
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --env-file
+          - "{{ compose_env }}"
+          - up
+          - -d
+          - --no-deps
+          - --force-recreate
+          - --wait
+          - --wait-timeout
+          - "60"
+          - worker
+        chdir: "{{ app_root }}"
+      environment:
+        PATH: "{{ system_path }}"
+      changed_when: true
+      no_log: true
+
+    - name: Reload nginx
+      ansible.builtin.shell: /usr/sbin/nginx -t && systemctl reload nginx
+      changed_when: true

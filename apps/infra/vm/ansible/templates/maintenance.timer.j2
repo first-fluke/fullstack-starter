@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description={{ app_name }} daily maintenance timer
+
+[Timer]
+OnCalendar={{ maintenance_on_calendar }}
+Persistent=true
+RandomizedDelaySec=120
+Unit={{ app_name }}-maintenance.service
+
+[Install]
+WantedBy=timers.target

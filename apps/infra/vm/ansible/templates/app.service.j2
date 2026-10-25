@@ -1,0 +1,20 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description={{ app_name }} application containers
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+RequiresMountsFor={{ data_root }}
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory={{ app_root }}
+Environment="PATH={{ system_path }}"
+ExecStart=/usr/bin/docker compose --env-file {{ compose_env }} up -d --wait --wait-timeout 300
+ExecStop=/usr/bin/docker compose --env-file {{ compose_env }} stop
+TimeoutStartSec=360
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

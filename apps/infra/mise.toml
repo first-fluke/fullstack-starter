@@ -65,6 +65,27 @@
 "freemium:env:sync" = { dir = "freemium", run = "bun run scripts/env-sync.ts", description = "Sync env vars to Vercel + .env.example" }
 "freemium:status" = { dir = "freemium", run = "bun run scripts/status.ts", description = "Check all provisioned resources" }
 
+# VM (single Compute Engine VM: Docker Compose + host nginx + Let's Encrypt)
+# Terraform provisions the VM; Ansible configures it from vm/ansible.
+"vm:init" = { dir = "vm", run = "terraform init", description = "Initialize VM Terraform" }
+"vm:fmt" = { dir = "vm", run = "terraform fmt -recursive", description = "Format VM Terraform" }
+"vm:fmt:check" = { dir = "vm", run = "terraform fmt -check -recursive", description = "Check VM Terraform format" }
+"vm:validate" = { dir = "vm", run = "terraform validate", description = "Validate VM Terraform" }
+"vm:output" = { dir = "vm", run = "terraform output", description = "Show VM Terraform outputs" }
+"vm:state:list" = { dir = "vm", run = "terraform state list", description = "List VM Terraform state" }
+"vm:plan" = { dir = "vm", run = "infisical run --env=dev --path=/infra -- terraform plan -var-file=terraform.tfvars", description = "Plan VM infrastructure" }
+"vm:plan:prod" = { dir = "vm", run = "infisical run --env=prod --path=/infra -- terraform plan -var-file=terraform.prod.tfvars", description = "Plan VM production" }
+"vm:apply" = { dir = "vm", run = "infisical run --env=dev --path=/infra -- terraform apply -var-file=terraform.tfvars", description = "Apply VM infrastructure" }
+"vm:apply:prod" = { dir = "vm", run = "infisical run --env=prod --path=/infra -- terraform apply -var-file=terraform.prod.tfvars", description = "Apply VM production" }
+"vm:destroy" = { dir = "vm", run = "infisical run --env=dev --path=/infra -- terraform destroy -var-file=terraform.tfvars", description = "Destroy VM infrastructure" }
+
+# Ansible runs in an isolated, pinned controller through uv (no system Ansible needed).
+"vm:ansible:check" = { dir = "vm/ansible", run = "uv tool run --python 3.14 --from ansible-core==2.21.5 ansible-playbook -i localhost, --syntax-check playbook.yml", description = "Syntax-check the VM playbook" }
+"vm:ansible:lint" = { dir = "vm/ansible", run = "uv tool run --python 3.14 --from ansible-lint==26.10.1 --with ansible-core==2.21.5 ansible-lint playbook.yml", description = "Lint the VM playbook" }
+"vm:env:export" = { dir = "vm/ansible", run = "infisical export --env=prod --path=/vm --format=dotenv > app.env", description = "Write runtime secrets for the VM to vm/ansible/app.env (gitignored)" }
+"vm:deploy" = { dir = "vm/ansible", run = "uv tool run --python 3.14 --from ansible-core==2.21.5 ansible-playbook playbook.yml", description = "Configure the VM and deploy the image digests in group_vars" }
+"vm:deploy:schedules" = { dir = "vm/ansible", run = "uv tool run --python 3.14 --from ansible-core==2.21.5 ansible-playbook playbook.yml --tags worker-schedules", description = "Push worker schedules.toml and recreate only the worker" }
+
 [tasks."freemium:setup"]
 description = "Provision everything"
 run = ["mise //apps/infra:freemium:apply", "mise //apps/infra:freemium:weaviate:up", "mise //apps/infra:freemium:env:sync"]
@@ -72,3 +93,7 @@ run = ["mise //apps/infra:freemium:apply", "mise //apps/infra:freemium:weaviate:
 [tasks."freemium:teardown"]
 description = "Destroy everything"
 run = ["mise //apps/infra:freemium:weaviate:down", "mise //apps/infra:freemium:destroy"]
+
+[tasks."vm:check"]
+description = "Format-check Terraform and syntax-check Ansible for the VM stack"
+run = ["mise //apps/infra:vm:fmt:check", "mise //apps/infra:vm:ansible:check"]

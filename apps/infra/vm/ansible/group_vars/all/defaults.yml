@@ -1,0 +1,73 @@
+---
+# Defaults for every deployment. Do not edit for a single site: override in
+# group_vars/all/site.yml (gitignored; copy from site.yml.example). Files in
+# this directory load alphabetically, so site.yml wins over defaults.yml.
+
+# Identity ----------------------------------------------------------------
+# Must match app_name in terraform.tfvars: it names paths, systemd units,
+# the nginx config and rate-limit zones.
+app_name: fullstack-starter
+app_root: "/opt/{{ app_name }}"
+config_root: "/etc/{{ app_name }}"
+data_root: "/srv/{{ app_name }}"
+
+# Public endpoints ----------------------------------------------------------
+# Web is served at https://{{ domain }}, the API at https://{{ api_domain }}.
+# Both names share one Let's Encrypt certificate and must resolve to the VM.
+api_domain: "api.{{ domain }}"
+# Adds X-Robots-Tag: noindex to keep a staging host out of search indexes.
+preview_mode: false
+
+# Services ------------------------------------------------------------------
+worker_enabled: true
+redis_enabled: true
+postgres_image: postgres:16-alpine
+redis_image: redis:7-alpine
+api_port: 8000
+web_port: 3000
+worker_port: 8080
+api_health_path: /health
+web_health_path: /api/health
+worker_health_path: /health
+api_mem_limit: 512m
+web_mem_limit: 512m
+worker_mem_limit: 256m
+postgres_mem_limit: 512m
+redis_mem_limit: 128m
+# Path on the controller; defaults to the committed worker schedule file.
+worker_schedule_file: "{{ playbook_dir }}/../../../worker/schedules.toml"
+# Docker credential helper for the image registry (gcloud on GCE images).
+# Set to "" when images come from a registry that needs no authentication.
+registry_credential_helper: gcloud
+
+# nginx ----------------------------------------------------------------------
+# Official nginx.org stable build (HTTP/3 capable), pinned by package version.
+nginx_package_version: 1.30.6-1~noble
+nginx_request_rate: 20r/s
+nginx_request_burst: 40
+nginx_static_rate: 60r/s
+nginx_static_burst: 120
+# Upload limit on the API host; the API enforces MAX_BODY_SIZE itself.
+api_client_max_body_size: 2m
+web_client_max_body_size: 1m
+# Exact-match API paths with their own per-IP limit (login brute force etc.).
+rate_limited_locations:
+  - { path: /api/auth/login, rate: 10r/m, burst: 10 }
+  - { path: /api/auth/register, rate: 5r/m, burst: 5 }
+  - { path: /api/auth/refresh, rate: 30r/m, burst: 10 }
+# API path prefixes that must never be reachable from the internet.
+blocked_api_paths: []
+
+# Backups --------------------------------------------------------------------
+backup_enabled: true
+backup_provider: gcs
+backup_hour: "18"
+backup_minute: "15"
+backup_local_retention_days: 7
+
+# Maintenance timer -----------------------------------------------------------
+# Shell command run daily inside {{ app_root }}, e.g. a retention job:
+#   docker compose --env-file /etc/<app>/app.env exec -T api python -m src.maintenance
+# Empty disables the timer.
+maintenance_command: ""
+maintenance_on_calendar: "*-*-* 03:00:00 UTC"

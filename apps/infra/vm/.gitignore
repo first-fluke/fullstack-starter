@@ -1,0 +1,35 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+tfplan
+
+# Sensitive files
+*.tfvars
+!*.tfvars.example
+backend.hcl
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI config
+.terraformrc
+terraform.rc
+
+# Ansible (per-deployment, see ansible/*.example)
+ansible/inventory.yml
+ansible/group_vars/all/site.yml
+ansible/app.env
+ansible/*.retry
+
+# oma docs generated artifacts
+docs/generated/

@@ -312,7 +312,7 @@ mise tasks --all
 </details>
 
 <details>
-<summary>Infrastructure (apps/infra/gcp, apps/infra/aws)</summary>
+<summary>Infrastructure (apps/infra/gcp, apps/infra/aws, apps/infra/vm, ...)</summary>
 
 | 명령어 | 설명 |
 |--------|------|
@@ -321,6 +321,10 @@ mise tasks --all
 | `mise //apps/infra:gcp:apply` | 변경사항 적용 |
 | `mise //apps/infra:gcp:plan:prod` | 프로덕션 미리보기 |
 | `mise //apps/infra:gcp:apply:prod` | 프로덕션 적용 |
+| `mise //apps/infra:vm:apply:prod` | 단일 Compute Engine VM 프로비저닝 (Terraform) |
+| `mise //apps/infra:vm:deploy` | VM 구성 및 이미지 배포 (Ansible) |
+
+전체 스택(GCP, AWS, Azure, OCI, freemium, 단일 VM)은 [`apps/infra/README.md`](../apps/infra/README.md)를 참고하세요.
 
 </details>
 

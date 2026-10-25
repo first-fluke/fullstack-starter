@@ -1,0 +1,24 @@
+# Required
+project_id = "your-gcp-project-id"
+
+region      = "asia-northeast3"
+zone        = "asia-northeast3-a"
+environment = "prod"
+app_name    = "fullstack-starter"
+
+# Compute - e2-small fits postgres + api + web + worker in 2 GB; move to
+# e2-medium when the API or Next.js server needs more headroom.
+machine_type        = "e2-small"
+boot_disk_gb        = 20
+data_disk_gb        = 30
+deletion_protection = true
+
+vpc_cidr = "10.42.0.0/24"
+
+operator_members = ["user:operator@example.com"]
+
+snapshot_retention_days = 7
+backup_retention_days   = 30
+artifact_keep_count     = 2
+
+github_repository = "your-org/your-repo"

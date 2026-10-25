@@ -1,0 +1,24 @@
+#!/bin/bash
+{{ ansible_managed | comment }}
+# Daily pg_dump to the data disk, uploaded to the backup bucket with the VM's
+# service account token. Local copies are pruned after a week; the bucket
+# lifecycle rule owns long-term retention.
+set -euo pipefail
+umask 077
+exec 9>/run/{{ app_name }}-backup.lock
+flock -n 9 || exit 0
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+destination="{{ data_root }}/backups/$stamp"
+mkdir -p "$destination"
+cd '{{ app_root }}'
+docker compose --env-file '{{ compose_env }}' exec -T postgres \
+  sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$destination/database.dump"
+token=$(curl --fail --silent --show-error -H 'Metadata-Flavor: Google' \
+  'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+curl --fail --silent --show-error --retry 3 \
+  -H "Authorization: Bearer $token" -H 'Content-Type: application/octet-stream' \
+  --data-binary "@$destination/database.dump" \
+  "https://storage.googleapis.com/upload/storage/v1/b/{{ backup_bucket }}/o?uploadType=media&name=$stamp/database.dump" >/dev/null
+find '{{ data_root }}/backups' -mindepth 1 -maxdepth 1 -type d -mtime +{{ backup_local_retention_days }} -exec rm -rf -- {} +
+echo "Backup uploaded: $stamp"

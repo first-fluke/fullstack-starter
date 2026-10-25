@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+# Serves only the ACME challenge until the first certificate is issued.
+server {
+    listen 80;
+    server_name {{ domain }} {{ api_domain }};
+    location /.well-known/acme-challenge/ { root /var/www/letsencrypt; }
+    location / { return 503; }
+}

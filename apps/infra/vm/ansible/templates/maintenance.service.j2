@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description={{ app_name }} daily maintenance
+Requires=docker.service
+After=docker.service {{ app_name }}.service
+RequiresMountsFor={{ data_root }}
+
+[Service]
+Type=oneshot
+WorkingDirectory={{ app_root }}
+Environment="PATH={{ system_path }}"
+ExecStart=/bin/sh -c {{ maintenance_command | quote }}
+TimeoutStartSec=300

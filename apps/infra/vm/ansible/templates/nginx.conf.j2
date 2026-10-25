@@ -1,0 +1,129 @@
+{{ ansible_managed | comment }}
+{% set zone = app_name | replace('-', '_') %}
+limit_req_zone $binary_remote_addr zone={{ zone }}_requests:10m rate={{ nginx_request_rate }};
+limit_req_zone $binary_remote_addr zone={{ zone }}_static:10m rate={{ nginx_static_rate }};
+{% for location in rate_limited_locations %}
+limit_req_zone $binary_remote_addr zone={{ zone }}_rl{{ loop.index }}:10m rate={{ location.rate }};
+{% endfor %}
+server_tokens off;
+
+# HTTP: ACME challenge, fast 404 for scanner paths, everything else to HTTPS.
+server {
+    listen 80;
+    server_name {{ domain }} {{ api_domain }};
+    location /.well-known/acme-challenge/ { root /var/www/letsencrypt; }
+    location ~ /\.(?!well-known(?:/|$)) { return 404; }
+    location ~* ^/(?:wp-admin|wp-content|wp-includes|wp-json|cgi-bin)(?:/|$) { return 404; }
+    location ~* \.(?:php[0-9]*|phtml|phar|cgi|asp|aspx|jsp)(?:/|$) { return 404; }
+    location / { return 301 https://$host$request_uri; }
+}
+
+# Web (Next.js)
+server {
+    listen 443 ssl;
+    listen 443 quic reuseport;
+    http2 on;
+    http3 on;
+    server_name {{ domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 4;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/javascript application/javascript application/json application/xml application/rss+xml image/svg+xml;
+    client_max_body_size {{ web_client_max_body_size }};
+    proxy_connect_timeout 5s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+    limit_req zone={{ zone }}_requests burst={{ nginx_request_burst }} nodelay;
+    limit_req_status 429;
+    add_header Strict-Transport-Security 'max-age=31536000' always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header X-Frame-Options DENY always;
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+{% if preview_mode | bool %}
+    add_header X-Robots-Tag 'noindex, nofollow' always;
+{% endif %}
+    location = /healthz { access_log off; return 200 'ok'; }
+    location /.well-known/acme-challenge/ { root /var/www/letsencrypt; }
+    location ~ /\.(?!well-known(?:/|$)) { return 404; }
+    location ~* ^/(?:wp-admin|wp-content|wp-includes|wp-json|cgi-bin)(?:/|$) { return 404; }
+    location ~* \.(?:php[0-9]*|phtml|phar|cgi|asp|aspx|jsp)(?:/|$) { return 404; }
+    # Hashed build chunks get their own bucket so page-load bursts do not
+    # exhaust the general request limit.
+    location /_next/static/ {
+        limit_req zone={{ zone }}_static burst={{ nginx_static_burst }} nodelay;
+        proxy_pass http://127.0.0.1:{{ web_port }};
+        proxy_set_header Accept-Encoding "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:{{ web_port }};
+        proxy_set_header Accept-Encoding "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_buffering off;
+    }
+}
+
+# API (FastAPI)
+server {
+    listen 443 ssl;
+    listen 443 quic;
+    http2 on;
+    http3 on;
+    server_name {{ api_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 4;
+    gzip_min_length 1024;
+    gzip_types application/json text/plain;
+    client_max_body_size {{ api_client_max_body_size }};
+    proxy_connect_timeout 5s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+    limit_req zone={{ zone }}_requests burst={{ nginx_request_burst }} nodelay;
+    limit_req_status 429;
+    add_header Strict-Transport-Security 'max-age=31536000' always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header X-Frame-Options DENY always;
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    add_header X-Robots-Tag 'noindex, nofollow' always;
+    location = /healthz { access_log off; return 200 'ok'; }
+    location /.well-known/acme-challenge/ { root /var/www/letsencrypt; }
+    location ~ /\.(?!well-known(?:/|$)) { return 404; }
+{% for path in blocked_api_paths %}
+    location ^~ {{ path }} { return 404; }
+{% endfor %}
+{% for location in rate_limited_locations %}
+    location = {{ location.path }} {
+        limit_req zone={{ zone }}_rl{{ loop.index }} burst={{ location.burst }} nodelay;
+        proxy_pass http://127.0.0.1:{{ api_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+{% endfor %}
+    location / {
+        proxy_pass http://127.0.0.1:{{ api_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}

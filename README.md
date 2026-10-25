@@ -312,7 +312,7 @@ mise tasks --all
 </details>
 
 <details>
-<summary>Infrastructure (apps/infra/gcp, apps/infra/aws)</summary>
+<summary>Infrastructure (apps/infra/gcp, apps/infra/aws, apps/infra/vm, ...)</summary>
 
 | Command | Description |
 |---------|-------------|
@@ -321,6 +321,10 @@ mise tasks --all
 | `mise //apps/infra:gcp:apply` | Apply changes |
 | `mise //apps/infra:gcp:plan:prod` | Preview production |
 | `mise //apps/infra:gcp:apply:prod` | Apply production |
+| `mise //apps/infra:vm:apply:prod` | Provision a single Compute Engine VM (Terraform) |
+| `mise //apps/infra:vm:deploy` | Configure the VM and deploy images (Ansible) |
+
+See [`apps/infra/README.md`](./apps/infra/README.md) for all stacks (GCP, AWS, Azure, OCI, freemium, single VM).
 
 </details>
 

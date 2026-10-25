@@ -1,0 +1,29 @@
+---
+# Copy to group_vars/all/site.yml (gitignored). Values marked (tf) come from
+# `mise //apps/infra:vm:output`. Anything in defaults.yml can be overridden here.
+
+app_name: fullstack-starter
+domain: www.example.com
+api_domain: api.example.com
+certificate_email: operator@example.com
+preview_mode: false
+
+# Immutable linux/amd64 digests in the stack's Artifact Registry (tf: artifact_registry_url).
+api_image: asia-northeast3-docker.pkg.dev/your-project/fullstack-starter-prod-images/api@sha256:replace_with_real_digest
+web_image: asia-northeast3-docker.pkg.dev/your-project/fullstack-starter-prod-images/web@sha256:replace_with_real_digest
+worker_image: asia-northeast3-docker.pkg.dev/your-project/fullstack-starter-prod-images/worker@sha256:replace_with_real_digest
+
+# Runtime secrets for API and worker, installed as /etc/<app>/app.env (0600).
+# Keys: POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD (URL-safe characters),
+# JWT_SECRET, JWE_SECRET_KEY, OAuth client ids/secrets, STORAGE_BACKEND=gcs,
+# GCS_BUCKET_NAME (tf: uploads_bucket). See apps/api/.env.example for the rest.
+# `mise //apps/infra:vm:env:export` writes it from Infisical.
+app_env_file: /absolute/path/to/app.env
+
+backup_bucket: your-project-fullstack-starter-prod-backups # (tf: backup_bucket)
+data_device: /dev/disk/by-id/google-fullstack-starter-prod-data # (tf: data_device)
+
+# worker_enabled: true
+# redis_enabled: true
+# worker_schedule_file: /absolute/path/to/schedules.toml
+# maintenance_command: docker compose --env-file /etc/fullstack-starter/app.env exec -T api python -m src.maintenance

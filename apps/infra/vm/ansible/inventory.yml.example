@@ -1,0 +1,12 @@
+# Copy to inventory.yml (gitignored). SSH goes through IAP with OS Login, so
+# ansible_user is your OS Login POSIX username (`gcloud compute os-login
+# describe-profile --format='value(posixAccounts[0].username)'`).
+all:
+  hosts:
+    app:
+      ansible_host: fullstack-starter-prod # terraform output instance_name
+      ansible_user: your_os_login_posix_username
+      ansible_ssh_private_key_file: ~/.ssh/google_compute_engine
+      ansible_ssh_common_args: >-
+        -o ProxyCommand="gcloud compute start-iap-tunnel %h 22 --listen-on-stdin
+        --project=your-gcp-project-id --zone=asia-northeast3-a --verbosity=warning"

@@ -11,22 +11,25 @@ Terraform configurations for provisioning the fullstack-starter stack. Each clou
 | [`az/`](./az/) | Azure — Container Apps, PostgreSQL Flexible Server, Azure Cache for Redis, Service Bus, Blob Storage, Front Door | Azure-native shops, KEDA-based scaling |
 | [`oci/`](./oci/) | Oracle Cloud — Container Instances, Database with PostgreSQL, OCI Cache, OCI Queue, Object Storage, LB + WAF | Generous free tier, cost-sensitive deployments |
 | [`freemium/`](./freemium/) | Vercel + Supabase + Backblaze B2 | Zero-cost prototypes and side projects |
+| [`vm/`](./vm/) | GCP — one Compute Engine VM running PostgreSQL, Redis, API, Web and Worker under Docker Compose behind host nginx with Let's Encrypt (Terraform + Ansible) | Lowest fixed cost for stateful small products; one box, no managed services |
 
 ### Service mapping
 
-| Component | `gcp/` | `aws/` | `az/` | `oci/` |
-|-----------|--------|--------|-------|--------|
-| API / Web / Worker | Cloud Run | ECS Fargate | Container Apps | Container Instances (fixed counts) |
-| Container registry | Artifact Registry | ECR | ACR | OCIR |
-| Database (PostgreSQL 16) | Cloud SQL | Aurora | PostgreSQL Flexible Server | Database with PostgreSQL |
-| Cache (Redis 7) | Memorystore | ElastiCache | Azure Cache for Redis | OCI Cache |
-| Task queues | Cloud Tasks (default / high / low priority) | SQS (default / high-priority / low-priority + DLQ) | Service Bus subscriptions (SQL filter + DLQ) | OCI Queue ×3 (built-in DLQ) |
-| Event bus | Pub/Sub | SNS → SQS fan-out | Service Bus topic fan-out | — (direct queue produce) |
-| Scheduled jobs | Cloud Scheduler → Pub/Sub (`schedules` var) | EventBridge Scheduler → SNS (`schedules` var) | Container Apps Jobs cron (`schedules` var) | — (no native cron→queue; see oci/scheduler.tf) |
-| Uploads / static assets | GCS + Cloud CDN | S3 + CloudFront (OAC) | Blob Storage + Front Door | Object Storage (no first-party CDN) |
-| WAF / rate limiting | Cloud Armor | WAFv2 (rate limit + AWS managed rules) | Front Door WAF (rate limit; managed rules need Premium) | OCI WAF on LB (rate limit) |
-| Email | — | SES (opt-in via `ses_domain`) | — | — |
-| CI/CD auth | Workload Identity Federation | GitHub Actions OIDC role | Entra ID federated credential | Identity Propagation Trust (GitHub OIDC) |
+| Component | `gcp/` | `aws/` | `az/` | `oci/` | `vm/` |
+|-----------|--------|--------|-------|--------|-------|
+| API / Web / Worker | Cloud Run | ECS Fargate | Container Apps | Container Instances (fixed counts) | Docker Compose on one Compute Engine VM |
+| Container registry | Artifact Registry | ECR | ACR | OCIR | Artifact Registry (deploy by digest) |
+| Database (PostgreSQL 16) | Cloud SQL | Aurora | PostgreSQL Flexible Server | Database with PostgreSQL | `postgres:16-alpine` container on a dedicated persistent disk |
+| Cache (Redis 7) | Memorystore | ElastiCache | Azure Cache for Redis | OCI Cache | `redis:7-alpine` container (optional) |
+| Task queues | Cloud Tasks (default / high / low priority) | SQS (default / high-priority / low-priority + DLQ) | Service Bus subscriptions (SQL filter + DLQ) | OCI Queue ×3 (built-in DLQ) | — |
+| Event bus | Pub/Sub | SNS → SQS fan-out | Service Bus topic fan-out | — (direct queue produce) | — |
+| Scheduled jobs | Cloud Scheduler → Pub/Sub (`schedules` var) | EventBridge Scheduler → SNS (`schedules` var) | Container Apps Jobs cron (`schedules` var) | — (no native cron→queue; see oci/scheduler.tf) | In-process APScheduler from `apps/worker/schedules.toml` (single worker) |
+| Uploads / static assets | GCS + Cloud CDN | S3 + CloudFront (OAC) | Blob Storage + Front Door | Object Storage (no first-party CDN) | GCS uploads bucket (no CDN) |
+| WAF / rate limiting | Cloud Armor | WAFv2 (rate limit + AWS managed rules) | Front Door WAF (rate limit; managed rules need Premium) | OCI WAF on LB (rate limit) | nginx `limit_req` per IP + scanner-path 404s |
+| TLS | Google-managed cert | ACM | Front Door managed | LB certificate | Let's Encrypt HTTP-01 via certbot (auto-renew) |
+| Email | — | SES (opt-in via `ses_domain`) | — | — | — |
+| CI/CD auth | Workload Identity Federation | GitHub Actions OIDC role | Entra ID federated credential | Identity Propagation Trust (GitHub OIDC) | Workload Identity Federation for image pushes (optional); deploys via IAP SSH + Ansible |
+| Backups | Cloud SQL automated | Aurora automated | Flexible Server automated | Managed | Daily `pg_dump` → GCS bucket + daily disk snapshots |
 
 ## Shared conventions
 
@@ -74,6 +77,14 @@ mise //apps/infra:oci:apply:prod
 mise //apps/infra:freemium:setup
 mise //apps/infra:freemium:status
 mise //apps/infra:freemium:teardown
+
+# VM (Terraform for the host, Ansible for everything on it)
+mise //apps/infra:vm:init
+mise //apps/infra:vm:plan:prod
+mise //apps/infra:vm:apply:prod
+mise //apps/infra:vm:deploy            # configure host + deploy image digests
+mise //apps/infra:vm:deploy:schedules  # push worker cron file only
+mise //apps/infra:vm:check             # terraform fmt + ansible syntax
 
 # Formatting / validation (any stack)
 mise //apps/infra:gcp:fmt

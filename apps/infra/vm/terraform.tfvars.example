@@ -1,0 +1,28 @@
+# Required
+project_id = "your-gcp-project-id"
+
+# Optional - customize as needed
+region      = "asia-northeast3"
+zone        = "asia-northeast3-a"
+environment = "dev"
+app_name    = "fullstack-starter"
+
+# Compute
+machine_type        = "e2-small"
+boot_disk_gb        = 20
+data_disk_gb        = 30
+deletion_protection = false
+
+# Network
+vpc_cidr = "10.42.0.0/24"
+
+# Operators who may SSH through IAP (OS Login, no SSH keys)
+operator_members = ["user:operator@example.com"]
+
+# Retention
+snapshot_retention_days = 7
+backup_retention_days   = 30
+artifact_keep_count     = 2
+
+# Optional - keyless image pushes from GitHub Actions
+# github_repository = "your-org/your-repo"
