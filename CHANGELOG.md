@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.28.0](https://github.com/first-fluke/fullstack-starter/compare/v2.27.1...v2.28.0) (2026-10-25)
+
+
+### Features
+
+* **infra:** add single-vm stack with terraform and ansible ([70aa7af](https://github.com/first-fluke/fullstack-starter/commit/70aa7afe376fcd47dd6b90d5727ac0551d2be188))
+* **worker:** add opt-in in-process cron scheduler ([73d9fed](https://github.com/first-fluke/fullstack-starter/commit/73d9fedaf5dd911b1e9a0fe51d6c1ab40920a615))
+
+
+### Bug Fixes
+
+* **web:** reduce build memory usage and update OMA ([12d8578](https://github.com/first-fluke/fullstack-starter/commit/12d857830c945794b20ae9a072489f699466aa55))
+* **web:** reduce next build memory usage ([2d7d467](https://github.com/first-fluke/fullstack-starter/commit/2d7d467f7136d25a8e437eaf054d5b6e22999d99))
+
 ## [2.27.1](https://github.com/first-fluke/fullstack-starter/compare/v2.27.0...v2.27.1) (2026-09-23)
 
 
