@@ -49,12 +49,12 @@ This document explains the reasoning behind each technology choice in this fulls
 
 ## Backend
 
-### FastAPI
+### Litestar
 
 - **AI/ML ecosystem**: Direct access to Python's AI libraries (LangChain, Transformers, etc.)
-- **Async-first**: Built on Starlette with native async/await support
+- **Async-first**: High-performance native ASGI framework with first-class DI, Controllers, Guards, and Stores
 - **Auto-generated docs**: OpenAPI (Swagger) and ReDoc out of the box
-- **Pydantic validation**: Request/response validation with type hints
+- **msgspec validation**: Ultra-fast zero-copy JSON serialization and schema validation with type hints
 - **Scalability**: Easy horizontal scaling with stateless design
 
 ### SQLAlchemy (async)
@@ -185,7 +185,7 @@ We prioritize **speed** across the entire development workflow by choosing Rust-
 |--------|-----------|------------------|
 | Next.js over Remix/SvelteKit | Larger bundle, more complexity | Ecosystem, React 19 compatibility |
 | Next.js over Flutter Web | Separate codebase from mobile | SEO, SSR, smaller bundle, web ecosystem compatibility |
-| FastAPI over Node.js | Two runtimes (Node + Python) | Python AI/ML ecosystem, scalability |
+| Litestar over Node.js | Two runtimes (Node + Python) | Python AI/ML ecosystem, scalability |
 | Flutter over React Native | Larger app size, custom rendering | Korea eGovFrame v5, flexible versioning |
 
 ## Summary

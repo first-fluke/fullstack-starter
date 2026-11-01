@@ -49,12 +49,12 @@
 
 ## 백엔드
 
-### FastAPI
+### Litestar
 
 - **AI/ML 생태계 연동**: Python 기반의 방대한 AI 라이브러리(LangChain, Transformers 등) 직접 활용
-- **비동기(Async) 네이티브**: Starlette 기반의 고성능 비동기 처리 지원
+- **비동기(Async) 네이티브**: 내장 DI, Controller, Guard, Store를 갖춘 고성능 네이티브 ASGI 프레임워크
 - **문서 자동화**: OpenAPI(Swagger) 및 ReDoc 문서 자동 생성
-- **Pydantic 검증**: Python 타입 힌트를 활용한 강력한 데이터 검증
+- **msgspec 검증**: Python 타입 힌트 기반의 초고속 직렬화 및 데이터 검증
 - **확장성**: Stateless 아키텍처로 손쉬운 수평 확장 가능
 
 ### SQLAlchemy (async)
@@ -185,7 +185,7 @@
 |------|------|-------------|-----------|
 | **Next.js** | Remix, SvelteKit | 상대적으로 큰 번들, 높은 복잡도 | React 19 최신 기능 지원, 방대한 생태계 |
 | **Next.js** | Flutter Web | 모바일과 별도 코드베이스 | SEO, SSR, 작은 번들, 웹 생태계 호환성 |
-| **FastAPI** | Node.js (NestJS) | 두 가지 런타임 관리 (Node+Python) | Python의 강력한 AI/ML 라이브러리 활용, 확장성 |
+| **Litestar** | Node.js (NestJS) | 두 가지 런타임 관리 (Node+Python) | Python의 강력한 AI/ML 라이브러리 활용, 확장성 |
 | **Flutter** | React Native | 앱 용량 증가, 독자적인 렌더링 엔진 | 전자정부 표준 준수, OS 업데이트에 덜 민감한 UI 일관성 |
 
 ## 요약

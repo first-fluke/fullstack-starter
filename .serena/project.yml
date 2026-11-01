@@ -1,6 +1,6 @@
 project:
   name: fullstack-starter
-  description: Modern fullstack monorepo template with Next.js 16, FastAPI, 
+  description: Modern fullstack monorepo template with Next.js 16, Litestar, 
     Flutter, and GCP infrastructure
 structure:
   monorepo: true
@@ -8,8 +8,8 @@ structure:
   - name: api
     path: apps/api
     language: python
-    framework: fastapi
-    description: FastAPI backend with PostgreSQL, Redis, and async SQLAlchemy
+    framework: litestar
+    description: Litestar backend with PostgreSQL, Redis, and async SQLAlchemy
 
   - name: web
     path: apps/web
@@ -21,7 +21,7 @@ structure:
   - name: worker
     path: apps/worker
     language: python
-    framework: fastapi
+    framework: litestar
     description: Background worker for Cloud Tasks and Pub/Sub
 
   - name: mobile

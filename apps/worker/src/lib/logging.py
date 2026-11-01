@@ -1,16 +1,17 @@
-"""Structured logging configuration."""
+"""Structured logging configuration with Litestar StructlogPlugin."""
 
 import logging
 import sys
 from typing import Any, cast
 
 import structlog
+from litestar.logging.config import StructLoggingConfig
+from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
 
 from src.lib.config import settings
 
 
-def configure_logging() -> None:
-    """Configure structured logging with optional JSON output for production."""
+def _build_processors() -> list[Any]:
     use_json = settings.PROJECT_ENV != "local"
 
     processors: list[Any] = [
@@ -27,6 +28,12 @@ def configure_logging() -> None:
         processors.append(structlog.processors.JSONRenderer())
     else:
         processors.append(structlog.dev.ConsoleRenderer(colors=True))
+    return processors
+
+
+def configure_logging() -> None:
+    """Configure structured logging with optional JSON output for production."""
+    processors = _build_processors()
 
     structlog.configure(
         processors=processors,
@@ -46,6 +53,21 @@ def configure_logging() -> None:
 
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
+def get_structlog_plugin() -> StructlogPlugin:
+    """Create the Litestar StructlogPlugin for the worker service."""
+    return StructlogPlugin(
+        config=StructlogConfig(
+            structlog_logging_config=StructLoggingConfig(
+                processors=_build_processors(),
+                wrapper_class=structlog.stdlib.BoundLogger,
+                logger_factory=structlog.stdlib.LoggerFactory(),
+                cache_logger_on_first_use=True,
+            ),
+            enable_middleware_logging=False,
+        )
+    )
 
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:

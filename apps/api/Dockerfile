@@ -27,4 +27,4 @@ USER 1000
 WORKDIR /app/apps/api
 EXPOSE 8000
 
-CMD ["uv", "run", "--project", "/app", "fastapi", "run", "src/main.py", "--port", "8000"]
+CMD ["uv", "run", "--project", "/app", "litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8000"]

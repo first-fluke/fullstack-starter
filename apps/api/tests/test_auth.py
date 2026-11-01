@@ -4,7 +4,7 @@ and logout."""
 import asyncio
 
 import httpx
-from fastapi.testclient import TestClient
+from litestar.testing import TestClient
 
 import src.lib.rate_limit as rate_limit_module
 import src.lib.token_store as token_store_module

@@ -1,4 +1,4 @@
-"""Generate OpenAPI schema from FastAPI application."""
+"""Generate OpenAPI schema from Litestar application."""
 
 import json
 import sys
@@ -11,8 +11,8 @@ from src.main import app
 
 
 def generate_openapi() -> None:
-    """Generate openapi.json from FastAPI app."""
-    openapi_schema = app.openapi()
+    """Generate openapi.json from Litestar app."""
+    openapi_schema = app.openapi_schema.to_schema()
     output_path = Path(__file__).parent.parent / "openapi.json"
 
     with output_path.open("w", encoding="utf-8") as f:

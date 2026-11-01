@@ -9,7 +9,7 @@ English | [한국어](./docs/README.ko.md) | [简体中文](./docs/README.cn.md)
 
 > Template versioning via [Release Please](https://github.com/googleapis/release-please) — see [CHANGELOG.md](./CHANGELOG.md) for release history.
 
-Production-ready fullstack monorepo template with Next.js 16, FastAPI, Flutter, and GCP infrastructure.
+Production-ready fullstack monorepo template with Next.js 16, Litestar, Flutter, and GCP infrastructure.
 
 ### 3-Tier Architecture
 
@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.14]
+        API[Litestar<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -50,8 +50,8 @@ graph TB
 
 ## Key Features
 
-- **Modern Stack**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
-- **Type Safety**: Full type support with TypeScript, Pydantic, and Dart
+- **Modern Stack**: Next.js 16 + React 19, Litestar, Flutter 3.44.8, TailwindCSS v4
+- **Type Safety**: Full type support with TypeScript, msgspec, and Dart
 - **Authentication**: Email/password, OAuth Authorization Code (Google/GitHub PKCE, Facebook), and WebAuthn passkeys
 - **Internationalization**: next-intl (web), Flutter ARB (mobile), shared i18n package
 - **Auto-generated API Clients**: Orval (web), swagger_parser (mobile)
@@ -65,9 +65,9 @@ graph TB
 | Layer | Technology |
 |-------|------------|
 | **Frontend** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
-| **Backend** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
+| **Backend** | Litestar, msgspec, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
 | **Mobile** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
-| **Worker** | FastAPI + CloudTasks/PubSub |
+| **Worker** | Litestar + CloudTasks/PubSub |
 | **Infrastructure** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **Tool Management** | mise (unified Node, Python, Flutter, Terraform versions) |
@@ -89,7 +89,7 @@ graph TB
 
     subgraph Execution["Parallel Execution"]
         FE[Frontend Agent<br/>Next.js/Flutter]
-        BE[Backend Agent<br/>FastAPI]
+        BE[Backend Agent<br/>Litestar]
         Infra[Infra Agent<br/>Terraform]
     end
 
@@ -204,7 +204,7 @@ fullstack-starter/
 ├── package.json       # bun workspace (apps/web, packages/*)
 ├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
-│   ├── api/           # FastAPI backend
+│   ├── api/           # Litestar backend
 │   ├── web/           # Next.js frontend
 │   ├── worker/        # Background worker
 │   ├── mobile/        # Flutter mobile app

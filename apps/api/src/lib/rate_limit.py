@@ -6,10 +6,17 @@ from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from fastapi import HTTPException, Request, status
-from fastapi.responses import Response
+from litestar import Request, Response
+from litestar.exceptions import HTTPException
+from litestar.middleware.rate_limit import (
+    DurationUnit,
+)
+from litestar.middleware.rate_limit import (
+    RateLimitConfig as LitestarRateLimitConfig,
+)
+from litestar.status_codes import HTTP_429_TOO_MANY_REQUESTS
 
 from src.lib.config import settings
 from src.lib.logging import get_logger
@@ -19,7 +26,7 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# Return type of the decorated endpoint (e.g. a Pydantic response model),
+# Return type of the decorated endpoint (e.g. a msgspec response model),
 # preserved so the rate limiter does not narrow handler return types to Response.
 R = TypeVar("R")
 
@@ -30,7 +37,9 @@ class RateLimitConfig:
 
     requests: int = 100  # Number of requests
     window: int = 60  # Time window in seconds
-    key_func: Callable[[Request], str] | None = None  # Custom key function
+    key_func: Callable[[Request[Any, Any, Any]], str] | None = (
+        None  # Custom key function
+    )
 
 
 def _is_trusted_proxy(host: str) -> bool:
@@ -48,7 +57,7 @@ def _is_trusted_proxy(host: str) -> bool:
     return False
 
 
-def default_key_func(request: Request) -> str:
+def default_key_func(request: Request[Any, Any, Any]) -> str:
     """Default rate limit key: IP address + path.
 
     X-Forwarded-For is only honoured when the direct upstream client
@@ -227,10 +236,10 @@ def get_rate_limiter(config: RateLimitConfig) -> InMemoryRateLimiter | RedisRate
 def rate_limit(
     requests: int = 100,
     window: int = 60,
-    key_func: Callable[[Request], str] | None = None,
+    key_func: Callable[[Request[Any, Any, Any]], str] | None = None,
 ) -> Callable[[Callable[..., Awaitable[R]]], Callable[..., Awaitable[R]]]:
     """
-    Rate limit decorator for FastAPI endpoints.
+    Rate limit decorator for Litestar endpoints.
 
     Args:
         requests: Maximum requests allowed in the window
@@ -238,9 +247,9 @@ def rate_limit(
         key_func: Custom function to generate rate limit key
 
     Usage:
-        @app.get("/api/resource")
+        @get("/api/resource")
         @rate_limit(requests=10, window=60)
-        async def get_resource():
+        async def get_resource(request: Request) -> ...:
             ...
     """
     config = RateLimitConfig(requests=requests, window=window, key_func=key_func)
@@ -252,13 +261,13 @@ def rate_limit(
         @wraps(func)
         async def wrapper(*args: object, **kwargs: object) -> R:
             # Find request in args/kwargs
-            request: Request | None = None
+            request: Request[Any, Any, Any] | None = None
             for arg in args:
                 if isinstance(arg, Request):
                     request = arg
                     break
             if request is None:
-                request = cast(Request | None, kwargs.get("request"))
+                request = cast(Request[Any, Any, Any] | None, kwargs.get("request"))
 
             if request is None:
                 return await func(*args, **kwargs)
@@ -274,7 +283,7 @@ def rate_limit(
             if not allowed:
                 logger.warning("Rate limit exceeded", key=key)
                 raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    status_code=HTTP_429_TOO_MANY_REQUESTS,
                     detail="Rate limit exceeded",
                     headers={
                         "X-RateLimit-Limit": str(config.requests),
@@ -287,23 +296,19 @@ def rate_limit(
             response = await func(*args, **kwargs)
             return response
 
+        wrapper.__annotations__ = dict(func.__annotations__)
         return wrapper
 
     return decorator
 
 
 async def rate_limit_middleware(
-    request: Request,
-    call_next: Callable[[Request], Awaitable[Response]],
+    request: Request[Any, Any, Any],
+    call_next: Callable[[Request[Any, Any, Any]], Awaitable[Response[Any]]],
     config: RateLimitConfig | None = None,
-) -> Response:
+) -> Response[Any]:
     """
-    Rate limit middleware for global application.
-
-    Usage in main.py:
-        @app.middleware("http")
-        async def rate_limit_mw(request: Request, call_next):
-            return await rate_limit_middleware(request, call_next)
+    Rate limit middleware helper.
     """
     if config is None:
         config = RateLimitConfig()
@@ -323,10 +328,8 @@ async def rate_limit_middleware(
 
     if not allowed:
         logger.warning("Rate limit exceeded", key=key, path=request.url.path)
-        from fastapi.responses import JSONResponse
-
-        return JSONResponse(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        return Response(
+            status_code=HTTP_429_TOO_MANY_REQUESTS,
             content={"detail": "Rate limit exceeded"},
             headers={
                 "X-RateLimit-Limit": str(config.requests),
@@ -341,3 +344,16 @@ async def rate_limit_middleware(
     response.headers["X-RateLimit-Remaining"] = str(remaining)
     response.headers["X-RateLimit-Reset"] = str(reset_after)
     return response
+
+
+def create_litestar_rate_limit_config(
+    unit: DurationUnit = "minute",
+    requests: int = 100,
+) -> LitestarRateLimitConfig:
+    """Create a native Litestar RateLimitConfig backed by the ``rate_limit`` Store."""
+    return LitestarRateLimitConfig(
+        rate_limit=(unit, requests),
+        exclude=["^/health"],
+        identifier_for_request=default_key_func,
+        store="rate_limit",
+    )

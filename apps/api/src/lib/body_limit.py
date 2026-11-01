@@ -6,11 +6,13 @@ request body size here.
 """
 
 import json
+from typing import cast
 
-from starlette.types import ASGIApp, Message, Receive, Scope, Send
+from litestar.types import ASGIApp, Message, Receive, Scope, Send
+from litestar.types.asgi_types import ReceiveMessage
 
 
-class _BodyTooLargeError(Exception):
+class _BodyTooLargeError(BaseException):
     """Raised by the wrapped receive when the streamed body exceeds the limit."""
 
 
@@ -44,11 +46,12 @@ class BodySizeLimitMiddleware:
                 response_started = True
             await send(message)
 
-        async def wrapped_receive() -> Message:
+        async def wrapped_receive() -> ReceiveMessage:
             nonlocal received_bytes
             message = await receive()
             if message["type"] == "http.request":
-                received_bytes += len(message.get("body", b""))
+                body_bytes = cast(bytes, message.get("body", b""))
+                received_bytes += len(body_bytes)
                 if received_bytes > self.max_body_size:
                     raise _BodyTooLargeError
             return message
@@ -86,4 +89,4 @@ class BodySizeLimitMiddleware:
                 ],
             }
         )
-        await send({"type": "http.response.body", "body": body})
+        await send({"type": "http.response.body", "body": body, "more_body": False})

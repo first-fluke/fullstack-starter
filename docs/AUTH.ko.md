@@ -1,6 +1,6 @@
 # 인증
 
-인증의 소유자는 FastAPI 애플리케이션입니다. 로그인 수단이 달라도 Web과 Mobile은 동일한 자체 access/refresh token을 발급받습니다.
+인증의 소유자는 Litestar 애플리케이션입니다. 로그인 수단이 달라도 Web과 Mobile은 동일한 자체 access/refresh token을 발급받습니다.
 
 ## 지원 방식
 

@@ -243,7 +243,7 @@ Antigravity IDE 채팅에서 입력하여 단계별 워크플로우를 실행합
 
 ## 팁
 
-1. **구체적으로** — "JWT 인증과 React 프론트엔드, FastAPI 백엔드가 있는 TODO 앱 만들어줘"가 "앱 만들어줘"보다 낫습니다.
+1. **구체적으로** — "JWT 인증과 React 프론트엔드, Litestar 백엔드가 있는 TODO 앱 만들어줘"가 "앱 만들어줘"보다 낫습니다.
 2. **멀티 도메인은 Agent Manager 사용** — 한 채팅에서 모든 것을 하려고 하지 마세요.
 3. **Knowledge Base 검토** — `.gemini/antigravity/brain/`에서 API 일관성 확인
 4. **재생성으로 반복** — 처음부터 다시 하지 말고, 명령을 다듬어 재생성하세요.

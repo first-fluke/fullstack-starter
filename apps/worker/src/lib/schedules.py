@@ -10,60 +10,49 @@ import json
 import tomllib
 from datetime import datetime
 from pathlib import Path
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
+import msgspec
 from apscheduler.triggers.cron import CronTrigger
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from msgspec import Meta
 
 from src.jobs import TASKS
 
 
-class ScheduledJob(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
-
-    id: str = Field(pattern=r"^[a-z][a-z0-9_]{0,63}$")
-    task: str = Field(min_length=1)
+class ScheduledJob(msgspec.Struct, forbid_unknown_fields=True):
+    id: Annotated[str, Meta(pattern=r"^[a-z][a-z0-9_]{0,63}$")]
+    task: Annotated[str, Meta(min_length=1)]
     cron: str
     enabled: bool = True
 
-    @field_validator("cron")
-    @classmethod
-    def validate_cron(cls, value: str) -> str:
-        fields = value.split()
+    def __post_init__(self) -> None:
+        fields = self.cron.split()
         if len(fields) != 5:
             raise ValueError("cron requires five fields: minute hour day month weekday")
         # APScheduler numbers weekdays mon=0, unlike crontab's sun=0. Names are
         # unambiguous in both, so only names are accepted.
         if any(character.isdigit() for character in fields[4]):
             raise ValueError("Use weekday names mon..sun, not weekday numbers")
-        CronTrigger.from_crontab(value, timezone=ZoneInfo("UTC"))
-        return value
+        CronTrigger.from_crontab(self.cron, timezone=ZoneInfo("UTC"))
 
     def trigger(self, timezone: ZoneInfo) -> CronTrigger:
         return CronTrigger.from_crontab(self.cron, timezone=timezone)
 
 
-class ScheduleConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
-
+class ScheduleConfig(msgspec.Struct, forbid_unknown_fields=True):
     timezone: str = "UTC"
-    jobs: list[ScheduledJob] = Field(default_factory=list)
+    jobs: list[ScheduledJob] = msgspec.field(default_factory=list)
 
-    @field_validator("timezone")
-    @classmethod
-    def validate_timezone(cls, value: str) -> str:
+    def __post_init__(self) -> None:
         try:
-            ZoneInfo(value)
+            ZoneInfo(self.timezone)
         except (KeyError, ValueError) as error:
             raise ValueError("timezone must be an IANA timezone name") from error
-        return value
 
-    @model_validator(mode="after")
-    def validate_job_ids(self) -> ScheduleConfig:
         ids = [job.id for job in self.jobs]
         if len(ids) != len(set(ids)):
             raise ValueError("Scheduled job ids must be unique")
-        return self
 
 
 def validate_tasks(config: ScheduleConfig) -> None:
@@ -75,7 +64,9 @@ def validate_tasks(config: ScheduleConfig) -> None:
 
 def load_schedules(path: Path) -> ScheduleConfig:
     with path.open("rb") as schedule_file:
-        config = ScheduleConfig.model_validate(tomllib.load(schedule_file))
+        config = msgspec.convert(
+            tomllib.load(schedule_file), type=ScheduleConfig, strict=True
+        )
     validate_tasks(config)
     return config
 
@@ -99,7 +90,7 @@ def main() -> None:
         next_run = job.trigger(timezone).get_next_fire_time(None, now)
         rows.append(
             {
-                **job.model_dump(),
+                **msgspec.structs.asdict(job),
                 "next_run_time": next_run.isoformat()
                 if job.enabled and next_run is not None
                 else None,

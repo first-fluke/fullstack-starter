@@ -49,12 +49,12 @@
 
 ## 后端
 
-### FastAPI
+### Litestar
 
 - **AI/ML 生态系统**：直接访问 Python 的 AI 库（LangChain、Transformers 等）
-- **异步优先**：基于 Starlette，原生支持 async/await
+- **异步优先**：内置 DI、Controller、Guard 和 Store 的高性能原生 ASGI 框架
 - **自动生成文档**：开箱即用的 OpenAPI (Swagger) 和 ReDoc
-- **Pydantic 验证**：使用类型提示进行请求/响应验证
+- **msgspec 验证**：使用类型提示进行超高速 JSON 序列化与请求/响应验证
 - **可扩展性**：无状态设计易于水平扩展
 
 ### SQLAlchemy (异步)
@@ -185,7 +185,7 @@
 |--------|-----------|------------------|
 | Next.js 而非 Remix/SvelteKit | 更大的包、更复杂 | 生态系统、React 19 兼容性 |
 | Next.js 而非 Flutter Web | 与移动端代码库分离 | SEO、SSR、更小的包、Web 生态系统兼容性 |
-| FastAPI 而非 Node.js | 两个运行时（Node + Python） | Python AI/ML 生态系统、可扩展性 |
+| Litestar 而非 Node.js | 两个运行时（Node + Python） | Python AI/ML 生态系统、可扩展性 |
 | Flutter 而非 React Native | 更大的应用体积、自定义渲染 | 韩国 eGovFrame v5、灵活的版本控制 |
 
 ## 总结

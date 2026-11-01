@@ -2,19 +2,28 @@ import json
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from functools import wraps
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 import bcrypt
-from fastapi import Depends, HTTPException, Request, status
+import msgspec
 from jwcrypto import jwe, jwk
 from jwcrypto.common import JWException
-from pydantic import BaseModel
+from litestar import Request
+from litestar.connection import ASGIConnection
+from litestar.di import NamedDependency
+from litestar.exceptions import HTTPException
+from litestar.handlers.base import BaseRouteHandler
+from litestar.middleware.authentication import (
+    AbstractAuthenticationMiddleware,
+    AuthenticationResult,
+)
+from litestar.status_codes import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 
 from src.lib.config import settings
 
 
-class TokenPayload(BaseModel):
+class TokenPayload(msgspec.Struct):
     """JWT/JWE token payload."""
 
     user_id: str
@@ -24,7 +33,7 @@ class TokenPayload(BaseModel):
     jti: str
 
 
-class TokenResponse(BaseModel):
+class TokenResponse(msgspec.Struct):
     """Token response."""
 
     access_token: str
@@ -32,14 +41,14 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"  # noqa: S105
 
 
-class EmailLoginRequest(BaseModel):
+class EmailLoginRequest(msgspec.Struct):
     """Email/password login request."""
 
     email: str
     password: str
 
 
-class RegisterRequest(BaseModel):
+class RegisterRequest(msgspec.Struct):
     """Email/password registration request."""
 
     email: str
@@ -47,13 +56,13 @@ class RegisterRequest(BaseModel):
     name: str | None = None
 
 
-class RefreshTokenRequest(BaseModel):
+class RefreshTokenRequest(msgspec.Struct):
     """Refresh token request."""
 
     refresh_token: str
 
 
-class OAuthUserInfo(BaseModel):
+class OAuthUserInfo(msgspec.Struct):
     """OAuth user information from provider."""
 
     id: str
@@ -63,7 +72,7 @@ class OAuthUserInfo(BaseModel):
     email_verified: bool = False
 
 
-class CurrentUserInfo(BaseModel):
+class CurrentUserInfo(msgspec.Struct):
     """Current authenticated user info."""
 
     id: str
@@ -82,7 +91,7 @@ def validate_password_strength(password: str) -> None:
     """Validate password minimum requirements."""
     if len(password) < 8:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Password must be at least 8 characters long",
         )
 
@@ -160,28 +169,29 @@ def decode_token(token: str) -> TokenPayload:
         jwe_token = jwe.JWE()
         jwe_token.deserialize(token)
         jwe_token.decrypt(key)
-        payload = json.loads(jwe_token.payload.decode("utf-8"))
-        return TokenPayload(**payload)
+        return msgspec.json.decode(jwe_token.payload, type=TokenPayload)
     except JWException:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from None
     except Exception:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from None
 
 
-async def get_current_user(request: Request) -> CurrentUserInfo:
-    """Get current authenticated user from Authorization header."""
-    auth_header = request.headers.get("Authorization")
+async def _authenticate_connection(
+    connection: ASGIConnection[Any, Any, Any, Any],
+) -> tuple[CurrentUserInfo, TokenPayload]:
+    """Validate the Authorization Bearer token on an ASGIConnection."""
+    auth_header = connection.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -191,13 +201,13 @@ async def get_current_user(request: Request) -> CurrentUserInfo:
 
     if payload.token_type != "access":  # noqa: S105
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",
         )
 
     if datetime.now(UTC).timestamp() > payload.exp:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Token expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -206,43 +216,88 @@ async def get_current_user(request: Request) -> CurrentUserInfo:
 
     if await is_revoked(payload.jti):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Token has been revoked",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return CurrentUserInfo(id=payload.user_id)
+    return CurrentUserInfo(id=payload.user_id), payload
 
 
-async def get_optional_user(request: Request) -> CurrentUserInfo | None:
+class JWEAuthenticationMiddleware(AbstractAuthenticationMiddleware):
+    """Litestar middleware that populates ``request.user`` and ``request.auth``.
+
+    When a valid Bearer JWE access token is present, ``scope['user']`` is set to
+    ``CurrentUserInfo`` and ``scope['auth']`` is set to ``TokenPayload``.
+    Unauthenticated requests set both to ``None`` so public routes remain accessible
+    while protected routes enforce auth via ``require_auth_guard`` or ``CurrentUser``.
+    """
+
+    async def authenticate_request(
+        self, connection: ASGIConnection[Any, Any, Any, Any]
+    ) -> AuthenticationResult:
+        auth_header = connection.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return AuthenticationResult(user=None, auth=None)
+        try:
+            user, payload = await _authenticate_connection(connection)
+            return AuthenticationResult(user=user, auth=payload)
+        except HTTPException:
+            return AuthenticationResult(user=None, auth=None)
+
+
+async def require_auth_guard(
+    connection: ASGIConnection[Any, Any, Any, Any],
+    _: BaseRouteHandler,
+) -> None:
+    """Litestar Guard that enforces a valid Bearer access token on a route."""
+    user = connection.scope.get("user")
+    if isinstance(user, CurrentUserInfo):
+        return
+    user, payload = await _authenticate_connection(connection)
+    connection.scope["user"] = user
+    connection.scope["auth"] = payload
+
+
+async def get_current_user(request: Request[Any, Any, Any]) -> CurrentUserInfo:
+    """Get current authenticated user from request scope or Authorization header."""
+    user = request.scope.get("user")
+    if isinstance(user, CurrentUserInfo):
+        return user
+    user, payload = await _authenticate_connection(request)
+    request.scope["user"] = user
+    request.scope["auth"] = payload
+    return user
+
+
+async def get_optional_user(
+    request: Request[Any, Any, Any],
+) -> CurrentUserInfo | None:
     """Get current user if authenticated, otherwise None."""
+    user = request.scope.get("user")
+    if isinstance(user, CurrentUserInfo):
+        return user
     try:
         return await get_current_user(request)
     except HTTPException:
         return None
 
 
-CurrentUser = Annotated[CurrentUserInfo, Depends(get_current_user)]
-OptionalUser = Annotated[CurrentUserInfo | None, Depends(get_optional_user)]
+CurrentUser = NamedDependency[CurrentUserInfo]
+OptionalUser = NamedDependency[CurrentUserInfo | None]
 
 
 def require_auth(
     func: Callable[..., Any] | None = None,
 ) -> Callable[..., Any]:
-    """Decorator to require authentication on a route.
-
-    Usage:
-        @router.get("/protected")
-        @require_auth
-        async def protected_route(user: CurrentUser):
-            return {"user": user}
-    """
+    """Decorator to require authentication on a route."""
 
     def decorator(f: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(f)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             return await f(*args, **kwargs)
 
+        wrapper.__annotations__ = dict(f.__annotations__)
         return wrapper
 
     if func is not None:

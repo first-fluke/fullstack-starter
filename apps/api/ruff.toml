@@ -15,7 +15,7 @@ select = [
     "RUF",   # Ruff-specific
 ]
 ignore = [
-    "B008",  # Do not perform function call in argument defaults (FastAPI Depends)
+    "B008",  # Do not perform function call in argument defaults (Litestar Parameter/Dependency)
     "S101",  # Use of assert detected (fine for tests)
 ]
 

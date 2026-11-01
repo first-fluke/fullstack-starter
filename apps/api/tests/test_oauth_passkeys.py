@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 
 import httpx
 import pytest
-from fastapi.testclient import TestClient
+from litestar.testing import TestClient
 
 import src.lib.rate_limit as rate_limit_module
 from src.auth.ephemeral_store import ephemeral_auth_store

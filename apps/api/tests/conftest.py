@@ -5,7 +5,8 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
+from litestar import Litestar
+from litestar.testing import TestClient
 
 TEST_DB_PATH = (
     Path(tempfile.gettempdir()) / f"fullstack-starter-api-tests-{os.getpid()}.db"
@@ -35,7 +36,7 @@ def reset_database() -> Iterator[None]:
 
 
 @pytest.fixture
-def client() -> Iterator[TestClient]:
+def client() -> Iterator[TestClient[Litestar]]:
     """Test client fixture."""
     with TestClient(app) as test_client:
         yield test_client

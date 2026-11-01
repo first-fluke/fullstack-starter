@@ -1,6 +1,6 @@
 # Autenticação
 
-A autenticação é responsabilidade da aplicação FastAPI. Independentemente do método de login, Web e Mobile recebem os mesmos access/refresh tokens próprios da aplicação.
+A autenticação é responsabilidade da aplicação Litestar. Independentemente do método de login, Web e Mobile recebem os mesmos access/refresh tokens próprios da aplicação.
 
 ## Métodos suportados
 

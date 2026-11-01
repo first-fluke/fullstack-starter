@@ -6,7 +6,12 @@ import secrets
 from typing import Any
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from litestar.exceptions import HTTPException
+from litestar.status_codes import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_404_NOT_FOUND,
+)
 from webauthn import (
     base64url_to_bytes,
     generate_authentication_options,
@@ -52,9 +57,7 @@ async def create_registration_options(
 ) -> dict[str, Any]:
     user = await repository.get_user_by_id(user_id)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
     existing = await repository.list_passkeys(user.id)
     challenge = secrets.token_bytes(32)
     ceremony_id = secrets.token_urlsafe(32)
@@ -95,7 +98,7 @@ async def verify_registration(
     ceremony = await ephemeral_auth_store.take("passkey-registration", ceremony_id)
     if ceremony is None or ceremony.get("user_id") != user_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Invalid or expired passkey registration ceremony",
         )
     try:
@@ -108,7 +111,7 @@ async def verify_registration(
         )
     except WebAuthnException as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Passkey registration verification failed",
         ) from exc
 
@@ -130,13 +133,13 @@ async def create_authentication_options(
     user = await repository.get_user_by_email(email)
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="No passkey is available for this account",
         )
     credentials = await repository.list_passkeys(user.id)
     if not credentials:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="No passkey is available for this account",
         )
     challenge = secrets.token_bytes(32)
@@ -170,19 +173,19 @@ async def verify_authentication(
     ceremony = await ephemeral_auth_store.take("passkey-authentication", ceremony_id)
     if ceremony is None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Invalid or expired passkey authentication ceremony",
         )
     credential_id = credential.get("id")
     if not isinstance(credential_id, str):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Passkey credential ID is missing",
         )
     stored = await repository.get_passkey(base64url_to_bytes(credential_id))
     if stored is None or str(stored.user_id) != str(ceremony["user_id"]):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Passkey credential was not recognized",
         )
     try:
@@ -197,7 +200,7 @@ async def verify_authentication(
         )
     except WebAuthnException as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Passkey authentication verification failed",
         ) from exc
 

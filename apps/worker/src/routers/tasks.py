@@ -1,15 +1,17 @@
-"""Task processing router."""
+"""Task processing controller."""
 
-from typing import Annotated, Literal
+from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends
-from pydantic import BaseModel, Field
+import msgspec
+from litestar import Controller, Response, Router, post
+from litestar.background_tasks import BackgroundTask
+from litestar.params import JSONBody
+from litestar.status_codes import HTTP_202_ACCEPTED
 
 from src.lib.logging import get_logger
-from src.lib.oidc import verify_oidc_token
+from src.lib.oidc import verify_oidc_guard
 from src.lib.retry import with_retry
 
-router = APIRouter(tags=["Tasks"])
 logger = get_logger(__name__)
 
 
@@ -18,37 +20,55 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 
 
-class AnalysisPayload(BaseModel):
-    task_type: Literal["analysis"]
+class AnalysisPayload(msgspec.Struct, tag_field="task_type", tag="analysis"):
     text: str
-    options: dict[str, object] = Field(default_factory=dict)
+    options: dict[str, object] = msgspec.field(default_factory=dict)
+
+    @property
+    def task_type(self) -> Literal["analysis"]:
+        return "analysis"
 
 
-class EmbeddingPayload(BaseModel):
-    task_type: Literal["embedding"]
+class EmbeddingPayload(msgspec.Struct, tag_field="task_type", tag="embedding"):
     content: str
     model: str = "text-embedding-3-small"
 
+    @property
+    def task_type(self) -> Literal["embedding"]:
+        return "embedding"
 
-TaskPayload = Annotated[
-    AnalysisPayload | EmbeddingPayload,
-    Field(discriminator="task_type"),
-]
+
+type TaskPayload = AnalysisPayload | EmbeddingPayload
 
 
 # ---------------------------------------------------------------------------
-# Route
+# Controller & Route
 # ---------------------------------------------------------------------------
 
 
-@router.post("/process", status_code=202)
-async def process_task(
-    payload: AnalysisPayload | EmbeddingPayload,
-    background_tasks: BackgroundTasks,
-    _: None = Depends(verify_oidc_token),
-) -> dict[str, str]:
-    background_tasks.add_task(execute_task, payload)
-    return {"status": "accepted"}
+class TasksController(Controller):
+    """Task processing endpoints guarded by Google OIDC verification."""
+
+    path = "/"
+
+    @post("/process", status_code=HTTP_202_ACCEPTED, guards=[verify_oidc_guard])
+    async def process_task(
+        self,
+        data: JSONBody[AnalysisPayload | EmbeddingPayload],
+    ) -> Response[dict[str, str]]:
+        return Response(
+            content={"status": "accepted"},
+            status_code=HTTP_202_ACCEPTED,
+            background=BackgroundTask(execute_task, data),
+        )
+
+
+router = Router(
+    path="/tasks",
+    tags=["Tasks"],
+    guards=[verify_oidc_guard],
+    route_handlers=[TasksController],
+)
 
 
 # ---------------------------------------------------------------------------

@@ -1,13 +1,16 @@
 """Pagination models and utilities."""
 
-from pydantic import BaseModel, Field
+from typing import Annotated
+
+import msgspec
+from msgspec import Meta
 
 
-class PaginationParams(BaseModel):
+class PaginationParams(msgspec.Struct):
     """Query parameters for pagination."""
 
-    page: int = Field(default=1, ge=1, description="Page number (1-indexed)")
-    limit: int = Field(default=20, ge=1, le=100, description="Items per page")
+    page: Annotated[int, Meta(ge=1, description="Page number (1-indexed)")] = 1
+    limit: Annotated[int, Meta(ge=1, le=100, description="Items per page")] = 20
 
     @property
     def offset(self) -> int:
@@ -15,18 +18,18 @@ class PaginationParams(BaseModel):
         return (self.page - 1) * self.limit
 
 
-class PaginationMeta(BaseModel):
+class PaginationMeta(msgspec.Struct):
     """Pagination metadata."""
 
-    page: int = Field(description="Current page number")
-    limit: int = Field(description="Items per page")
-    total: int = Field(description="Total number of items")
-    total_pages: int = Field(description="Total number of pages")
-    has_next: bool = Field(description="Whether there is a next page")
-    has_prev: bool = Field(description="Whether there is a previous page")
+    page: Annotated[int, Meta(description="Current page number")]
+    limit: Annotated[int, Meta(description="Items per page")]
+    total: Annotated[int, Meta(description="Total number of items")]
+    total_pages: Annotated[int, Meta(description="Total number of pages")]
+    has_next: Annotated[bool, Meta(description="Whether there is a next page")]
+    has_prev: Annotated[bool, Meta(description="Whether there is a previous page")]
 
 
-class PaginatedResponse[T](BaseModel):
+class PaginatedResponse[T](msgspec.Struct):
     """Generic paginated response wrapper."""
 
     data: list[T]

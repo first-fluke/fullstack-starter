@@ -244,7 +244,7 @@ Browser:    http://localhost:9847 → real-time status
 
 ## Tips
 
-1. **Be specific** — "Build a TODO app with JWT auth, React frontend, FastAPI backend" is better than "make an app"
+1. **Be specific** — "Build a TODO app with JWT auth, React frontend, Litestar backend" is better than "make an app"
 2. **Use Agent Manager** for multi-domain projects — don't try to do everything in one chat
 3. **Review Knowledge Base** — check `.gemini/antigravity/brain/` for API consistency
 4. **Iterate with re-spawns** — refine instructions, don't start over

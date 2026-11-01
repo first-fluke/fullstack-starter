@@ -9,7 +9,7 @@
 
 > テンプレートのバージョン管理は [Release Please](https://github.com/googleapis/release-please) により行われます — リリース履歴は [CHANGELOG.md](../CHANGELOG.md) をご覧ください。
 
-Next.js 16、FastAPI、Flutter、GCP インフラを統合した、本番環境対応のフルスタック monorepo テンプレートです。
+Next.js 16、Litestar、Flutter、GCP インフラを統合した、本番環境対応のフルスタック monorepo テンプレートです。
 
 ### 3 層アーキテクチャ
 
@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.14]
+        API[Litestar<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -50,8 +50,8 @@ graph TB
 
 ## 主な機能
 
-- **モダンスタック**: Next.js 16 + React 19、FastAPI、Flutter 3.44.8、TailwindCSS v4
-- **型安全性**: TypeScript、Pydantic、Dartによるフルスタックの型サポート
+- **モダンスタック**: Next.js 16 + React 19、Litestar、Flutter 3.44.8、TailwindCSS v4
+- **型安全性**: TypeScript、msgspec、Dartによるフルスタックの型サポート
 - **認証**: メール/パスワード、OAuth Authorization Code（Google/GitHub PKCE、Facebook）、WebAuthn パスキー
 - **国際化 (i18n)**: next-intl（Web）、Flutter ARB（モバイル）、共有 i18n パッケージ
 - **APIクライアント自動生成**: Orval（Web）、swagger_parser（モバイル）
@@ -65,9 +65,9 @@ graph TB
 | レイヤー | 技術 |
 |------|------|
 | **フロントエンド** | Next.js 16、React 19、TailwindCSS v4、shadcn/ui、TanStack Query、Jotai |
-| **バックエンド** | FastAPI、SQLAlchemy (async)、PostgreSQL 16、Redis 7 |
+| **バックエンド** | Litestar、SQLAlchemy (async)、PostgreSQL 16、Redis 7 |
 | **モバイル** | Flutter 3.44.8、Riverpod 3、go_router 17、Firebase Crashlytics、Fastlane |
-| **ワーカー** | FastAPI + CloudTasks/PubSub |
+| **ワーカー** | Litestar + CloudTasks/PubSub |
 | **インフラストラクチャ** | Terraform、GCP（Cloud Run、Cloud SQL、Cloud Storage、CDN） |
 | **CI/CD** | GitHub Actions、Workload Identity Federation |
 | **ツール管理** | mise（Node、Python、Flutter、Terraform バージョンの統一） |
@@ -89,7 +89,7 @@ graph TB
 
     subgraph Execution["並列実行"]
         FE[フロントエンドエージェント<br/>Next.js/Flutter]
-        BE[バックエンドエージェント<br/>FastAPI]
+        BE[バックエンドエージェント<br/>Litestar]
         Infra[インフラエージェント<br/>Terraform]
     end
 
@@ -204,7 +204,7 @@ fullstack-starter/
 ├── package.json       # bun workspace (apps/web, packages/*)
 ├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
-│   ├── api/           # FastAPI バックエンド
+│   ├── api/           # Litestar バックエンド
 │   ├── web/           # Next.js フロントエンド
 │   ├── worker/        # バックグラウンドワーカー
 │   ├── mobile/        # Flutter モバイルアプリ

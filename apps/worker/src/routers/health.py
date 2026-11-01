@@ -2,34 +2,34 @@
 
 from typing import Literal
 
-from fastapi import APIRouter, Response
-from pydantic import BaseModel
+import msgspec
+from litestar import Response, Router, get
+from litestar.status_codes import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
 
 from src.lib.config import settings
 from src.lib.scheduler import SchedulerStatus, WorkerScheduler
 
 
-class HealthResponse(BaseModel):
+class HealthResponse(msgspec.Struct):
     status: Literal["healthy", "unhealthy"]
-    version: str = "0.1.0"
     environment: str
+    version: str = "0.1.0"
     # Present only when WORKER_SCHEDULES_FILE enables the in-process scheduler.
     scheduler: SchedulerStatus | None = None
 
 
-def build_health_router(runtime: WorkerScheduler | None) -> APIRouter:
-    router = APIRouter(tags=["Health"])
-
-    @router.get("/health", response_model=HealthResponse)
-    async def health_check(response: Response) -> HealthResponse:
+def build_health_router(runtime: WorkerScheduler | None) -> Router:
+    @get("/health", tags=["Health"])
+    async def health_check() -> Response[HealthResponse]:
         scheduler = runtime.snapshot() if runtime is not None else None
         healthy = scheduler is None or scheduler.running
-        if not healthy:
-            response.status_code = 503
-        return HealthResponse(
-            status="healthy" if healthy else "unhealthy",
-            environment=settings.PROJECT_ENV,
-            scheduler=scheduler,
+        return Response(
+            content=HealthResponse(
+                status="healthy" if healthy else "unhealthy",
+                environment=settings.PROJECT_ENV,
+                scheduler=scheduler,
+            ),
+            status_code=HTTP_200_OK if healthy else HTTP_503_SERVICE_UNAVAILABLE,
         )
 
-    return router
+    return Router(path="/", route_handlers=[health_check])

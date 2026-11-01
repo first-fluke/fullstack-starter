@@ -1,6 +1,6 @@
 # 身份验证
 
-身份验证由 FastAPI 应用统一负责。无论用户选择哪种登录方式，Web 和 Mobile 都会获得相同的第一方 access/refresh token。
+身份验证由 Litestar 应用统一负责。无论用户选择哪种登录方式，Web 和 Mobile 都会获得相同的第一方 access/refresh token。
 
 ## 支持的方式
 

@@ -9,7 +9,7 @@
 
 > O versionamento do template é gerenciado via [Release Please](https://github.com/googleapis/release-please) — consulte o [CHANGELOG.md](../CHANGELOG.md) para o histórico de releases.
 
-Template monorepo fullstack pronto para produção com Next.js 16, FastAPI, Flutter e infraestrutura GCP.
+Template monorepo fullstack pronto para produção com Next.js 16, Litestar, Flutter e infraestrutura GCP.
 
 ### Arquitetura de 3 Camadas
 
@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.14]
+        API[Litestar<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -50,8 +50,8 @@ graph TB
 
 ## Principais Recursos
 
-- **Stack Moderno**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
-- **Segurança de Tipos**: Suporte completo de tipos com TypeScript, Pydantic e Dart
+- **Stack Moderno**: Next.js 16 + React 19, Litestar, Flutter 3.44.8, TailwindCSS v4
+- **Segurança de Tipos**: Suporte completo de tipos com TypeScript, msgspec e Dart
 - **Autenticação**: e-mail/senha, OAuth Authorization Code (Google/GitHub PKCE, Facebook) e passkeys WebAuthn
 - **Internacionalização (i18n)**: next-intl (web), Flutter ARB (mobile), pacote i18n compartilhado
 - **Clientes API Auto-gerados**: Orval (web), swagger_parser (mobile)
@@ -65,9 +65,9 @@ graph TB
 | Camada | Tecnologia |
 |--------|------------|
 | **Frontend** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
-| **Backend** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
+| **Backend** | Litestar, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
 | **Mobile** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
-| **Worker** | FastAPI + CloudTasks/PubSub |
+| **Worker** | Litestar + CloudTasks/PubSub |
 | **Infraestrutura** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **Gerenciamento de Ferramentas** | mise (versões unificadas de Node, Python, Flutter, Terraform) |
@@ -89,7 +89,7 @@ graph TB
 
     subgraph Execution["Execução Paralela"]
         FE[Agente Frontend<br/>Next.js/Flutter]
-        BE[Agente Backend<br/>FastAPI]
+        BE[Agente Backend<br/>Litestar]
         Infra[Agente Infra<br/>Terraform]
     end
 
@@ -204,7 +204,7 @@ fullstack-starter/
 ├── package.json       # bun workspace (apps/web, packages/*)
 ├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
-│   ├── api/           # Backend FastAPI
+│   ├── api/           # Backend Litestar
 │   ├── web/           # Frontend Next.js
 │   ├── worker/        # Worker em segundo plano
 │   ├── mobile/        # App mobile Flutter

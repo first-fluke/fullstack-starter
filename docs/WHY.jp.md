@@ -49,12 +49,12 @@
 
 ## バックエンド
 
-### FastAPI
+### Litestar
 
 - **AI/ML エコシステム**：Python の AI ライブラリ（LangChain、Transformers など）に直接アクセス
-- **非同期ファースト**：Starlette 上に構築され、ネイティブの async/await サポート
+- **非同期ファースト**：DI、Controller、Guard、Store を標準搭載した高性能ネイティブ ASGI フレームワーク
 - **自動生成ドキュメント**：OpenAPI（Swagger）と ReDoc をすぐに使用可能
-- **Pydantic バリデーション**：型ヒントを使用したリクエスト/レスポンスバリデーション
+- **msgspec バリデーション**：型ヒントを使用した超高速 JSON シリアライズおよびリクエスト/レスポンス検証
 - **スケーラビリティ**：ステートレス設計による簡単な水平スケーリング
 
 ### SQLAlchemy（非同期）
@@ -185,7 +185,7 @@ Rust ベースのツールを選択することで、開発ワークフロー全
 |--------|-----------|------------------|
 | Next.js vs Remix/SvelteKit | より大きなバンドル、より複雑 | エコシステム、React 19 互換性 |
 | Next.js vs Flutter Web | モバイルから別のコードベース | SEO、SSR、小さなバンドル、Web エコシステム互換性 |
-| FastAPI vs Node.js | 2 つのランタイム（Node + Python） | Python AI/ML エコシステム、スケーラビリティ |
+| Litestar vs Node.js | 2 つのランタイム（Node + Python） | Python AI/ML エコシステム、スケーラビリティ |
 | Flutter vs React Native | より大きなアプリサイズ、カスタムレンダリング | 韓国 eGovFrame v5、柔軟なバージョニング |
 
 ## まとめ

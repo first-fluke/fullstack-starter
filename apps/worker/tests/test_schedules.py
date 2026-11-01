@@ -5,9 +5,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import msgspec
 import pytest
-from fastapi.testclient import TestClient
-from pydantic import ValidationError
+from litestar.testing import TestClient
 
 from src.jobs import TASKS
 from src.lib.config import Settings
@@ -19,13 +19,14 @@ COMMITTED_SCHEDULES = Path(__file__).resolve().parents[1] / "schedules.toml"
 
 
 def schedule(**overrides: object) -> ScheduledJob:
-    return ScheduledJob.model_validate(
+    return msgspec.convert(
         {
             "id": "test_job",
             "task": "scheduler_heartbeat",
             "cron": "*/5 * * * *",
             **overrides,
-        }
+        },
+        type=ScheduledJob,
     )
 
 
@@ -39,7 +40,7 @@ def schedule(**overrides: object) -> ScheduledJob:
     ["* * * *", "* * * * * *", "61 * * * *", "* 25 * * *", "0 9 * * 0", "@daily"],
 )
 def test_invalid_cron_is_rejected(cron: str) -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises((msgspec.ValidationError, ValueError)):
         schedule(cron=cron)
 
 
@@ -52,12 +53,12 @@ def test_next_run_follows_configured_timezone() -> None:
 
 
 def test_bad_timezone_duplicate_ids_and_unknown_keys_are_rejected() -> None:
-    with pytest.raises(ValidationError, match="IANA timezone"):
+    with pytest.raises(ValueError, match="IANA timezone"):
         ScheduleConfig(timezone="Not/A-Timezone")
-    with pytest.raises(ValidationError, match="unique"):
+    with pytest.raises(ValueError, match="unique"):
         ScheduleConfig(jobs=[schedule(), schedule()])
-    with pytest.raises(ValidationError, match="Extra inputs"):
-        ScheduleConfig.model_validate({"unknown_key": True})
+    with pytest.raises(msgspec.ValidationError, match="unknown_key"):
+        msgspec.convert({"unknown_key": True}, type=ScheduleConfig)
 
 
 def test_unregistered_handler_is_rejected_even_if_disabled() -> None:
@@ -79,7 +80,7 @@ def test_invalid_schedule_file_prevents_app_startup(tmp_path: Path) -> None:
         'timezone = "UTC"\n[[jobs]]\nid = "bad"\ncron = "@daily"\n'
         'task = "scheduler_heartbeat"\n'
     )
-    with pytest.raises(ValidationError, match="five fields"):
+    with pytest.raises((msgspec.ValidationError, ValueError), match="five fields"):
         create_app(Settings(WORKER_SCHEDULES_FILE=path))
 
 
@@ -220,8 +221,17 @@ def test_health_reports_running_scheduler_inside_lifespan() -> None:
 def test_health_is_503_when_scheduler_is_not_running() -> None:
     # Outside the lifespan the scheduler never started; a stopped scheduler
     # must fail the container health check so Compose restarts it.
-    client = TestClient(create_app(Settings(WORKER_SCHEDULES_FILE=COMMITTED_SCHEDULES)))
-    response = client.get("/health")
-    assert response.status_code == 503
-    assert response.json()["status"] == "unhealthy"
-    assert response.json()["scheduler"]["running"] is False
+    app = create_app(Settings(WORKER_SCHEDULES_FILE=COMMITTED_SCHEDULES))
+
+    async def _check() -> None:
+        from httpx import ASGITransport, AsyncClient
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            response = await client.get("/health")
+            assert response.status_code == 503
+            assert response.json()["status"] == "unhealthy"
+            assert response.json()["scheduler"]["running"] is False
+
+    asyncio.run(_check())

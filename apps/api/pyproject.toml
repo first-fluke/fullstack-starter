@@ -1,11 +1,11 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "FastAPI backend API"
+description = "Litestar backend API"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi[standard]>=0.141.1",
+    "litestar[standard,opentelemetry]>=2.25.0",
     "sqlalchemy[asyncio]>=2.0.54",
     "alembic>=1.20.0",
     "pydantic-settings>=2.15.0",
@@ -17,7 +17,6 @@ dependencies = [
     "structlog>=26.1.0",
     "opentelemetry-api>=1.44.0",
     "opentelemetry-sdk>=1.44.0",
-    "opentelemetry-instrumentation-fastapi>=0.65b0",
     "opentelemetry-instrumentation-sqlalchemy>=0.65b0",
     "opentelemetry-instrumentation-httpx>=0.65b0",
     "opentelemetry-instrumentation-redis>=0.65b0",
@@ -62,8 +61,8 @@ dev = [
 managed = true
 
 [tool.poe.tasks]
-dev = "fastapi dev src/main.py --port 8000"
-start = "fastapi run src/main.py --port 8000"
+dev = "litestar --app src.main:app run --reload --port 8000"
+start = "litestar --app src.main:app run --host 0.0.0.0 --port 8000"
 
 # Database
 migrate = "alembic upgrade head"

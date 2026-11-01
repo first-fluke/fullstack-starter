@@ -1,18 +1,23 @@
 {
-  "openapi": "3.1.0",
   "info": {
     "title": "fullstack-starter-api",
     "version": "0.1.0"
   },
+  "openapi": "3.1.0",
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
   "paths": {
     "/health": {
       "get": {
-        "summary": "Health Check",
-        "description": "Detailed health check endpoint with service statuses.",
+        "summary": "HealthCheck",
         "operationId": "health_check_health_get",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Request fulfilled, document follows",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
@@ -21,95 +26,77 @@
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
     "/health/live": {
       "get": {
-        "summary": "Liveness Check",
-        "description": "Simple liveness probe for Kubernetes.",
+        "summary": "LivenessCheck",
         "operationId": "liveness_check_health_live_get",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Request fulfilled, document follows",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": {
                     "type": "string"
                   },
-                  "type": "object",
-                  "title": "Response Liveness Check Health Live Get"
+                  "type": "object"
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
     "/health/ready": {
       "get": {
-        "summary": "Readiness Check",
-        "description": "Readiness probe - checks if app can serve traffic.",
+        "summary": "ReadinessCheck",
         "operationId": "readiness_check_health_ready_get",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Request fulfilled, document follows",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
                   "additionalProperties": {
                     "type": "string"
                   },
-                  "type": "object",
-                  "title": "Response Readiness Check Health Ready Get"
+                  "type": "object"
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/api/auth/register": {
-      "post": {
+    "/api/auth/me": {
+      "get": {
         "tags": [
           "authentication"
         ],
-        "summary": "Register",
-        "description": "Register with email/password and issue backend tokens.",
-        "operationId": "register_api_auth_register_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            }
-          },
-          "required": true
-        },
+        "summary": "GetMe",
+        "operationId": "get_me_api_auth_me_get",
         "responses": {
-          "201": {
-            "description": "Successful Response",
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/UserResponse"
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
     "/api/auth/login": {
@@ -118,7 +105,6 @@
           "authentication"
         ],
         "summary": "Login",
-        "description": "Login with email/password and issue first-party tokens.",
         "operationId": "login_api_auth_login_post",
         "requestBody": {
           "content": {
@@ -132,7 +118,8 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Request fulfilled, document follows",
+            "headers": {},
             "content": {
               "application/json": {
                 "schema": {
@@ -141,430 +128,46 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "Bad request syntax or unsupported method",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/oauth/{provider}/authorize": {
-      "get": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Oauth Authorize",
-        "description": "Start an OAuth Authorization Code + PKCE transaction.",
-        "operationId": "oauth_authorize_api_auth_oauth__provider__authorize_get",
-        "parameters": [
-          {
-            "name": "provider",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "enum": [
-                "google",
-                "github",
-                "facebook"
-              ],
-              "type": "string",
-              "title": "Provider"
-            }
-          },
-          {
-            "name": "redirect_uri",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Redirect Uri"
-            }
-          },
-          {
-            "name": "return_to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "/",
-              "title": "Return To"
-            }
-          },
-          {
-            "name": "code_challenge",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code Challenge"
-            }
-          },
-          {
-            "name": "code_challenge_method",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code Challenge Method"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/oauth/{provider}/callback": {
-      "get": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Oauth Callback",
-        "description": "Handle the provider callback and redirect with a one-time login code.",
-        "operationId": "oauth_callback_api_auth_oauth__provider__callback_get",
-        "parameters": [
-          {
-            "name": "provider",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "enum": [
-                "google",
-                "github",
-                "facebook"
-              ],
-              "type": "string",
-              "title": "Provider"
-            }
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "State"
-            }
-          },
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code"
-            }
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Error"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/oauth/exchange": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Oauth Exchange",
-        "description": "Exchange a single-use OAuth code for first-party access and refresh tokens.",
-        "operationId": "oauth_exchange_api_auth_oauth_exchange_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OAuthExchangeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/passkeys/register/options": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Passkey Registration Options",
-        "description": "Create options for registering a passkey to the signed-in account.",
-        "operationId": "passkey_registration_options_api_auth_passkeys_register_options_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
                   "type": "object",
-                  "title": "Response Passkey Registration Options Api Auth Passkeys Register Options Post"
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
                 }
               }
             }
           }
-        }
-      }
-    },
-    "/api/auth/passkeys/register/verify": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Passkey Registration Verify",
-        "description": "Verify and store a new passkey.",
-        "operationId": "passkey_registration_verify_api_auth_passkeys_register_verify_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasskeyRegistrationVerifyRequest"
-              }
-            }
-          },
-          "required": true
         },
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/passkeys/authenticate/options": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Passkey Authentication Options",
-        "description": "Create options for signing in with a passkey.",
-        "operationId": "passkey_authentication_options_api_auth_passkeys_authenticate_options_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasskeyAuthenticationOptionsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Passkey Authentication Options Api Auth Passkeys Authenticate Options Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/passkeys/authenticate/verify": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Passkey Authentication Verify",
-        "description": "Verify a passkey assertion and issue first-party tokens.",
-        "operationId": "passkey_authentication_verify_api_auth_passkeys_authenticate_verify_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasskeyAuthenticationVerifyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/refresh": {
-      "post": {
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh access token using refresh token (with rotation).",
-        "operationId": "refresh_token_api_auth_refresh_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshTokenRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
+        "deprecated": false
       }
     },
     "/api/auth/logout": {
@@ -573,7 +176,6 @@
           "authentication"
         ],
         "summary": "Logout",
-        "description": "Logout: revoke both the access token and the refresh token.",
         "operationId": "logout_api_auth_logout_post",
         "requestBody": {
           "content": {
@@ -587,41 +189,757 @@
         },
         "responses": {
           "204": {
-            "description": "Successful Response"
+            "description": "Request fulfilled, nothing follows",
+            "headers": {}
           },
-          "422": {
-            "description": "Validation Error",
+          "400": {
+            "description": "Bad request syntax or unsupported method",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
       }
     },
-    "/api/auth/me": {
+    "/api/auth/refresh": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "RefreshToken",
+        "operationId": "refresh_token_api_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/oauth/{provider}/authorize": {
       "get": {
         "tags": [
           "authentication"
         ],
-        "summary": "Get Me",
-        "description": "Return the current authenticated user.",
-        "operationId": "get_me_api_auth_me_get",
+        "summary": "OauthAuthorize",
+        "operationId": "oauth_authorize_api_auth_oauth__provider__authorize_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ]
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "return_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "/"
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
+          "302": {
+            "description": "Redirect Response",
+            "headers": {
+              "location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "target path for the redirect",
+                "required": false,
+                "deprecated": false
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/oauth/{provider}/callback": {
+      "get": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "OauthCallback",
+        "operationId": "oauth_callback_api_auth_oauth__provider__callback_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ]
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect Response",
+            "headers": {
+              "location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "target path for the redirect",
+                "required": false,
+                "deprecated": false
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/oauth/exchange": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "OauthExchange",
+        "operationId": "oauth_exchange_api_auth_oauth_exchange_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthExchangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/passkeys/authenticate/options": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "PasskeyAuthenticationOptions",
+        "operationId": "passkey_authentication_options_api_auth_passkeys_authenticate_options_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyAuthenticationOptionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/passkeys/authenticate/verify": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "PasskeyAuthenticationVerify",
+        "operationId": "passkey_authentication_verify_api_auth_passkeys_authenticate_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyAuthenticationVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/passkeys/register/options": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "PasskeyRegistrationOptions",
+        "operationId": "passkey_registration_options_api_auth_passkeys_register_options_post",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/auth/passkeys/register/verify": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "PasskeyRegistrationVerify",
+        "operationId": "passkey_registration_verify_api_auth_passkeys_register_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRegistrationVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Request fulfilled, nothing follows",
+            "headers": {}
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
       }
     }
   },
@@ -630,12 +948,10 @@
       "EmailLoginRequest": {
         "properties": {
           "email": {
-            "type": "string",
-            "title": "Email"
+            "type": "string"
           },
           "password": {
-            "type": "string",
-            "title": "Password"
+            "type": "string"
           }
         },
         "type": "object",
@@ -643,21 +959,7 @@
           "email",
           "password"
         ],
-        "title": "EmailLoginRequest",
-        "description": "Email/password login request."
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
+        "title": "EmailLoginRequest"
       },
       "HealthResponse": {
         "properties": {
@@ -667,145 +969,35 @@
               "healthy",
               "degraded",
               "unhealthy"
-            ],
-            "title": "Status"
-          },
-          "version": {
-            "type": "string",
-            "title": "Version",
-            "default": "0.1.0"
+            ]
           },
           "services": {
             "additionalProperties": {
               "$ref": "#/components/schemas/ServiceStatus"
             },
-            "type": "object",
-            "title": "Services"
+            "type": "object"
+          },
+          "version": {
+            "type": "string",
+            "default": "0.1.0"
           }
         },
         "type": "object",
         "required": [
-          "status",
-          "services"
+          "services",
+          "status"
         ],
-        "title": "HealthResponse",
-        "description": "Health check response with detailed service statuses."
+        "title": "HealthResponse"
       },
       "OAuthExchangeRequest": {
         "properties": {
           "code": {
             "type": "string",
             "maxLength": 256,
-            "minLength": 32,
-            "title": "Code"
+            "minLength": 32
           },
           "code_verifier": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128,
-                "minLength": 43
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code Verifier"
-          }
-        },
-        "type": "object",
-        "required": [
-          "code"
-        ],
-        "title": "OAuthExchangeRequest",
-        "description": "Exchange a one-time OAuth login code for first-party tokens."
-      },
-      "PasskeyAuthenticationOptionsRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 3,
-            "title": "Email"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email"
-        ],
-        "title": "PasskeyAuthenticationOptionsRequest",
-        "description": "Start a passkey authentication ceremony."
-      },
-      "PasskeyAuthenticationVerifyRequest": {
-        "properties": {
-          "ceremony_id": {
-            "type": "string",
-            "maxLength": 256,
-            "minLength": 32,
-            "title": "Ceremony Id"
-          },
-          "credential": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Credential"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ceremony_id",
-          "credential"
-        ],
-        "title": "PasskeyAuthenticationVerifyRequest",
-        "description": "Complete a passkey authentication ceremony."
-      },
-      "PasskeyRegistrationVerifyRequest": {
-        "properties": {
-          "ceremony_id": {
-            "type": "string",
-            "maxLength": 256,
-            "minLength": 32,
-            "title": "Ceremony Id"
-          },
-          "credential": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Credential"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ceremony_id",
-          "credential"
-        ],
-        "title": "PasskeyRegistrationVerifyRequest",
-        "description": "Complete an authenticated passkey registration ceremony."
-      },
-      "RefreshTokenRequest": {
-        "properties": {
-          "refresh_token": {
-            "type": "string",
-            "title": "Refresh Token"
-          }
-        },
-        "type": "object",
-        "required": [
-          "refresh_token"
-        ],
-        "title": "RefreshTokenRequest",
-        "description": "Refresh token request."
-      },
-      "RegisterRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "name": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "string"
               },
@@ -813,7 +1005,97 @@
                 "type": "null"
               }
             ],
-            "title": "Name"
+            "maxLength": 128,
+            "minLength": 43
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "OAuthExchangeRequest"
+      },
+      "PasskeyAuthenticationOptionsRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "PasskeyAuthenticationOptionsRequest"
+      },
+      "PasskeyAuthenticationVerifyRequest": {
+        "properties": {
+          "ceremony_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32
+          },
+          "credential": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ceremony_id",
+          "credential"
+        ],
+        "title": "PasskeyAuthenticationVerifyRequest"
+      },
+      "PasskeyRegistrationVerifyRequest": {
+        "properties": {
+          "ceremony_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32
+          },
+          "credential": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ceremony_id",
+          "credential"
+        ],
+        "title": "PasskeyRegistrationVerifyRequest"
+      },
+      "RefreshTokenRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshTokenRequest"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -821,8 +1103,7 @@
           "email",
           "password"
         ],
-        "title": "RegisterRequest",
-        "description": "Email/password registration request."
+        "title": "RegisterRequest"
       },
       "ServiceStatus": {
         "properties": {
@@ -831,52 +1112,45 @@
             "enum": [
               "healthy",
               "unhealthy"
-            ],
-            "title": "Status"
+            ]
           },
           "latency_ms": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "number"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Latency Ms"
+            ]
           },
           "error": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Error"
+            ]
           }
         },
         "type": "object",
         "required": [
           "status"
         ],
-        "title": "ServiceStatus",
-        "description": "Individual service health status."
+        "title": "ServiceStatus"
       },
       "TokenResponse": {
         "properties": {
           "access_token": {
-            "type": "string",
-            "title": "Access Token"
+            "type": "string"
           },
           "refresh_token": {
-            "type": "string",
-            "title": "Refresh Token"
+            "type": "string"
           },
           "token_type": {
             "type": "string",
-            "title": "Token Type",
             "default": "bearer"
           }
         },
@@ -885,106 +1159,65 @@
           "access_token",
           "refresh_token"
         ],
-        "title": "TokenResponse",
-        "description": "Token response."
+        "title": "TokenResponse"
       },
       "UserResponse": {
         "properties": {
           "id": {
-            "type": "string",
-            "title": "Id"
+            "type": "string"
           },
           "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "image": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image"
-          },
-          "email_verified": {
-            "type": "boolean",
-            "title": "Email Verified",
-            "default": false
+            "type": "string"
           },
           "created_at": {
             "type": "string",
-            "format": "date-time",
-            "title": "Created At"
+            "format": "date-time"
           },
           "updated_at": {
             "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
+            "format": "date-time"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "email_verified": {
+            "type": "boolean",
+            "default": false
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "email",
           "created_at",
+          "email",
+          "id",
           "updated_at"
         ],
-        "title": "UserResponse",
-        "description": "User response model."
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
-          }
-        },
-        "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
+        "title": "UserResponse"
+      }
+    },
+    "securitySchemes": {
+      "BearerToken": {
+        "type": "http",
+        "description": "First-party JWE access token",
+        "scheme": "bearer",
+        "bearerFormat": "JWE"
       }
     }
   }

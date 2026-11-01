@@ -242,7 +242,7 @@ Navegador:  http://localhost:9847 → status em tempo real
 
 ## Dicas
 
-1. **Seja específico** — "Construa um app TODO com auth JWT, frontend React, backend FastAPI" é melhor que "faça um app"
+1. **Seja específico** — "Construa um app TODO com auth JWT, frontend React, backend Litestar" é melhor que "faça um app"
 2. **Use o Gerenciador de Agentes** para projetos multi-domínio — não tente fazer tudo em um chat
 3. **Revise a Base de Conhecimento** — verifique `.gemini/antigravity/brain/` para consistência de API
 4. **Itere com regerações** — refine instruções, não comece do zero

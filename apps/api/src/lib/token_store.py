@@ -1,6 +1,8 @@
-"""Token revocation store with Redis or in-memory backend."""
+"""Token revocation store backed by Litestar Stores (MemoryStore / Redis)."""
 
 from typing import TYPE_CHECKING
+
+from litestar.stores.memory import MemoryStore
 
 from src.lib.config import settings
 from src.lib.logging import get_logger
@@ -14,64 +16,47 @@ _REVOKED_KEY_PREFIX = "revoked:"
 
 
 class InMemoryTokenStore:
-    """In-memory token revocation store."""
+    """In-memory token revocation store backed by Litestar MemoryStore."""
 
     def __init__(self) -> None:
+        self._memory_store = MemoryStore()
         self._store: dict[str, float] = {}
 
     async def revoke(self, jti: str, ttl: int) -> None:
-        """Mark a token as revoked for the given TTL (seconds).
-
-        Args:
-            jti: JWT ID to revoke.
-            ttl: Seconds until the token naturally expires.
-        """
+        """Mark a token as revoked for the given TTL (seconds)."""
         import time
 
         expires_at = time.time() + ttl
         self._store[jti] = expires_at
+        if ttl > 0:
+            await self._memory_store.set(jti, b"1", expires_in=ttl)
 
     async def is_revoked(self, jti: str) -> bool:
-        """Return True if the token has been revoked and has not expired.
-
-        Args:
-            jti: JWT ID to check.
-        """
+        """Return True if the token has been revoked and has not expired."""
         import time
 
         expires_at = self._store.get(jti)
         if expires_at is None:
             return False
         if time.time() > expires_at:
-            # Lazy cleanup — entry has naturally expired
             del self._store[jti]
+            await self._memory_store.delete(jti)
             return False
         return True
 
     async def revoke_if_not_revoked(self, jti: str, ttl: int) -> bool:
-        """Atomically claim and revoke a token only if it has not been revoked yet.
-
-        Because asyncio is single-threaded and there is no ``await`` between the
-        check and the set, this is safe without an explicit lock.
-
-        Args:
-            jti: JWT ID to claim.
-            ttl: Remaining lifetime in seconds.
-
-        Returns:
-            True if the token was successfully claimed (first caller wins).
-            False if the token was already revoked.
-        """
+        """Atomically claim and revoke a token only if it has not been revoked yet."""
         import time
 
         # --- begin critical section (no await between check and set) ---
         expires_at = self._store.get(jti)
         if expires_at is not None and time.time() <= expires_at:
-            # Already revoked and not yet naturally expired.
             return False
         new_expires_at = time.time() + ttl
         self._store[jti] = new_expires_at
         # --- end critical section ---
+        if ttl > 0:
+            await self._memory_store.set(jti, b"1", expires_in=ttl)
         return True
 
     def clear(self) -> None:
@@ -94,12 +79,7 @@ class RedisTokenStore:
         return self._redis
 
     async def revoke(self, jti: str, ttl: int) -> None:
-        """Mark a token as revoked in Redis with a TTL.
-
-        Args:
-            jti: JWT ID to revoke.
-            ttl: Seconds until the entry should auto-expire.
-        """
+        """Mark a token as revoked in Redis with a TTL."""
         if ttl <= 0:
             return
         redis = await self._get_redis()
@@ -107,31 +87,15 @@ class RedisTokenStore:
         await redis.setex(key, ttl, "1")
 
     async def is_revoked(self, jti: str) -> bool:
-        """Return True if the revocation key exists in Redis.
-
-        Args:
-            jti: JWT ID to check.
-        """
+        """Return True if the revocation key exists in Redis."""
         redis = await self._get_redis()
         key = f"{_REVOKED_KEY_PREFIX}{jti}"
         result = await redis.exists(key)
         return bool(result)
 
     async def revoke_if_not_revoked(self, jti: str, ttl: int) -> bool:
-        """Atomically claim and revoke a token using Redis SET NX EX.
-
-        Only the first caller for a given JTI succeeds; concurrent calls return False.
-
-        Args:
-            jti: JWT ID to claim.
-            ttl: Remaining lifetime in seconds.
-
-        Returns:
-            True if the SET NX succeeded (token claimed by this caller).
-            False if the key already existed (already revoked).
-        """
+        """Atomically claim and revoke a token using Redis SET NX EX."""
         if ttl <= 0:
-            # Token already expired at the call site — treat as already revoked.
             return False
         redis = await self._get_redis()
         key = f"{_REVOKED_KEY_PREFIX}{jti}"
@@ -168,36 +132,18 @@ def get_token_store() -> InMemoryTokenStore | RedisTokenStore:
 
 
 async def revoke(jti: str, ttl: int) -> None:
-    """Revoke a token by its JTI.
-
-    Args:
-        jti: JWT ID to revoke.
-        ttl: Remaining lifetime in seconds.
-    """
+    """Revoke a token by its JTI."""
     store = get_token_store()
     await store.revoke(jti, ttl)
 
 
 async def is_revoked(jti: str) -> bool:
-    """Check whether a token has been revoked.
-
-    Args:
-        jti: JWT ID to check.
-    """
+    """Check whether a token has been revoked."""
     store = get_token_store()
     return await store.is_revoked(jti)
 
 
 async def revoke_if_not_revoked(jti: str, ttl: int) -> bool:
-    """Atomically claim and revoke a token only if it has not already been revoked.
-
-    Args:
-        jti: JWT ID to claim.
-        ttl: Remaining lifetime in seconds.
-
-    Returns:
-        True if the token was successfully claimed (caller should proceed).
-        False if the token was already revoked (caller should reject with 401).
-    """
+    """Atomically claim and revoke a token only if it has not already been revoked."""
     store = get_token_store()
     return await store.revoke_if_not_revoked(jti, ttl)

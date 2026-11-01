@@ -18,4 +18,4 @@ USER 1000
 
 WORKDIR /app/apps/worker
 EXPOSE 8080
-CMD ["uv", "run", "--project", "/app", "fastapi", "run", "src/main.py", "--port", "8080"]
+CMD ["uv", "run", "--project", "/app", "litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8080"]

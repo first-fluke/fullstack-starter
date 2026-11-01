@@ -9,7 +9,7 @@
 
 > 템플릿 버전은 [Release Please](https://github.com/googleapis/release-please)로 관리됩니다 — [CHANGELOG.md](../CHANGELOG.md)에서 릴리즈 히스토리를 확인하세요.
 
-실무에 바로 적용 가능한 풀스택 모노레포 템플릿입니다. Next.js 16, FastAPI, Flutter, GCP 인프라가 통합되어 있습니다.
+실무에 바로 적용 가능한 풀스택 모노레포 템플릿입니다. Next.js 16, Litestar, Flutter, GCP 인프라가 통합되어 있습니다.
 
 ### 3-Tier Architecture (3계층 아키텍처)
 
@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.14]
+        API[Litestar<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -50,8 +50,8 @@ graph TB
 
 ## 주요 기능
 
-- **모던 스택**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
-- **타입 안전성**: TypeScript, Pydantic, Dart 등 전 영역 타입 지원
+- **모던 스택**: Next.js 16 + React 19, Litestar, Flutter 3.44.8, TailwindCSS v4
+- **타입 안전성**: TypeScript, msgspec, Dart 등 전 영역 타입 지원
 - **통합 인증**: 이메일/비밀번호, OAuth Authorization Code (Google/GitHub PKCE, Facebook), WebAuthn 패스키
 - **국제화 (i18n)**: next-intl (웹), Flutter ARB (모바일), 공용 패키지 통합
 - **API 클라이언트 자동화**: Orval (웹), swagger_parser (모바일) 코드 생성
@@ -65,9 +65,9 @@ graph TB
 | 레이어 | 기술 |
 |--------|------|
 | **프론트엔드** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
-| **백엔드** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
+| **백엔드** | Litestar, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
 | **모바일** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
-| **워커** | FastAPI + CloudTasks/PubSub |
+| **워커** | Litestar + CloudTasks/PubSub |
 | **인프라** | Terraform, GCP (Cloud Run, Cloud SQL, Cloud Storage, CDN) |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **도구 관리** | mise (Node, Python, Flutter, Terraform 버전 통합) |
@@ -89,7 +89,7 @@ graph TB
 
     subgraph Execution["병렬 실행"]
         FE[프론트엔드 에이전트<br/>Next.js/Flutter]
-        BE[백엔드 에이전트<br/>FastAPI]
+        BE[백엔드 에이전트<br/>Litestar]
         Infra[인프라 에이전트<br/>Terraform]
     end
 
@@ -204,7 +204,7 @@ fullstack-starter/
 ├── package.json       # bun workspace (apps/web, packages/*)
 ├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
-│   ├── api/           # FastAPI 백엔드
+│   ├── api/           # Litestar 백엔드
 │   ├── web/           # Next.js 프론트엔드
 │   ├── worker/        # 백그라운드 워커
 │   ├── mobile/        # Flutter 모바일 앱

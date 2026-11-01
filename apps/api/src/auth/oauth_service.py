@@ -9,7 +9,13 @@ from typing import Any
 from urllib.parse import urlencode, urlparse
 
 import httpx
-from fastapi import HTTPException, status
+from litestar.exceptions import HTTPException
+from litestar.status_codes import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_409_CONFLICT,
+    HTTP_503_SERVICE_UNAVAILABLE,
+)
 
 from src.auth.ephemeral_store import ephemeral_auth_store
 from src.auth.repository import AuthRepository
@@ -64,7 +70,7 @@ def _provider_config(provider: OAuthProvider) -> OAuthProviderConfig:
     config = configs[provider]
     if config is None or not config.client_id or not config.client_secret:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"OAuth provider is not configured: {provider}",
         )
     return config
@@ -91,7 +97,7 @@ def _validate_redirect_uri(redirect_uri: str) -> bool:
     valid_mobile = redirect_uri in settings.OAUTH_ALLOWED_MOBILE_REDIRECT_URIS
     if not valid_web and not valid_mobile:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="OAuth redirect URI is not allowed",
         )
     return valid_mobile
@@ -100,7 +106,7 @@ def _validate_redirect_uri(redirect_uri: str) -> bool:
 def _validate_return_to(return_to: str) -> None:
     if not return_to.startswith("/") or return_to.startswith("//"):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="return_to must be an application-relative path",
         )
 
@@ -121,7 +127,7 @@ async def create_authorization_url(
         or re.fullmatch(r"[A-Za-z0-9_-]{43}", client_code_challenge) is None
     ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Mobile OAuth requires an S256 client code challenge",
         )
     config = _provider_config(provider)
@@ -168,7 +174,7 @@ async def complete_oauth_callback(
     transaction = await ephemeral_auth_store.take("oauth-state", state)
     if transaction is None or transaction.get("provider") != provider:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Invalid or expired OAuth state",
         )
     config = _provider_config(provider)
@@ -190,13 +196,13 @@ async def complete_oauth_callback(
         )
         if token_response.status_code >= 400:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=HTTP_401_UNAUTHORIZED,
                 detail="OAuth authorization code exchange failed",
             )
         access_token = token_response.json().get("access_token")
         if not access_token:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=HTTP_401_UNAUTHORIZED,
                 detail="OAuth provider did not return an access token",
             )
         user_info = await _fetch_user_info(client, provider, config, access_token)
@@ -205,14 +211,14 @@ async def complete_oauth_callback(
     if user is None:
         if not user_info.email and provider != "facebook":
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=HTTP_400_BAD_REQUEST,
                 detail="OAuth provider did not return an email address",
             )
         email = user_info.email or f"facebook_{user_info.id}@oauth.placeholder"
         user = await repository.get_user_by_email(email)
         if user is not None and not user_info.email_verified:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
+                status_code=HTTP_409_CONFLICT,
                 detail="Sign in first, then link this OAuth account",
             )
         if user is None:
@@ -250,7 +256,7 @@ async def cancel_oauth_callback(
     transaction = await ephemeral_auth_store.take("oauth-state", state)
     if transaction is None or transaction.get("provider") != provider:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTP_400_BAD_REQUEST,
             detail="Invalid or expired OAuth state",
         )
     return str(transaction["redirect_uri"]), str(transaction["return_to"])
@@ -260,14 +266,14 @@ async def consume_exchange_code(code: str, code_verifier: str | None = None) -> 
     payload = await ephemeral_auth_store.take("oauth-code", code)
     if payload is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired OAuth exchange code",
         )
     expected_challenge = payload.get("client_code_challenge")
     if expected_challenge:
         if not code_verifier:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=HTTP_401_UNAUTHORIZED,
                 detail="OAuth exchange code verifier is required",
             )
         actual_challenge = (
@@ -277,7 +283,7 @@ async def consume_exchange_code(code: str, code_verifier: str | None = None) -> 
         )
         if not secrets.compare_digest(str(expected_challenge), actual_challenge):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=HTTP_401_UNAUTHORIZED,
                 detail="OAuth exchange code verifier is invalid",
             )
     return str(payload["user_id"])
@@ -298,7 +304,7 @@ async def _fetch_user_info(
     )
     if response.status_code >= 400:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTP_401_UNAUTHORIZED,
             detail="OAuth user information request failed",
         )
     data: dict[str, Any] = response.json()

@@ -1,7 +1,7 @@
 import uuid as uuid_lib
 from datetime import datetime
 
-from pydantic import BaseModel
+import msgspec
 from sqlalchemy import (
     Boolean,
     DateTime,
@@ -81,13 +81,13 @@ class PasskeyCredential(Base):
     )
 
 
-class UserResponse(BaseModel):
+class UserResponse(msgspec.Struct):
     """User response model."""
 
     id: str
     email: str
+    created_at: datetime
+    updated_at: datetime
     name: str | None = None
     image: str | None = None
     email_verified: bool = False
-    created_at: datetime
-    updated_at: datetime

@@ -49,12 +49,12 @@ Este documento explica o raciocínio por trás de cada escolha tecnológica nest
 
 ## Backend
 
-### FastAPI
+### Litestar
 
 - **Ecossistema AI/ML**: Acesso direto às bibliotecas Python de IA (LangChain, Transformers, etc.)
-- **Async-first**: Construído no Starlette com suporte nativo a async/await
+- **Async-first**: Framework ASGI nativo de alta performance com DI, Controllers, Guards e Stores integrados
 - **Docs auto-geradas**: OpenAPI (Swagger) e ReDoc out of the box
-- **Validação Pydantic**: Validação de request/response com type hints
+- **Validação msgspec**: Serialização JSON ultra-rápida e validação de request/response com type hints
 - **Escalabilidade**: Fácil escalabilidade horizontal com design stateless
 
 ### SQLAlchemy (async)
@@ -185,7 +185,7 @@ Priorizamos **velocidade** em todo o workflow de desenvolvimento escolhendo ferr
 |---------|-----------|-------------------|
 | Next.js vs Remix/SvelteKit | Bundle maior, mais complexidade | Ecossistema, compatibilidade React 19 |
 | Next.js vs Flutter Web | Codebase separado do mobile | SEO, SSR, bundle menor, compatibilidade com ecossistema web |
-| FastAPI vs Node.js | Dois runtimes (Node + Python) | Ecossistema Python AI/ML, escalabilidade |
+| Litestar vs Node.js | Dois runtimes (Node + Python) | Ecossistema Python AI/ML, escalabilidade |
 | Flutter vs React Native | App maior, renderização customizada | Korea eGovFrame v5, versionamento flexível |
 
 ## Resumo

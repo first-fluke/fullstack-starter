@@ -9,7 +9,7 @@
 
 > 模板版本通过 [Release Please](https://github.com/googleapis/release-please) 管理 — 查看 [CHANGELOG.md](../CHANGELOG.md) 了解发布历史。
 
-生产就绪的全栈 monorepo 模板，集成 Next.js 16、FastAPI、Flutter 和 GCP 基础设施。
+生产就绪的全栈 monorepo 模板，集成 Next.js 16、Litestar、Flutter 和 GCP 基础设施。
 
 ### 3 层架构
 
@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph GCP["GCP Cloud Run"]
-        API[FastAPI<br/>Python 3.14]
+        API[Litestar<br/>Python 3.14]
         Worker[Worker<br/>CloudTasks]
     end
 
@@ -50,8 +50,8 @@ graph TB
 
 ## 核心特性
 
-- **现代技术栈**: Next.js 16 + React 19, FastAPI, Flutter 3.44.8, TailwindCSS v4
-- **类型安全**: TypeScript、Pydantic 和 Dart 全栈类型支持
+- **现代技术栈**: Next.js 16 + React 19, Litestar, Flutter 3.44.8, TailwindCSS v4
+- **类型安全**: TypeScript、msgspec 和 Dart 全栈类型支持
 - **身份验证**: 邮箱/密码、OAuth Authorization Code（Google/GitHub PKCE、Facebook）和 WebAuthn 通行密钥
 - **国际化 (i18n)**: next-intl（Web）、Flutter ARB（移动端）、共享 i18n 包
 - **API 客户端自动生成**: Orval（Web）、swagger_parser（移动端）
@@ -65,9 +65,9 @@ graph TB
 | 层级 | 技术 |
 |------|------|
 | **前端** | Next.js 16, React 19, TailwindCSS v4, shadcn/ui, TanStack Query, Jotai |
-| **后端** | FastAPI, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
+| **后端** | Litestar, SQLAlchemy (async), PostgreSQL 16, Redis 7 |
 | **移动端** | Flutter 3.44.8, Riverpod 3, go_router 17, Firebase Crashlytics, Fastlane |
-| **Worker** | FastAPI + CloudTasks/PubSub |
+| **Worker** | Litestar + CloudTasks/PubSub |
 | **基础设施** | Terraform, GCP（Cloud Run、Cloud SQL、Cloud Storage、CDN） |
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **工具管理** | mise（统一 Node、Python、Flutter、Terraform 版本） |
@@ -89,7 +89,7 @@ graph TB
 
     subgraph Execution["并行执行"]
         FE[前端智能体<br/>Next.js/Flutter]
-        BE[后端智能体<br/>FastAPI]
+        BE[后端智能体<br/>Litestar]
         Infra[基础设施智能体<br/>Terraform]
     end
 
@@ -204,7 +204,7 @@ fullstack-starter/
 ├── package.json       # bun workspace (apps/web, packages/*)
 ├── pyproject.toml     # uv workspace (apps/api, apps/worker)
 ├── apps/
-│   ├── api/           # FastAPI 后端
+│   ├── api/           # Litestar 后端
 │   ├── web/           # Next.js 前端
 │   ├── worker/        # 后台 Worker
 │   ├── mobile/        # Flutter 移动应用

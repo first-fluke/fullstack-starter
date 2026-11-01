@@ -3,13 +3,13 @@
 import contextlib
 import os
 
-from fastapi import FastAPI
+from litestar import Litestar
+from litestar.plugins.opentelemetry import OpenTelemetryConfig, OpenTelemetryPlugin
 from opentelemetry import metrics, trace
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
@@ -120,16 +120,19 @@ def configure_telemetry() -> None:
     init_genai_metrics()
 
 
-def instrument_app(app: FastAPI) -> None:
-    """Instrument FastAPI and other libraries for tracing."""
+def get_opentelemetry_plugin() -> OpenTelemetryPlugin:
+    """Create the Litestar OpenTelemetry plugin excluding health probes."""
+    return OpenTelemetryPlugin(
+        OpenTelemetryConfig(
+            exclude=["^/health"],
+        )
+    )
+
+
+def instrument_app(_app: Litestar | None = None) -> None:
+    """Instrument backing libraries (SQLAlchemy, HTTPX, Redis, GenAI SDKs)."""
     from src.lib.ai.telemetry import instrument_genai_sdks
     from src.lib.database import engine
-
-    # Instrument FastAPI
-    FastAPIInstrumentor.instrument_app(
-        app,
-        excluded_urls="health,health/live,health/ready",
-    )
 
     # Instrument SQLAlchemy
     SQLAlchemyInstrumentor().instrument(

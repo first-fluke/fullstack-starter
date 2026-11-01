@@ -10,9 +10,9 @@ from datetime import datetime
 from typing import Literal
 from zoneinfo import ZoneInfo
 
+import msgspec
 from apscheduler.events import EVENT_SCHEDULER_SHUTDOWN, SchedulerEvent
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pydantic import BaseModel
 
 from src.jobs import TASKS
 from src.lib.logging import get_logger
@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 SHUTDOWN_GRACE_SECONDS = 25
 
 
-class JobStatus(BaseModel):
+class JobStatus(msgspec.Struct):
     id: str
     task: str
     cron: str
@@ -34,7 +34,7 @@ class JobStatus(BaseModel):
     last_result: Literal["success", "error", "cancelled"] | None = None
 
 
-class SchedulerStatus(BaseModel):
+class SchedulerStatus(msgspec.Struct):
     running: bool
     timezone: str
     jobs: list[JobStatus]
@@ -53,7 +53,9 @@ class WorkerScheduler:
                 "misfire_grace_time": 300,
             },
         )
-        self._statuses = {job.id: JobStatus(**job.model_dump()) for job in config.jobs}
+        self._statuses = {
+            job.id: JobStatus(**msgspec.structs.asdict(job)) for job in config.jobs
+        }
         self._active_count = 0
         self._drained = asyncio.Event()
         self._drained.set()
@@ -100,10 +102,14 @@ class WorkerScheduler:
     def snapshot(self) -> SchedulerStatus:
         jobs: list[JobStatus] = []
         for job in self.config.jobs:
-            status = self._statuses[job.id].model_copy()
             scheduled_job = self.scheduler.get_job(job.id)
-            if scheduled_job is not None:
-                status.next_run_time = scheduled_job.next_run_time
+            next_run_time = (
+                scheduled_job.next_run_time if scheduled_job is not None else None
+            )
+            status = msgspec.structs.replace(
+                self._statuses[job.id],
+                next_run_time=next_run_time,
+            )
             jobs.append(status)
         return SchedulerStatus(
             running=self.scheduler.running,

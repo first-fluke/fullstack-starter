@@ -1,6 +1,6 @@
 # Authentication
 
-Authentication is owned by the FastAPI application. Web and mobile clients receive the same first-party access and refresh tokens regardless of how the user signs in.
+Authentication is owned by the Litestar application. Web and mobile clients receive the same first-party access and refresh tokens regardless of how the user signs in.
 
 ## Supported methods
 

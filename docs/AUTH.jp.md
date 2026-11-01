@@ -1,6 +1,6 @@
 # 認証
 
-認証は FastAPI アプリケーションが一元管理します。ログイン方法にかかわらず、Web と Mobile には同じ自社 access/refresh token が発行されます。
+認証は Litestar アプリケーションが一元管理します。ログイン方法にかかわらず、Web と Mobile には同じ自社 access/refresh token が発行されます。
 
 ## 対応する認証方法
 
