@@ -25,7 +25,7 @@ checksum = "sha256:d8b96221828ad6f97ac7ac0ab7e95872341af763001e8803e8267652c2652
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-darwin-aarch64.zip"
 
 [[tools.flutter]]
-version = "3.47.5-stable"
+version = "3.47.7-stable"
 backend = "asdf:flutter"
 
 [[tools."github:Infisical/cli"]]
