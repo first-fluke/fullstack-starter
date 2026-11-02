@@ -218,6 +218,20 @@ def test_health_reports_running_scheduler_inside_lifespan() -> None:
     assert payload["scheduler"]["jobs"][0]["next_run_time"] is not None
 
 
+def test_health_scheduler_is_isolated_between_apps() -> None:
+    scheduled = create_app(
+        Settings(PROJECT_ENV="staging", WORKER_SCHEDULES_FILE=COMMITTED_SCHEDULES)
+    )
+    unmanaged = create_app(Settings(PROJECT_ENV="local", WORKER_SCHEDULES_FILE=None))
+    with TestClient(scheduled) as scheduled_client, TestClient(unmanaged) as other:
+        unmanaged_health = other.get("/health").json()
+        scheduled_health = scheduled_client.get("/health").json()
+        assert unmanaged_health["scheduler"] is None
+        assert scheduled_health["scheduler"]["running"] is True
+        assert unmanaged_health["environment"] == "local"
+        assert scheduled_health["environment"] == "staging"
+
+
 def test_health_is_503_when_scheduler_is_not_running() -> None:
     # Outside the lifespan the scheduler never started; a stopped scheduler
     # must fail the container health check so Compose restarts it.

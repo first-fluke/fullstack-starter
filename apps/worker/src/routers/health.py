@@ -3,7 +3,8 @@
 from typing import Literal
 
 import msgspec
-from litestar import Response, Router, get
+from litestar import Controller, Response, Router, get
+from litestar.di import NamedDependency, Provide
 from litestar.status_codes import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
 
 from src.lib.config import settings
@@ -18,18 +19,49 @@ class HealthResponse(msgspec.Struct):
     scheduler: SchedulerStatus | None = None
 
 
-def build_health_router(runtime: WorkerScheduler | None) -> Router:
-    @get("/health", tags=["Health"])
-    async def health_check() -> Response[HealthResponse]:
+class HealthController(Controller):
+    """Health checks using the scheduler attached to this application."""
+
+    path = "/"
+
+    @get("/health", tags=["Health"], operation_id="HealthHealthCheck")
+    async def health_check(
+        self,
+        runtime: NamedDependency[WorkerScheduler | None],
+        environment: NamedDependency[str],
+    ) -> Response[HealthResponse]:
         scheduler = runtime.snapshot() if runtime is not None else None
         healthy = scheduler is None or scheduler.running
         return Response(
             content=HealthResponse(
                 status="healthy" if healthy else "unhealthy",
-                environment=settings.PROJECT_ENV,
+                environment=environment,
                 scheduler=scheduler,
             ),
             status_code=HTTP_200_OK if healthy else HTTP_503_SERVICE_UNAVAILABLE,
         )
 
-    return Router(path="/", route_handlers=[health_check])
+
+def build_health_router(
+    runtime: WorkerScheduler | None,
+    *,
+    environment: str | None = None,
+) -> Router:
+    configured_environment = (
+        settings.PROJECT_ENV if environment is None else environment
+    )
+
+    def scheduler_runtime() -> WorkerScheduler | None:
+        return runtime
+
+    def project_environment() -> str:
+        return configured_environment
+
+    return Router(
+        path="/",
+        route_handlers=[HealthController],
+        dependencies={
+            "runtime": Provide(scheduler_runtime, sync_to_thread=False),
+            "environment": Provide(project_environment, sync_to_thread=False),
+        },
+    )

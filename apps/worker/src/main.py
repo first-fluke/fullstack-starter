@@ -74,7 +74,7 @@ def create_app(config: Settings | None = None) -> Litestar:
 
     return Litestar(
         route_handlers=[
-            build_health_router(runtime),
+            build_health_router(runtime, environment=config.PROJECT_ENV),
             tasks.router,
         ],
         middleware=[DefineMiddleware(RequestIDMiddleware)],

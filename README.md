@@ -72,6 +72,8 @@ graph TB
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **Tool Management** | mise (unified Node, Python, Flutter, Terraform versions) |
 
+API health/auth routes and worker health/task routes use Litestar Controllers. Routers group paths and dependencies. Worker health receives its scheduler through router-scoped dependency injection, keeping each application's runtime separate.
+
 > **[Why this tech stack?](./docs/WHY.md)** — Detailed reasoning behind each technology choice.
 
 ![Fullstack](./docs/fullstack.jpg)
