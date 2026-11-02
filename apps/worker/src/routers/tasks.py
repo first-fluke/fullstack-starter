@@ -50,8 +50,9 @@ class TasksController(Controller):
     """Task processing endpoints guarded by Google OIDC verification."""
 
     path = "/"
+    guards = (verify_oidc_guard,)
 
-    @post("/process", status_code=HTTP_202_ACCEPTED, guards=[verify_oidc_guard])
+    @post("/process", status_code=HTTP_202_ACCEPTED)
     async def process_task(
         self,
         data: JSONBody[AnalysisPayload | EmbeddingPayload],
@@ -66,7 +67,6 @@ class TasksController(Controller):
 router = Router(
     path="/tasks",
     tags=["Tasks"],
-    guards=[verify_oidc_guard],
     route_handlers=[TasksController],
 )
 

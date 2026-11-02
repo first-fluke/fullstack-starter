@@ -4,6 +4,7 @@ from typing import Any
 
 from litestar import Litestar, Request, Response
 from litestar.config.compression import CompressionConfig
+from litestar.datastructures import State
 from litestar.exceptions import HTTPException, ValidationException
 from litestar.middleware import DefineMiddleware
 from litestar.openapi.config import OpenAPIConfig
@@ -73,6 +74,7 @@ def create_app(config: Settings | None = None) -> Litestar:
     )
 
     return Litestar(
+        state=State({"worker_settings": config}),
         route_handlers=[
             build_health_router(runtime, environment=config.PROJECT_ENV),
             tasks.router,

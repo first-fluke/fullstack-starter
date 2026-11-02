@@ -13,18 +13,21 @@ from litestar.status_codes import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from src.lib.config import settings
+from src.lib.config import Settings, settings
 
 
 async def _verify_connection_oidc(
     connection: ASGIConnection[Any, Any, Any, Any],
 ) -> None:
-    if not settings.WORKER_VERIFY_OIDC:
+    config = connection.app.state.get("worker_settings")
+    if not isinstance(config, Settings):
+        config = settings
+    if not config.WORKER_VERIFY_OIDC:
         return
 
     # Defensive runtime guard — the pydantic validator blocks this at startup,
     # but a runtime settings override (e.g. in tests) could bypass it.
-    if not settings.WORKER_OIDC_AUDIENCE:
+    if not config.WORKER_OIDC_AUDIENCE:
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             detail=(
@@ -47,7 +50,7 @@ async def _verify_connection_oidc(
             detail="Missing Authorization header",
         )
 
-    audience = settings.WORKER_OIDC_AUDIENCE
+    audience = config.WORKER_OIDC_AUDIENCE
 
     try:
         verify_oauth2_token(token, GoogleRequest(), audience=audience)

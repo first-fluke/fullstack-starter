@@ -1,12 +1,14 @@
 """Tests for POST /tasks/process endpoint and execute_task background function."""
 
-from unittest.mock import patch
-
 import pytest
 from httpx import ASGITransport, AsyncClient
+from litestar import Litestar
+from litestar.datastructures import State
 from tenacity import RetryError
 
-from src.main import app
+from src.lib.config import Settings
+from src.main import app, create_app
+from src.routers.tasks import TasksController
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -50,13 +52,34 @@ async def test_process_embedding_returns_202(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_process_returns_401_when_oidc_enabled_and_no_token(
-    client: AsyncClient,
-) -> None:
-    with patch("src.lib.oidc.settings") as mock_settings:
-        mock_settings.WORKER_VERIFY_OIDC = True
-        mock_settings.WORKER_OIDC_AUDIENCE = "https://example.com"
+async def test_process_returns_401_when_oidc_enabled_and_no_token() -> None:
+    protected = create_app(
+        Settings(WORKER_VERIFY_OIDC=True, WORKER_OIDC_AUDIENCE="https://example.com")
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=protected), base_url="http://test"
+    ) as client:
         response = await client.post("/tasks/process", json=ANALYSIS_BODY)
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_standalone_tasks_controller_requires_oidc() -> None:
+    protected = Litestar(
+        route_handlers=[TasksController],
+        state=State(
+            {
+                "worker_settings": Settings(
+                    WORKER_VERIFY_OIDC=True,
+                    WORKER_OIDC_AUDIENCE="https://example.com",
+                )
+            }
+        ),
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=protected), base_url="http://test"
+    ) as client:
+        response = await client.post("/process", json=ANALYSIS_BODY)
     assert response.status_code == 401
 
 

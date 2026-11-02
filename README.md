@@ -72,7 +72,7 @@ graph TB
 | **CI/CD** | GitHub Actions, Workload Identity Federation |
 | **Tool Management** | mise (unified Node, Python, Flutter, Terraform versions) |
 
-API health/auth routes and worker health/task routes use Litestar Controllers. Routers group paths and dependencies. Worker health receives its scheduler through router-scoped dependency injection, keeping each application's runtime separate.
+API health/auth routes and worker health/task routes use Litestar Controllers. Routers group paths and dependencies. Worker health receives its scheduler through router-scoped dependency injection, keeping each application's runtime separate. The task controller's OIDC guard uses that application's settings and verifies each token once before background work runs, including when the controller is registered directly.
 
 > **[Why this tech stack?](./docs/WHY.md)** — Detailed reasoning behind each technology choice.
 
