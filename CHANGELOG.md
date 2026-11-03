@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.29.0](https://github.com/first-fluke/fullstack-starter/compare/v2.28.0...v2.29.0) (2026-11-03)
+
+
+### Features
+
+* **api,worker:** migrate from fastapi to litestar and msgspec ([be7c9e4](https://github.com/first-fluke/fullstack-starter/commit/be7c9e408fdd7160ac1c4330356b7b9ba8c9ffce))
+
+
+### Bug Fixes
+
+* **worker:** bind health checks to a litestar controller ([ccfd3db](https://github.com/first-fluke/fullstack-starter/commit/ccfd3dbcedb5e2a446e046a88038fbe81051c246))
+* **worker:** isolate oidc settings and avoid duplicate checks ([ade79e7](https://github.com/first-fluke/fullstack-starter/commit/ade79e7eabe875479c38eacc28ea0f0f242fd90d))
+
 ## [2.28.0](https://github.com/first-fluke/fullstack-starter/compare/v2.27.1...v2.28.0) (2026-10-25)
 
 
