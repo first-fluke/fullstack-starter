@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.14-slim AS base
+FROM python:3.14-alpine AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
@@ -13,9 +13,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --package worker --no-install-workspace
 COPY apps/worker/src ./apps/worker/src
 
-RUN useradd --create-home --shell /bin/bash --uid 1000 appuser
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser -h /home/appuser -s /bin/sh appuser
 USER 1000
 
 WORKDIR /app/apps/worker
 EXPOSE 8080
-CMD ["uv", "run", "--project", "/app", "litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/app/.venv/bin/litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8080"]

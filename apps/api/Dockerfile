@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.14-slim AS base
+FROM python:3.14-alpine AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -21,10 +21,11 @@ COPY apps/api/src ./apps/api/src
 COPY apps/api/alembic ./apps/api/alembic
 COPY apps/api/alembic.ini ./apps/api/alembic.ini
 
-RUN useradd --create-home --shell /bin/bash --uid 1000 appuser
+RUN addgroup -g 1000 appuser && \
+    adduser -D -u 1000 -G appuser -h /home/appuser -s /bin/sh appuser
 USER 1000
 
 WORKDIR /app/apps/api
 EXPOSE 8000
 
-CMD ["uv", "run", "--project", "/app", "litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/litestar", "--app", "src.main:app", "run", "--host", "0.0.0.0", "--port", "8000"]
