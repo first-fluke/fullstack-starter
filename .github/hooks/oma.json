@@ -1,0 +1,56 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'SessionStart'",
+        "timeoutSec": 13
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'UserPromptSubmit'",
+        "timeoutSec": 21
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'PreToolUse' --matcher 'Bash|Grep|Glob'",
+        "timeoutSec": 15,
+        "matcher": "Bash|Grep|Glob"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'PostToolUse' --matcher 'Edit|Write'",
+        "timeoutSec": 10,
+        "matcher": "Edit|Write"
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'Stop'",
+        "timeoutSec": 40
+      }
+    ],
+    "subagentStart": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'subagentStart'",
+        "timeoutSec": 8
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "'.github/hooks/oma-hook.sh' --vendor 'copilot' --event 'subagentStop'",
+        "timeoutSec": 8
+      }
+    ]
+  },
+  "version": 1
+}

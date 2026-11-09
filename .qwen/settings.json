@@ -30,11 +30,11 @@
           {
             "name": "oma-hook-PreToolUse",
             "type": "command",
-            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PreToolUse' --matcher 'run_shell_command'",
-            "timeout": 15
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PreToolUse' --matcher 'run_shell_command|write_file|edit|replace|edit_file'",
+            "timeout": 26
           }
         ],
-        "matcher": "run_shell_command"
+        "matcher": "run_shell_command|write_file|edit|replace|edit_file"
       }
     ],
     "PostToolUse": [
@@ -43,11 +43,11 @@
           {
             "name": "oma-hook-PostToolUse",
             "type": "command",
-            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PostToolUse' --matcher 'write_file|edit|replace'",
-            "timeout": 10
+            "command": "\"$QWEN_PROJECT_DIR/.qwen/hooks/oma-hook.sh\" --vendor 'qwen' --event 'PostToolUse' --matcher 'write_file|edit|replace|notebook_edit|edit_file'",
+            "timeout": 21
           }
         ],
-        "matcher": "write_file|edit|replace"
+        "matcher": "write_file|edit|replace|notebook_edit|edit_file"
       }
     ],
     "SessionStart": [
@@ -89,14 +89,13 @@
   },
   "ui": {
     "statusLine": {
+      "respectUserColors": true,
+      "hideContextIndicator": true,
       "type": "command",
       "command": "'bun' \"$QWEN_PROJECT_DIR/.qwen/hooks/oma/hud.ts\""
     }
   },
   "$version": 4,
-  "hooksConfig": {
-    "enabled": true
-  },
   "permissions": {
     "allow": [
       "Bash(ls *)",
@@ -104,6 +103,18 @@
     ]
   },
   "memory": {
-    "enableManagedAutoMemory": false
+    "enableManagedAutoMemory": false,
+    "enableManagedAutoDream": false
+  },
+  "general": {
+    "gitCoAuthor": {
+      "commit": false,
+      "pr": false
+    }
+  },
+  "model": {
+    "generationConfig": {
+      "timeout": 300000
+    }
   }
 }

@@ -4,7 +4,7 @@ description: Coordinate multiple agents for a complex multi-domain project using
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search only for paths outside this project or ignored paths when unavailable or timed out. Do not install a provider or track a repository automatically.
 - Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
@@ -96,10 +96,6 @@ Native CLI executor path: `codex exec "@{agent} ..."` using the generated agent 
 Pass each agent its task description, API contracts, and relevant context.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn`.
 
-### If Gemini CLI and target vendor is Gemini
-Use native Gemini subagents when available, otherwise fall back to `oma agent spawn`.
-Native CLI executor path: `gemini -p "@{agent} ..."` using `.gemini/agents/{agent}.md`.
-
 ### If target vendor differs from current runtime, or native dispatch is unavailable
 ```bash
 oma agent spawn backend "task description" session-id --task-id {backend_task.id} -w ./backend &
@@ -111,11 +107,12 @@ wait
 
 ## Step 5: Monitor Agent Progress
 
-- Use memory read tool to poll `progress-{agent}[-{sessionId}].md` files
+- Apply the deadline, cancellation, resource ownership, and bounded monitoring rules in `.agents/skills/_shared/core/execution-policy.md`. Cancellation or deadline exhaustion stops dispatch and recovery; perform only bounded shutdown and a partial handoff.
+- Prefer host completion notifications. If polling is needed, one coordinator reads changed `progress-{agent}[-{sessionId}].md` files with bounded backoff.
 - Use configured symbol/pattern tools or native search to verify API contract alignment between agents
 - Use memory edit tool to record monitoring results
 
-> **Claude Code note**: the Agent tool returns results synchronously (or notifies on background completion), so no file polling is needed. Check status, files changed, and issues directly in each agent's return value.
+> **Claude Code note**: agents dispatched with `run_in_background=true` report via background completion notifications, not synchronous return values — wait for each notification before proceeding to QA (foreground Agent calls return inline). Check status, files changed, and issues in each agent's result; `progress-*` files remain the monitoring path for CLI-fallback spawns.
 
 ---
 
@@ -152,11 +149,11 @@ Apply the shared per-task attempt and cost budget in `.agents/skills/oma-orchest
    oma state verify --workflow work --checkpoint remediation-choice --instance "<finding ID and revision/attempt>"
    ```
 3. Dispatch authorized fixes to their owners with the recorded action and evidence. If a defined comparison is active, refresh affected measurements after the fix and verify required checks. Record actual experiment decisions with evidence.
-4. Before each new fix cycle, apply the loop termination check:
+4. Before each new fix cycle, apply cancellation/deadline precedence from the shared execution policy, then the loop termination check:
 
    > **Fix Loop termination conditions** (OR, whichever fires first wins):
    > 1. Total fix cycles have reached the configured maximum (default: 5). Do not start another cycle; report the remaining CRITICAL/HIGH findings and stop.
-   > 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save current results before stopping, then report early termination due to quota.
+   > 2. Session cost cap exceeded: `oma agent:spawn` enforces `session.quota_cap` mechanically — when the cap is exceeded it prints the quota message and refuses the spawn with a `[session-cost] Quota cap exceeded` error (no cap configured → spawns proceed normally). If a spawn is rejected that way, stop the loop immediately, save current results, and report early termination due to quota.
    >
    > If neither condition is met, repeat Steps 5-7.
 

@@ -52,6 +52,7 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 3. For each task, classify into one or more `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`. Tasks that match no domain confidently inherit the union of their parent feature's tags.
 4. Select the references needed by each task. One confidently matched skill is sufficient; expand the set when classification is uncertain or a dependency requires another domain.
 5. Record selected domains, references, and any fallback reason in the task board. These are coordinator notes, not launcher-enforced exposure fields; use only reference/context controls supported by the active dispatch path.
+6. Apply the shared collaboration policy before dispatch: assign edit ownership, peer contact paths, and a collection owner.
 
 ### Scenes
 1. **PREPARE**: Plan, setup session ID, and initialize memory files.
@@ -131,8 +132,8 @@ When native runtime dispatch is available, prefer the runtime-specific native pa
 
 Current native executor paths:
 - Claude Code: Agent tool with `.claude/agents/{agent}.md` definitions (multiple Agent tool calls in one message run in parallel; results return synchronously — no polling)
-- OpenCode: native `task` tool with `subagent_type: {agent-id}`; do not use `oma agent spawn` for same-session OpenCode work because it will not appear as a native child task
-- Codex: use the current session's exposed native subagent tool with the resolved custom role from `.codex/agents/*.toml` when supported; otherwise use `oma agent spawn`.
+- OpenCode / Kilo Code: native `task` tool with `subagent_type: {agent-id}`; do not use `oma agent spawn` for same-session OpenCode or Kilo work because it will not appear as a native child task
+- Codex: use the current session's exposed native subagent tool with the resolved custom role from `.codex/agents/*.toml` when supported; otherwise use `oma agent spawn`. Model tiering follows `../_shared/core/vendor-detection.md`.
 - Gemini: use the current session's exposed native role-subagent tool with the resolved role when supported; otherwise use `oma agent spawn`.
 
 `codex exec` and `gemini -p` start external CLI sessions. An `@agent` string in a prompt does not establish native dispatch or apply a custom-role contract.
@@ -143,7 +144,7 @@ Current native executor paths:
 |---------|---------|-------------|
 | MAX_PARALLEL | 3 | Max concurrent subagents |
 | MAX_RECOVERY_ATTEMPTS | 3 | Total retries and exploration hypotheses per task, including the original attempt |
-| POLL_INTERVAL | 30s | Status check interval |
+| POLL_INTERVAL | bounded backoff | Fallback only when completion notifications are unavailable |
 | Turn guidance | role-specific | Checkpoint/resume signal, not a hard stop or approval boundary |
 
 These are workflow defaults. Resolve model/vendor, parallelism, and budget settings from project configuration. `config/cli-config.yaml` supplies the vendor transport registry; it does not select the active vendor or override runtime execution settings.
@@ -171,7 +172,7 @@ Memory provider and tool names are configurable via `.agents/mcp.json` (not the 
 **PHASE 1.5 - References**: Select task references as described in Entry; record uncertainty and expansion reasons without assuming runtime enforcement.
 **PHASE 2 - Setup**: Create session/task-board artifacts with the current IDs and selected references.
 **PHASE 3 - Execute**: Dispatch ready tasks within MAX_PARALLEL using supported native or fallback context controls.
-**PHASE 4 - Monitor**: Poll every POLL_INTERVAL; handle completed/failed/crashed agents
+**PHASE 4 - Monitor**: Prefer completion notifications; otherwise use one coordinator with bounded polling backoff. Follow `../_shared/core/execution-policy.md` for the shared deadline, cancellation, resource ownership, and shutdown rules. Cancellation or deadline exhaustion stops dispatch and recovery before verification.
 **PHASE 4.5 - Verify**: Run mechanical checks for every completed agent; run `oma verify agent {agent-type}` only for `backend`, `frontend`, `mobile`, `qa`, `debug`, and `pm`; then run QA cross-review for every completed implementation
 **PHASE 5 - Collect**: Read claims and run-scoped reports for plan tasks whose checks passed; compile summary without deleting evidence.
 
@@ -283,6 +284,7 @@ Classify failures before retrying: `PRODUCT_FAILURE` follows the remaining produ
 For material corrections or review findings, retain the cause, impact, and evidence in existing task artifacts. Use `../_shared/core/session-metrics.md` when a retrospective or separate session summary is useful. Do not score clarification questions or require an RCA based on counters. Resolve the affected work and ask only for a material missing decision.
 
 ## References
+- Parallel worker collaboration: `../_shared/core/collaboration-policy.md` (before assigning parallel work or coordinating peer issues, ownership handoffs, and result collection)
 - Prompt template: `resources/subagent-prompt-template.md`
 - Memory schema: `resources/memory-schema.md`
 - Scripts: `scripts/spawn-agent.sh`, `scripts/parallel-run.sh`, `scripts/verify.sh`
