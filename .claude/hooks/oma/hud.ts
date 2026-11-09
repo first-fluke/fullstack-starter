@@ -2,10 +2,10 @@
 /**
  * oh-my-agent — HUD
  *
- * Lightweight status display for Claude Code / agy (statusLine): stdin =
- * vendor payload, stdout = ANSI text consumed by the native status-line
- * renderer. Field names line up across both vendors; vendor-specific extras
- * are best-effort.
+ * Lightweight status display for Claude Code / Qwen Code / agy (statusLine):
+ * stdin = vendor payload, stdout = ANSI text consumed by the native
+ * status-line renderer. Field names line up across vendors; vendor-specific
+ * extras are best-effort.
  *
  * Set `OMA_HUD_DEBUG=1` to dump the raw stdin payload to
  * `<hookDir>/../last-hud-input.json` for schema reverse-engineering.
@@ -78,6 +78,8 @@ interface StatuslineStdin {
   background_tasks?: Array<{ name?: string; status?: string; index?: number }>;
   pending_input_count?: number;
   tool_confirmation_pending?: boolean;
+  /** Qwen Code: present only while vim keybindings are enabled. */
+  vim?: { mode?: string };
   terminal_width?: number;
 }
 
@@ -194,18 +196,21 @@ export function shortModel(model?: {
   // Claude: "Claude Opus 4.6 (1M context)" → "Opus 4.6"
   const claude = name.match(/(Opus|Sonnet|Haiku)[\s.]*([\d.]*)/i);
   if (claude) return `${claude[1]}${claude[2] ? ` ${claude[2]}` : ""}`;
-  // Gemini / agy: "Gemini 3.6 Flash (High)" → "Gemini 3.6 Flash"
+  // Gemini / agy: "Gemini 3.6 Flash (High)" or "Gemini 2.5 Flash Lite" → "Gemini 3.6 Flash"
   const gemini = name.match(
-    /(Gemini)\s+([\d.]+)\s+(Pro|Flash|Ultra|Nano|Thinking)/i,
+    /(Gemini)\s+([\d.]+)\s+(Flash\s+Lite|Pro|Flash|Ultra|Nano|Thinking|Argon)/i,
   );
   if (gemini) return `${gemini[1]} ${gemini[2]} ${gemini[3]}`;
-  // Gemini / agy slug: "antigravity/gemini-3.6-flash" → "Gemini 3.6 Flash"
+  // Gemini / agy slug: "antigravity/gemini-3.6-flash" or "gemini-2.5-flash-lite"
   const geminiSlug = name.match(
-    /gemini-([\d.]+)-(pro|flash|ultra|nano|thinking)/i,
+    /gemini-([\d.]+)-(flash-lite|pro|flash|ultra|nano|thinking|argon)/i,
   );
   if (geminiSlug) {
     const type = geminiSlug[2] ?? "";
-    const capType = type.charAt(0).toUpperCase() + type.slice(1);
+    const capType = type
+      .split("-")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
     return `Gemini ${geminiSlug[1]} ${capType}`;
   }
   return name.split("/").pop()?.slice(0, 20) || "";
@@ -242,6 +247,8 @@ function formatTokens(n: number): string {
 export function buildClaudeStatusline(input: StatuslineStdin): string {
   const projectDir =
     process.env.CLAUDE_PROJECT_DIR ||
+    process.env.QWEN_PROJECT_DIR ||
+    input.workspace?.project_dir ||
     input.cwd ||
     input.workspace?.current_dir ||
     process.cwd();
@@ -253,6 +260,9 @@ export function buildClaudeStatusline(input: StatuslineStdin): string {
   // 2. Model
   const model = shortModel(input.model);
   if (model) parts.push(dim(model));
+
+  // 2b. Qwen Code vim mode (absent unless vim keybindings are enabled).
+  if (input.vim?.mode) parts.push(dim(`vim:${input.vim.mode}`));
 
   // 3. Context %
   const ctxPct = input.context_window?.used_percentage;

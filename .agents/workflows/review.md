@@ -4,7 +4,7 @@ description: Full QA review pipeline covering security audit (OWASP Top 10), per
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover configured
   tools; if unavailable or timed out, use native search only for paths outside this project or ignored paths. Do not install
@@ -113,7 +113,7 @@ Use the Agent tool to spawn subagent:
 ### If Codex CLI
 Request parallel subagent execution with the review scope and standards.
 
-### If Gemini CLI or Antigravity or CLI Fallback
+### If Antigravity or CLI Fallback
 ```bash
 oma agent spawn qa-agent review-prompt.md {sessionId} --task-id {qa_review_task.id} -w {workspace}
 ```
@@ -137,7 +137,7 @@ When user wants fixes too, execute review then fix then re-review loop:
 ### If Codex CLI
      Request parallel subagent execution with the issues and fix instructions.
 
-### If Gemini CLI or Antigravity or CLI Fallback
+### If Antigravity or CLI Fallback
      ```bash
      oma agent spawn backend backend-fix-prompt.md {sessionId} --task-id {backend_fix_task.id} -w ./backend &
      oma agent spawn frontend frontend-fix-prompt.md {sessionId} --task-id {frontend_fix_task.id} -w ./frontend &

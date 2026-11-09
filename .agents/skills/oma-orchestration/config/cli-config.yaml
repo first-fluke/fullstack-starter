@@ -28,7 +28,7 @@ vendors:
     output_format_flag: "--json"
     auto_approve_flag: "--sandbox workspace-write"
     model_flag: "-m"
-    default_model: "gpt-5.5"
+    default_model: "gpt-6.1-terra"
     response_jq: ".response"
     isolation_method: "directory"
 
@@ -39,13 +39,13 @@ vendors:
     output_format: "json"
     auto_approve_flag: "--yolo"
     model_flag: "-m"
-    default_model: "qwen3.6-plus"
+    default_model: "qwen3.7-plus"
     response_jq: ".output"
     isolation_method: "directory"
 
   # Antigravity (agy) headless print mode: `agy -p "<prompt>"`.
   # Models: run `agy models`. `--model` accepts ONLY those display names —
-  # a slug like `gemini-3.1-pro` makes agy exit with `Error: invalid --model`
+  # a slug like `gemini-4-argon` makes agy exit with `Error: invalid --model`
   # before running the prompt. The parenthesised tier is agy's effort dial.
   # agy 1.0 had no --model / --add-dir / --print-timeout; oma probes
   # `agy --help` once and drops whichever flags the installed binary lacks.
@@ -54,7 +54,7 @@ vendors:
     prompt_flag: "-p"
     auto_approve_flag: "--dangerously-skip-permissions"
     model_flag: "--model"
-    default_model: "Gemini 3.1 Pro (High)"
+    default_model: "Gemini 4 Argon (High)"
     isolation_method: "directory"
 
   # Cursor Agent headless CLI: `cursor agent -p …` (--print). Prompt is positional.

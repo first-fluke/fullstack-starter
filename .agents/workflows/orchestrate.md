@@ -4,7 +4,7 @@ description: Automated parallel agent execution that spawns CLI subagents via na
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider's tools; do not install or track a repository; if unavailable or timed out, use native search only for paths outside this project or ignored paths, and record that limit.
 - Persist coordination artifacts through the file-memory contract in `.agents/skills/_shared/runtime/memory-protocol.md`. That path is independent of code-intelligence MCP tools.
@@ -138,15 +138,14 @@ Spawn agents via **Agent tool** using `.claude/agents/{agent}.md` definitions.
 
 Spawn same-session subagents with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent spawn` for same-session OpenCode tasks; that external fallback does not appear as a native child task in the active UI/TUI.
 
+### If Kilo Code and target vendor is Kilo
+
+Same as OpenCode: spawn same-session subagents (`.kilo/agents/{agent}.md`) with the native `task` tool and `subagent_type: {agent-id}`. Do not use `oma agent spawn` for same-session Kilo tasks.
+
 ### If Codex CLI and target vendor is Codex
 
 Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when available.
 Pass each agent its task description, API contracts, and relevant context.
-If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} --task-id {task.id} -w {workspace}`.
-
-### If Gemini CLI and target vendor is Gemini
-
-Spawn native Gemini subagents using `.gemini/agents/{agent}.md` when available.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn {agent_id} {prompt_file} {session_id} --task-id {task.id} -w {workspace}`.
 
 ### If target vendor differs from current runtime, or native dispatch is unavailable
@@ -158,7 +157,7 @@ Spawn agents using `oma agent spawn {agent_id} {prompt_file} {session_id} --task
 ## Step 4: Monitor Progress
 
 Use `oma agent status {session_id} {agent_id}` to check process health.
-Also poll `progress-{agentId}-{taskId}-{runId}-{sessionId}.md` for logic updates.
+Prefer host completion notifications. If polling is needed, one coordinator reads changed `progress-{agentId}-{taskId}-{runId}-{sessionId}.md` files with bounded backoff. Apply `.agents/skills/_shared/core/execution-policy.md` for the execution deadline, cancellation, resource ownership, and shutdown; cancellation or deadline exhaustion prevents re-dispatch and gate repair.
 
 - Update `task-board-{sessionId}.md` with turn counts and status changes.
 - Watch for: completion, failures, crashes.
@@ -170,7 +169,7 @@ Use observed failures, missing artifacts, and unmet acceptance criteria to diagn
 
 If useful context is lost or progress remains stalled, save completed work, remaining criteria, verification, and artifact paths before resuming or re-dispatching. Preserve partial results and avoid duplicating a live attempt. Follow `.agents/skills/_shared/core/context-budget.md` and the existing retry/cost limits.
 
-> **Claude Code note**: Agent tool returns results synchronously, so no polling is needed. Check status, files changed, and issues directly in each agent's return value.
+> **Claude Code note**: agents dispatched with `run_in_background=true` report via background completion notifications, not synchronous return values — wait for each notification before proceeding (foreground Agent calls return inline). Check status, files changed, and issues in each agent's result; `oma agent:status` and `progress-*` polling remain the monitoring path for CLI-fallback spawns.
 
 ---
 

@@ -51,6 +51,7 @@ Guide manual multi-agent coordination for complex work that spans PM, frontend, 
 1. Confirm the task is complex enough for multi-agent coordination.
 2. Reuse a current plan and handoff state; use PM when task decomposition or contract changes are needed.
 3. Identify priority tiers and shared contracts.
+4. Apply the shared collaboration policy before assigning parallel work or coordinating ownership handoffs and result collection.
 
 ### Scenes
 1. **PREPARE**: Define session, domains, and task decomposition needs.
@@ -152,6 +153,7 @@ wait
 
 #### Step 3: Monitor & Coordinate
 
+- Apply `../_shared/core/execution-policy.md` for the execution deadline, resource ownership, and cancellation. Prefer host completion notifications; otherwise use one coordinator with bounded polling backoff. Cancellation or deadline exhaustion stops new dispatch, review, and recovery; use bounded termination checks and report survivors or unsupported cancellation in the handoff.
 - Read injected run artifacts and receipts. Human-readable progress/results use `{memoryConfig.basePath}/progress-{agentId}-{taskId}-{runId}-{sessionId}.md` and the corresponding `result-` name; see `../_shared/runtime/memory-protocol.md`. Keep the structured claim path unchanged.
 - Verify API contracts align between agents
 - Ensure shared data models are consistent
@@ -165,3 +167,4 @@ Review the coordinated deliverables with QA. Resolve blocking defects and requir
 For fully automated execution without manual spawning, use the **orchestrator** skill instead.
 
 ## References
+- Parallel worker collaboration: `../_shared/core/collaboration-policy.md` (before assigning parallel work or coordinating peer issues, ownership handoffs, and result collection)

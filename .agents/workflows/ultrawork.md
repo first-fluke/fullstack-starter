@@ -4,7 +4,7 @@ description: Ultrawork - high-quality 5-phase development workflow with 12 revie
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover configured tools; if the provider is unavailable or times out, use native search only for paths outside this project or ignored paths. Do not install or track repositories automatically.
 - Persist coordination artifacts through the file-memory contract in `.agents/skills/_shared/runtime/memory-protocol.md`; it is independent of code-intelligence MCP tools.
@@ -27,7 +27,7 @@ The detected runtime vendor and each agent's target vendor determine how agents 
 
 ## Cross-Context Review (CCR) Dispatch
 
-Every review step in this workflow (the 12 reviews in `multi-review-protocol.md`) runs as a **fresh, context-isolated reviewer subagent** — never inline in the main session, and never batched with implementation or with another review. This is mandatory; see the **Cross-Context Review (CCR) Mandate** in `multi-review-protocol.md` for the rationale and the two papers behind it.
+Every review step in this workflow (the 12 reviews in `multi-review-protocol.md`) runs as a **fresh, context-isolated reviewer subagent** — never inline in the main session, and never batched with implementation or with another review. This is mandatory; see the **Cross-Context Review (CCR) Mandate** in `multi-review-protocol.md`.
 
 **One review = one fresh reviewer subagent.** The main session is the coordinator: it dispatches each review, waits for its verdict, and aggregates verdicts into the phase's `result-*.md` and `session-ultrawork.md`. For each review:
 
@@ -60,7 +60,7 @@ Reviewers are read-only evaluators. Implementation and refactor **actions** (Pha
    - Include: session start time, session ID, user request summary, workflow version (ultrawork)
 11. (Recommended) Attach a mechanical stop gate when the project has a cheap deterministic check:
    - `oma goal set --gate typecheck` (allowlist: `typecheck` | `test` | `lint`; maps to the package.json script)
-   - While set, the Stop hook allows the session to end only when the gate passes; failures return the output tail. Add `--budget-minutes <n>` to bound unattended runs with an honest partial stop.
+   - While set, the Stop hook allows the session to end only when the gate passes; failures return the output tail. Add `--budget-minutes <n>` to bound the gate with an honest partial stop. This does not terminate external work. Apply `.agents/skills/_shared/core/execution-policy.md` for the whole-execution deadline and owned-resource shutdown; user cancellation overrides gate repair and recovery.
 
 ---
 
@@ -131,9 +131,6 @@ Spawn native Codex custom agents using `.codex/agents/{agent}.toml` when availab
 Pass each agent its task description, API contracts, and relevant context.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn`.
 
-#### If Gemini CLI and target vendor is Gemini
-Use native Gemini subagents when available, otherwise fall back to `oma agent spawn`.
-
 #### If target vendor differs from current runtime, or native dispatch is unavailable
 ```bash
 oma agent spawn backend backend-prompt.md {sessionId} --task-id {backend_task.id} -w ./backend &
@@ -147,12 +144,12 @@ wait
 
 **Wait for all implementation agents to complete before proceeding.**
 
-1. Poll `progress-{agentId}-{taskId}-{runId}-{sessionId}.md` files
+1. Prefer host completion notifications; otherwise one coordinator reads changed `progress-{agentId}-{taskId}-{runId}-{sessionId}.md` files with bounded backoff under the shared execution policy.
 2. Use configured code intelligence or its native fallback to verify implementation alignment
 3. Check the injected claim and `result-{agentId}-{taskId}-{runId}-{sessionId}.md` to confirm completion
 4. Use memory edit tool to record monitoring results in `session-ultrawork.md`
 
-**Continue polling until all agents report completion or failure.**
+**Wait for completion or failure within the shared execution deadline. Cancellation or deadline exhaustion stops new work and starts bounded owned-resource shutdown; do not proceed to verification or recovery.**
 
 ### Step 5.2: Measure Baseline (Conditional)
 
@@ -189,7 +186,7 @@ Use three separate Agent tool calls (one message = parallel, isolated contexts):
 Spawn one native Codex custom agent (`.codex/agents/{agent}.toml`) **per review** when available, each with only its artifacts + guide section.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn`.
 
-#### If Gemini CLI or Antigravity or CLI Fallback
+#### If Antigravity or CLI Fallback
 ```bash
 oma agent spawn qa-agent step-6-prompt.md {sessionId} --task-id {qa_alignment_task.id} -w {workspace}
 oma agent spawn qa-agent step-7-prompt.md {sessionId} --task-id {qa_safety_task.id} -w {workspace}
@@ -202,12 +199,12 @@ oma agent spawn qa-agent step-8-prompt.md {sessionId} --task-id {qa_regression_t
 
 **Wait for all three VERIFY reviewers to complete before proceeding.**
 
-1. Use memory read tool to poll each reviewer's `progress-*` / verdict entry.
+1. Prefer completion notifications; otherwise use bounded polling of changed reviewer `progress-*` / verdict entries.
 2. Confirm each reviewer wrote its structured verdict to memory.
-   - **Claude-native path**: each `qa-reviewer` Agent call returns synchronously with its verdict.
+   - **Claude-native path**: `qa-reviewer` calls dispatched with `run_in_background=true` report via completion notifications — collect each verdict from memory once notified (foreground calls return inline).
 3. **Aggregate** the three verdicts into `result-qa-{sessionId}.md` under `.agents/results/` (this satisfies the VERIFY artifact contract) and record the combined VERIFY result in `session-ultrawork.md`.
 
-**Continue polling until all three reviewers report completion.**
+**Wait within the shared execution deadline. Cancellation or deadline exhaustion stops review and recovery and requires bounded owned-resource shutdown.**
 
 ### Step 6: Alignment Review
 - **Executed by a fresh isolated reviewer subagent (CCR)**: Compare implementation vs plan.
@@ -235,7 +232,7 @@ Evaluate [the canonical VERIFY_GATE](ultrawork/resources/phase-gates.md#verify_g
 
 > **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Gate failure count has reached the configured maximum iterations (default: 5 total VERIFY + REFINE cycles). Do not start another cycle.
-> 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop the loop immediately. Save all current step results before stopping, then report to the user that the loop was terminated early due to quota.
+> 2. Session cost cap exceeded: `oma agent:spawn` enforces `session.quota_cap` mechanically — when the cap is exceeded it prints the quota message and refuses the spawn with a `[session-cost] Quota cap exceeded` error (no cap configured → spawns proceed normally). If a spawn is rejected that way, stop the loop immediately, save all current step results, and report to the user that the loop was terminated early due to quota.
 >
 > If neither condition is met, return to Step 5 and continue.
 
@@ -272,7 +269,7 @@ Refactor actions (after the review verdicts are collected):
 Spawn one native Codex reviewer per review (`.codex/agents/{agent}.toml`) with only its artifacts + guide section, then the native refactor agent (`.codex/agents/refactor-engineer.toml`) for Steps 9/11/13.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn`.
 
-#### If Gemini CLI or Antigravity or CLI Fallback
+#### If Antigravity or CLI Fallback
 ```bash
 oma agent spawn qa-agent step-10-prompt.md {sessionId} --task-id {qa_reuse_task.id} -w {workspace}
 oma agent spawn qa-agent step-12-prompt.md {sessionId} --task-id {qa_consistency_task.id} -w {workspace}
@@ -286,13 +283,13 @@ oma agent spawn refactor-engineer refine-prompt.md {sessionId} --task-id {refine
 **Wait for the two reviewers and the Refactor Agent to complete refinement before proceeding.**
 
 1. Confirm both isolated reviewers wrote their structured verdicts to memory.
-2. Use memory read tool to poll `progress-refactor*[-{sessionId}].md`
+2. Prefer completion notifications; otherwise use bounded polling of changed `progress-refactor*[-{sessionId}].md` files.
 3. Check the `refine_task` claim and its run-scoped result report. The injected
    claim path, not an agent-derived filename, is the completion identity.
    - **Claude-native path**: use the native result and persist it against the same plan task ID/run ID.
 4. Use memory edit tool to record refinement results (reviews + actions) in `session-ultrawork.md`
 
-**Continue polling until the reviewers and Refactor Agent report completion.**
+**Wait within the shared execution deadline. Cancellation or deadline exhaustion stops refinement and recovery and requires bounded owned-resource shutdown.**
 
 ### Step 9: Split Large Files/Functions
 - **Executed by Refactor Agent (action)**: Files > 500 lines, Functions > 50 lines.
@@ -333,7 +330,7 @@ Evaluate [the canonical REFINE_GATE](ultrawork/resources/phase-gates.md#refine_g
 
 > **Review Loop termination conditions** (OR, whichever fires first wins):
 > 1. Total REFINE failure count has reached the configured maximum iterations (default: 5 cycles across all phases). Do not start another cycle.
-> 2. Session cost cap exceeded: if `loadQuotaCap()` from `cli/io/session-cost.ts` returns non-null, call `checkCap(sessionId, cap)` (no cap configured → skip this condition). If `exceeded === true`, print `formatPromptMessage(result)` to the user and stop. Save current step results before stopping, then report early termination due to quota.
+> 2. Session cost cap exceeded: `oma agent:spawn` enforces `session.quota_cap` mechanically — when the cap is exceeded it prints the quota message and refuses the spawn with a `[session-cost] Quota cap exceeded` error (no cap configured → spawns proceed normally). If a spawn is rejected that way, stop the loop immediately, save current step results, and report early termination due to quota.
 >
 > If neither condition is met, re-spawn the Refactor Agent with specific issues and repeat until GATE passes.
 
@@ -357,7 +354,7 @@ Use separate Agent tool calls (one message = parallel, isolated contexts):
 Spawn one native Codex reviewer per review (`.codex/agents/{agent}.toml`) when available, each with only its artifacts + guide section.
 If native dispatch is not verified in the current runtime, fall back to `oma agent spawn`.
 
-#### If Gemini CLI or Antigravity or CLI Fallback
+#### If Antigravity or CLI Fallback
 ```bash
 oma agent spawn qa-agent step-14-prompt.md {sessionId} --task-id {qa_quality_task.id} -w {workspace}
 oma agent spawn qa-agent step-15-prompt.md {sessionId} --task-id {qa_ux_task.id} -w {workspace}
@@ -372,10 +369,10 @@ oma agent spawn qa-agent step-17-prompt.md {sessionId} --task-id {qa_ship_task.i
 **Wait for all SHIP reviewers to complete final review before proceeding.**
 
 1. Confirm each reviewer wrote its structured verdict to memory.
-   - **Claude-native path**: each `qa-reviewer` Agent call returns synchronously with its verdict.
+   - **Claude-native path**: `qa-reviewer` calls dispatched with `run_in_background=true` report via completion notifications — collect each verdict from memory once notified (foreground calls return inline).
 2. **Aggregate** the verdicts into `result-qa-{sessionId}.md` under `.agents/results/` (this satisfies the SHIP artifact contract) and record the combined final result in `session-ultrawork.md`.
 
-**Continue polling until all SHIP reviewers report completion.**
+**Wait within the shared execution deadline. Cancellation or deadline exhaustion stops SHIP review and recovery and requires bounded owned-resource shutdown.**
 
 ### Step 14: Code Quality Review
 - **Executed by a fresh isolated reviewer subagent (CCR)**: Lint, Types, Coverage.
@@ -439,9 +436,7 @@ Every review runs in its own fresh context (never inline, never batched) per the
 
 ---
 
-## Autoresearch-Inspired Enhancements
-
-This workflow conditionally incorporates patterns from autoresearch:
+## Conditional Measurement and Recovery
 
 | Pattern | When Active | Reference |
 |---------|-------------|-----------|
