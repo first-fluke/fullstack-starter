@@ -44,8 +44,13 @@
     "PostToolUse": [
       {
         "hook": "refactor-guard.ts",
-        "matcher": "write_file|replace",
+        "matcher": "write_file|edit|replace|notebook_edit",
         "timeout": 5
+      },
+      {
+        "hook": "skill-route.ts",
+        "matcher": "skill|read_file|run_shell_command",
+        "timeout": 3
       }
     ],
     "Stop": [
@@ -60,13 +65,14 @@
     ]
   },
   "statusLine": {
-    "hook": "hud.ts"
+    "hook": "hud.ts",
+    "options": {
+      "respectUserColors": true,
+      "hideContextIndicator": true
+    }
   },
   "statusLineKey": "ui",
   "extra": {
-    "hooksConfig": {
-      "enabled": true
-    },
     "permissions": {
       "allow": ["Bash(ls *)", "Bash(oma *)"]
     }

@@ -1,1 +1,0 @@
-../../../.agents/workflows/security.md

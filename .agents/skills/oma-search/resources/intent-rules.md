@@ -1,77 +1,25 @@
-# Intent Classification Rules
+# Route selection
 
-## Classification Priority
+Select from the requested outcome, supplied input and constraints. Keywords can
+help interpret context but do not override what the user is trying to obtain.
 
-1. **Override flags**: always win, skip classification entirely
-2. **Keyword pattern matching**: scan query for mode-specific keywords
-3. **Signal detection**: contextual clues (library name + version, error message, etc.)
-4. **Fallback**: `web` + `docs` parallel when no clear signal
+## Selection order
 
-## Override Flags
+1. An explicit route flag or constraint decides.
+2. Read a supplied or discovered URL with `fetch` when the requested result is its
+   contents. A GitHub URL is not by itself a request for code-pattern search.
+3. Use `docs` for a library/API contract or official version-specific instructions,
+   `code` for remote implementation matches, and `web` for external discovery such
+   as comparisons or current events.
+4. If an unresolved ambiguity materially changes the answer, clarify that
+   ambiguity before choosing.
 
-| Flag | Forced Mode | Description |
-|------|-------------|-------------|
-| `--docs` | `docs` | Official documentation only via Context7 |
-| `--code` | `code` | GitHub/GitLab code search only |
-| `--web` | `web` | Web search only (native + `oma search fetch` fallback) |
-| `--strict` | (modifier) | Filter results to verified+ sources (score >= 0.85) |
-| `--wide` | (modifier) | Show all sources with trust labels (no filtering) |
-| `--gitlab` | (modifier) | Force `glab api` instead of `gh` for code route |
+## Examples
 
-## Keyword Patterns
-
-### docs mode
-
-**Keywords:** official, docs, documentation, API ref, reference, spec, specification
-
-**Signals:**
-- Library/framework name + version mentioned (e.g., "React 19 docs")
-- Specific API or method name + "how to use"
-
-### web mode
-
-**Keywords:** example, tutorial, how to, guide, blog, comparison, vs, use case, best practice
-
-**Signals:**
-- Opinion/comparison queries ("X vs Y", "best way to")
-- Error messages or stack traces (solution search)
-- Trend or news queries
-
-### code mode
-
-**Keywords:** implementation, pattern, repo, repository, source code, code search, codebase
-
-**Signals:**
-- Language/framework + "how is it implemented"
-- Specific algorithm or pattern name
-- URL containing github.com or gitlab.com
-
-### local mode
-
-**Keywords:** this project, here, this file, function, class, method, variable, our code
-
-**Signals:**
-- References to current codebase context
-- Relative file paths mentioned
-- "Where is X defined" type queries
-
-> Multi-language activation (Korean, Japanese, etc.) is owned by `.agents/hooks/core/triggers.json §oma-search.keywords`. This file documents English mode classifiers only.
-
-## Fallback Rule
-
-When no clear intent is detected:
-- Dispatch `web` + `docs` in parallel
-- Merge results with trust scoring
-- Present combined ranked output
-
-## Ambiguity Resolution Examples
-
-| Query | Detected Mode | Reason |
-|-------|--------------|--------|
-| "React useState" | `web` + `docs` (fallback) | Ambiguous: could be docs or tutorial |
-| "React useState official docs" | `docs` | "official docs" keyword |
-| "React useState use case" | `web` | "use case" keyword |
-| "React useState implementation" | `code` | "implementation" keyword |
-| "find handleAuth function" | `local` | "function" + "find" signals local |
-| "Next.js vs Remix" | `web` | "vs" comparison signal |
-| "OAuth PKCE github" | `code` | "github" platform signal |
+| Request | Primary action | Constraint |
+|---|---|---|
+| React 19 useEffect API | `docs` | Check the requested version |
+| Next.js versus Remix | `web` | Discover comparative sources |
+| OAuth PKCE implementation in a named repository | `code` | Retain repository and language filters |
+| Read this GitHub file URL | `fetch` | Read that file; do not infer a broad search |
+| Find handleAuth in this project | Local-code handoff | Use configured code intelligence directly |

@@ -43,6 +43,7 @@ Analyze, compare, and document software architecture decisions with explicit tra
 - Assumptions, tradeoffs, risks, and validation steps
 - A Mermaid context/container diagram when the decision changes structure (boundaries, dependencies, data flow)
 - When `oma diagram resolve` reports `engine: archify` (the normal case — oma auto-fetches the latest archify release), an interactive sibling `<artifact-stem>.archify.json` + `.archify.html` derived from that Mermaid (see `_shared/conditional/diagram-engine.md`)
+- When the diagram is a vendor-stack topology and the user wants logos or a poster, a `<artifact-stem>.stack.html` sibling from the upstream stack-diagram skill (stack route in `_shared/conditional/diagram-engine.md`; no CLI, no config key)
 - ADRs and retained recommendations for a selected approach in `docs/decisions/`, linked from `docs/decisions/index.md`
 - Run-specific reviews, diagnoses, CBAM analyses, and unselected comparison drafts in `.agents/results/architecture/`
 
@@ -64,6 +65,14 @@ outputs:
     description: archify interactive HTML diagram (+ JSON spec) beside a run-specific structural report; only when the archify engine resolves
     artifact: ".agents/results/architecture/*.archify.html"
     required: false
+  - name: architecture-decision-stack-html
+    description: stack-diagram HTML poster with vendor logos beside a retained structural decision; only on the stack route when the upstream skill resolves
+    artifact: "docs/decisions/*.stack.html"
+    required: false
+  - name: architecture-stack-html
+    description: stack-diagram HTML poster with vendor logos beside a run-specific structural report; only on the stack route when the upstream skill resolves
+    artifact: ".agents/results/architecture/*.stack.html"
+    required: false
 ```
 
 ### Dependencies
@@ -73,27 +82,9 @@ outputs:
 - `resources/output-templates.md` for final artifact shapes
 - `resources/api-evolution.md` for published-contract versioning/deprecation decisions (MAP evolution patterns)
 - `resources/migration-patterns.md` for transition plans when the chosen architecture requires restructuring a live system
-- `_shared/conditional/diagram-engine.md` (+ `oma diagram resolve`) when a structural diagram is emitted — chooses archify vs Mermaid and owns the validate/deliver loop
-
-### Control-flow features
-- Branches by request clarity, decision materiality, risk level, and need for stakeholder consultation
-- May compare multiple options before recommending one
-- Produces source-grounded docs rather than directly changing implementation
+- `_shared/conditional/diagram-engine.md` (+ `oma diagram resolve`) when a structural diagram is emitted — picks the route (archify vs Mermaid, or the upstream stack-diagram poster) and owns the validate/deliver loop
 
 ## Structural Flow
-
-### Entry
-1. Identify the architecture problem, decision, or pain signal.
-2. Gather existing constraints, source evidence, and stakeholder context.
-3. Read prior decisions in `docs/decisions/`; use `.agents/results/architecture/`, `docs/design-docs/`, and `docs/plans/designs/` as legacy context until migration. New decisions supersede old ones explicitly, never contradict them silently.
-4. Select the lightest sufficient method.
-
-### Scenes
-1. **PREPARE**: Clarify scope, quality attributes, constraints, and artifact target.
-2. **ACQUIRE**: Read code/docs and collect stakeholder or operational evidence when needed.
-3. **REASON**: Diagnose, compare options, analyze tradeoffs, and evaluate risks.
-4. **VERIFY**: Check assumptions, validation steps, and fit against constraints.
-5. **FINALIZE**: Produce recommendation, ADR, or architecture artifact.
 
 ### Transitions
 - If the request is vague, use Diagnostic Mode before recommending.
@@ -113,48 +104,17 @@ outputs:
 
 ## Logical Operations
 
-### Actions
-| Action | SSL primitive | Evidence |
-|--------|---------------|----------|
-| Classify architecture request | `SELECT` | Method selection summary |
-| Read code/docs/context | `READ` | Source-grounded architecture evidence |
-| Compare options | `COMPARE` | Design-twice or recommendation mode |
-| Infer risks and tradeoffs | `INFER` | ATAM/CBAM-style analysis |
-| Validate decision fit | `VALIDATE` | Checklist and validation steps |
-| Write artifact | `WRITE` | ADR or architecture result |
-| Notify outcome | `NOTIFY` | Final recommendation summary |
-
-### Tools and instruments
-- Local file reading and search for codebase/docs
-- Architecture method references and output templates
-- Optional stakeholder-agent consultation only when cross-cutting enough to justify cost
-
 ### Canonical workflow path
-Use the configured code-intelligence provider for structure, symbols, references, and integration points. If unavailable, use native search only for paths outside this project or ignored paths:
+1. Identify the architecture problem, decision, or pain signal, and clarify scope, quality attributes, constraints, stakeholder context, and the target artifact.
+2. Read prior decisions in `docs/decisions/`; read `.agents/results/architecture/`, `docs/design-docs/`, and `docs/plans/designs/` as legacy fallback until migration.
+3. Use the configured code-intelligence provider for structure, symbols, references, and integration points: discover its file, symbol, reference, and pattern tools, then inspect architecture-relevant modules, ownership, and integration points within the selected scope. If unavailable, use native search only for paths outside this project or ignored paths.
+4. Choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or ADR mode before writing the artifact. Record the mode with subject `architecture.route-selection` per `../_shared/runtime/route-selection.md` (the lightest sufficient method and why heavier ones were not needed).
+5. Diagnose, compare options, and analyze tradeoffs and risks in the selected mode, following `resources/execution-protocol.md`.
+6. Check assumptions, validation steps, and fit against constraints with `resources/checklist.md`.
+7. Write the recommendation, ADR, or run report from `resources/output-templates.md` to the location Guardrail 9 assigns. When the decision changes structure, add the diagram per `_shared/conditional/diagram-engine.md`. Report the recommendation with its assumptions, tradeoffs, risks, and validation steps.
 
-```text
-1. Read prior decisions in docs/decisions/; read old result/design directories as legacy fallback until migration.
-2. Discover the configured provider's file, symbol, reference, and pattern tools.
-3. Inspect architecture-relevant modules, ownership, and integration points within the selected scope.
-```
-
-Then choose Diagnostic, Recommendation, Design-Twice, ATAM-style, CBAM-style, or ADR mode before writing the artifact.
-
-### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `CODEBASE` | Architecture-relevant source files and docs |
-| `LOCAL_FS` | `docs/decisions/` decisions and `.agents/results/architecture/` run reports |
-| `MEMORY` | Assumptions, option matrix, tradeoff notes |
-
-### Preconditions
-- The architecture concern or decision boundary is identifiable.
-- Relevant context can be read or assumptions can be stated.
-
-### Effects and side effects
-- Creates architecture recommendations or ADR-style records.
-- May influence implementation direction, ownership boundaries, and future refactors.
-- Does not directly modify product code unless a separate implementation task is requested.
+### Resource scope and effects
+Reads architecture-relevant source files and docs. Writes ADRs and retained recommendations to `docs/decisions/` (and its index) and run reports to `.agents/results/architecture/`; diagram siblings are written beside the artifact they illustrate. A recommendation may influence implementation direction, ownership boundaries, and future refactors. This skill does not modify product code unless a separate implementation task is requested.
 
 ### Guardrails
 1. Diagnose the architecture problem before selecting a method.

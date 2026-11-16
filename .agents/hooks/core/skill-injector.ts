@@ -20,11 +20,17 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { agyConversationId, readAgyPrompt } from "./agy-input.ts";
 import { toPosixPath } from "./fs-utils.ts";
 import { makePromptOutput } from "./hook-output.ts";
+import { omaHome } from "./oma-home.ts";
 import { isRelayedAgentMessage, normalizePromptInput } from "./prompt-input.ts";
+import {
+  explicitSkillMentions,
+  knownSkillNames,
+  recordSkillRoutes,
+} from "./skill-route.ts";
 // triggers.json is imported statically: bundler inlines it into the oma binary;
 // standalone bun runs resolve the sibling file (pi / direct run).
 import embeddedTriggers from "./triggers.json" with { type: "json" };
@@ -87,8 +93,16 @@ export interface SkillEntry {
   relPath: string;
 }
 
-export function discoverSkills(projectDir: string): SkillEntry[] {
-  const skillsDir = join(projectDir, ".agents", "skills");
+function defaultGlobalRoot(): string | null {
+  try {
+    return omaHome();
+  } catch {
+    return null;
+  }
+}
+
+function skillsUnder(root: string, project: boolean): SkillEntry[] {
+  const skillsDir = join(root, ".agents", "skills");
   if (!existsSync(skillsDir)) return [];
 
   const out: SkillEntry[] = [];
@@ -103,7 +117,7 @@ export function discoverSkills(projectDir: string): SkillEntry[] {
   }
 
   for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+    if (!entry.isDirectory() && !entry.isSymbolicLink?.()) continue;
     if (entry.name.startsWith("_")) continue;
 
     const skillPath = join(skillsDir, entry.name, "SKILL.md");
@@ -112,8 +126,33 @@ export function discoverSkills(projectDir: string): SkillEntry[] {
     out.push({
       name: entry.name,
       absolutePath: skillPath,
-      relPath: join(".agents", "skills", entry.name, "SKILL.md"),
+      // A global install's skills live outside the project, so the model is
+      // pointed at the absolute path instead of a project-relative one.
+      relPath: project
+        ? join(".agents", "skills", entry.name, "SKILL.md")
+        : skillPath,
     });
+  }
+  return out;
+}
+
+/**
+ * Skills under the project's `.agents/skills/`, plus — for a global install
+ * (`oma install --global`) — `<OMA_HOME>/.agents/skills/`. A project skill
+ * shadows a global one of the same name.
+ */
+export function discoverSkills(
+  projectDir: string,
+  globalRoot: string | null = defaultGlobalRoot(),
+): SkillEntry[] {
+  const out = skillsUnder(projectDir, true);
+  if (!globalRoot || resolve(globalRoot) === resolve(projectDir)) return out;
+  const seen = new Set(out.map((skill) => skill.name));
+  for (const skill of skillsUnder(globalRoot, false)) {
+    if (!seen.has(skill.name)) {
+      seen.add(skill.name);
+      out.push(skill);
+    }
   }
   return out;
 }
@@ -455,6 +494,23 @@ export async function run(
   // and produced false skill suggestions. Same guard as keyword-detector.
   if (isRelayedAgentMessage(prompt)) return null;
 
+  // Routing telemetry: a skill the user named (`/name`, `$name`) is routed by
+  // explicit request. Recorded before every early exit below; never blocks.
+  if (/[/$]/.test(prompt)) {
+    const explicit = explicitSkillMentions(
+      stripCodeBlocks(prompt),
+      knownSkillNames(projectDir),
+    );
+    await recordSkillRoutes(
+      { projectDir, vendor: ctx.host ?? vendor, vendorSid: sessionId },
+      explicit.map((skill) => ({
+        skill,
+        source: "user-explicit" as const,
+        stage: "loaded" as const,
+      })),
+    );
+  }
+
   // Claude-specific: slash-skill resolution must run BEFORE the slash early-exit
   // and persistent-workflow guard (same order as the original standalone path).
   if (vendor === "claude") {
@@ -487,6 +543,18 @@ export async function run(
   if (fresh.length === 0) return null;
 
   writeState(projectDir, nextState);
+  // Routing telemetry: why each skill was suggested (matched trigger
+  // keywords only — never the prompt text).
+  await recordSkillRoutes(
+    { projectDir, vendor: ctx.host ?? vendor, vendorSid: sessionId },
+    fresh.map((match) => ({
+      skill: match.name,
+      source: "hook-trigger" as const,
+      stage: "suggested" as const,
+      matchedTriggers: match.matchedTriggers,
+      score: match.score,
+    })),
+  );
   return { type: "context", additionalContext: formatContext(fresh) };
 }
 
@@ -511,7 +579,7 @@ async function main() {
   if (vendor === "antigravity" && !prompt) {
     const invocationNum = input.invocationNum;
     if (typeof invocationNum === "number" && invocationNum > 1) process.exit(0);
-    prompt = readAgyPrompt(input.transcriptPath);
+    prompt = readAgyPrompt(input.transcriptPath, input.lastUserInput);
   }
 
   // Build canonical inputs and delegate to run() — single logic source.

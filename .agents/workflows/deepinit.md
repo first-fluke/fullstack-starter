@@ -4,7 +4,7 @@ description: Initialize project harness with AGENTS.md as table of contents, ARC
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search only for paths outside this project or ignored paths when unavailable or timed out. Do not install a provider or track a repository automatically.
 - Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
@@ -80,7 +80,7 @@ Not all files are required. Generate only what is **discoverable and relevant** 
 
 ## Step 0: Preparation
 
-1. Check if `AGENTS.md`, `ARCHITECTURE.md`, or `docs/` already exists. If so, this is an **update run** (see Step 6).
+1. Check if `AGENTS.md`, `ARCHITECTURE.md`, or `docs/` already exists. If so, this is an **update run**: keep everything below a `<!-- MANUAL -->` marker and every file this workflow did not generate, and regenerate only the sections this workflow owns. Drift checks after the run belong to `oma-docs` (Step 6).
 
 ---
 
@@ -244,7 +244,7 @@ Reference this file from AGENTS.md so review agents load it automatically.
 
 ## Step 4: Generate Root AGENTS.md
 
-**~100 lines. Table of contents pointing to docs/.**
+**About 100 lines, under 120. Table of contents pointing to docs/.**
 
 ### Template
 
@@ -330,19 +330,17 @@ Only at **package/app boundaries** in monorepos.
 
 ### Rules
 
-- **Max 50 lines.** Point to `docs/` for details.
+- **Under 60 lines.** Point to `docs/` for details.
 - Content must be **specific to this boundary**. Don't repeat root-level rules.
 
 ---
 
 ## Step 6: Verify After Updates (Delegated)
 
-This step is now handled by `oma-docs`. After deepinit completes, the user can run:
+`deepinit` generates initial bootstrap content only. After it completes, the user can run `oma-docs` for drift and broken-reference checks:
 
 - `/oma-docs verify`: check generated harness docs against the current codebase.
 - Set `docs.auto_verify: true` in `oma-config.yaml` to run verify automatically at the end of `/scm`, `/work`, and `/ultrawork` workflows.
-
-deepinit no longer detects drift on update runs; it only generates 0→1 bootstrap content. The legacy `<!-- REVIEW: this rule may be outdated -->` marker behavior is replaced by the broken-ref report from `oma-docs verify`.
 
 ---
 

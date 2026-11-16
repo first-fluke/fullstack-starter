@@ -45,8 +45,13 @@
     "postToolUse": [
       {
         "hook": "refactor-guard.ts",
-        "matcher": "fs_write",
+        "matcher": "fs_write|str_replace|fs_append",
         "timeout": 5
+      },
+      {
+        "hook": "skill-route.ts",
+        "matcher": "fs_read|read_file|execute_bash|disclose_context",
+        "timeout": 3
       }
     ],
     "stop": [

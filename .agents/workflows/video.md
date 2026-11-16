@@ -4,14 +4,14 @@ description: Agent-native, key-optional video generation workflow that turns a b
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
-- **Key-optional by default (backend rule 11).** The baseline path uses **zero external API keys**: the agent writes the script, oma-voice does TTS, oma-image does visuals, captions are key-free, HyperFrames composites. Every paid upgrade (Pexels stock, Pixelle AIGC) sits behind a key-free fallback and is **off by default**. Never disable the fallback to force a real call, and never silently drop a requested real path.
+- **Key-optional by default (oma-backend core rule 11).** The baseline path uses **zero external API keys**: the agent writes the script, oma-voice does TTS, oma-image does visuals, captions are key-free, HyperFrames composites. Every paid upgrade (Pexels stock, Pixelle AIGC) sits behind a key-free fallback and is **off by default**. Never disable the fallback to force a real call, and never silently drop a requested real path.
 - **Determinism boundary = `render-spec.json` + asset files (+ seed + embedded Pretendard).** "Reproducible from script/assets, not from brief." Never edit assets or render-spec by hand after generation; re-run the stage that produced them.
 - **Demo capture is human-supplied.** `--source web --url` gives URL context only; it neither opens nor records a browser. The human records the flow with Cap or another recorder, then supplies `--capture <path>`. Never automate login or capture credentials. Mask URL query tokens in logs and manifests.
 - **The `oma video` CLI owns the pipeline. This workflow owns the brief, the agent-authored script, the QA loop, and decision checkpoints.** Do NOT reimplement orchestration, provider selection, or rendering in the workflow.
 - **Code intelligence and state are separate capabilities.** Follow `.agents/skills/_shared/core/code-intelligence.md` for configured tools and native fallback. Follow `.agents/skills/_shared/runtime/memory-protocol.md` for run tracking and result paths. Do not require an MCP memory tool or automatically install, initialize, or track a repository.
-- **Read the oma-video skill BEFORE starting.** Read `.agents/skills/oma-video/SKILL.md` and follow its Core Rules and execution protocol, including `resources/execution-protocol.md`. If the skill is not installed, stop and ask the user to run `oma install` first.
+- **Read the oma-video skill BEFORE starting.** Read `.agents/skills/oma-video/SKILL.md` and follow its guardrails and execution protocol, including `resources/execution-protocol.md`. If the skill is not installed, stop and ask the user to run `oma install` first.
 
 ---
 
@@ -21,7 +21,7 @@ disable-model-invocation: true
 
 ## L1 Decision Events
 
-Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in the `Emitting Decisions` section of `.agents/skills/_shared/runtime/event-spec.md`.
 
 Record **mode-selection** at Step 2. Record **cost-confirmation** at Step 4 only when the estimate reaches the guardrail or a paid-provider choice needs authorization. Emit and verify that decision before a non-dry run, paid rerun, or provider action; an under-guardrail default does not require a confirmation event.
 
@@ -45,14 +45,14 @@ For `demo`, resolve the recording path first. Use `--source file --capture <path
 
 ## Cost Guardrail & Key-Optional Notes (read before Step 4)
 
-- **Guardrail**: default `cost.guardrail_usd: 0.20` in `.agents/skills/oma-video/config/video-config.yaml` (reused from oma-image). Any provider whose estimated cost meets or exceeds the guardrail requires spend authorization (`-y` / `--yes` backed by existing authorization and the Step 4 decision). Reuse an existing authorization covering that provider and amount. `--max-usd <n>` overrides the threshold.
+- **Guardrail**: default `cost.guardrail_usd: 0.20`, set under `video:` in `.agents/oma-config.yaml` (shipped defaults live in the CLI). Any provider whose estimated cost meets or exceeds the guardrail requires spend authorization (`-y` / `--yes` backed by existing authorization and the Step 4 decision). Reuse an existing authorization covering that provider and amount. `--max-usd <n>` overrides the threshold.
 - **Key-optional pairs** (real path is gated; fallback is always wired):
 
   | capability | real (key/resource) | key-free fallback | deferred marker |
   |------|------|------|------|
-  | stock video | Pexels (`PEXELS_API_KEY`) | oma-image stills + Ken Burns | `TODO(oma-deferred): pexels` |
+  | stock video | Pexels (`PEXELS_API_KEY`) | static oma-image stills | `TODO(oma-deferred): pexels` |
   | AIGC video | Pixelle-MCP + RunningHub (`RUNNINGHUB_API_KEY`) | oma-image stills | `TODO(oma-deferred): pixelle` |
-  | caption timing | voicebox-stt (MCP `voicebox_transcribe` → REST) | estimate | `TODO(oma-deferred): whisper-cpp` |
+  | caption timing | voicebox-stt (MCP `voicebox_transcribe` → REST) or voicestudio-stt (`/v1/audio/transcriptions`) | estimate | `TODO(oma-deferred): whisper-cpp` |
   | music mixing | Strudel offline render (`oma video doctor --install-strudel`) | render without music | — |
   | premium TTS | (not needed — oma-voice is local) | — | — |
 
@@ -97,7 +97,7 @@ For `demo`, resolve the recording path first. Use `--source file --capture <path
 The agent writes the script — this is the start of the determinism boundary. Do NOT call an external LLM; you are the script provider.
 
 1. Produce a script honoring the `script.json` schema (`schemaVersion: "1.0"` — required literal — plus `mode, aspect, locale, title, scenes[{id, durationSec, narration, onScreenText, visual{kind: still|clip|mixed|slide|capture, prompt, ref, source}, transition}], music, brand`). Author against `.agents/skills/oma-video/resources/script-schema.md` (full field reference + example) — a schema mismatch is exit 4.
-2. Respect limits from `.agents/skills/oma-video/config/video-config.yaml` (`max_duration_sec: 180`, `max_scenes: 40`). Keep narration tight and per-scene so scene boundaries map cleanly to TTS timing.
+2. Respect the limits under `video:` in `.agents/oma-config.yaml` (shipped defaults: `max_duration_sec: 180`, `max_scenes: 40`). Keep narration tight and per-scene so scene boundaries map cleanly to TTS timing.
 3. Mode-specific sourcing:
    - `shorts`: a hook-first synthetic script from the topic; each scene gets a `visual.prompt` for oma-image.
    - `explainer`: ground scenes in the README / code / data the user pointed to; mark scenes that should become oma-slide frames vs oma-image diagrams.
@@ -134,7 +134,7 @@ oma video generate "<brief>" --mode <mode> [same flags as Step 3, incl. --script
 
 The three tracks (per `.agents/skills/oma-video/SKILL.md` and its execution protocol):
 
-- **Voice** (oma-voice / Voicebox MCP) → a **single** `audio/narration-01.wav` (all scene lines joined into one track — not per-scene files) + `timing.json`. Timing source: `voicebox-stt` (MCP `voicebox_transcribe`, REST `/transcribe` fallback, on the generated wav) → `estimated` (the `tts-native` / `whisper-cpp` source values are reserved but deferred). **The default voice is `none` → a silent video with estimated timing; pass `--voice <profile>` for narration.** If oma-voice is down, the run falls back to silent + estimated timing and warns — it does not hard-fail.
+- **Voice** (oma-voice / Voicebox MCP, or VoiceStudio per `voice.backend`) → a **single** `audio/narration-01.wav` (all scene lines joined into one track — not per-scene files) + `timing.json`. Timing source: `voicebox-stt` (MCP `voicebox_transcribe`, REST `/transcribe` fallback, on the generated wav) or `voicestudio-stt` (VoiceStudio `/v1/audio/transcriptions`) → `estimated` (the `tts-native` / `whisper-cpp` source values are reserved but deferred). **The default voice is `none` → a silent video with estimated timing; pass `--voice <profile>` for narration.** If oma-voice is down, the run falls back to silent + estimated timing and warns — it does not hard-fail.
 - **Visual** (per-scene, fallback chain `oma-image → pexels → pixelle`) → `visuals/scene-NN.*`. Default is key-free oma-image stills (aspect snapped to the nearest 16-multiple; HyperFrames crops to exact frame). `--visual stock` engages Pexels only when `PEXELS_API_KEY` is set; `--visual aigc` engages Pixelle only after consent + cost gate. Each scene that falls back is recorded with `pathTaken: fallback`.
 - **Caption** (key-free) → `captions.srt` / `.vtt`, aligned to `timing.json`, styled `tiktok` or `lower-third`, with platform safe-area presets. Non-source locales translate via oma-translation; if absent, captions keep the source locale and warn.
 
@@ -160,7 +160,7 @@ For `demo`, the orchestrator produces the footage in place of synthetic visuals,
 
 1. **HyperFrames** (default, all modes):
    1. `generate` prepares `<runDir>/hyperframes/` with a `composition pending` warning. Use `oma video compose <runDir> --output json` to refresh it.
-   2. Read `<runDir>/hyperframes/AUTHORING.md`, the listed `hyperframes-core`, `hyperframes-animation`, and `hyperframes-cli` API references, and `.agents/skills/oma-video/resources/hyperframes-authoring/<mode>.md`.
+   2. Read `<runDir>/hyperframes/AUTHORING.md`, the listed `hyperframes` and `hyperframes-cli` skill references (installed with `oma video doctor --install`), and `.agents/skills/oma-video/resources/hyperframes-authoring/<mode>.md`.
    3. Author `index.html`. Use the staged render spec and local assets, timed HTML clips, uniquely identified audio elements, and a paused GSAP timeline. Honor the spec's dimensions, duration, captions, and audio levels.
    4. Run `oma video render <runDir> --output json`. It lints, renders, verifies the encoded video, and updates the manifest. Diagnose and fix any failure before delivery.
 
@@ -177,7 +177,7 @@ Review the finished video against the brief and the quality bars. Iterate by re-
 1. **Checklist** (priority order: correctness → sync → readability → polish):
    - Output plays; duration matches the script total within tolerance.
    - Narration audio is present (or intentionally silent) and aligns to scenes.
-   - Captions are synced to `timing.json`, within the safe area, and legible (static windowed cues, CSS-wrapped, Pretendard, design rule 2).
+   - Captions are synced to `timing.json`, within the safe area, and legible (static windowed cues, CSS-wrapped, Pretendard).
    - Visuals match each scene's intent; any placeholder visual asset is declared in warnings, and a real validated MP4 remains required.
    - Aspect / dimensions are correct for the mode; branding applied as requested. (A requested music mode yields `music/bgm.wav` mixed at −18 dB, or a fallback warning and a silent render when Strudel is not installed.)
 2. **Route each defect to its stage:**

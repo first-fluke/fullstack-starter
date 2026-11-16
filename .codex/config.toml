@@ -20,3 +20,6 @@ enabled = false
 [feedback]
 enabled = false
 
+[agents]
+max_concurrent_threads_per_session = 16
+

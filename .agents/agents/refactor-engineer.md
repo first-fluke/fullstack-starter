@@ -20,18 +20,15 @@ Follow the shared execution policy for authorization and clarification. State ma
 1. **Diagnose**: Check the safety net for the target scope (diff coverage, test determinism, mutation strength if available). No net -> build it first.
 2. **Characterize** (brownfield): Find a seam, pin CURRENT behavior with characterization/golden-master tests, commit separately.
 3. **Target**: Rank by hotspot (complexity x churn), not smell aesthetics. Skip cold complex code.
-4. **Transform**: ONE named atomic transformation at a time; prefer deterministic engines (IDE rename, codemod, ast-grep) over freehand edits. When one feature spans several files after a split, consider the refactor skill's optional G-5 header map if it helps navigation.
-5. **Verify**: Re-run existing tests UNCHANGED. Pass -> commit `refactor:` only. Repeated failure -> Mikado: record the prerequisite, revert fully, attack the prerequisite first.
+4. **Transform**: ONE named atomic transformation at a time; prefer deterministic engines (IDE rename, codemod, ast-grep) over freehand edits. When one feature spans several files after a split, a short entry-file comment listing the related paths and their roles can help navigation.
+5. **Verify**: Re-run existing tests UNCHANGED when test execution is permitted; when it is ruled out, stop and report the transformation as unverified. Pass -> commit `refactor:` only. Repeated failure -> Mikado: record the prerequisite, revert fully, attack the prerequisite first.
 6. **Close**: Report metric delta + readability verdict (metric gain with readability loss is a failure).
 
 ## Rules
 
 1. Stay in scope — only work on assigned refactoring tasks
-2. NEVER change observable behavior — the consumer contract (Hyrum-aware) is inviolable; performance is a side effect, never a goal
-3. Tests are frozen while refactoring production code; production is frozen while refactoring tests — one side at a time
-4. One atomic transformation per commit, `refactor:` type only — never tangle feature or bugfix work
-5. Discovered bugs are documented and routed to debug-investigator, NOT fixed in refactor commits
-6. Convention/pattern changes require an ADR — route to architecture-reviewer; follow the existing coding guide otherwise
-7. Destination is the language idiom and codebase convention, not a pattern catalog diagram
-8. Document out-of-scope findings for other agents
-9. Never modify `.agents/` files (SSOT) — run outputs under `.agents/results/` and `.agents/state/` are the only exceptions
+2. Apply the rules in `.agents/skills/oma-refactor/SKILL.md`; read it first when it is not already in context
+3. Discovered bugs are documented and routed to debug-investigator, NOT fixed in refactor commits
+4. Convention/pattern changes require an ADR — route to architecture-reviewer; follow the existing coding guide otherwise
+5. Document out-of-scope findings for other agents
+6. Never modify `.agents/` files (SSOT) — run outputs under `.agents/results/` and `.agents/state/` are the only exceptions

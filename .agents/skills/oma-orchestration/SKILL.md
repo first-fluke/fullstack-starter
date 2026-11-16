@@ -1,6 +1,6 @@
 ---
 name: oma-orchestration
-description: "Dispatch and supervise parallel specialist agents with durable task state. Use when automated multi-agent execution is requested."
+description: "Dispatch and supervise parallel specialist agents with durable task state. Use for automated multi-agent execution, to coordinate agents step by step, or to hand a task to a named vendor or model."
 ---
 
 # Orchestration - Automated Multi-Agent Coordination
@@ -13,16 +13,18 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 ### Intent signature
 - User asks to orchestrate, run in parallel, automate multi-agent execution, or coordinate full-stack work end to end.
 - Task requires multiple specialist agents and a persistent review/remediation loop.
+- User names the agent, vendor, or model that should do a task.
 
 ### When to use
 - Complex feature requires multiple specialized agents working in parallel
 - User wants automated execution without manually spawning agents
 - Full-stack implementation spanning backend, frontend, mobile, and QA
 - User says "run it automatically", "run in parallel", or similar automation requests
+- User wants to coordinate the agents manually, approving each dispatch
+- User hands a task, or a worklist of same-shaped items, to another vendor's agent
 
 ### When NOT to use
 - Simple single-domain task -> use the specific agent directly
-- User wants step-by-step manual control -> use oma-coordination
 - Quick bug fixes or minor changes
 
 ### Expected inputs
@@ -36,33 +38,18 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 - Review history and retry/remediation status when loops fail
 
 ### Dependencies
-- `.agents/oma-config.yaml`, `.codex/agents/*.toml`, `.gemini/agents/*.md`, or fallback `oma agent spawn`
-- Memory provider config, subagent prompt template, scripts, task templates, verify script, and session metrics
-
-### Control-flow features
-- Branches by vendor/native dispatch availability, priority tiers, agent completion/failure, verification status, QA verdict, retry limits, and unresolved decisions
-- Spawns processes/agents and reads/writes memory/result files
-- Preserves unresolved evidence when bounded recovery stops
+- `.agents/oma-config.yaml`, the runtime's native agent definitions (for example `.claude/agents/*.md`, `.codex/agents/*.toml`), or fallback `oma agent spawn`
+- Memory provider config, subagent prompt template, scripts, verify script, and the session evidence guide
+- Memory tools named in `memoryConfig`, and the QA agent for cross-review
 
 ## Structural Flow
 
-### Entry
-1. Resolve agent vendor routing and runtime dispatch path.
-2. Decompose request into priority-tiered tasks.
-3. For each task, classify into one or more `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`. Tasks that match no domain confidently inherit the union of their parent feature's tags.
-4. Select the references needed by each task. One confidently matched skill is sufficient; expand the set when classification is uncertain or a dependency requires another domain.
-5. Record selected domains, references, and any fallback reason in the task board. These are coordinator notes, not launcher-enforced exposure fields; use only reference/context controls supported by the active dispatch path.
-
-### Scenes
-1. **PREPARE**: Plan, setup session ID, and initialize memory files.
-2. **ACT**: Spawn agents by priority tier within parallelism limits.
-3. **VERIFY**: Run self-check, `oma verify`, and QA cross-review loop.
-4. **RECOVER**: Retry failed agents with review history when limits allow.
-5. **FINALIZE**: Collect verified claims, compile summary, and preserve progress artifacts.
-
 ### Transitions
+- If the user wants step-by-step control, run the canonical path one dispatch at a time: present the next ready task, spawn it when the user says go, and report its result before the next.
+- If the user names a vendor or model for one task, or hands over a worklist of same-shaped items, follow Delegating to a named vendor instead of the phase sequence.
 - If native dispatch is available for current runtime/vendor, use it.
 - If vendors differ or native path is unavailable, use fallback spawn.
+- Record the dispatch path per target vendor with subject `orchestration.route-selection` per `../_shared/runtime/route-selection.md` (native or `oma agent spawn`, and the vendor match or unavailability that decided it).
 - If verify or QA fails, feed feedback back to the implementation agent.
 - If recovery limits are exceeded, preserve review history and return `partial` or `failed`; never force completion.
 - If recovery shows that a required domain reference was missing, update the task's reference selection without changing its frozen acceptance contract, and supply it through the supported context mechanism.
@@ -78,48 +65,28 @@ Automatically orchestrate multi-agent execution with task decomposition, native/
 
 ## Logical Operations
 
-### Actions
-| Action | SSL primitive | Evidence |
-|--------|---------------|----------|
-| Read config and task context | `READ` | oma config, routing, request |
-| Classify task into domain tags | `INFER` | task text vs each skill's `Intent signature` |
-| Select task references | `SELECT` | confident domain matches, dependencies, and supported context controls |
-| Select dispatch path | `SELECT` | Native vs fallback |
-| Write session state | `WRITE` | task board and memory files |
-| Spawn agents | `CALL_TOOL` | exposed native role-subagent tool or `oma agent spawn` |
-| Poll progress | `READ` | progress/result files |
-| Run verification | `CALL_TOOL` | `oma verify`, tests, QA |
-| Update retry state | `UPDATE_STATE` | loop counters and CD metrics |
-| Report final result | `NOTIFY` | compiled summary |
-
-### Tools and instruments
-- Exposed native role-subagent tools, fallback spawn scripts, memory tools, verify script, QA agent
-- Session metrics, prompt templates, task templates
-
 ### Canonical command path
-```bash
-oma agent spawn <agent-type> <prompt-file> <session-id> --task-id <task.id> -w <workspace>
-oma verify agent <agent-type> --workspace <workspace> --json
-```
+Phase names refer to Workflow Phases below.
 
-When native runtime dispatch is available, prefer the runtime-specific native path listed in this skill before falling back to `oma agent spawn`.
+1. Read the project configuration and the request. Confirm the request decomposes into specialist-agent tasks, then resolve agent vendor routing and the dispatch path for each agent, native or fallback (Guardrails 1–3).
+2. Run PHASE 1 and PHASE 1.5: reuse the valid plan or decompose the request into priority-tiered tasks, then select and record each task's references.
+3. Apply the shared collaboration policy before dispatch: its coordination rules, edit ownership, peer contact paths, and a collection owner.
+4. Run PHASE 2: set the session ID and initialize the task board and memory files.
+5. Run PHASE 3: spawn agents by priority tier within the parallelism limit, through the exposed native role-subagent tool or the fallback. When native runtime dispatch is available, prefer the runtime-specific native path listed in this skill before falling back to `oma agent spawn`.
+   ```bash
+   oma agent spawn <agent-type> <prompt-file> <session-id> --task-id <task.id> -w <workspace>
+   ```
+   Spawn options: `--vendor <vendor>` (CLI vendor override), `--model-id <id>` (model for this spawn), `--isolation worktree` (git worktree per spawn), `--read-only` (non-destructive tools only, for review and QA passes), `--edit-only` (file edits approved, nothing else).
+6. Run PHASE 4: monitor each run through completion notifications, or through its progress and result files when polling is the fallback.
+7. Run PHASE 4.5 for every completed agent: mechanical self-check, automated verify, then QA cross-review (Agent-to-Agent Review Loop).
+   ```bash
+   oma verify agent <agent-type> --workspace <workspace> --json
+   ```
+8. When an agent fails or the review loop is exhausted, update the loop counters and the recovery budget, then retry with review history while the limits allow (Loop Limits, Recovery Budget).
+9. Run PHASE 5: collect verified claims, compile the summary, and preserve progress artifacts.
 
-### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `LOCAL_FS` | Session, task-board, progress, result, config files |
-| `PROCESS` | Agent CLI processes and verify scripts |
-| `MEMORY` | Session state and unresolved decisions |
-| `CODEBASE` | Workspaces owned by spawned agents |
-
-### Preconditions
-- Task is decomposable into specialist agent work.
-- Runtime/vendor dispatch path or fallback exists.
-
-### Effects and side effects
-- Spawns agents and writes session/progress/result artifacts.
-- May cause code changes through specialist agents.
-- May trigger iterative review and retries.
+### Resource scope and effects
+Reads project configuration and writes the session, task-board, progress, and result files through the configured memory provider (under the `basePath` in `memoryConfig`), including session state and unresolved decisions. Starts agent processes (native subagents or `oma agent spawn`) and verify scripts. Spawned agents change code in the workspaces they own. A failed verify or review starts further agent runs, each consuming the recovery budget.
 
 ### Guardrails
 1. Orchestrate per-agent dispatch from the project configuration before spawning any agent.
@@ -129,13 +96,29 @@ When native runtime dispatch is available, prefer the runtime-specific native pa
 5. Keep session state, task-board state, progress files, claims, and receipts aligned. Use the plan task ID on every spawn and native begin/finish path.
 6. Select references by task needs and confidence. Do not expand to all skills solely because one skill matches, or assume task-board metadata enforces runtime exposure.
 
+### Delegating to a named vendor
+When the user names who should do a task, dispatch it with `oma agent spawn`; do not write a launcher by hand. The delegate knows only the brief, so put the goal, the files, the constraints, and the check that proves the work into a prompt file.
+
+```bash
+oma agent spawn <agent-type> <prompt-file> <session-id> --vendor <vendor> --model-id <model> --edit-only
+```
+
+- **Permission**: use the narrowest mode the task allows. `--read-only` for inspection and review. `--edit-only` for edits: file edits are approved and nothing else, so the delegate runs no commands and the parent runs the checks. Omit both only when the task needs commands and the user accepted the vendor's auto-approve mode. A vendor without an edit-only mode refuses the flag; report that and ask before widening.
+- **Model**: `--model-id` takes the name the vendor CLI uses (`grok models`, `agy models`, `cursor-agent models`). It replaces the configured plan for that spawn.
+- **Worklist**: for many items of one shape (files to translate, modules to migrate), run one bounded session per item and let a command decide what is done:
+  ```bash
+  oma agent batch <agent-type> <prompt-template> --items <file> --check "<command with {item}>" --vendor <vendor> --fallback-vendors <v1,v2> --edit-only
+  ```
+  Items whose check already passes are skipped, the parent re-runs the check after each session, and a rerun resumes from what still fails. After two vendor failures in a row the batch moves to the next fallback vendor, or stops when none is left.
+- **Commits**: do not commit while delegates or subagents are editing the working tree. A pre-commit hook that stashes unstaged changes can discard their edits; the SCM guard refuses the commit while a subagent of the session is open.
+
 Current native executor paths:
 - Claude Code: Agent tool with `.claude/agents/{agent}.md` definitions (multiple Agent tool calls in one message run in parallel; results return synchronously — no polling)
-- OpenCode: native `task` tool with `subagent_type: {agent-id}`; do not use `oma agent spawn` for same-session OpenCode work because it will not appear as a native child task
-- Codex: use the current session's exposed native subagent tool with the resolved custom role from `.codex/agents/*.toml` when supported; otherwise use `oma agent spawn`.
-- Gemini: use the current session's exposed native role-subagent tool with the resolved role when supported; otherwise use `oma agent spawn`.
+- OpenCode / Kilo Code: native `task` tool with `subagent_type: {agent-id}`; do not use `oma agent spawn` for same-session OpenCode or Kilo work because it will not appear as a native child task
+- Codex: use the current session's exposed native subagent tool with the resolved custom role from `.codex/agents/*.toml` when supported; otherwise use `oma agent spawn`. Model tiering follows `../_shared/core/vendor-detection.md`.
+- Antigravity and other runtimes: use `oma agent spawn` unless a native role-subagent path is verified for the target vendor (`../_shared/core/vendor-detection.md`).
 
-`codex exec` and `gemini -p` start external CLI sessions. An `@agent` string in a prompt does not establish native dispatch or apply a custom-role contract.
+`codex exec` and `agy -p` start external CLI sessions. An `@agent` string in a prompt does not establish native dispatch or apply a custom-role contract.
 
 ### Configuration
 
@@ -143,7 +126,7 @@ Current native executor paths:
 |---------|---------|-------------|
 | MAX_PARALLEL | 3 | Max concurrent subagents |
 | MAX_RECOVERY_ATTEMPTS | 3 | Total retries and exploration hypotheses per task, including the original attempt |
-| POLL_INTERVAL | 30s | Status check interval |
+| POLL_INTERVAL | bounded backoff | Fallback only when completion notifications are unavailable |
 | Turn guidance | role-specific | Checkpoint/resume signal, not a hard stop or approval boundary |
 
 These are workflow defaults. Resolve model/vendor, parallelism, and budget settings from project configuration. `config/cli-config.yaml` supplies the vendor transport registry; it does not select the active vendor or override runtime execution settings.
@@ -168,10 +151,10 @@ Memory provider and tool names are configurable via `.agents/mcp.json` (not the 
 ### Workflow Phases
 
 **PHASE 1 - Plan**: Reuse the current valid plan or decompose the request; preserve injected session/task/run IDs.
-**PHASE 1.5 - References**: Select task references as described in Entry; record uncertainty and expansion reasons without assuming runtime enforcement.
+**PHASE 1.5 - References**: For each task, classify into one or more `domain_tags` by matching against the `Intent signature` block of each installed `.agents/skills/oma-*/SKILL.md`. Tasks that match no domain confidently inherit the union of their parent feature's tags. Select the references needed by each task. One confidently matched skill is sufficient; expand the set when classification is uncertain or a dependency requires another domain. Record selected domains, references, and any fallback reason in the task board; record uncertainty and expansion reasons without assuming runtime enforcement. These are coordinator notes, not launcher-enforced exposure fields; use only reference/context controls supported by the active dispatch path.
 **PHASE 2 - Setup**: Create session/task-board artifacts with the current IDs and selected references.
 **PHASE 3 - Execute**: Dispatch ready tasks within MAX_PARALLEL using supported native or fallback context controls.
-**PHASE 4 - Monitor**: Poll every POLL_INTERVAL; handle completed/failed/crashed agents
+**PHASE 4 - Monitor**: Prefer completion notifications; otherwise use one coordinator with bounded polling backoff. Follow `../_shared/core/execution-policy.md` for the shared deadline, cancellation, resource ownership, and shutdown rules. Cancellation or deadline exhaustion stops dispatch and recovery before verification.
 **PHASE 4.5 - Verify**: Run mechanical checks for every completed agent; run `oma verify agent {agent-type}` only for `backend`, `frontend`, `mobile`, `qa`, `debug`, and `pm`; then run QA cross-review for every completed implementation
 **PHASE 5 - Collect**: Read claims and run-scoped reports for plan tasks whose checks passed; compile summary without deleting evidence.
 
@@ -207,7 +190,7 @@ Accept result
 
 ### Step Details
 
-**[1] Mechanical Self-Check** (formerly "Self-Review"):
+**[1] Mechanical Self-Check**:
 Before requesting external review, the implementation agent must:
 - Run lint, type-check, and tests in the workspace
 - Verify only planned files were modified (diff scope check)
@@ -283,13 +266,13 @@ Classify failures before retrying: `PRODUCT_FAILURE` follows the remaining produ
 For material corrections or review findings, retain the cause, impact, and evidence in existing task artifacts. Use `../_shared/core/session-metrics.md` when a retrospective or separate session summary is useful. Do not score clarification questions or require an RCA based on counters. Resolve the affected work and ask only for a material missing decision.
 
 ## References
+- Parallel worker collaboration: `../_shared/core/collaboration-policy.md` (before assigning parallel work or coordinating peer issues, ownership handoffs, and result collection)
 - Prompt template: `resources/subagent-prompt-template.md`
 - Memory schema: `resources/memory-schema.md`
 - Scripts: `scripts/spawn-agent.sh`, `scripts/parallel-run.sh`, `scripts/verify.sh`
-- Task templates: `templates/`
 - Skill-to-agent mapping: `../_shared/core/skill-routing.md`
 - Verification: `scripts/verify.sh <agent-type>`
-- Session metrics: `../_shared/core/session-metrics.md`
+- Session evidence: `../_shared/core/session-metrics.md` (requested retrospective or separate session summary)
 - API contract template (SSOT): `../_shared/core/api-contracts/template.md`; read generated contracts from `.agents/results/api-contracts/` (run artifact) or `docs/plans/contracts/` (durable spec)
 - Context loading: `../_shared/core/context-loading.md`
 - Task decomposition: `../_shared/core/difficulty-guide.md` (unresolved scope or dependencies)

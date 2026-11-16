@@ -2,72 +2,32 @@
   "$schema": "./agent-variant.schema.json",
   "vendor": "codex",
   "destDir": ".codex/agents",
-  "modelDefault": "gpt-5.6-terra",
+  "modelDefault": "inherit",
   "effortDefault": "high",
   "toolsDefault": [],
   "protocolPath": ".agents/skills/_shared/runtime/execution-protocols/codex.md",
   "agents": {
-    "backend-engineer": {
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
-    },
-    "frontend-engineer": {
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
-    },
-    "db-engineer": {
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
-    },
+    "backend-engineer": {},
+    "frontend-engineer": {},
+    "db-engineer": {},
     "debug-investigator": {
-      "effort": "high",
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
+      "effort": "high"
     },
     "architecture-reviewer": {
-      "effort": "high",
-      "extra": {
-        "sandbox_mode": "read-only"
-      }
+      "effort": "high"
     },
-    "tf-infra-engineer": {
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
-    },
-    "mobile-engineer": {
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
-    },
-    "pm-planner": {
-      "extra": {
-        "sandbox_mode": "read-only"
-      }
-    },
+    "tf-infra-engineer": {},
+    "mobile-engineer": {},
+    "pm-planner": {},
     "qa-reviewer": {
-      "effort": "high",
-      "extra": {
-        "sandbox_mode": "read-only"
-      }
+      "effort": "high"
     },
+    "refactor-engineer": {},
     "docs-curator": {
-      "model": "gpt-5.6-luna",
-      "effort": "max",
-      "extra": {
-        "sandbox_mode": "workspace-write"
-      }
+      "effort": "medium"
     },
     "research-explorer": {
-      "model": "gpt-5.6-luna",
-      "effort": "max",
-      "extra": {
-        "sandbox_mode": "read-only"
-      }
+      "effort": "low"
     }
   }
 }
