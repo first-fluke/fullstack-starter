@@ -4,7 +4,7 @@ Use when changing skill routing, context injection, approval boundaries, or a wo
 
 ## Comparisons
 
-Compare the current instructions, the proposed instructions, and a minimal task-only baseline on the same held-out tasks. Run each supported model separately with its exact dispatch model and effort recorded. An evaluator's default model, a mock result, or a result from another model is not an Astra measurement.
+Compare the current instructions, the proposed instructions, and a minimal task-only baseline on the same held-out tasks. Run each supported model separately with its exact dispatch model and effort recorded. An evaluator's default model, a mock result, or a result from another model is not a measurement of the model being evaluated.
 
 `oma skill eval` provides baseline/treatment isolation and optional negative-transfer checks; see `web/docs/guide/skill-eval.md` in the repository. Use available recordings or static fixtures first. Live dispatch consumes resources and follows existing budget authorization; do not start it just to complete a prose edit.
 
@@ -34,5 +34,3 @@ Use repeated runs when model variation affects a decision. Preserve the current 
 ## Regression checks
 
 Check description boundaries before loading SKILL.md. Test the default context path as well as explicit graph calls. Exercise a soft budget smaller than the entry skill and verify the entry survives with a reported overrun. Check generated agent and directory instructions against the same policy as the source. Scope and approval behavior must hold through nested references, not only in the root skill.
-
-The design follows [OpenAI's guidance on skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra): concise routing, conditional references, task-specific reading, and explicit completion and authorization boundaries.

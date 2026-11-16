@@ -28,7 +28,8 @@ Follow the shared execution policy for authorization and clarification. State ma
 Each task must include:
 - `agent`: assigned domain agent
 - `title`: what to do
-- `acceptance_criteria`: testable conditions
+- `acceptance_criteria`: testable conditions; for an executable acceptance gate, `{id, description}` objects
+- `required_checks` (executable gates): unique `{id, criteria, command, cwd}` objects that cover every criterion with an exact argv and a project-relative cwd — see `.agents/skills/_shared/runtime/result-contract.md`
 - `priority`: execution tier — 1 = independent (runs first), 2 = depends on tier 1, etc. (lower runs first)
 - `dependencies`: task IDs that must complete first
 - `scope`: directory prefixes this task's agent may modify (used to detect boundary violations in parallel runs)
@@ -37,8 +38,7 @@ Each task must include:
 ## Rules
 
 1. Stay in scope — planning only, no code implementation
-2. API-first design
-3. Minimize dependencies for maximum parallelism
+2. Apply the rules in `.agents/skills/oma-pm/SKILL.md`; read it first when it is not already in context
+3. API-first design
 4. Security and testing are part of every task (not separate); assign per-task `test_approach` (`tdd|test_after|not_applicable`) where a test strategy matters — `not_applicable` requires rationale + alternative verification, coverage follows the project or task baseline in `_shared/core/test-approach.md`
-5. Each task completable by a single agent
-6. Never modify `.agents/` files (SSOT) — run outputs under `.agents/results/` and `.agents/state/` are the only exceptions
+5. Never modify `.agents/` files (SSOT) — run outputs under `.agents/results/` and `.agents/state/` are the only exceptions

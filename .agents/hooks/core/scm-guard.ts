@@ -1,18 +1,23 @@
-// PreToolUse hook — Block staging of likely-secret files (oma-scm enforcement).
-// Enforces `forbidden_patterns` from oma-scm's commit-config.yaml mechanically:
+// PreToolUse hook — Block staging of likely-secret files (oma-scm enforcement),
+// and `git commit` while a subagent of the session is still running.
+// Enforces `scm.forbidden_patterns` from oma-config (legacy oma-scm
+// commit-config.yaml is still read as a fallback) mechanically:
 // before this hook the pattern list was advisory-only (model compliance).
 // Works with: Claude Code, Codex CLI, Cursor, Grok, Kimi, Kiro, Qwen Code.
 //
 // Scope decisions:
-//  - Only `git add` segments are guarded. Untracked secrets must pass through
+//  - For secrets, only `git add` segments are guarded. Untracked secrets must pass through
 //    `git add` to ever reach a commit (`git commit <path>` / `-a` only touch
 //    already-tracked files), so staging is the single choke point.
 //  - Broad staging (`git add -A` / `git add .`) is NOT blocked here: the rule
 //    ("never without explicit permission") depends on user consent the hook
 //    cannot observe. It stays an agent-level guardrail.
-//  - Escape hatch: a command containing `OMA_SCM_ALLOW_SECRETS=1` bypasses the
-//    guard, mirroring SKILL.md Guardrail 0 (explicit user override — surface
-//    once, then proceed).
+//  - Escape hatch: `OMA_SCM_ALLOW_SECRETS=1` as an env-assignment prefix of the
+//    very `git add` segment being guarded (e.g.
+//    `OMA_SCM_ALLOW_SECRETS=1 git add file`) bypasses the guard for THAT
+//    segment only, mirroring SKILL.md Guardrail 0 (explicit user override —
+//    surface once, then proceed). The token elsewhere (another segment, an
+//    echo/comment, or a pathspec argument) never disables scanning.
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -24,7 +29,7 @@ import type {
   HookInput,
   Vendor,
 } from "./types.ts";
-import { getProjectDir } from "./vendor-detect.ts";
+import { detectVendorFromInput, getProjectDir } from "./vendor-detect.ts";
 
 // --- Defaults (mirror .agents/skills/oma-scm/config/commit-config.yaml) ---
 // Used when the config file is absent (global installs without project config,
@@ -159,7 +164,10 @@ function globToRegExp(pattern: string): RegExp {
 }
 
 function basename(path: string): string {
-  const trimmed = path.replace(/\/+$/, "");
+  // Windows pathspecs use `\` separators; normalize so basename-exact
+  // patterns (credentials.json, .npmrc, …) match `config\credentials.json`.
+  const normalized = path.replace(/\\/g, "/");
+  const trimmed = normalized.replace(/\/+$/, "");
   const idx = trimmed.lastIndexOf("/");
   return idx === -1 ? trimmed : trimmed.slice(idx + 1);
 }
@@ -173,36 +181,114 @@ export function matchesForbidden(path: string, config: GuardConfig): boolean {
 
 // --- Command parsing ---
 
+const SEGMENT_SPLIT_RE = /&&|\|\||;|\||\n/;
+const GIT_ADD_RE = /\bgit\s+(?:[-\w]+=\S+\s+)*add\b(.*)$/;
+// Bypass is granted only when the segment STARTS with an env-assignment chain
+// containing the token, immediately followed by the `git … add` invocation.
+// A token in an argument position (`echo OMA_SCM_ALLOW_SECRETS=1 git add …`),
+// in another segment, or after the paths does not match this anchor.
+const BYPASS_PREFIX_RE = new RegExp(
+  `^(?:[-\\w]+=\\S+\\s+)*${BYPASS_TOKEN}\\s+(?:[-\\w]+=\\S+\\s+)*git\\s+(?:[-\\w]+=\\S+\\s+)*add\\b`,
+);
+
+export interface GitAddSegment {
+  paths: string[];
+  /** True only when the bypass token env-prefixes this very `git add`. */
+  bypassed: boolean;
+}
+
 /**
- * Extract candidate pathspec tokens from every `git add` segment of a shell
- * command. Naive quoting-aware-ish tokenizer: segments split on shell control
- * operators; option tokens (`-…`) and the `--` separator are skipped.
+ * Parse every `git add` segment of a shell command. Naive quoting-aware-ish
+ * tokenizer: segments split on shell control operators; option tokens (`-…`)
+ * and the `--` separator are skipped. Each segment reports whether the bypass
+ * token is an env-assignment prefix of that segment's own `git add`.
  */
-export function extractGitAddPaths(command: string): string[] {
-  const paths: string[] = [];
-  const segments = command.split(/&&|\|\||;|\||\n/);
-  for (const segment of segments) {
-    const m = segment.match(/\bgit\s+(?:[-\w]+=\S+\s+)*add\b(.*)$/);
+export function extractGitAddSegments(command: string): GitAddSegment[] {
+  const result: GitAddSegment[] = [];
+  for (const segment of command.split(SEGMENT_SPLIT_RE)) {
+    const m = segment.match(GIT_ADD_RE);
     if (!m) continue;
     const rest = m[1] ?? "";
     // Tokenize, honoring simple single/double quotes.
     const tokens = rest.match(/"[^"]*"|'[^']*'|\S+/g) ?? [];
+    const paths: string[] = [];
     for (const raw of tokens) {
       const token = raw.replace(/^["']|["']$/g, "");
       if (token === "--") continue;
       if (token.startsWith("-")) continue; // options (incl. -A/--all; see header)
       paths.push(token);
     }
+    result.push({ paths, bypassed: BYPASS_PREFIX_RE.test(segment.trim()) });
   }
-  return paths;
+  return result;
+}
+
+/**
+ * Extract candidate pathspec tokens from every `git add` segment of a shell
+ * command (including bypassed segments; callers decide what to scan).
+ */
+export function extractGitAddPaths(command: string): string[] {
+  return extractGitAddSegments(command).flatMap((segment) => segment.paths);
+}
+
+// --- Commit while subagents run ---
+//
+// A pre-commit hook that stashes unstaged changes (hk, lint-staged, pre-commit)
+// rewrites the working tree for the length of the commit. A subagent writing to
+// the same tree in that window loses its edits when the stash is restored. The
+// host's SubagentStart/SubagentStop events are recorded by open-subagents.ts
+// (Claude Code, Codex, Copilot), so a commit made while one is open is refused.
+
+const BUSY_BYPASS_TOKEN = "OMA_SCM_ALLOW_BUSY=1";
+// Anchored at the segment start so `git log --grep commit` is not a commit.
+const GIT_COMMIT_RE =
+  /^(?:[-\w]+=\S+\s+)*git\s+(?:(?:-[cC]\s+\S+|--?[\w-]+(?:=\S+)?)\s+)*commit(?:\s|$)/;
+const BUSY_BYPASS_PREFIX_RE = new RegExp(
+  `^(?:[-\\w]+=\\S+\\s+)*${BUSY_BYPASS_TOKEN}\\s`,
+);
+/** True when a segment of the command runs `git commit` without the bypass. */
+export function hasGuardedGitCommit(command: string): boolean {
+  return command.split(SEGMENT_SPLIT_RE).some((raw) => {
+    const segment = raw.trim().replace(/^[({\s]+/, "");
+    return GIT_COMMIT_RE.test(segment) && !BUSY_BYPASS_PREFIX_RE.test(segment);
+  });
+}
+
+async function blockCommitWhileSubagentsRun(
+  command: string,
+  projectDir: string,
+  vendorSid: string | undefined,
+): Promise<HandlerResult | null> {
+  if (!hasGuardedGitCommit(command)) return null;
+  try {
+    // Loaded on demand: only a commit needs the open-subagent records.
+    const { listOpenSubagents } = await import("./open-subagents.ts");
+    const open = listOpenSubagents(projectDir, vendorSid).map(
+      (subagent) => subagent.agentType,
+    );
+    if (open.length === 0) return null;
+    return {
+      type: "block",
+      reason:
+        `[oma scm-guard] Blocked: ${open.length} subagent(s) are still running in this working tree (${open.join(", ")}). ` +
+        `A pre-commit hook that stashes unstaged changes can discard the edits they are writing. ` +
+        `Wait for them to finish or stop them, then commit. ` +
+        `If the user confirms they are not editing this tree, ` +
+        `re-run the commit segment prefixed with ${BUSY_BYPASS_TOKEN}.`,
+    };
+  } catch {
+    return null; // fail-open: unreadable records never block a commit
+  }
 }
 
 // ── Pure handler (canonical ABI) ─────────────────────────────
 
 /**
- * Pure decision function — blocks `git add` of likely-secret files.
+ * Pure decision function — blocks `git add` of likely-secret files, and
+ * `git commit` while a subagent of this session is still running.
  * Returns a `block` HandlerResult when a staged path matches
- * `forbidden_patterns` (minus `allowed_exceptions`), else `null` (fail-open).
+ * `forbidden_patterns` (minus `allowed_exceptions`) or a subagent is open,
+ * else `null` (fail-open).
  */
 export async function run(
   input: HookInput,
@@ -218,16 +304,25 @@ export async function run(
     toolName !== "Bash" &&
     toolName !== "run_shell_command" &&
     toolName !== "Shell" &&
-    toolName !== "execute_bash"
+    toolName !== "execute_bash" &&
+    toolName !== "run_command"
   )
     return null;
 
-  const command = toolInput.command as string | undefined;
+  const command = (toolInput.command ?? toolInput.CommandLine) as
+    | string
+    | undefined;
   if (!command) return null;
   if (!/\bgit\b/.test(command)) return null;
-  if (command.includes(BYPASS_TOKEN)) return null;
 
-  const candidates = extractGitAddPaths(command);
+  const busy = await blockCommitWhileSubagentsRun(command, projectDir, ctx.sid);
+  if (busy) return busy;
+
+  // The bypass applies per segment: only the `git add` env-prefixed by the
+  // token is exempt; every other segment is still scanned.
+  const candidates = extractGitAddSegments(command)
+    .filter((segment) => !segment.bypassed)
+    .flatMap((segment) => segment.paths);
   if (candidates.length === 0) return null;
 
   const config = loadGuardConfig(projectDir, ctx.config);
@@ -240,7 +335,8 @@ export async function run(
       `[oma scm-guard] Blocked: staging likely-secret file(s): ${flagged.join(", ")} ` +
       `(matched forbidden_patterns in ${MAIN_CONFIG_RELPATH}). ` +
       `Surface this to the user; if they explicitly approve committing these files, ` +
-      `re-run the command prefixed with ${BYPASS_TOKEN}.`,
+      `re-run the git add segment prefixed with ${BYPASS_TOKEN} ` +
+      `(the bypass applies only to that segment).`,
   };
 }
 
@@ -263,14 +359,26 @@ function main() {
   if (!raw.trim()) process.exit(0);
 
   const parsed: PreToolUseInput = JSON.parse(raw);
-  // Standalone path is vendor-agnostic here; claude covers the common dialect.
-  const vendor: Vendor = "claude";
+  const vendor: Vendor = detectVendorFromInput(
+    parsed,
+    "tool",
+    import.meta.filename,
+  );
   const projectDir = getProjectDir(vendor, parsed);
+  const toolCall = parsed.toolCall as
+    | { name?: string; args?: Record<string, unknown> }
+    | undefined;
+  const toolName =
+    parsed.tool_name ||
+    (typeof toolCall?.name === "string" ? toolCall.name : "");
+  const rawInput =
+    parsed.tool_input ??
+    (toolCall?.args && typeof toolCall.args === "object" ? toolCall.args : {});
 
   const hookInput: HookInput = {
     kind: "pre_tool",
-    toolName: parsed.tool_name,
-    toolInput: { ...(parsed.tool_input ?? {}) },
+    toolName,
+    toolInput: { ...rawInput },
     cwd: projectDir,
   };
 

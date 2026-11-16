@@ -24,6 +24,7 @@ Review and verify software quality with priority on security, performance, acces
 ### When NOT to use
 - Initial implementation -> let specialists build first
 - Writing new features -> use domain agents
+- Scanner-driven scans, penetration tests, finding validation, or security CI gates -> use `oma-security`
 
 ### Expected inputs
 - Diff, codebase area, PR, feature branch, build output, test results, or quality concern
@@ -39,24 +40,7 @@ Review and verify software quality with priority on security, performance, acces
 - `resources/execution-protocol.md`, ISO guide, and checklist
 - Automated tools such as `npm audit`, `bandit`, `lighthouse`, linters, tests, and coverage tools when applicable
 
-### Control-flow features
-- Branches by review type, available diff, quality dimension, and tool availability
-- Reads code and reports; may run tools; generally should not implement broad feature work
-- Findings must be reproducible and prioritized
-
 ## Structural Flow
-
-### Entry
-1. Identify review scope and quality dimensions.
-2. Collect diff, files, commands, and standards context.
-3. Choose automated checks before manual review where practical.
-
-### Scenes
-1. **PREPARE**: Define scope, severity rubric, and evidence requirements.
-2. **ACQUIRE**: Read diff/code and run relevant automated tools.
-3. **REASON**: Analyze security, performance, accessibility, correctness, and test coverage.
-4. **VERIFY**: Reproduce findings and reject false positives.
-5. **FINALIZE**: Report findings, remediation, test gaps, and residual risk.
 
 ### Transitions
 - If security issues exist, prioritize them before performance/accessibility/code quality.
@@ -76,49 +60,20 @@ Review and verify software quality with priority on security, performance, acces
 
 ## Logical Operations
 
-### Actions
-| Action | SSL primitive | Evidence |
-|--------|---------------|----------|
-| Read review scope and code | `READ` | Diff, files, reports |
-| Select quality checks | `SELECT` | Security/performance/accessibility/test dimensions |
-| Run automated tools | `CALL_TOOL` | Audit, lint, tests, Lighthouse, coverage |
-| Compare behavior to standards | `COMPARE` | OWASP, WCAG, ISO guides |
-| Validate findings | `VALIDATE` | Reproducibility and evidence |
-| Write review report | `WRITE` | Findings and remediation |
-| Notify outcome | `NOTIFY` | Final review summary |
-
-### Tools and instruments
-- Security, lint, coverage, performance, accessibility, and test tools
-- ISO quality guide and checklist
-
 ### Canonical command path
-```bash
-npm audit
-bandit -r .
-lighthouse <url>
-```
+1. Identify the review scope and quality dimensions. Collect the diff, files, commands, standards context, and any user-provided acceptance or quality criteria.
+2. Detect the stack and the project's existing audit, lint, test, and coverage commands.
+3. Select the checks that match the review scope and stack: dependency audit (e.g. `npm audit`), static security analysis (e.g. `bandit -r .`), runtime/performance audit (e.g. `lighthouse <url>`). Select only the tools that match the detected stack and available target.
+4. Run the selected tools against an available target, before manual review where practical; review statically where a tool or target is unavailable. Run project lint/test/coverage commands when the review request or the active workflow requires that evidence; otherwise report them as not run.
+5. Analyze security, performance, accessibility, correctness, and test coverage against the applicable standards (OWASP, WCAG, ISO guides).
+6. Reproduce each candidate finding and reject false positives.
+7. Report findings, remediation, the verification summary, test gaps, and residual risk.
 
-Run only the tools that match the detected stack and available target. Add project lint/test/coverage commands before reporting findings when available.
-
-### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `CODEBASE` | Reviewed source, tests, configs, and diff |
-| `PROCESS` | Automated QA/security/performance/accessibility commands |
-| `LOCAL_FS` | Reports, coverage output, review artifacts |
-| `USER_DATA` | User-provided acceptance and quality criteria |
-
-### Preconditions
-- Review scope and available evidence are identifiable.
-- Tools can run or their absence is documented.
-
-### Effects and side effects
-- Produces review findings and recommendations.
-- May run read-heavy or diagnostic commands.
-- Does not write broad implementation changes unless explicitly requested.
+### Resource scope and effects
+Reads the reviewed source, tests, configs, and diff. Runs read-heavy or diagnostic commands (audit, lint, test, coverage, performance, and accessibility tools), which may write reports and coverage output locally. Produces review findings and recommendations; does not write broad implementation changes unless explicitly requested.
 
 ### Guardrails
-1. Review in priority order: Security > Performance > Accessibility > Code Quality
+1. Review in priority order: Security > Performance > Accessibility > Code Quality. Security findings from this skill are code-review findings rated with the severity rubric below; scanner candidates, exploit proof, and `confirmed`/`needs_validation` dispositions belong to `oma-security`
 2. Every finding must include file:line, description, and fix
 3. Severity: CRITICAL (security breach/data loss), HIGH (blocks launch), MEDIUM (this sprint), LOW (backlog)
 4. Run the automated tools that apply to the project and review scope; do not require unrelated stack tools
@@ -128,12 +83,12 @@ Run only the tools that match the detected stack and available target. Add proje
 
 ## References
 - Execution steps (follow for the selected task): `resources/execution-protocol.md`
-- ISO quality guide: `resources/iso-quality.md`
-- QA checklist: `resources/checklist.md`
-- Error recovery: `resources/error-playbook.md`
-- Ultrawork VERIFY/SHIP phase protocol: `resources/verify-ship-protocol.md` (used when this skill runs inside the ultrawork workflow)
+- ISO quality guide: `resources/iso-quality.md` (standards-based review requested)
+- QA checklist: `resources/checklist.md` (check the items that apply to the review scope)
+- Error recovery: `resources/error-playbook.md` (a tool, source access, or quota failure during review)
+- Ultrawork VERIFY/SHIP gates and review guides: `.agents/workflows/ultrawork/resources/phase-gates.md`, `.agents/workflows/ultrawork/resources/multi-review-protocol.md` (when this skill runs inside the ultrawork workflow, which owns those gates)
 - Context loading: `../_shared/core/context-loading.md`
 - Context budget: `../_shared/core/context-budget.md`
-- Runtime lessons: `../_shared/core/session-metrics.md`
+- Session evidence: `../_shared/core/session-metrics.md` (requested retrospective, or a correction or review finding worth preserving)
 - Code intelligence: `../_shared/core/code-intelligence.md`
-- Observability handoff: `../oma-observability/SKILL.md` §Integrations — canary RUM (Core Web Vitals), backend perf spans
+- Observability handoff: `../oma-observability/SKILL.md` §Integrations — Core Web Vitals targets, backend performance span evidence

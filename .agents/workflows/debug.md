@@ -4,7 +4,7 @@ description: Structured bug diagnosis and fixing workflow that reproduces, diagn
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - Follow `.agents/skills/_shared/core/code-intelligence.md`: discover the configured provider’s tools; use native search only for paths outside this project or ignored paths when unavailable or timed out. Do not install a provider or track a repository automatically.
 - Use native file tools and `.agents/skills/_shared/runtime/memory-protocol.md` for durable coordination state; code-intelligence memory tools are not required.
@@ -19,7 +19,7 @@ Steps 1-5 execute inline for all vendors. Step 6 (similar pattern scanning) may 
 
 ### L1 Decision Events
 
-Emit required L1 decisions by calling `oma state emit` directly, as documented in `.agents/skills/_shared/runtime/event-spec.md`.
+Emit required L1 decisions by calling `oma state emit` directly, as documented in the `Emitting Decisions` section of `.agents/skills/_shared/runtime/event-spec.md`.
 
 ### Subagent Spawn Criteria
 
@@ -28,27 +28,11 @@ Spawn `debug-investigator` when:
 - Similar pattern scan scope is 10+ files
 - Deep dependency tracing is needed for diagnosis
 
-### Vendor-Specific Spawn (Step 6)
+### Spawn (Step 6)
 
-#### If Claude Code
+Dispatch `debug-investigator` by the Dispatch Rule in `.agents/skills/_shared/core/vendor-detection.md`, with the diagnosis results so far and the scan scope in the prompt.
 
-Spawn `debug-investigator` via **Agent tool** using `.claude/agents/debug-investigator.md`.
-Include diagnosis results so far + scan scope in prompt.
-
-#### If Codex CLI
-
-Request subagent execution via model-mediated subagent request.
-Include diagnosis results and scan scope. Results returned as JSON output.
-
-#### If Gemini CLI
-
-Use the native `.gemini/agents/{name}.md` subagent when available (per `_shared/core/vendor-detection.md`); otherwise fall back to:
-
-```bash
-oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}
-```
-
-#### If Antigravity or CLI Fallback
+CLI fallback:
 
 ```bash
 oma agent spawn debug "scan prompt with diagnosis context" {session_id} -w {workspace}

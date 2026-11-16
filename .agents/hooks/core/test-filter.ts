@@ -94,11 +94,14 @@ export async function run(
     toolName !== "Bash" &&
     toolName !== "run_shell_command" &&
     toolName !== "Shell" &&
-    toolName !== "execute_bash"
+    toolName !== "execute_bash" &&
+    toolName !== "run_command"
   )
     return null;
 
-  const command = toolInput.command as string | undefined;
+  const command = (toolInput.command ?? toolInput.CommandLine) as
+    | string
+    | undefined;
   if (!command) return null;
 
   // The rewrite below is Bash-only (`set -o pipefail`, subshell, pipe to
@@ -117,28 +120,35 @@ export async function run(
   const isExcluded = EXCLUDE_PATTERNS.some((p) => p.test(command));
   if (isExcluded) return null;
 
-  // Resolve the filter script: owned vendor namespace, legacy hook dir, then the opencode
-  // bridge dir (opencode has no core Vendor identity — its subprocess payload
-  // detects as claude, whose hook dir is absent in opencode-only installs),
-  // then the SSOT core dir as the last resort.
+  // Resolve the filter script: the bridge dir a packaged host plugin exports
+  // (OMA_HOOK_BRIDGE_DIR — the opencode npm package and the Command Code mod
+  // live outside the project), then the owned vendor namespace, legacy hook
+  // dir, the opencode-family bridge dirs (opencode / kilo have no core Vendor
+  // identity — their subprocess payload detects as claude, whose hook dir is
+  // absent in opencode- or kilo-only installs), then the SSOT core dir.
+  const bridgeDir = process.env.OMA_HOOK_BRIDGE_DIR;
   const filterScript = [
-    join(getHookDir(vendor), "oma"),
-    getHookDir(vendor),
-    join(".opencode", "plugins", "oma"),
-    join(".agents", "hooks", "core"),
-  ]
-    .map((dir) => join(projectDir, dir, "filter-test-output.sh"))
-    .find((p) => existsSync(p));
+    ...(bridgeDir ? [join(bridgeDir, "filter-test-output.sh")] : []),
+    ...[
+      join(getHookDir(vendor), "oma"),
+      getHookDir(vendor),
+      join(".opencode", "plugins", "oma"),
+      join(".kilo", "plugins", "oma"),
+      join(".agents", "hooks", "core"),
+    ].map((dir) => join(projectDir, dir, "filter-test-output.sh")),
+  ].find((p) => existsSync(p));
   if (!filterScript) return null;
 
   // The original command sits on its own lines inside the subshell: a
   // trailing `# comment` would otherwise swallow the closing paren, and a
   // heredoc's terminator must stay alone on its line (`EOF)` never matches).
   const filteredCmd = `set -o pipefail; (\n${command}\n) 2>&1 | bash "${filterScript}"`;
-  const updatedInput: Record<string, unknown> = {
-    ...toolInput,
-    command: filteredCmd,
-  };
+  const usesCommandLine =
+    typeof toolInput.CommandLine === "string" &&
+    typeof toolInput.command !== "string";
+  const updatedInput: Record<string, unknown> = usesCommandLine
+    ? { ...toolInput, CommandLine: filteredCmd }
+    : { ...toolInput, command: filteredCmd };
 
   return { type: "mutate", updatedInput };
 }
@@ -162,13 +172,22 @@ function main() {
   const vendor = detectVendorFromInput(parsed, "tool", import.meta.filename);
   const projectDir = getProjectDir(vendor, parsed);
 
+  const toolCall = parsed.toolCall as
+    | { name?: string; args?: Record<string, unknown> }
+    | undefined;
+  const toolName =
+    parsed.tool_name ||
+    (typeof toolCall?.name === "string" ? toolCall.name : "");
   // Build canonical HookInput and delegate to run() — single logic source.
   const toolInput: Record<string, unknown> = {
-    ...(parsed.tool_input ?? {}),
+    ...(parsed.tool_input ??
+      (toolCall?.args && typeof toolCall.args === "object"
+        ? toolCall.args
+        : {})),
   };
   const hookInput: HookInput = {
     kind: "pre_tool",
-    toolName: parsed.tool_name,
+    toolName,
     toolInput,
     cwd: projectDir,
   };

@@ -4,7 +4,7 @@ description: Register a scheduled agent job from a natural-language schedule req
 disable-model-invocation: true
 ---
 
-- **Response language follows `language` setting in `.agents/oma-config.yaml` if configured.**
+- **Response language: the user's prompt language first, then `language` in `.agents/oma-config.yaml`, then English.**
 - Follow `.agents/skills/_shared/core/execution-policy.md` for authorization, clarification, verification, and completion. Execute required steps on the selected path in dependency order; apply documented branch and skip conditions.
 - **This workflow is slash-invoked only** (`/schedule`). It is NOT triggered by broad keyword detection.
 
@@ -20,7 +20,7 @@ Ask the user for the following if not already provided in the prompt:
 | Prompt | Instruction the agent will receive | `"review the latest diff"` |
 | Interval / cron | When to run | `"every 2 hours"`, `"5m"`, `"0 9 * * *"` |
 | Workspace (optional) | Absolute path to the project directory | `/home/user/myproject` (default: cwd) |
-| Vendor (optional) | CLI vendor override (passed to `oma agent spawn --vendor`) | `claude`, `codex`, `antigravity`, `cursor`, `qwen`, `grok`, `opencode`, `pi` |
+| Vendor (optional) | CLI vendor override (passed to `oma agent spawn --vendor`) | `claude`, `codex`, `antigravity`, `cursor`, `qwen`, `grok`, `opencode`, `kilo`, `pi` |
 
 If all required fields are already in the user's prompt, proceed directly to Step 2.
 

@@ -43,6 +43,13 @@
         "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'afterFileEdit'",
         "timeout": 10
       }
+    ],
+    "postToolUse": [
+      {
+        "command": "'.cursor/hooks/oma-hook.sh' --vendor 'cursor' --event 'postToolUse' --matcher 'Read|Shell'",
+        "timeout": 8,
+        "matcher": "Read|Shell"
+      }
     ]
   },
   "version": 1

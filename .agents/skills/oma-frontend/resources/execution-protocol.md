@@ -17,6 +17,10 @@ Use the task's scope, existing project conventions, and acceptance criteria. Fol
 - Plan state management approach (Jotai or Zustand for client, nuqs for URL, TanStack Query for server)
 - Identify API integration points (orval-generated TanStack Query hooks when an OpenAPI spec exists; regenerate via the project's `gen:api` task after contract changes)
 - Plan responsive breakpoints and accessibility requirements
+- For requested GPU/canvas effects, cinematic video-scroll, or selected GSAP APIs,
+  choose the matching route in [specialized-visual-implementation.md](specialized-visual-implementation.md).
+- For affected motion, touch, feedback, or interaction performance, apply
+  [shared interaction quality](../../_shared/ui-interaction-quality.md).
 
 ## Step 3: Implement
 - **Honor the task's `test_approach`** (see `../../_shared/core/test-approach.md`): for `tdd` tasks, write and run the focused test first (record the RED failure), make the minimal change (GREEN), then continue
@@ -30,12 +34,14 @@ Use the task's scope, existing project conventions, and acceptance criteria. Fol
 - Follow `resources/tailwind-rules.md` for styling
 
 ## Step 4: Verify
+Select the checks relevant to the change. Run commands only when the user or the active workflow requires it; report the rest as not verified.
 - Check applicable items in `resources/checklist.md`
 - Use `../../_shared/core/common-checklist.md` only for cross-domain verification
 - Check TypeScript strict mode: no errors
 - For `tdd` tasks, append the `TDD_EVIDENCE` block (test command, RED, GREEN) to the result file per `../../_shared/core/test-approach.md`
-- Verify responsive design at 320px, 768px, 1024px, 1440px
+- Verify responsive design at the task's target breakpoints (checklist §Styling)
 - Test keyboard navigation and screen reader compatibility
+- For a new or substantially changed admin console, dashboard, SaaS product UI, or internal tool, follow the [recommended product-interface review](../../oma-design/resources/product-interface-review.md). Record its outcome as `resources/checklist.md` describes.
 
 ## On Error
 See `resources/error-playbook.md` for recovery steps.

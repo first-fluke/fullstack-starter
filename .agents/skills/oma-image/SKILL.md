@@ -19,7 +19,7 @@ Generate images and visual assets through authenticated multi-vendor routing whi
 
 - Generating images, visual assets, illustrations, product photos, concept art
 - Comparing output between multiple image models for the same prompt
-- Producing images from prompts within editor workflows (Claude Code, Codex, Gemini CLI)
+- Producing images from prompts within editor workflows (Claude Code, Codex, Antigravity)
 - Other skills needing image generation infrastructure (shared invocation)
 - Regenerating a new image that follows a supplied reference's subject, style, lighting, or composition
 
@@ -33,7 +33,7 @@ Generate images and visual assets through authenticated multi-vendor routing whi
 ### Expected inputs
 - Image prompt or creative brief
 - Optional vendor, size, quality, count, output directory, and reference images
-- Authentication/environment state for Codex, Pollinations, or Gemini
+- Authentication/environment state for Codex, Antigravity (`agy`), or Pollinations
 
 ### Expected outputs
 - Generated image files under `.agents/results/images/` or requested output directory
@@ -42,25 +42,17 @@ Generate images and visual assets through authenticated multi-vendor routing whi
 
 ### Dependencies
 - `oma image generate` CLI and vendor authentication
-- Codex image generation, Pollinations API, or Gemini API/CLI strategy
+- `oma image doctor` and `oma image vendor list` for vendor availability and supported models
+- Codex image generation, Antigravity (`agy`), or the Pollinations API
 - `resources/vendor-matrix.md`, `resources/prompt-tips.md`, and the `image:` section of `.agents/oma-config.yaml`
 
-### Control-flow features
-- Branches by prompt ambiguity, vendor auth, cost threshold, reference-guided regeneration support, path safety, and safety/timeout exit codes
-- Calls external vendor APIs/CLIs
-- Reads reference images and writes generated images plus manifests
-
 ## Structural Flow
-
-### Entry
-1. Validate that the request contains enough subject, setting, style, usage, and aspect-ratio signal.
-2. Classify a supplied image as a reference for a newly generated variation, or as a request for unsupported pixel/mask editing.
-3. Check authentication, cost guardrails, output path, and count limits.
 
 ### Transitions
 - If the subject or intended result cannot be inferred, clarify that missing input; otherwise proceed with reasonable defaults.
 - If `--vendor all` is requested, require every requested vendor to be available.
 - If the request is reference-guided regeneration and the selected vendor supports references, pass it automatically.
+- When the vendor is chosen by the agent (not fixed by an explicit `--vendor`), record it with subject `image.route-selection` per `../_shared/runtime/route-selection.md`: vendor/model, and the auth, reference-support, or cost fact that decided it.
 - If the request requires pixel, mask, crop, resize, or format editing, stop before generation and name the unsupported operation and an appropriate editor route.
 - If estimated cost exceeds guardrail, require confirmation unless bypassed.
 
@@ -77,39 +69,25 @@ Generate images and visual assets through authenticated multi-vendor routing whi
 
 ## Logical Operations
 
-### Tools and instruments
-- `oma image generate`, `oma image doctor`, `oma image vendor list`
-- Codex, Pollinations, and Gemini provider paths
-- Prompt tips, vendor matrix, and image config
-
 ### Canonical command path
-```bash
-oma image doctor
-oma image generate "<prompt>" --vendor auto --size auto --quality auto --output json
-```
+1. Check that the request carries enough subject, setting, style, usage, and aspect-ratio signal; resolve gaps per Creative brief.
+2. Classify a supplied image as a reference for a newly generated variation, or as a request for unsupported pixel/mask editing (stop per Transitions). Confirm reference paths are accessible.
+3. Check vendor authentication, then the cost guardrail, output path and its permissions, and count limit (Guardrails 2-4 and 7):
+   ```bash
+   oma image doctor
+   ```
+4. Generate:
+   ```bash
+   oma image generate "<prompt>" --vendor auto --size auto --quality auto --output json
+   ```
+   With reference images:
+   ```bash
+   oma image generate --reference "<absolute-path>" --vendor codex "<prompt>"
+   ```
+5. Confirm the images and `manifest.json` exist in the output directory, run `resources/checklist.md`, and report the output paths; on failure, report the exit code and provider status.
 
-With reference images:
-```bash
-oma image generate --reference "<absolute-path>" --vendor codex "<prompt>"
-```
-
-### Resource scope
-| Scope | Resource target |
-|-------|-----------------|
-| `LOCAL_FS` | Reference images, generated images, manifests |
-| `PROCESS` | Provider CLIs and image router commands |
-| `NETWORK` | Pollinations/Gemini or provider APIs |
-| `CREDENTIALS` | Provider auth and API keys |
-
-### Preconditions
-- Prompt is sufficiently specified or user approves amplification.
-- Required vendor auth and output permissions exist.
-- Reference paths are accessible when used.
-
-### Effects and side effects
-- Creates image files and manifests.
-- May call paid or rate-limited provider APIs.
-- May read attached/reference images.
+### Resource scope and effects
+Reads attached or reference images. Creates image files and `manifest.json` under `.agents/results/images/` or the requested output directory. Runs the image router and provider CLIs (Codex, `agy`), which call their own backends, and calls the Pollinations API. Uses provider auth and API keys. Provider APIs may be paid or rate-limited.
 
 ### Guardrails
 
@@ -130,7 +108,7 @@ Use the requested subject and constraints. Infer setting, style, lighting, and a
 
 ### Configuration
 
-Project-specific settings: the `image:` section of `.agents/oma-config.yaml`, which `oma update` preserves. Shipped defaults live in the CLI (`DEFAULTS` in `cli/commands/image/config.ts`) — write only the keys you change. The legacy `config/image-config.yaml` is no longer read by the CLI; migration 022 moves anything you had changed there into oma-config (and deletes the file when it was never edited).
+Project-specific settings: the `image:` section of `.agents/oma-config.yaml`, which `oma update` preserves. Shipped defaults live in the CLI (`DEFAULTS` in `cli/commands/image/config.ts`) — write only the keys you change.
 Env vars: `OMA_IMAGE_DEFAULT_VENDOR`, `OMA_IMAGE_DEFAULT_OUT`, `OMA_IMAGE_YES`, `POLLINATIONS_API_KEY`.
 
 - Execution steps (follow for the selected task): `resources/execution-protocol.md`

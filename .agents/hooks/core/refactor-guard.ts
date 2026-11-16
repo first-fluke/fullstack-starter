@@ -35,7 +35,12 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
-import { agyConversationId, agyProjectDir, isAgyInput } from "./agy-input.ts";
+import {
+  agyConversationId,
+  agyProjectDir,
+  isAgyInput,
+  isAgyNonBlockingStopReason,
+} from "./agy-input.ts";
 import { toPosixPath } from "./fs-utils.ts";
 import { makeBlockOutput } from "./hook-output.ts";
 import { atomicWriteJson } from "./state-marker.ts";
@@ -90,7 +95,9 @@ const EDIT_TOOLS = new Set([
   "hashline_edit", // grok (args.path)
   "create_file", // grok
   "str_replace", // grok
+  "search_replace", // grok standard toolset (Edit/Write alias target)
   "fs_write", // kiro
+  "fs_append", // kiro V3
 ]);
 
 /** Extensions the guard treats as refactorable source code. */
@@ -301,8 +308,9 @@ export function resolveEditedPaths(
     toolInput.filePath ??
     toolInput.notebook_path ??
     toolInput.path ??
-    // antigravity tool args use PascalCase (write_to_file /
-    // replace_file_content carry TargetFile — verified from the agy binary).
+    // antigravity tool args use PascalCase (`write_file` / `edit_file` carry
+    // `Path`; Cortex `write_to_file` / `replace_file_content` carry `TargetFile`).
+    toolInput.Path ??
     toolInput.TargetFile;
   return typeof cand === "string" && cand.length > 0 ? [cand] : [];
 }
@@ -551,6 +559,9 @@ function main() {
       agyProjectDir(parsed) || ((parsed.cwd as string | undefined) ?? "");
     const sid = agyConversationId(parsed) ?? undefined;
     const isPostTool = typeof toolCall?.name === "string";
+    if (!isPostTool && isAgyNonBlockingStopReason(parsed)) {
+      process.exit(0);
+    }
     const hookInput: HookInput = isPostTool
       ? {
           kind: "post_tool",

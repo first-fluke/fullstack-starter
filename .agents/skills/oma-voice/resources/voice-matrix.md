@@ -1,5 +1,7 @@
 # Voice Engine Matrix
 
+This matrix covers the Voicebox backend. On VoiceStudio, discover installed engines and their languages from the running backend instead (`voicestudio.md`).
+
 Voicebox bundles seven engines. All run locally; the user picks one when creating a voice profile in the Voicebox app, and the skill respects that choice. This matrix exists so the agent can recommend a profile-engine pair when the user has not yet decided.
 
 ## Engine comparison
@@ -34,13 +36,6 @@ Voicebox bundles seven engines. All run locally; the user picks one when creatin
 - **Mixed sentences**: pick a multilingual engine and keep the call as a single request. Splitting hurts prosody.
 - **Bottom-tier hardware**: LuxTTS or Kokoro stay snappy without a GPU.
 - **Long-form narration (over 5 minutes total in chunks)**: prefer TADA or Chatterbox Turbo for sustained expression; reserve Kokoro for short bursts.
-
-## Profile selection heuristic
-
-1. If the user passes an explicit `profile` argument, use it.
-2. Else use `notification_profile` (notify mode) or `asset_profile` (asset mode) from `voice-config.yaml`.
-3. Else use the first available profile from `voicebox_list_profiles` whose engine matches the detected language pick in the table above.
-4. Else exit with a setup hint pointing the user to the Voicebox app Profiles tab.
 
 ## Caveats
 

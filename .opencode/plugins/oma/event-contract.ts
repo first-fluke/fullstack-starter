@@ -16,7 +16,9 @@ export function validateEventPayload(kind: string, payload: unknown): string[] {
       ? ["subject", "decision", "rationale"]
       : kind === "blocker.raised"
         ? ["summary"]
-        : [];
+        : kind === "skill.routed"
+          ? ["skill", "source", "stage"]
+          : [];
   const record = isEventRecord(payload) ? payload : undefined;
   if (payload !== undefined && !record)
     errors.push("payload must be an object");
@@ -31,6 +33,21 @@ export function validateEventPayload(kind: string, payload: unknown): string[] {
     record?.status !== "failed"
   ) {
     errors.push("payload.status must be completed or failed");
+  }
+  if (
+    (kind === "gate.passed" || kind === "gate.failed") &&
+    record &&
+    ["head", "dirty", "treeHash"].some((field) => Object.hasOwn(record, field))
+  ) {
+    // Historical gate events omit fingerprints; new fingerprints are complete.
+    for (const field of ["head", "treeHash"]) {
+      if (record[field] !== null && typeof record[field] !== "string") {
+        errors.push(`payload.${field} must be a string or null`);
+      }
+    }
+    if (typeof record.dirty !== "boolean") {
+      errors.push("payload.dirty must be a boolean");
+    }
   }
   if (
     record?.instanceId !== undefined &&
